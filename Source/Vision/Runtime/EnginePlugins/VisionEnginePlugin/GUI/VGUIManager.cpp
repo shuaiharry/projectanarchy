@@ -267,7 +267,13 @@ VDialogResource *VGUIManager::LoadDialog(const char *szFilename, const char *szP
   VISION_PROFILE_FUNCTION(PROFILING_BUILD);
   VDialogResource *pDialog = (VDialogResource *)FindResource(szFilename,DIALOG, szPath);
   if (pDialog)
+  {
+    if (Vision::Editor.IsInEditor() && pDialog->IsLoaded())
+    {
+      pDialog->UnloadAndReload(true, true);
+    }
     return pDialog;
+  }
 
   char szPathname[FS_MAX_PATH];
   VFileHelper::CombineDirAndFile(szPathname,szPath,szFilename);

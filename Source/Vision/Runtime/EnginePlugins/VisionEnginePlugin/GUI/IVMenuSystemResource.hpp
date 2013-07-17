@@ -24,6 +24,7 @@ public:
   inline IVMenuSystemResource(VGUIManager *pManager, const char *szFilename, VGUIManager::ResourceType type) 
     : VManagedResource(pManager) 
   {
+    SetResourceFlag(VRESOURCEFLAG_ALLOWUNLOAD);
     m_Type=type;
     SetFilename(szFilename);
   }
