@@ -37,6 +37,9 @@
     <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\EnginePlugins\EnginePluginsImport.hpp">
         <Filter>External\Source\Vision\Runtime\EnginePlugins</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <Filter>External\Source\Vision\Runtime\Common</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="SimpleFontPCH.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>

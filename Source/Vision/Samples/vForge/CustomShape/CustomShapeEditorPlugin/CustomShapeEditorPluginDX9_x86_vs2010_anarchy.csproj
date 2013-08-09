@@ -95,16 +95,13 @@
   </ItemGroup>
   <ItemGroup>
     
-            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
     
-            <Reference Include="ManagedBase.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\ManagedBase.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="ManagedBase.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedBase.dll</HintPath><Private>False</Private></Reference>
     
-            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
-    <ProjectReference Include="..\CustomShapeManaged\CustomShapeManagedDX9_win32_vs2010_anarchy.vcxproj">
-        <Project>{75E1EB09-565F-4FB5-BD43-8C44897A6976}</Project>
-        <Name>CustomShapeManaged</Name>
-        <Private>False</Private>
-    </ProjectReference>
+            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
+    
+            <Reference Include="CustomShapeManaged.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CustomShapeManaged.dll</HintPath><Private>False</Private></Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include=" " />

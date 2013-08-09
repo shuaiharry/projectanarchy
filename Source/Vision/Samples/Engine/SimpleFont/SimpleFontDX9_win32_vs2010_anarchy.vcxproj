@@ -295,6 +295,8 @@
         <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Dev DLL|win32'">Create</PrecompiledHeader>
         <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'">Create</PrecompiledHeader>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.cpp">
         <PrecompiledHeader>NotUsing</PrecompiledHeader>
         <DeploymentContent>False</DeploymentContent></ClCompile>

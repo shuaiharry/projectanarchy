@@ -101,14 +101,11 @@
   </ItemGroup>
   <ItemGroup>
     
-            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
     
-            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
-    <ProjectReference Include="..\FmodManaged\FmodManagedDX9_win32_vs2010_anarchy.vcxproj">
-        <Project>{F7BDDA0E-FCF4-4686-8FE4-A49832E2FCBB}</Project>
-        <Name>FmodManaged</Name>
-        <Private>False</Private>
-    </ProjectReference>
+            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
+    
+            <Reference Include="FmodManaged.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\FmodManaged.dll</HintPath><Private>False</Private></Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include=" " />

@@ -370,9 +370,9 @@
   </ItemGroup>
   <ItemGroup>
     
-            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
     
-            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
     <ProjectReference Include="..\..\..\VisionPlugin\VisionManaged\VisionManagedDX9_win32_vs2010_anarchy.vcxproj">
         <Project>{4A6A0572-F227-4288-829B-A7D1A991341D}</Project>
         <Name>VisionManaged</Name>

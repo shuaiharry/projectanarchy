@@ -304,6 +304,8 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="BasicAnimation.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="GUI\MenuSystem.hpp">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="SimpleVertexAnimatedObject.cpp">

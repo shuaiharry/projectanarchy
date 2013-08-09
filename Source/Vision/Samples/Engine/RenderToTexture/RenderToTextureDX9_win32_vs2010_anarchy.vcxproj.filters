@@ -28,8 +28,8 @@
     <ClCompile Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleAppCallbacks.cpp">
         <Filter>External\Source\Vision\Runtime\Common</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="_SecurityCamEntity.hpp">
-        <Filter></Filter>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <Filter>External\Source\Vision\Runtime\Common</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\EnginePlugins\EnginePluginsImport.hpp">
         <Filter>External\Source\Vision\Runtime\EnginePlugins</Filter>
@@ -37,6 +37,9 @@
     <ClCompile Include="_SecurityCamEntity.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="_SecurityCamEntity.hpp">
+        <Filter></Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="RenderToTexturePCH.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>

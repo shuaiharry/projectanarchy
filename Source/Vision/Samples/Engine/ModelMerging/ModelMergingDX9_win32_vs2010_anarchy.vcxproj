@@ -307,6 +307,8 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="ModelMergingPCH.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="GUI\MenuSystem.hpp">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="MergedModelFactory.hpp">

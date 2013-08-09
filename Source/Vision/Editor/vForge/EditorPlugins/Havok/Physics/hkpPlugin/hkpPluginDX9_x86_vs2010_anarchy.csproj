@@ -123,26 +123,20 @@
   </ItemGroup>
   <ItemGroup>
     
-            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
     
-            <Reference Include="DockPanel.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\DockPanel.dll</HintPath><Private>False</Private></Reference>
-    <ProjectReference Include="..\..\..\VisionPlugin\VisionManaged\VisionManagedDX9_win32_vs2010_anarchy.vcxproj">
-        <Project>{4A6A0572-F227-4288-829B-A7D1A991341D}</Project>
-        <Name>VisionManaged</Name>
-        <Private>False</Private>
-    </ProjectReference>
+            <Reference Include="DockPanel.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\DockPanel.dll</HintPath><Private>False</Private></Reference>
+    
+            <Reference Include="VisionManaged.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\VisionManaged.dll</HintPath><Private>False</Private></Reference>
     <ProjectReference Include="..\..\..\VisionPlugin\VisionEditorPlugin\VisionEditorPluginDX9_x86_vs2010_anarchy.csproj">
         <Project>{944C2E99-6C46-439E-8AD2-B4503C8A8574}</Project>
         <Name>VisionEditorPlugin.EditorPlugin</Name>
         <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\hkpManaged\hkpManagedDX9_win32_vs2010_anarchy.vcxproj">
-        <Project>{1DE08A5D-6B91-44C8-B9B9-B0F295E942E7}</Project>
-        <Name>HavokManaged</Name>
-        <Private>False</Private>
-    </ProjectReference>
     
-            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="HavokManaged.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\HavokManaged.dll</HintPath><Private>False</Private></Reference>
+    
+            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include=" " />

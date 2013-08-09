@@ -300,6 +300,8 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="GUI\MenuSystem.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.cpp">
         <PrecompiledHeader>NotUsing</PrecompiledHeader>
         <DeploymentContent>False</DeploymentContent></ClCompile>

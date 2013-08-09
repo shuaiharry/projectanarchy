@@ -213,23 +213,20 @@
   </ItemGroup>
   <ItemGroup>
     
-            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
     
-            <Reference Include="DockPanel.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\DockPanel.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="DockPanel.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\DockPanel.dll</HintPath><Private>False</Private></Reference>
     
-            <Reference Include="ManagedBase.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\ManagedBase.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="ManagedBase.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedBase.dll</HintPath><Private>False</Private></Reference>
     
-            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
+            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
     <ProjectReference Include="..\TerrainBase\TerrainBaseDX9_x86_vs2010_anarchy.csproj">
         <Project>{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}</Project>
         <Name>TerrainBase</Name>
         <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\TerrainManaged\TerrainManagedDX9_win32_vs2010_anarchy.vcxproj">
-        <Project>{B050A360-A538-11DA-8BDE-F66BAD1E3F3A}</Project>
-        <Name>TerrainManaged</Name>
-        <Private>False</Private>
-    </ProjectReference>
+    
+            <Reference Include="TerrainManaged.dll"><HintPath>..\..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\TerrainManaged.dll</HintPath><Private>False</Private></Reference>
     <ProjectReference Include="..\..\VisionPlugin\VisionEditorPlugin\VisionEditorPluginDX9_x86_vs2010_anarchy.csproj">
         <Project>{944C2E99-6C46-439E-8AD2-B4503C8A8574}</Project>
         <Name>VisionEditorPlugin.EditorPlugin</Name>

@@ -295,6 +295,8 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Tutorial01PCH.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.cpp">
         <PrecompiledHeader>NotUsing</PrecompiledHeader>
         <DeploymentContent>False</DeploymentContent></ClCompile>

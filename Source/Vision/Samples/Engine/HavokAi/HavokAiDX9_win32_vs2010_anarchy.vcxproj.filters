@@ -37,6 +37,9 @@
     <ClCompile Include="HavokAiPCH.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <Filter>External\Source\Vision\Runtime\Common</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="HavokAi.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>

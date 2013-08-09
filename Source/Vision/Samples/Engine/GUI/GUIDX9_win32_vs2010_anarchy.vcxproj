@@ -304,6 +304,8 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="MonitorContext.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="MainMenu.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
   </ItemGroup>

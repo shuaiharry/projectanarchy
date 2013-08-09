@@ -43,6 +43,9 @@
     <ClCompile Include="Tutorial05PCH.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <Filter>External\Source\Vision\Runtime\Common</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Tutorial05PCH.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>

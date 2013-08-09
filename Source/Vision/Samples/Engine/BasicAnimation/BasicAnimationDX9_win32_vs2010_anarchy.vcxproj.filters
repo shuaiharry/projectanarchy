@@ -55,6 +55,9 @@
     <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\EnginePlugins\EnginePluginsImport.hpp">
         <Filter>External\Source\Vision\Runtime\EnginePlugins</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
+        <Filter>External\Source\Vision\Runtime\Common</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="SimpleSkeletalAnimatedObject.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
