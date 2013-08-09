@@ -27,31 +27,31 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|hkAndroid'">
-    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_and_vs2010_anarchyDebug.props" />
+    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_vs2010_anarchyDebug.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Dev|hkAndroid'">
-    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_and_vs2010_anarchyDev.props" />
+    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_vs2010_anarchyDev.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|hkAndroid'">
-    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_and_vs2010_anarchyRelease.props" />
+    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_vs2010_anarchyRelease.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|hkAndroid'">
-    <OutDir>..\..\Bin\and_vs2010_anarchy\$(Configuration)\</OutDir>
+    <OutDir>..\..\Bin\android_vs2010_anarchy\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|hkAndroid'">
-    <IntDir>..\..\Obj\and_vs2010_anarchy\$(Configuration)\</IntDir>
+    <IntDir>..\..\Obj\android_vs2010_anarchy\$(Configuration)\</IntDir>
     <TargetName>ProjectTemplate</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev|hkAndroid'">
     <TargetName>ProjectTemplate</TargetName>
-    <OutDir>..\..\Bin\and_vs2010_anarchy\$(Configuration)\</OutDir>
-    <IntDir>..\..\Obj\and_vs2010_anarchy\$(Configuration)\</IntDir>
+    <OutDir>..\..\Bin\android_vs2010_anarchy\$(Configuration)\</OutDir>
+    <IntDir>..\..\Obj\android_vs2010_anarchy\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|hkAndroid'">
     <TargetName>ProjectTemplate</TargetName>
-    <OutDir>..\..\Bin\and_vs2010_anarchy\$(Configuration)\</OutDir>
-    <IntDir>..\..\Obj\and_vs2010_anarchy\$(Configuration)\</IntDir>
+    <OutDir>..\..\Bin\android_vs2010_anarchy\$(Configuration)\</OutDir>
+    <IntDir>..\..\Obj\android_vs2010_anarchy\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|hkAndroid'">
     <ClCompile>
@@ -72,7 +72,7 @@
     </PostBuildEvent>
     <Link>
       <AdditionalDependencies>-lGamePlugin;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\Lib\and_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Lib\android_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev|hkAndroid'">
@@ -85,7 +85,7 @@
       <Command>"$(VISION_SDK)\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe" $(OutDir)$(TargetName)$(TargetExt) --pickleName $(ProjectFileName)_$(Configuration).deploy -j $(JavaOutputDir) -s $(AndroidAPILevel) -e -i --asset ..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\../Assets/ Assets/</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalLibraryDirectories>..\..\Lib\and_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Lib\android_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>-lGamePlugin;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -99,7 +99,7 @@
       <Command>"$(VISION_SDK)\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe" $(OutDir)$(TargetName)$(TargetExt) --pickleName $(ProjectFileName)_$(Configuration).deploy -j $(JavaOutputDir) -s $(AndroidAPILevel) -e -i --asset ..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\../Assets/ Assets/</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalLibraryDirectories>..\..\Lib\and_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Lib\android_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>-lGamePlugin;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
