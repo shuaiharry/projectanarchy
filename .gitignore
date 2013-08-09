@@ -8,7 +8,7 @@
 /Lib/*
 /Obj/*
 /ThirdParty/*
-/Tools/*
+/Tools/VisualDebugger
 AndroidTemp/
 
 ProjectAnarchyEULA.pdf
