@@ -15,7 +15,7 @@
 #include <xmmintrin.h>
 #endif
 
-#ifdef HK_ARCH_ARM
+#if defined(HK_ARCH_ARM) || defined(HK_PLATFORM_ANDROID)
   #define cpu_relax() asm volatile("":::"memory") 
 #endif
 
@@ -43,7 +43,7 @@ class hkPthreadUtil
 				{
 					return;
 				}
-			#if defined(HK_ARCH_IA32) || defined(HK_ARCH_X64)
+			#if (defined(HK_ARCH_IA32) || defined(HK_ARCH_X64)) && !defined(HK_PLATFORM_ANDROID)
 				for (int i = 0; i < delayPerSpin; ++i)
 				{
 					// This will delay execution of the next instruction for an implementation-specific amount of time 
@@ -63,7 +63,7 @@ class hkPthreadUtil
 #endif // HKBASE_HK_PTHREADS_UTIL
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

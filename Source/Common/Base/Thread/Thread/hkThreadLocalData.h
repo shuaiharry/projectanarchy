@@ -77,7 +77,7 @@
 #		define HK_THREAD_LOCAL(TYPE) hkThreadLocalData<TYPE>
 #		define HK_THREAD_LOCAL_SET(var,value) var.setData(value)
 #		define HK_THREAD_LOCAL_GET(var) var.getData()
-#	elif defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_LRB)
+#	elif defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_LRB) || (defined(HK_PLATFORM_ANDROID) && defined(HK_ARCH_IA32))
 
 #		ifdef HK_PLATFORM_LRBSIM
 #		include <common/winpthread.h>
@@ -137,7 +137,7 @@
 #endif // HKBASE_HK_THREAD_LOCAL_POINTER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

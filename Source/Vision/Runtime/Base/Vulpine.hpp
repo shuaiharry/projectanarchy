@@ -482,7 +482,7 @@ const SLONG VERR_LINUXMAGIC     = -4711;   ///< Magic linux arbitrary error
 
 #ifndef _VISION_DOC
   // TODO (Platform Team): Fix this
-  #ifndef _VISION_IOS
+  #if !defined (_VISION_IOS) && !defined(_VISION_ANDROID)
     class Vision_MemAlignTest { int a; double d; };
     V_COMPILE_ASSERT(sizeof(Vision_MemAlignTest) == 16);
   #endif
@@ -497,7 +497,7 @@ const SLONG VERR_LINUXMAGIC     = -4711;   ///< Magic linux arbitrary error
 #endif // #ifndef VULPINE_H_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

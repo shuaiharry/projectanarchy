@@ -3,8 +3,8 @@ echo off
 
 REM - Set root directory
 
-set CURR_DIR=%CD%\
-set ROOT_DIR=%CD%\
+set CURR_DIR=%~dp0
+set ROOT_DIR=%~dp0
 echo Files will be copied from:
 echo %VISION_SDK%
 echo to:
@@ -47,5 +47,11 @@ set SRC_DIR=%VISION_SDK%\Data\Vision\Base
 md Data\Vision\Base
 xcopy "%SRC_DIR%" /S "%ROOT_DIR%\Data\Vision\Base" /Y
 
-xcopy "%VISION_SDK%\Source\Vision\Runtime\Common\VisSampleApp.cpp" /S %ROOT_DIR%\Source\GameApplication /Y
-xcopy "%VISION_SDK%\Source\Vision\Runtime\Common\VisSampleAppCallbacks.cpp" /S %ROOT_DIR%\Source\GameApplication /Y
+REM - Start copy (Android Icons)
+
+set SRC_DIR=%VISION_SDK%\Data\Common\Android
+md Data\Common\Android
+xcopy "%SRC_DIR%" /S "%ROOT_DIR%\Data\Common\Android" /Y
+
+xcopy "%VISION_SDK%\Source\Vision\Runtime\Common\VisSampleApp.cpp" /S "%ROOT_DIR%\Source\GameApplication" /Y
+xcopy "%VISION_SDK%\Source\Vision\Runtime\Common\VisSampleAppCallbacks.cpp" /S "%ROOT_DIR%\Source\GameApplication" /Y

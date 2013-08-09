@@ -205,12 +205,16 @@ HK_HAVOK_CLASSES_VERSION(201220r1)
 HK_HAVOK_CLASSES_VERSION(201221r1)
 #endif
 
+#if HK_SERIALIZE_MIN_COMPATIBLE_VERSION_INTERNAL_VALUE <= HK_HAVOK_VERSION_201310r1
+HK_HAVOK_CLASSES_VERSION(201310r1)
+#endif
+
 #if HK_SERIALIZE_MIN_COMPATIBLE_VERSION_INTERNAL_VALUE <= HK_HAVOK_VERSION_Current
 HK_HAVOK_CLASSES_VERSION(Current)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130725)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

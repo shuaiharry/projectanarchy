@@ -296,7 +296,46 @@ namespace Editor
 
     private GoogleAnalyticsTracker _GATracker;
 
+    private void ShowEula()
+    {
+      string sAcceptedEulaToken = Path.Combine(EditorManager.GetDirectory(EditorManager.DirectoryType.UserDataPath), "UserAcceptedEula.token");
+
+      if (System.IO.File.Exists(sAcceptedEulaToken))
+        return;
+
+      using (EULA EulaDlg = new EULA())
+      {
+        EulaDlg.ShowDialog();
+
+        if (!EulaDlg.HasAcceptedEula())
+        {
+          MessageBox.Show("You rejected the Project Anarchy EULA.\nvForge will now close.", "vForge", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+          Close();
+        }
+        else
+        {
+          try
+          {
+            System.IO.File.WriteAllText(sAcceptedEulaToken, "The Project Anarchy EULA has been accepted by this user.");
+          }
+          catch(Exception e)
+          {
+            MessageBox.Show("Failed to write this file: \n'" + sAcceptedEulaToken + "'\nPlease make sure vForge has the necessary access rights to create this file.", "vForge", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+          }
+        }
+      }
+    }
+
+    #else
+
+    private void ShowEula()
+    {
+      // nothing to do in non-Anarchy builds
+    }
+
+
     #endif
+
 
     /// <summary>
     /// Constructor
@@ -588,6 +627,8 @@ namespace Editor
       // Initialize the tracker which listens to the necessary editor events to ensure correct stats tracking
       _GATracker = new GoogleAnalyticsTracker();
 #endif
+
+      ShowEula();
 
       // Show startup dialog (when there are command line arguments do not show the startup dialog)
       if (!TestManager.IsRunning && !EditorManager.SilentMode && EditorManager.Settings.OpenStartupDialog && CommandLineArgs.Length == 0)
@@ -5908,7 +5949,7 @@ namespace Editor
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130731)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

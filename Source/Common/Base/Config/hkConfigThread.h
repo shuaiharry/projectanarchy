@@ -80,7 +80,7 @@
 
 	// Android 
 #	elif defined(HK_PLATFORM_ANDROID)
-		#ifdef HK_ARCH_ARM_V7
+		#if defined(HK_ARCH_ARM_V7) || defined(HK_ARCH_IA32)
 			#define HK_CONFIG_THREAD HK_CONFIG_MULTI_THREADED
 		#else // V6 had no dual cores really
 			#define HK_CONFIG_THREAD HK_CONFIG_SINGLE_THREADED
@@ -113,7 +113,7 @@
 #endif // HK_BASE_CONFIGTHREAD_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok
