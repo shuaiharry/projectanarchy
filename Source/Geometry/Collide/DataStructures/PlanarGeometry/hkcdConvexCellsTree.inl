@@ -119,7 +119,7 @@ HK_FORCE_INLINE const hkcdPlanarGeometry* hkcdConvexCellsTree::getGeometry() con
 HK_FORCE_INLINE void hkcdConvexCellsTree::setSolidPlanarGeom(hkcdSolidPlanarGeometry* sGeom) { m_solidMesh = sGeom; }
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -495,7 +495,7 @@ HKV_FORCE_INLINE const hkvVec4 operator/ (const hkvVec4& lhs, float f);
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

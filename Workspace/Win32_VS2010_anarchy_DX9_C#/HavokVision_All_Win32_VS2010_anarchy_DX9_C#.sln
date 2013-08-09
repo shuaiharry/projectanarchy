@@ -1,0 +1,113 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmodEditorPluginDX9_x86_vs2010_anarchy", "..\..\Source\Vision\Editor\vForge\EditorPlugins\ThirdParty\FmodPlugin\FmodEditorPlugin\FmodEditorPluginDX9_x86_vs2010_anarchy.csproj", "{A06DECAD-4DD4-40E4-B27D-4EE684765332}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerrainBaseDX9_x86_vs2010_anarchy", "..\..\Source\Vision\Editor\vForge\EditorPlugins\TerrainPlugin\TerrainBase\TerrainBaseDX9_x86_vs2010_anarchy.csproj", "{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerrainEditorPluginDX9_x86_vs2010_anarchy", "..\..\Source\Vision\Editor\vForge\EditorPlugins\TerrainPlugin\TerrainEditorPlugin\TerrainEditorPluginDX9_x86_vs2010_anarchy.csproj", "{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisionEditorPluginDX9_x86_vs2010_anarchy", "..\..\Source\Vision\Editor\vForge\EditorPlugins\VisionPlugin\VisionEditorPlugin\VisionEditorPluginDX9_x86_vs2010_anarchy.csproj", "{944C2E99-6C46-439E-8AD2-B4503C8A8574}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hkaiPluginDX9_x86_vs2010_anarchy", "..\..\Source\Vision\Editor\vForge\EditorPlugins\Havok\Ai\hkaiPlugin\hkaiPluginDX9_x86_vs2010_anarchy.csproj", "{EB597B94-5615-4D6C-924B-3B80369FB618}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hkbPluginDX9_x86_vs2010_anarchy", "..\..\Source\Vision\Editor\vForge\EditorPlugins\Havok\Behavior\hkbPlugin\hkbPluginDX9_x86_vs2010_anarchy.csproj", "{02DE81D9-F287-4D72-B3CD-80C522365B4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hkpPluginDX9_x86_vs2010_anarchy", "..\..\Source\Vision\Editor\vForge\EditorPlugins\Havok\Physics\hkpPlugin\hkpPluginDX9_x86_vs2010_anarchy.csproj", "{DB597B94-5615-4D6C-924B-3B80369FB617}"
+EndProject
+
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug DLL|Mixed Platforms = Debug DLL|Mixed Platforms
+		Debug DLL|x86 = Debug DLL|x86
+		Dev DLL|Mixed Platforms = Dev DLL|Mixed Platforms
+		Dev DLL|x86 = Dev DLL|x86
+		Release DLL|Mixed Platforms = Release DLL|Mixed Platforms
+		Release DLL|x86 = Release DLL|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Debug DLL|Mixed Platforms.ActiveCfg = Debug DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Debug DLL|Mixed Platforms.Build.0 = Debug DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Debug DLL|x86.ActiveCfg = Debug DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Debug DLL|x86.Build.0 = Debug DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Dev DLL|Mixed Platforms.ActiveCfg = Dev DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Dev DLL|Mixed Platforms.Build.0 = Dev DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Dev DLL|x86.ActiveCfg = Dev DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Dev DLL|x86.Build.0 = Dev DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Release DLL|Mixed Platforms.ActiveCfg = Release DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Release DLL|Mixed Platforms.Build.0 = Release DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Release DLL|x86.ActiveCfg = Release DLL|x86
+		{A06DECAD-4DD4-40E4-B27D-4EE684765332}.Release DLL|x86.Build.0 = Release DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Debug DLL|Mixed Platforms.ActiveCfg = Debug DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Debug DLL|Mixed Platforms.Build.0 = Debug DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Debug DLL|x86.ActiveCfg = Debug DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Debug DLL|x86.Build.0 = Debug DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Dev DLL|Mixed Platforms.ActiveCfg = Dev DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Dev DLL|Mixed Platforms.Build.0 = Dev DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Dev DLL|x86.ActiveCfg = Dev DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Dev DLL|x86.Build.0 = Dev DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Release DLL|Mixed Platforms.ActiveCfg = Release DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Release DLL|Mixed Platforms.Build.0 = Release DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Release DLL|x86.ActiveCfg = Release DLL|x86
+		{653BCB9B-BC3A-45AE-9201-1DBC49A2B8E6}.Release DLL|x86.Build.0 = Release DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Debug DLL|Mixed Platforms.ActiveCfg = Debug DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Debug DLL|Mixed Platforms.Build.0 = Debug DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Debug DLL|x86.ActiveCfg = Debug DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Debug DLL|x86.Build.0 = Debug DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Dev DLL|Mixed Platforms.ActiveCfg = Dev DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Dev DLL|Mixed Platforms.Build.0 = Dev DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Dev DLL|x86.ActiveCfg = Dev DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Dev DLL|x86.Build.0 = Dev DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Release DLL|Mixed Platforms.ActiveCfg = Release DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Release DLL|Mixed Platforms.Build.0 = Release DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Release DLL|x86.ActiveCfg = Release DLL|x86
+		{AB717DD8-A538-11DA-8BDE-F66BAD1E3F3A}.Release DLL|x86.Build.0 = Release DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Debug DLL|Mixed Platforms.ActiveCfg = Debug DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Debug DLL|Mixed Platforms.Build.0 = Debug DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Debug DLL|x86.ActiveCfg = Debug DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Debug DLL|x86.Build.0 = Debug DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Dev DLL|Mixed Platforms.ActiveCfg = Dev DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Dev DLL|Mixed Platforms.Build.0 = Dev DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Dev DLL|x86.ActiveCfg = Dev DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Dev DLL|x86.Build.0 = Dev DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Release DLL|Mixed Platforms.ActiveCfg = Release DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Release DLL|Mixed Platforms.Build.0 = Release DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Release DLL|x86.ActiveCfg = Release DLL|x86
+		{944C2E99-6C46-439E-8AD2-B4503C8A8574}.Release DLL|x86.Build.0 = Release DLL|x86
+		{EB597B94-5615-4D6C-924B-3B80369FB618}.Debug DLL|Mixed Platforms.ActiveCfg = Debug DLL|x86
+		{EB597B94-5615-4D6C-924B-3B80369FB618}.Debug DLL|x86.ActiveCfg = Debug DLL|x86
+		{EB597B94-5615-4D6C-924B-3B80369FB618}.Dev DLL|Mixed Platforms.ActiveCfg = Dev DLL|x86
+		{EB597B94-5615-4D6C-924B-3B80369FB618}.Dev DLL|x86.ActiveCfg = Dev DLL|x86
+		{EB597B94-5615-4D6C-924B-3B80369FB618}.Release DLL|Mixed Platforms.ActiveCfg = Release DLL|x86
+		{EB597B94-5615-4D6C-924B-3B80369FB618}.Release DLL|x86.ActiveCfg = Release DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Debug DLL|Mixed Platforms.ActiveCfg = Debug DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Debug DLL|Mixed Platforms.Build.0 = Debug DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Debug DLL|x86.ActiveCfg = Debug DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Debug DLL|x86.Build.0 = Debug DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Dev DLL|Mixed Platforms.ActiveCfg = Dev DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Dev DLL|Mixed Platforms.Build.0 = Dev DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Dev DLL|x86.ActiveCfg = Dev DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Dev DLL|x86.Build.0 = Dev DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Release DLL|Mixed Platforms.ActiveCfg = Release DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Release DLL|Mixed Platforms.Build.0 = Release DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Release DLL|x86.ActiveCfg = Release DLL|x86
+		{02DE81D9-F287-4D72-B3CD-80C522365B4D}.Release DLL|x86.Build.0 = Release DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Debug DLL|Mixed Platforms.ActiveCfg = Debug DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Debug DLL|Mixed Platforms.Build.0 = Debug DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Debug DLL|x86.ActiveCfg = Debug DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Debug DLL|x86.Build.0 = Debug DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Dev DLL|Mixed Platforms.ActiveCfg = Dev DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Dev DLL|Mixed Platforms.Build.0 = Dev DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Dev DLL|x86.ActiveCfg = Dev DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Dev DLL|x86.Build.0 = Dev DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Release DLL|Mixed Platforms.ActiveCfg = Release DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Release DLL|Mixed Platforms.Build.0 = Release DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Release DLL|x86.ActiveCfg = Release DLL|x86
+		{DB597B94-5615-4D6C-924B-3B80369FB617}.Release DLL|x86.Build.0 = Release DLL|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		
+	EndGlobalSection
+EndGlobal

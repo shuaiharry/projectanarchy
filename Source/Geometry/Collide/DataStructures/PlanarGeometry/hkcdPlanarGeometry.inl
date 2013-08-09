@@ -178,7 +178,7 @@ HK_FORCE_INLINE const hkVector4& hkcdPlanarGeometry::getConversionOffset() const
 HK_FORCE_INLINE const hkSimdReal hkcdPlanarGeometry::getConversionScale() const		{	return m_offsetAndScale.getComponent<3>();	}
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

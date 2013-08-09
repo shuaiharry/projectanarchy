@@ -38,7 +38,7 @@
 #endif // !defined(AFX_STDAFX_H__A9DB83DB_A9FD_11D0_BFD1_444553540000__INCLUDED_)
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

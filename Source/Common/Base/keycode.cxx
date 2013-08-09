@@ -79,7 +79,7 @@ extern const char         HK_DESTRUCTION_KEYCODE[] KEYCODE_ATTRIBUTES = HAVOK_DE
 extern const char         HK_AI_KEYCODE[] KEYCODE_ATTRIBUTES = HAVOK_AI_KEYCODE;
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

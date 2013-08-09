@@ -110,7 +110,7 @@ START_VAR_TABLE(IVTransitionEventTrigger, IVAnimationEventTrigger, "Transition E
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

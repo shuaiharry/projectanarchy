@@ -267,13 +267,7 @@ VDialogResource *VGUIManager::LoadDialog(const char *szFilename, const char *szP
   VISION_PROFILE_FUNCTION(PROFILING_BUILD);
   VDialogResource *pDialog = (VDialogResource *)FindResource(szFilename,DIALOG, szPath);
   if (pDialog)
-  {
-    if (Vision::Editor.IsInEditor() && pDialog->IsLoaded())
-    {
-      pDialog->UnloadAndReload(true, true);
-    }
     return pDialog;
-  }
 
   char szPathname[FS_MAX_PATH];
   VFileHelper::CombineDirAndFile(szPathname,szPath,szFilename);
@@ -473,7 +467,7 @@ const char *VGUIManager::TranslateString(VWindowBase *pItem, const char *szIn) c
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

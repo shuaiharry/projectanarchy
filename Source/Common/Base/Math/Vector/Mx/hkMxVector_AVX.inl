@@ -1925,7 +1925,7 @@ template <> HK_FORCE_INLINE void hkMxVectorf<1>::setAsBroadcast(hkVector4fParame
 #undef MXV_COMPARE_SINGLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130717)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

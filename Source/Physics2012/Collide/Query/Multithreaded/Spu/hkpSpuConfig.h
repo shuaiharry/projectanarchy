@@ -284,7 +284,7 @@ enum { HK_SPU_COLLIDE_WORLD_GET_CLOSEST_POINTS_JOB_TRANSFORM_NUM_CACHE_ROWS				=
 #endif // HK_COLLIDE_SPU_CONFIG_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

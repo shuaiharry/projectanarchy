@@ -1747,7 +1747,7 @@ HK_FORCE_INLINE  void HK_CALL rotate4Directions(hkMxTransformdParameter mat0, hk
 } // namespace hkMxVectorUtil
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

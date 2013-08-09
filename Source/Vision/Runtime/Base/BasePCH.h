@@ -33,7 +33,7 @@ extern VModule g_baseModule;
 #endif // !defined(AFX_STDAFX_H__74205EFD_9B00_4EA4_8DB5_B4A8178D9822__INCLUDED_)
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

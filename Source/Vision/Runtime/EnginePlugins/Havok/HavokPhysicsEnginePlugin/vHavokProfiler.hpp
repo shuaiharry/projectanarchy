@@ -101,7 +101,7 @@ HK_COMPILE_TIME_ASSERT(HK_JOB_TYPE_HAVOK_MAX == 22); // If this fails then there
 #endif // vHavokProfiler_h__
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

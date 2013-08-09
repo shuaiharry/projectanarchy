@@ -12,7 +12,7 @@ extern const hkQuadDouble64 g_vectordConstants[HK_QUADREAL_END];
 extern HK_ALIGN16(const hkUint32 g_intVectorConstants[HK_QUADINT_END][4]);
 
 /*
- * Havok SDK - Base file, BUILD(#20130624)
+ * Havok SDK - Base file, BUILD(#20130723)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok
