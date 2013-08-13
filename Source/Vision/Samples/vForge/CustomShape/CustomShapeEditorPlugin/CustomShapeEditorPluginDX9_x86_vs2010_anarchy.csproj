@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!--
     VARIANT = "DX9"
@@ -7,7 +7,6 @@
     SOURCE_LEVEL = "PUBLIC"
     REQUIRED_HAVOK_PRODUCTS = "VISION"
   -->
-        
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Dev</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -18,7 +17,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CustomShapeEditorPlugin</RootNamespace>
     <AssemblyName>CustomShapeEditorPlugin.EditorPlugin</AssemblyName>
-    <ApplicationIcon> </ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <PlatformToolset>v100</PlatformToolset>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
@@ -28,7 +28,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug DLL|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -39,12 +38,12 @@
     <ErrorReport>prompt</ErrorReport>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>3</WarningLevel>
-    <NoWarn></NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Dev DLL|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
@@ -55,12 +54,12 @@
     <ErrorReport>prompt</ErrorReport>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>3</WarningLevel>
-    <NoWarn></NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release DLL|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    
     <DebugSymbols>false</DebugSymbols>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
@@ -71,43 +70,77 @@
     <ErrorReport>prompt</ErrorReport>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>3</WarningLevel>
-    <NoWarn></NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CustomShapePlugin.cs">
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DeploymentContent>False</DeploymentContent>
+    </Compile>
     <Compile Include="NodeShape.cs">
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DeploymentContent>False</DeploymentContent>
+    </Compile>
     <Compile Include="AssemblyInfo.cs">
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DeploymentContent>False</DeploymentContent>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-            <Reference Include="System"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Core"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Data"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Drawing"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Windows.Forms"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Xml"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
+    <Reference Include="System">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    
-            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
-    
-            <Reference Include="ManagedBase.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedBase.dll</HintPath><Private>False</Private></Reference>
-    
-            <Reference Include="ManagedFramework.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedFramework.dll</HintPath><Private>False</Private></Reference>
-    
-            <Reference Include="CustomShapeManaged.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CustomShapeManaged.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="CSharpFramework.dll">
+      <HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ManagedBase.dll">
+      <HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedBase.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ManagedFramework.dll">
+      <HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\ManagedFramework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include=" " />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CustomShapeManaged\CustomShapeManagedDX9_win32_vs2010_anarchy.vcxproj">
+      <Project>{75E1EB09-565F-4FB5-BD43-8C44897A6976}</Project>
+      <Name>CustomShapeManagedDX9</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-<PropertyGroup>
-    <PostBuildEvent></PostBuildEvent>
-</PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

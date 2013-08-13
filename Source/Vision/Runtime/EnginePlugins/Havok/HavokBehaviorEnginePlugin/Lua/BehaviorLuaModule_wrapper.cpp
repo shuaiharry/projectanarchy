@@ -1056,9 +1056,9 @@ SWIGINTERN void VisionLuaClassGet(lua_State *L)
   //(-): elements are not stored in a table, so you cannot iterate over all elements of an instance
   
   const char * pKey = lua_tostring(L, 2);
-  int iPtr = (int) lua_topointer(L, 1);
+  const void * pPtr = lua_topointer(L, 1);
 
-  lua_pushfstring(L, "$node-%p-%s$", iPtr, pKey); //stack: userdata, key, ..., new key, TOP
+  lua_pushfstring(L, "$node-%p-%s$", pPtr, pKey);  //stack: userdata, key, ..., new key, TOP
   lua_gettable(L, LUA_GLOBALSINDEX); 		      //stack: userdata, key, ..., requested val, TOP
   
 /*
@@ -1150,9 +1150,9 @@ SWIGINTERN void VisionLuaClassSet(lua_State *L)
   //(-): elements are not stored in a table, so you cannot iterate over all elements of an instance
   
   const char * pKey = lua_tostring(L, 2);
-  int iPtr = (int) lua_topointer(L, 1);
-
-  lua_pushfstring(L, "$node-%p-%s$", iPtr, pKey);   //stack: userdata, key, value, ..., new key, TOP
+  const void * pPtr = lua_topointer(L, 1);
+  
+  lua_pushfstring(L, "$node-%p-%s$", pPtr, pKey);   //stack: userdata, key, value, ..., new key, TOP
   
   lua_pushvalue(L, 3);                              //stack: userdata, key, value, ..., new key, value, TOP
   lua_settable(L, LUA_GLOBALSINDEX);                //stack: userdata, key, value, ..., TOP

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!--
     VARIANT = "DX9"
@@ -7,7 +7,6 @@
     SOURCE_LEVEL = "PUBLIC"
     REQUIRED_HAVOK_PRODUCTS = "VISION"
   -->
-        
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Dev</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -18,7 +17,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AnimationLoopPlugin</RootNamespace>
     <AssemblyName>AnimationLoopPlugin.EditorPlugin</AssemblyName>
-    <ApplicationIcon> </ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <PlatformToolset>v100</PlatformToolset>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
@@ -28,7 +28,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug DLL|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -39,12 +38,12 @@
     <ErrorReport>prompt</ErrorReport>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
-    <NoWarn></NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Dev DLL|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
@@ -55,12 +54,12 @@
     <ErrorReport>prompt</ErrorReport>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
-    <NoWarn></NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release DLL|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    
     <DebugSymbols>false</DebugSymbols>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
@@ -71,57 +70,98 @@
     <ErrorReport>prompt</ErrorReport>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
-    <NoWarn></NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="LoopButton.cs">
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DeploymentContent>False</DeploymentContent>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="IntervalChangeDialog.Designer.cs">
-        <DependentUpon>IntervalChangeDialog.cs</DependentUpon>
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DependentUpon>IntervalChangeDialog.cs</DependentUpon>
+      <DeploymentContent>False</DeploymentContent>
+    </Compile>
     <Compile Include="ButtonIcons.Designer.cs">
-        <DependentUpon>ButtonIcons.resx</DependentUpon>
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DependentUpon>ButtonIcons.resx</DependentUpon>
+      <DeploymentContent>False</DeploymentContent>
+    </Compile>
     <EmbeddedResource Include="IntervalChangeDialog.resx">
-        <DependentUpon>IntervalChangeDialog.cs</DependentUpon>
-        <SubType>Designer</SubType>
-        <DeploymentContent>False</DeploymentContent></EmbeddedResource>
+      <DependentUpon>IntervalChangeDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+      <DeploymentContent>False</DeploymentContent>
+    </EmbeddedResource>
     <Compile Include="AnimationLoopPlugin.cs">
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DeploymentContent>False</DeploymentContent>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DeploymentContent>False</DeploymentContent>
+    </Compile>
     <Compile Include="IntervalChangeDialog.cs">
-        <DeploymentContent>False</DeploymentContent></Compile>
+      <DeploymentContent>False</DeploymentContent>
+      <SubType>Form</SubType>
+    </Compile>
     <EmbeddedResource Include="ButtonIcons.resx">
-        <DependentUpon>ButtonIcons.Designer.cs</DependentUpon>
-        <SubType>Designer</SubType>
-        <DeploymentContent>False</DeploymentContent></EmbeddedResource>
+      <DependentUpon>ButtonIcons.Designer.cs</DependentUpon>
+      <SubType>Designer</SubType>
+      <DeploymentContent>False</DeploymentContent>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-            <Reference Include="System"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Core"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Drawing"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Windows.Forms"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Xml.Linq"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Data.DataSetExtensions"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Data"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
-            <Reference Include="System.Xml"><HintPath>$(OutputPath)</HintPath><Private>False</Private></Reference>
+    <Reference Include="System">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>$(OutputPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    
-            <Reference Include="CSharpFramework.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath><Private>False</Private></Reference>
-    
-            <Reference Include="DockPanel.dll"><HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\DockPanel.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="CSharpFramework.dll">
+      <HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CSharpFramework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DockPanel.dll">
+      <HintPath>..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\DockPanel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include=" " />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-<PropertyGroup>
-    <PostBuildEvent></PostBuildEvent>
-</PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>
