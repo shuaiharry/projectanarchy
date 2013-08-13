@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Configuration">
+    <CharacterSet>MultiByte</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CLRSupport>false</CLRSupport>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\Source;$(VISION_SDK)/Source;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(DXSDK_DIR)/Include;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;</AdditionalIncludeDirectories>
+      <AdditionalOptions/>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>Default</CompileAs>
+      <CompileAsManaged>false</CompileAsManaged>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>6031</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnablePREfast/>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <OmitFramePointers/>
+      <Optimization>disabled</Optimization>
+      <PrecompiledHeader/>
+      <PrecompiledHeaderFile/>
+      <PrecompiledHeaderOutputFile>$(IntDir)EnginePlugin.pch</PrecompiledHeaderOutputFile>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_WIN32;_DEBUG;HK_DEBUG;HK_DEBUG_SLOW;_CONSOLE;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;HK_ANARCHY;PROFILING;_VISION_WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_VR_DX9;PROFILING;_VISION_WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_VR_DX9;HK_CONFIG_SIMD=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SDLCheck>true</SDLCheck>
+      <StringPooling>true</StringPooling>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <UndefinePreprocessorDefinitions/>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <ResourceCompile>
+      <ResourceOutputFileName/>
+      <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Lib>
+      <AdditionalDependencies>lua100d.lib;BaseD.lib;VisionD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\Lib\win32_vs2010_anarchy\debug_dll;$(VISION_SDK)/Lib/win32_vs2010_anarchy\debug_dll;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib;$(DXSDK_DIR)/Lib/x86</AdditionalLibraryDirectories>
+      <AdditionalOptions> /ignore:4221</AdditionalOptions>
+      <IgnoreAllDefaultLibraries/>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <UseUnicodeResponseFiles>true</UseUnicodeResponseFiles>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>lua100d.lib;BaseD.lib;VisionD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\Lib\win32_vs2010_anarchy\debug_dll;$(VISION_SDK)/Lib/win32_vs2010_anarchy\debug_dll;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib;$(DXSDK_DIR)/Lib/x86</AdditionalLibraryDirectories>
+      <AdditionalOptions> /ignore:4221</AdditionalOptions>
+      <AssemblyDebug/>
+      <EnableCOMDATFolding/>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libc.lib;libcmtd.lib;</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>..\..\..\Lib\win32_vs2010_anarchy\debug_dll\$(TargetName).lib</ImportLibrary>
+      <ManifestFile>$(IntDir)Manifest$(TargetExt).intermediate.manifest</ManifestFile>
+      <OptimizeReferences/>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <PropertyGroup>
+</PropertyGroup>
+</Project>

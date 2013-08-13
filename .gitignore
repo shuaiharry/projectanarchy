@@ -1,7 +1,8 @@
 ## Anarchy SDK files to ignore
 
 /Bin/*
-/Build/*
+/Build/MSBuild/*
+/Build/StandaloneTools/*
 /ChangeLogs/*
 /Data/*
 /Docs/*
@@ -38,7 +39,6 @@ GeneratedFiles/
 [Dd]ebug/
 [Rr]elease/
 x64/
-build/
 [Bb]in/
 [Oo]bj/
 

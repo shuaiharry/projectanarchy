@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Configuration">
+    <CharacterSet>MultiByte</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CLRSupport>true</CLRSupport>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\Source;$(VISION_SDK)/Source;$(DXSDK_DIR)/Include;</AdditionalIncludeDirectories>
+      <AdditionalOptions/>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>Default</CompileAs>
+      <CompileAsManaged>true</CompileAsManaged>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4793</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnablePREfast/>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <OmitFramePointers/>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader/>
+      <PrecompiledHeaderFile/>
+      <PrecompiledHeaderOutputFile>$(IntDir)Managed.pch</PrecompiledHeaderOutputFile>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_WIN32;HK_DEBUG;_CONSOLE;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;HK_ANARCHY;PROFILING;_VISION_WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_VR_DX9;_VR_DX9;PROFILING;_VISION_WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_VR_DX9;HK_CONFIG_SIMD=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SDLCheck>true</SDLCheck>
+      <StringPooling>true</StringPooling>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <UndefinePreprocessorDefinitions/>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <ResourceCompile>
+      <ResourceOutputFileName/>
+      <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Lib>
+      <AdditionalDependencies>msvcrt.lib;msvcmrt.lib;msvcprt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\Lib\win32_vs2010_anarchy\dev_dll;$(VISION_SDK)/Lib/win32_vs2010_anarchy\dev_dll;$(DXSDK_DIR)/Lib/x86</AdditionalLibraryDirectories>
+      <AdditionalOptions> /ignore:4221</AdditionalOptions>
+      <IgnoreAllDefaultLibraries/>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <UseUnicodeResponseFiles>true</UseUnicodeResponseFiles>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>msvcrt.lib;msvcmrt.lib;msvcprt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\Lib\win32_vs2010_anarchy\dev_dll;$(VISION_SDK)/Lib/win32_vs2010_anarchy\dev_dll;$(DXSDK_DIR)/Lib/x86</AdditionalLibraryDirectories>
+      <AdditionalOptions> /ignore:4221</AdditionalOptions>
+      <AssemblyDebug>true</AssemblyDebug>
+      <EnableCOMDATFolding/>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary/>
+      <ManifestFile>$(IntDir)Manifest$(TargetExt).intermediate.manifest</ManifestFile>
+      <OptimizeReferences/>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <PropertyGroup>
+</PropertyGroup>
+</Project>
