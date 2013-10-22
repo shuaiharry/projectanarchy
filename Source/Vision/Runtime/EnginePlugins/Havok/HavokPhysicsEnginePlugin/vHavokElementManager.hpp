@@ -11,9 +11,7 @@
 #ifndef V_HAVOK_ELEMENT_MANAGER_HPP_INCLUDED
 #define V_HAVOK_ELEMENT_MANAGER_HPP_INCLUDED
 
-
 #define VHAVOK_ELEMENTMANAGER_FREE_INDEX_CACHE_SIZE  128
-
 
 /// \brief
 ///   Template element manager class for all physics related objects in the scene.
@@ -24,17 +22,18 @@ public:
   /// \brief
   ///   Constructor of the element manager.
   /// 
-  /// Initialises the element table.
+  /// Initializes the element table.
   vHavokElementManager();
+
   inline virtual ~vHavokElementManager(){}
 
   /// \brief
-  ///   Adds an element to the element table and returns the index at which it was added.
+  ///   Adds an element to the element table and returns the index of where it was added.
   /// 
-  /// This index is later necessary to remove the element from the table.
+  /// This index is needed later on to remove the element from the table.
   /// 
   /// \param element
-  ///   This element will be stored in the element table.
+  ///   This is the element that will be stored in the element table.
   /// 
   /// \return
   ///   int index: index of the element in the table.
@@ -49,9 +48,8 @@ public:
   ///   index is set when calling the non-static AddToElementManager function.
   static int ElementManagerAdd(ELEMTYPE element);
 
-
   /// \brief
-  ///   Takes an index and sets a certain element in the element table
+  ///   Takes an index and sets a certain element in the element table.
   /// 
   /// The value to set is the second parameter of this function.
   /// 
@@ -62,10 +60,9 @@ public:
   ///   Element to set at the given index.
   /// 
   /// \note
-  ///   Instead of this method the method ElementManagerAdd is used in most cases, since it finds a
-  ///   free entry in the element table.
+  ///   In most cases ElementManagerAdd is used instead of this method since ElementManagerAdd finds a
+  ///   free entry in the element table by itself.
   static void ElementManagerSet(unsigned int index, ELEMTYPE element);
-
 
   /// \brief
   ///   Returns a certain element in the element table by index
@@ -79,7 +76,6 @@ public:
   ///   ELEMTYPE retElement : The element at index. Can be a NULL pointer.
   static ELEMTYPE ElementManagerGet(unsigned int index);
 
-
   /// \brief
   ///   Returns the entry in the element table with the given index.
   /// 
@@ -92,12 +88,11 @@ public:
   ///   ELEMTYPE retElement : The element at the index. Can be a NULL pointer.
   static ELEMTYPE ElementManagerGetAt(unsigned int index);
 
-
   /// \brief
   ///   Returns the overall size of the element table.
   /// 
   /// A size of 8 means that the highest entry in the element table is 7, but it doesn't mean that
-  /// all of the entries from 0 to 7 are actually defined (there might be entries which are undefined
+  /// all of the entries from 0 to 7 are actually valid (there might be entries which are undefined
   /// and therefore set to NULL).
   /// 
   /// \return
@@ -106,13 +101,12 @@ public:
   /// \sa VisElementManager_cl::ElementManagerGetUsedCount
   static unsigned int ElementManagerGetSize();
 
-
   /// \brief
   ///   Returns the number of used elements in the element table.
   /// 
-  /// The function iterates through all elements and counts the elements which are != NULL. 
+  /// The function iterates through all elements and counts the elements which are not NULL. 
   /// 
-  /// Thus, the count returned by this method may be smaller than the value returned by
+  /// The count returned by this method may thus be smaller than the value returned by
   /// ElementManagerGetSize.
   /// 
   /// \return
@@ -121,28 +115,26 @@ public:
   /// \sa VisElementManager_cl::ElementManagerGetSize
   static unsigned int ElementManagerGetUsedCount();
 
-
   /// \brief
   ///   Removes the element with the given index from the static element table.
   /// 
-  /// That means that it sets this entry to NULL.
+  /// That means that it sets the entry specified by the index to NULL.
   /// 
   /// \param index
-  ///   Index of the element which shall be removed. You get this index from the Add/Set functions.
+  ///   Index of the element which shall be removed. You can get this index from the Add/Set functions.
   /// 
   /// \note
-  ///   This function does not delete the object. If you, for instance, store a sound sample in the
-  ///   element table and remove it in the end with this function, the sound sample will be not be
-  ///   destructed or freed, it will just not be referenced anymore in the static element table. In
-  ///   most cases this function is called in the destructor of the element.
+  ///   This function does not delete the object. For instance, if you store a physics object in the
+  ///   element table and remove with this function, the object will be not be destructed or freed, 
+  ///   it will just not be referenced anymore in the static element table. In most cases this function 
+  ///   is called in the destructor of the element.
   static void ElementManagerRemove(unsigned int index);
-
 
   /// \brief
   ///   Deletes all the elements in the element table.
   /// 
-  /// ElementManagerDeleteAll takes all the currently registered elements in the element table and
-  /// deletes them (actually calling the destructor). Use this function only if the elements in the
+  /// ElementManagerDeleteAll takes all the elements in the element table which are currently registered 
+  /// and deletes them (actually calling the destructor). Use this function only if the elements in the
   /// tables are pointers to deletable objects.
   /// 
   /// Since the element manager is a template class and the code for deleting is inlined, it is
@@ -166,12 +158,11 @@ public:
   ///   int iRemovedCount : number of removed elements.
   static unsigned int ElementManagerDeleteAllUnRef(BOOL bResize=TRUE);
 
-
   /// \brief
   ///   Adjusts the number of elements (returned by ElementManagerGetSize) by eliminating NULL
   ///   entries from the end of the table.
   /// 
-  /// It will be adjusted so that there are no NULL elements at the end.
+  /// The internal array will be adjusted so that there are no NULL elements at the end.
   /// 
   /// If the bResize flag is set, the array will additionally be resized to the new upper limit.
   /// 
@@ -183,11 +174,20 @@ public:
   ///   Adds this element instance to the element manager.
   /// 
   /// Sets the m_iListIndex member accordingly.
-  inline void AddToElementManager()       {VASSERT(m_iListIndex==(unsigned int)-1);m_iListIndex=ElementManagerAdd((ELEMTYPE)this);}
+  inline void AddToElementManager()       
+  {
+    VASSERT(m_iListIndex == (unsigned int)-1);
+    m_iListIndex=ElementManagerAdd((ELEMTYPE)this);
+  }
 
   /// \brief
   ///   Removes this element instance from the element manager
-  inline void RemoveFromElementManager()  {VASSERT(m_iListIndex!=VIS_INVALID && ElementManagerGet(m_iListIndex)==((ELEMTYPE)this));ElementManagerRemove(m_iListIndex);m_iListIndex=(unsigned int)-1;}
+  inline void RemoveFromElementManager()  
+  {
+    VASSERT(m_iListIndex != VIS_INVALID && ElementManagerGet(m_iListIndex) == ((ELEMTYPE)this));
+    ElementManagerRemove(m_iListIndex);
+    m_iListIndex = (unsigned int)-1;
+  }
 
   /// \brief
   ///   Returns the table index of this element in the element manager
@@ -195,7 +195,10 @@ public:
   /// \return
   ///   int iListIndex : The index in the element manager of this element. The index can be used as
   ///   input to the ElementManagerGet() method.
-  inline int GetNumber() const            {return m_iListIndex;}
+  inline int GetNumber() const            
+  {
+    return m_iListIndex;
+  }
 
   /// \brief
   ///   Finds instance(s) with the specified key. Classes must implement the HasObjectKey function
@@ -215,19 +218,22 @@ public:
   /// 
   /// \return
   ///   ELEMTYPE : The first hit, or NULL in case there is no object in the list with specified key
-  static inline ELEMTYPE FindByKey(const char *szObjectKey, DynArray_cl<ELEMTYPE> *storageArray = NULL, BOOL bIgnoreCase=TRUE);
+  static inline ELEMTYPE FindByKey(const char *szObjectKey, DynArray_cl<ELEMTYPE> *storageArray = NULL, 
+    BOOL bIgnoreCase=TRUE);
 
   /// \brief
-  ///   Internal function, wraps around elementTable.GetFreePos()
+  ///   Internal function, wraps elementTable.GetFreePos().
   static inline int ElementManagerGetFreePos();
 
   /// \brief
-  ///   Returns the array index of the passed element (or -1 if not in list)
+  ///   Returns the array index of the passed element (or -1 if not in list).
   static inline int ElementManagerIndexOf(ELEMTYPE elem)
   {
-    for (unsigned int i=0;i<g_iElementCount;i++)
-      if (elementTable.GetDataPtr()[i]==elem)
+    for (unsigned int i = 0; i < g_iElementCount; i++)
+    {
+      if (elementTable.GetDataPtr()[i] == elem)
         return i;
+    }
     return -1;
   }
 
@@ -237,15 +243,25 @@ public:
 
   /// \brief
   ///   Internal function, ensures that the element table has at least the passed size.
-  static inline void ElementManagerEnsureSize(int iSize) { if ((int)elementTable.GetSize() < iSize) { elementTable.Resize(iSize); } }
+  static inline void ElementManagerEnsureSize(int iSize) 
+  { 
+    if ((int)elementTable.GetSize() < iSize) 
+    { 
+      elementTable.Resize(iSize); 
+    } 
+  }
 
   /// \brief
   ///   Internal function, invalidates the free element cache.
-  static inline void ElementManagerInvalidateCache() { g_iCurrentElementCacheIndex = 0; g_iNumElementsInCache = 0; }
+  static inline void ElementManagerInvalidateCache() 
+  { 
+    g_iCurrentElementCacheIndex = 0; 
+    g_iNumElementsInCache = 0; 
+  }
 
 private:
-  VHAVOK_IMPEXP static DynArray_cl<ELEMTYPE> elementTable;           ///< static element table, used to store the elements
-  VHAVOK_IMPEXP static unsigned int g_iElementCount;                 ///< current number of elements (returned by GetSize)
+  VHAVOK_IMPEXP static DynArray_cl<ELEMTYPE> elementTable;       ///< Static element table, used to store the elements.
+  VHAVOK_IMPEXP static unsigned int g_iElementCount;             ///< Current number of elements (returned by GetSize).
   VHAVOK_IMPEXP static unsigned int g_iFreeElementCache[];
   VHAVOK_IMPEXP static unsigned int g_iNumElementsInCache;
   VHAVOK_IMPEXP static unsigned int g_iCurrentElementCacheIndex;
@@ -254,7 +270,6 @@ private:
 public:
   unsigned int m_iListIndex;
 };
-
 
 #if defined(_VISION_WIIU)
 
@@ -275,7 +290,7 @@ public:
 #endif //V_HAVOK_ELEMENT_MANAGER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

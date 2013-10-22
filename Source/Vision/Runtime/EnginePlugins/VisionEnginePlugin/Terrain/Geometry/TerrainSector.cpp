@@ -1212,6 +1212,8 @@ BOOL VTerrainSector::Unload()
 
   m_spTerrainReplacementTechnique = NULL;
 
+  SetSurface(NULL);
+
   return TRUE;
 }
 
@@ -1679,13 +1681,14 @@ void VTerrainSector::Render(VCompiledShaderPass *pShader,const VisStaticGeometry
     VTerrainSectorMeshPageInfo *pPage = m_pMeshPage;
 
     for (int iPageY=0;iPageY<m_Config.m_iSectorMeshesPerSector[1];iPageY++)
+    {
       for (int iPageX=0;iPageX<m_Config.m_iSectorMeshesPerSector[0];iPageX++,pPage++,iStartVertex+=m_Config.m_iVerticesPerMesh)
       {
         if (infoComp.m_pPageLOD[pPage->m_iGlobalIndex]==(char)-1) // page not visible
           continue;
 
 #if defined(_VR_DX11)
-        VisRenderStates_cl::SetPSConstantBuffer(3,&pPage->m_SectorPSConstBuffer);
+        VisRenderStates_cl::SetPSConstantBuffer(3, &pPage->m_SectorPSConstBuffer);
 #else
         // bind individual streams and constants (only for some shaders)
         if ((pShader==NULL || (pShader->GetRenderState ()->GetTrackingMask () & VSHADER_TRACKING_USERBIT0)) && pPage->m_iPixelShaderRegCount>0) // ignore register 0 and 1
@@ -1715,7 +1718,7 @@ void VTerrainSector::Render(VCompiledShaderPass *pShader,const VisStaticGeometry
 
         // individual vertex shader const
 #if defined(_VR_DX11)
-        VisRenderStates_cl::SetVSConstantBuffer(3,&pPage->m_PageVSConstBuffer);
+        VisRenderStates_cl::SetVSConstantBuffer(3, &pPage->m_PageVSConstBuffer);
 #else
         VisRenderStates_cl::SetVertexShaderConstant(38, pPage->m_vVertexShaderConst[0].data, sizeof(pPage->m_vVertexShaderConst)/sizeof(hkvVec4));
 #endif
@@ -1741,14 +1744,19 @@ void VTerrainSector::Render(VCompiledShaderPass *pShader,const VisStaticGeometry
           RenderTerrainMesh(pPage,infoComp);
         }
       }
+    }
   }
-
-  //DebugRender(); // remove
 
   // end terrain group
   if (iThisIndex==allInstances.GetNumEntries()-1 || allInstances.GetEntry(iThisIndex+1)->GetGeometryType()!=STATIC_GEOMETRY_TYPE_TERRAIN)
   {
     Vision::RenderLoopHelper.EndMeshRendering();
+
+#if defined(_VR_DX11)
+    VisRenderStates_cl::SetVSConstantBuffer(3, NULL);
+    VisRenderStates_cl::SetPSConstantBuffer(3, NULL);
+    VisRenderStates_cl::SetPSConstantBuffer(5, NULL);
+#endif
   }
 }
 
@@ -2063,16 +2071,16 @@ int VTerrainSector::GetRelevantCollisionMeshesInBoundingBox(const VLargeBounding
 
 int VTerrainSector::TraceTest(const hkvVec3& startOfLine, const hkvVec3& endOfLine, int iStoreResultCount, VisTraceLineInfo_t *pFirstTraceInfo)
 {
+  // This method tests potentially hit tiles of the sector. The selection of the tiles is based on the ray-grid traversal as described in http://www.cse.yorku.ca/~amana/research/grid.pdf
+  // The idea is to only test tiles 'along the ray'
+
   hkvAlignedBBox rayBox(startOfLine,startOfLine);
   rayBox.expandToInclude(endOfLine);
   const hkvAlignedBBox &sectorBox = GetBoundingBox();
-  if (!sectorBox.overlaps(rayBox) || (!sectorBox.contains (startOfLine) && !sectorBox.getLineSegmentIntersection(startOfLine,endOfLine)))
+  if (!sectorBox.overlaps(rayBox))
+  {
     return 0;
-
-  int x1 = WORLDX_2_TILE(rayBox.m_vMin.x);
-  int y1 = WORLDY_2_TILE(rayBox.m_vMin.y);
-  int x2 = WORLDX_2_TILE(rayBox.m_vMax.x);
-  int y2 = WORLDY_2_TILE(rayBox.m_vMax.y);
+  }
 
   // transformed start/end since collision meshes are sector relative
 #ifdef TERRAIN_COLLISIONMESHES_SECTORLOCALSPACE
@@ -2083,72 +2091,192 @@ int VTerrainSector::TraceTest(const hkvVec3& startOfLine, const hkvVec3& endOfLi
   hkvVec3 vEnd = endOfLine;
 #endif
 
-  // completely outside?
-  if (x1>=m_Config.m_iTilesPerSector[0] || y1>=m_Config.m_iTilesPerSector[1]) return 0;
-  if (x2<0 || y2<0) return 0;
-
-  //clamp
-  if (x1<0) x1=0;
-  if (y1<0) y1=0;
-  if (x2>=m_Config.m_iTilesPerSector[0]) x2=m_Config.m_iTilesPerSector[0]-1;
-  if (y2>=m_Config.m_iTilesPerSector[1]) y2=m_Config.m_iTilesPerSector[1]-1;
-
+  // early out if ray is too short
   hkvVec3 vDir = vEnd-vStart;
   float fLen = vDir.getLength();
   if (fLen<=HKVMATH_LARGE_EPSILON) return 0;
-  vDir *= (1.f/fLen);
+
+  // Traversal Initialization
+  hkvVec3 vTraversalEnd = endOfLine;
+  hkvVec3 vTraversalStart(hkvNoInitialization);  
+  if(!sectorBox.getRayIntersection(startOfLine, vDir, NULL, &vTraversalStart))
+  {
+    return 0;
+  }
+
+  // If the ray starts in the sector bbox, use the ray starting point, as the ray intersection
+  // is the point where the ray leaves the sector bbox
+  if(sectorBox.contains(startOfLine))
+  {
+    vTraversalStart = startOfLine;    
+  }
+
+  // Discard z-values since we basically keep working with the 2D layout of the tiles
+  vTraversalStart.z = 0.f;
+  vTraversalEnd.z = 0.f;
+
+  hkvVec3 vDirTraversal = vTraversalEnd - vTraversalStart;   // 2D traversal direction
+  float fLenTraversal = vDirTraversal.getLength();
+
+  bool bHasXMovement = true;
+  bool bHasYMovement = true;
+  float fMaxX, fMaxY; // virtual positions along the ray
+  if(hkvMath::Abs(vDirTraversal.x) <= HKVMATH_SMALL_EPSILON)
+  {
+    fMaxX = HKVMATH_FLOAT_MAX_POS; // If there's no movement in x direction, set maximum threshold for a step
+    bHasXMovement = false;
+  }
+
+  if(hkvMath::Abs(vDirTraversal.y) <= HKVMATH_SMALL_EPSILON)
+  {
+    fMaxY = HKVMATH_FLOAT_MAX_POS; // If there's no movement in y direction, set maximum threshold for a step
+    bHasYMovement = false;
+  }
+
+  // Normalize traversal direction since it's used to compute percentages
+  if(bHasXMovement || bHasYMovement)
+  {
+    vDirTraversal.normalize();
+  }
+
+  // Get the first intersection tile with the ray
+  int iCurrentX = hkvMath::clamp(WORLDX_2_TILE(vTraversalStart.x),0, m_Config.m_iTilesPerSector[0] - 1);  
+  int iCurrentY = hkvMath::clamp(WORLDY_2_TILE(vTraversalStart.y),0, m_Config.m_iTilesPerSector[1] - 1);
+
+  // Determine stepping direction for the traversal for x and y directions
+  int iStepX = vDirTraversal.x > 0 ? 1 : -1;
+  int iStepY = vDirTraversal.y > 0 ? 1 : -1;
+
+  // Get the start position in sector local space
+  hkvVec3 vStartSectorLocal = vTraversalStart - m_vSectorOrigin;
+
+  // Get the size of a single tile
+  hkvVec2 vTileSize(hkvNoInitialization);
+  vTileSize.x = m_Config.m_vSectorSize[0] / (float)m_Config.m_iTilesPerSector[0];
+  vTileSize.y = m_Config.m_vSectorSize[1] / (float)m_Config.m_iTilesPerSector[1];
+
+  // Calculate stepping parameters in x-direction
+  float fDeltaX = 0.f;
+  if(bHasXMovement)
+  {
+    fDeltaX = vTileSize.x / hkvMath::Abs(vDirTraversal.x); // ray length to pass a complete cell in x-direction
+
+    // fMaxX is the ray length to get from the starting position to the cell border in x-direction
+    fMaxX = hkvMath::fraction(vStartSectorLocal.x / vTileSize.x);
+    if(vDirTraversal.x > 0)
+    {
+      fMaxX = fDeltaX * (1.f - fMaxX);
+    }
+    else
+    {
+      fMaxX = fDeltaX * fMaxX;
+    }
+
+    // if we're on the border (length to cell border basically zero), assume we do a complete step
+    if(fMaxX < HKVMATH_SMALL_EPSILON)
+    {
+      fMaxX = fDeltaX; 
+    }
+  }
+
+  float fDeltaY = 0.f;
+  if(bHasYMovement)
+  {
+    fDeltaY = vTileSize.y / hkvMath::Abs(vDirTraversal.y); // ray length to pass a complete cell in y-direction
+
+    // fMaxY is the ray length to get from the starting position to the cell border in y-direction
+    fMaxY = hkvMath::fraction(vStartSectorLocal.y / vTileSize.y);
+    if(vDirTraversal.y > 0)
+    {
+      fMaxY = fDeltaY * (1.f - fMaxY);
+    }
+    else
+    {
+      fMaxY = fDeltaY * fMaxY;
+    }
+
+    // if we're on the border (length to cell border basically zero), assume we do a complete step
+    if(fMaxY < HKVMATH_SMALL_EPSILON)
+    {
+      fMaxY = fDeltaY;
+    }
+  }  
 
   VTraceHitInfo hitInfo;
   VTraceHitInfo *pHitInfo = iStoreResultCount>0 ? &hitInfo : NULL;
-
-  // this loop could be optimized...
   int iHitCount = 0;
-  for (int y=y1;y<=y2;y++)
-    for (int x=x1;x<=x2;x++)
+  bool bContinue = true;
+  while (bContinue)
+  {
+    VSimpleCollisionMesh* pMesh = GetCollisionMesh(iCurrentX, iCurrentY);
+    const hkvAlignedBBox* pBBox = pMesh->GetBoundingBox();
+    int primitiveNumber = (int)GetTile(iCurrentX, iCurrentY);
+
+    // Prepare next step for the grid traversal
+    if(fMaxX < fMaxY) // the condition basically checks if we reach the next cell by going in x or y direction
     {
-      VSimpleCollisionMesh* pMesh = GetCollisionMesh(x,y);
-      const hkvAlignedBBox* pBBox = pMesh->GetBoundingBox();
-
-      //pMesh->Render(Vision::Contexts.GetMainRenderContext()->GetRenderInterface(), V_RGBA_YELLOW);
-
-      // performs bbox early out.
-      // This does however not cover multiple hits per single tile yet...
-      // We need the TRACEFLAG_DOUBLESIDED flag as the vertex order is flipped (physics requirement) 
-      if (!pMesh->GetTraceIntersection((hkvVec3& )vStart,(hkvVec3& )vEnd,TRACEFLAG_DOUBLESIDED,pHitInfo))
-        continue;
-
-      // we have a hit
-      if (iStoreResultCount<1)
-        return 1;
-
-      // better than any of the current ones?
-      hitInfo.m_fDistance *= fLen;
-      VisTraceLineInfo_t *pStoreInfo = VisTraceLineInfo_t::InsertTraceResult(iStoreResultCount,pFirstTraceInfo,hitInfo.m_fDistance);
-      if (!pStoreInfo)
-        continue;
-
-      pStoreInfo->detected = TRUE;
-      pStoreInfo->hitType = VIS_TRACETYPE_STATICGEOMETRY;
-      pStoreInfo->sceneElementType = V_COLMESH_SCENEELEMENT_TERRAIN; // actually it is VIS_PRIMITIVETYPE_STATICMESH or VIS_PRIMITIVETYPE_CUSTOM
-      pStoreInfo->colliderEntity = NULL;
-      pStoreInfo->pCollisionMesh = NULL;
-      pStoreInfo->distance = hitInfo.m_fDistance;
-      pStoreInfo->touchPoint = hitInfo.m_vTouchPoint;
-#ifdef TERRAIN_COLLISIONMESHES_SECTORLOCALSPACE
-      pStoreInfo->touchPoint += m_vSectorOrigin; // local space collision mesh
-#endif
-      pStoreInfo->primitiveNumber = (int)GetTile(x,y);
-      pStoreInfo->pSurface = &m_pMeshPage[0].GetSurfaceSafe();
-      pStoreInfo->primitivePlane = hitInfo.m_MeshTriangle.GetPlane ();
-      pStoreInfo->primitiveVertex = hitInfo.m_MeshTriangle.GetVertex0();
-      //  pStoreInfo->baseUV; ? 
-      pStoreInfo->pGeoInstance = this;
-      pStoreInfo->pSubmesh = NULL;
-      iHitCount++;
-
+      fMaxX = fMaxX + fDeltaX;
+      iCurrentX = iCurrentX + iStepX;
+    }
+    else
+    {
+      fMaxY = fMaxY + fDeltaY;
+      iCurrentY = iCurrentY + iStepY;
     }
 
-    return iHitCount;
+    // Check if we quit the traversal after this step
+    if(iCurrentX < 0 || 
+      iCurrentY < 0 || 
+      iCurrentX >= m_Config.m_iTilesPerSector[0] || 
+      iCurrentY >= m_Config.m_iTilesPerSector[1] || 
+      fMaxX >= fLenTraversal && fMaxY >= fLenTraversal || // quit if the virtual ray length exceeds the actual ray length
+      (!bHasXMovement && !bHasYMovement)) // don't do another step if we have no movement in the grid
+    {
+      bContinue = false;
+    }
+
+    // performs bbox early out.
+    // This does however not cover multiple hits per single tile yet...
+    // We need the TRACEFLAG_DOUBLESIDED flag as the vertex order is flipped (physics requirement) 
+    if (!pMesh->GetTraceIntersection((hkvVec3& )vStart,(hkvVec3& )vEnd,TRACEFLAG_DOUBLESIDED,pHitInfo))
+      continue;
+
+    // we have a hit
+    if (iStoreResultCount<1)
+      return 1;
+
+    // better than any of the current ones?
+    hitInfo.m_fDistance *= fLen;
+    VisTraceLineInfo_t *pStoreInfo = VisTraceLineInfo_t::InsertTraceResult(iStoreResultCount,pFirstTraceInfo,hitInfo.m_fDistance);
+    if (!pStoreInfo)
+      continue;
+
+    pStoreInfo->detected = TRUE;
+    pStoreInfo->hitType = VIS_TRACETYPE_STATICGEOMETRY;
+    pStoreInfo->sceneElementType = V_COLMESH_SCENEELEMENT_TERRAIN; // actually it is VIS_PRIMITIVETYPE_STATICMESH or VIS_PRIMITIVETYPE_CUSTOM
+    pStoreInfo->colliderEntity = NULL;
+    pStoreInfo->pCollisionMesh = NULL;
+    pStoreInfo->distance = hitInfo.m_fDistance;
+    pStoreInfo->touchPoint = hitInfo.m_vTouchPoint;
+#ifdef TERRAIN_COLLISIONMESHES_SECTORLOCALSPACE
+    pStoreInfo->touchPoint += m_vSectorOrigin; // local space collision mesh
+#endif
+    pStoreInfo->primitiveNumber = primitiveNumber;
+
+    if(m_pMeshPage==NULL)
+      pStoreInfo->pSurface = NULL;
+    else
+      pStoreInfo->pSurface = &m_pMeshPage[0].GetSurfaceSafe();
+    
+    pStoreInfo->primitivePlane = hitInfo.m_MeshTriangle.GetPlane ();
+    pStoreInfo->primitiveVertex = hitInfo.m_MeshTriangle.GetVertex0();
+    //  pStoreInfo->baseUV; ? 
+    pStoreInfo->pGeoInstance = this;
+    pStoreInfo->pSubmesh = NULL;
+    iHitCount++;
+  }
+
+  return iHitCount;
 }
 
 #ifdef SUPPORTS_SNAPSHOT_CREATION
@@ -2274,7 +2402,7 @@ VCompiledTechnique* VTerrainSector::GetReplacementTechnique()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

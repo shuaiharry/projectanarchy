@@ -24,7 +24,7 @@ class hkaiDirectedGraphExplicitCost : public hkReferencedObject
 {
 public:
 	//+vtable(true)
-	//+version(6)
+	//+version(7)
 	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_ASTAR);
 	HK_DECLARE_REFLECTION();
 
@@ -33,9 +33,12 @@ public:
 	hkaiDirectedGraphExplicitCost( hkFinishLoadedObjectFlag f );
 
 	// hkaiAstar interface
-	typedef hkUint32 SearchIndex;
+	typedef hkaiPackedKey SearchIndex;
 	typedef int EdgeIndex;
 	typedef int NodeIndex;
+
+	typedef hkUint32 NodeData;
+	typedef hkUint32 EdgeData;
 
 		/// The cost of traveling from one Node to another
 	typedef hkReal EdgeCost;
@@ -43,6 +46,7 @@ public:
 		/// An hkVector4 representing a position in the graph.
 	typedef hkVector4 Position;
 
+		/// Graph constants.
 	enum Constants
 	{
 		INVALID_NODE_INDEX	 = -1,
@@ -64,6 +68,27 @@ public:
 		int m_numEdges;
 	};
 
+#ifdef HK_PLATFORM_SPU
+
+		/// same as Node, but with padded members. Only used on SPU.
+	struct PaddedNode
+	{
+		hkPadSpu<int> m_startEdgeIndex;
+		hkPadSpu<int> m_numEdges;
+
+		PaddedNode() {}
+
+		PaddedNode(const Node& unpadded)
+		{
+			m_startEdgeIndex = unpadded.m_startEdgeIndex;
+			m_numEdges       = unpadded.m_numEdges;
+		}
+	};
+#else
+	typedef Node PaddedNode;
+#endif
+
+		/// Edge flags.
 	enum EdgeBits
 	{
 			/// Indicates the edge is related to an hkaiNavMesh::UserEdge.
@@ -105,7 +130,7 @@ public:
 
 
 	HK_FORCE_INLINE void init(const hkaiDirectedGraphExplicitCost* gConst);
-	HK_FORCE_INLINE void init(Position* pos, Node* nodes, Edge* edges, int numNodes, int numEdges);
+	HK_FORCE_INLINE void init(Position* pos, Node* nodes, Edge* edges, int numNodes, int numEdges, NodeData* nodeData, EdgeData* edgeData, int nodeStride, int edgeStride);
 	HK_FORCE_INLINE void clearAndDeallocate();
 
 		/// Copys the nodes, edges, and vertices of the other graph. Returns HK_SUCCESS if all memory operations succeeded.
@@ -113,13 +138,35 @@ public:
 	void swap( hkaiDirectedGraphExplicitCost& other );
 
 	void validate() const;
+
+	/// Set the NodeData striding. If greater than the old value, new data will be set to fillValue.
+	hkResult setNodeDataStriding( int newStride, NodeData fillValue = 0 );
+
+	/// Set the EdgeData striding. If greater than the old value, new data will be set to fillValue.
+	hkResult setEdgeDataStriding( int newStride, EdgeData fillValue = 0 );
+
+	/// Expand the node array, and return a pointer to the start of the new nodes.
+	Node* expandNodesBy(int n);
+
+	/// Expand the edge array, and return a pointer to the start of the new edges
+	Edge* expandEdgesBy(int n);
+
+	hkResult setNodesSize( int n );
+	hkResult setEdgesSize( int n );
 	
 	//
 	// Accessor interface
 	//	
 	HK_FORCE_INLINE void getPosition( SearchIndex a, hkVector4& v ) const;
 	HK_FORCE_INLINE const Node& getNode( SearchIndex a) const;
+	HK_FORCE_INLINE       Node& getNode( SearchIndex a);
 	HK_FORCE_INLINE const Edge& getEdge( EdgeIndex a) const;
+	HK_FORCE_INLINE       Edge& getEdge( EdgeIndex a);
+
+	HK_FORCE_INLINE const EdgeData* getEdgeDataPtr( EdgeIndex eIdx) const;
+	HK_FORCE_INLINE       EdgeData* getEdgeDataPtr( EdgeIndex eIdx);
+	HK_FORCE_INLINE const NodeData* getNodeDataPtr( NodeIndex nIdx) const;
+	HK_FORCE_INLINE       NodeData* getNodeDataPtr( NodeIndex nIdx);
 
 	HK_FORCE_INLINE int getNumNodes() const;
 	HK_FORCE_INLINE int getNumEdges() const;
@@ -136,6 +183,16 @@ public:
 		/// Array of edges
 	hkArray<struct Edge> m_edges;
 
+	hkArray<NodeData>			m_nodeData;
+
+	hkArray<EdgeData>			m_edgeData;
+
+	/// Number of NodeData per face
+	int							m_nodeDataStriding; //+default(0)
+
+	/// Number of EdgeData per edge
+	int							m_edgeDataStriding; //+default(0)
+
 	hkArray<hkaiStreamingSet>	m_streamingSets;
 
 protected:
@@ -150,7 +207,7 @@ protected:
 #endif // HKAI_DIRECTEDGRAPHEXPLICITCOST_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

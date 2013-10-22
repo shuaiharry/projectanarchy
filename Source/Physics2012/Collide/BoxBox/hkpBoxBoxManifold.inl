@@ -7,17 +7,17 @@
  */
 
 
-inline int hkpBoxBoxManifold::getNumPoints()
+HK_FORCE_INLINE int hkpBoxBoxManifold::getNumPoints() const
 {
 	return m_numPoints;
 }
 
-inline hkpFeatureContactPoint& hkpBoxBoxManifold::operator[]( int index )
+HK_FORCE_INLINE hkpFeatureContactPoint& hkpBoxBoxManifold::operator[]( int index )
 {
 	return m_contactPoints[index];
 }
 
-inline hkBool hkpBoxBoxManifold::findInManifold( const hkpFeatureContactPoint& fcp )
+HK_FORCE_INLINE bool hkpBoxBoxManifold::findInManifold( const hkpFeatureContactPoint& fcp ) const
 {
 	for (int i = m_numPoints-1; i>=0; i--)
 	{
@@ -29,23 +29,38 @@ inline hkBool hkpBoxBoxManifold::findInManifold( const hkpFeatureContactPoint& f
 	return false;
 }
 
-inline hkBool hkpBoxBoxManifold::isComplete()
+HK_FORCE_INLINE bool hkpBoxBoxManifold::isComplete() const
 {
 	return m_isComplete; 
 }
 
-inline void hkpBoxBoxManifold::setComplete( hkBool complete )
+HK_FORCE_INLINE void hkpBoxBoxManifold::setComplete( bool complete )
 {
 	m_isComplete = complete;	
 }
 
-inline hkBool hkpBoxBoxManifold::hasNoPointsLeft()
+HK_FORCE_INLINE bool hkpBoxBoxManifold::hasNoPointsLeft() const
 {
 	return (m_numPoints >= HK_BOXBOX_MANIFOLD_MAX_POINTS); 
 }
 
+HK_FORCE_INLINE hkBool32 hkpBoxBoxManifold::isNormalInitialized() const
+{
+	return m_manifoldNormalA.getW().isLessZero();
+}
+
+HK_FORCE_INLINE void hkpBoxBoxManifold::setNormalInitialized()
+{
+	m_manifoldNormalA.setW(hkSimdReal_Minus1);
+}
+
+HK_FORCE_INLINE void hkpBoxBoxManifold::clearNormalInitialized()
+{
+	m_manifoldNormalA.zeroComponent<3>();
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

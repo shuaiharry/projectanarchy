@@ -24,6 +24,14 @@
 #endif
 #endif
 
+#if defined(_VISION_TIZEN)
+  #include <FApp.h>
+  #include <FBase.h>
+  #include <FSystem.h>
+  #include <FUi.h>
+  #include <FGrpGlPlayer.h>
+#endif
+
 #if defined(WIN32) && !defined(_VISION_WINRT) 
 
 #include <Vision/Runtime/Base/Graphics/Video/VWindow.hpp>
@@ -34,7 +42,7 @@
 #ifdef _VR_DX9
 
 struct D3DDevice;
-struct Direct3D;
+struct hkvDirect3D;
 
 #elif defined(_VR_DX11)
 #define MAX_SWAP_CHAINS 64
@@ -81,7 +89,7 @@ struct Direct3D;
 #define VVIDEO_DEFAULTHEIGHT 768
 #define VVIDEO_PRESENTPARAMFLAGS 0
 
-#elif defined(_VISION_ANDROID)
+#elif defined(_VISION_ANDROID) || defined(_VISION_TIZEN)
 #define VVIDEO_DEFAULTWIDTH 1024
 #define VVIDEO_DEFAULTHEIGHT 600
 #define VVIDEO_PRESENTPARAMFLAGS 0
@@ -114,6 +122,7 @@ struct VWinRTConfig
   {
     ViewWidth = ViewHeight = 0;
     DisplayDensity = 1.0f;
+    DisplayDensityDPI = -1;
     ScreenRotation = 0; //0,90,180,270
     CoreWindow = NULL;
     #ifdef _VISION_METRO
@@ -129,6 +138,7 @@ struct VWinRTConfig
   unsigned int ViewWidth;
   unsigned int ViewHeight;
   float DisplayDensity;
+  int DisplayDensityDPI;
   unsigned int ScreenRotation;
 };
 #endif
@@ -436,10 +446,12 @@ struct VAndroidGLES2Config
   VAndroidGLES2Config()
   {
     ViewWidth = ViewHeight = 0;
+    
     DisplayDensity = 1.0f;
     DisplayDensityDPI = -1;
     DisplayXDPI = -1.0f;
     DisplayYDPI = -1.0f;
+    
     Display = EGL_NO_DISPLAY;
     Context = EGL_NO_CONTEXT;
     Surface = EGL_NO_SURFACE;
@@ -474,6 +486,61 @@ struct VAndroidGLES2Config
   bool LazyShaderCompilation;       ///< Configuration value which allows to enable / disable lazy shader compilation (speeds up loading times but may produce small stalls when spawning new models), default = true
   bool bRunWhileSleeping;           ///< Configuration value which allows the app to run even when in background (not recommended due to battery consumption - but may be useful for automated tests), default = false
   bool bDisablePVRUsage;            ///< Configuration value which allows to disable PVR texture usage (useful when stripping PVR textures from the APK for example), default = false
+};
+
+#elif defined(_VISION_TIZEN)
+
+/// \brief
+///   This structure stores the display orientation from the Android Surface
+enum EDisplayRotation
+{
+  ROTATION_0 = 0,
+  ROTATION_90 = 1,
+  ROTATION_180 = 2,
+  ROTATION_270 = 3,
+};
+
+/// \brief
+///   This structure stores the display configuration of the display used by GLES2. It will be filled by the
+///   GLES2/screen initialization functions.
+struct VTizenGLES2Config
+{
+  VTizenGLES2Config()
+  {
+    ViewWidth = ViewHeight = 0;
+
+    DisplayDensity = 1.0f;
+    DisplayDensityDPI = -1;
+    DisplayXDPI = -1.0f;
+    DisplayYDPI = -1.0f;
+    
+    Display = EGL_NO_DISPLAY;
+    Context = EGL_NO_CONTEXT;
+    Surface = EGL_NO_SURFACE;
+    
+    Transparent = false;
+    UseR5G6B5Format = true;
+    bEglSurfaceInitialized = false;
+    LazyShaderCompilation = true;
+  }
+
+  EDisplayRotation DisplayRotation;
+  unsigned int ViewWidth;
+  unsigned int ViewHeight;
+
+  float DisplayDensity;
+  int DisplayDensityDPI;
+  float DisplayXDPI;
+  float DisplayYDPI;
+
+  EGLDisplay Display;
+  EGLSurface Surface;
+  EGLContext Context;
+
+  bool Transparent;
+  bool UseR5G6B5Format;
+  bool bEglSurfaceInitialized;
+  bool LazyShaderCompilation;       ///< Configuration value which allows to enable / disable lazy shader compilation (speeds up loading times but may produce small stalls when spawning new models), default = true
 };
 
 #elif defined(_VISION_WIIU)
@@ -1094,7 +1161,7 @@ public:
   /// 
   /// \return
   ///   D3DDevice* or NULL
-  static VBASE_IMPEXP Direct3D* GetD3DInstance();
+  static VBASE_IMPEXP hkvDirect3D* GetD3DInstance();
 
   /// \brief
   ///   Returns the currently active D3D Device.
@@ -1352,6 +1419,18 @@ public:
   static VBASE_IMPEXP VAndroidGLES2Config* GetVideoConfig() { return &m_AndroidGLES2Config; }
 
   static VBASE_IMPEXP bool IsGLViewRecreationWished() { bool bRetVal = m_bGLViewRecreationWished; m_bGLViewRecreationWished = false; return bRetVal; }
+
+#endif
+
+#if defined(_VISION_TIZEN)
+
+  static VBASE_IMPEXP VTizenGLES2Config* GetVideoConfig() { return &m_TizenGLES2Config; }
+
+  static VBASE_IMPEXP void SetUIForm( Tizen::Ui::Controls::Form* pUIForm ) { m_pUIForm = pUIForm; }
+     
+  static VBASE_IMPEXP Tizen::Ui::Controls::Form* GetUIForm() { return m_pUIForm; }
+
+  static VBASE_IMPEXP void MakeCurrent();
 
 #endif
 
@@ -2156,6 +2235,10 @@ protected:
   static VAndroidGLES2Config m_AndroidGLES2Config;
   static bool m_bGLViewRecreationWished;
 
+#elif defined(_VISION_TIZEN)
+  static VTizenGLES2Config m_TizenGLES2Config;
+  static Tizen::Ui::Controls::Form* m_pUIForm;
+
 #elif defined(_VISION_WIIU)
   static VWiiUDisplayConfig m_WiiUDisplayConfig;
 
@@ -2247,7 +2330,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

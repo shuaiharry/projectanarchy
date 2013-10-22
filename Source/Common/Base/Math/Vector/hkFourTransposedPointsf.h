@@ -19,9 +19,9 @@ class hkFourTransposedPointsf
 	public:
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_COLLIDE, hkFourTransposedPointsf );
-#if defined(HK_REAL_IS_FLOAT)
+
 		HK_DECLARE_REFLECTION();
-#endif
+
 		HK_DECLARE_POD_TYPE();
 	public:
 
@@ -205,7 +205,7 @@ class hkFourTransposedPointsf
 #endif	//	HK_MATH_FOUR_TRANSPOSED_VECTORSf_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

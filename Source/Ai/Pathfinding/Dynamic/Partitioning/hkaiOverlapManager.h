@@ -15,14 +15,13 @@
 
 #include <Common/Base/Container/Set/hkSet.h>
 
-#include <Common/Base/Container/BitField/hkBitField.h>
-
 // Uncomment the following line to enable debug display code
 //#define HKAI_DEBUG_DISPLAY_OVERLAP_MANAGER
 
 class hkaiStreamingCollection;
 class hkaiSpatialQueryHitFilter;
 class hkaiSilhouettePriorityController;
+class hkBitField;
 
 /// Mapping information for one hkaiNavMeshInstance
 struct hkaiOverlapManagerSection
@@ -163,7 +162,7 @@ public:
 	void recomputeOverlapsForGenerator( const hkaiSilhouetteGenerator* silGen );
 
 		/// Step all the silhouette generators, and record what faces they overlap.
-	void updateOverlapsOfAllGenerators( const GeneratorArray& generators, const class hkBitField* sectionsToUpdate, hkUint32 updateFlags = UPDATE_NORMAL );
+	void updateOverlapsOfAllGenerators( const GeneratorArray& generators, const hkBitField* sectionsToUpdate, hkUint32 updateFlags = UPDATE_NORMAL );
 
 		/// Let the manager know that all updates (bodies removed) are starting anew by clearing the m_faceIsDirty map.
 	void markFrameDone();
@@ -189,6 +188,9 @@ public:
 		/// Gets the maximum number of faces per step that can be cut.
 	inline int getMaxCutFacesPerStep( ) const;
 
+		/// Returns whether or not there is a limit on the number of cut faces per step.
+	inline bool isLimitingMaxCutFaces() const;
+
 		/// Gets the silhouette priority controller.
 	inline const hkaiSilhouettePriorityController* getSilhouettePriorityController() const;
 	
@@ -204,7 +206,7 @@ public:
 	//
 
 		/// Return a list of face keys which have changed since the last cut.
-	virtual void getUpdatedFaces( const class hkaiNavMeshCutter* cutter, hkArray<hkaiPackedKey>::Temp& cutFaceKeysOut, hkArray<hkaiPackedKey>::Temp& uncutFaceKeysOut, const class hkBitField* sectionsToUpdate ) HK_OVERRIDE;
+	virtual void getUpdatedFaces( const class hkaiNavMeshCutter* cutter, hkArray<hkaiPackedKey>::Temp& cutFaceKeysOut, hkArray<hkaiPackedKey>::Temp& uncutFaceKeysOut, const hkBitField* sectionsToUpdate ) HK_OVERRIDE;
 		/// For a given face, return a list of silhouettes which are relevant to this face.
 	virtual void gatherSilhouettesForFace( hkaiPackedKey faceKey, const struct hkaiSilhouetteGenerationParameters& genParams, hkArray<hkaiCompoundSilhouette>::Temp& silsOut, hkArray<int>::Temp& silMaterialIds ) HK_OVERRIDE;
 		/// Sets up the job
@@ -265,7 +267,7 @@ protected:
 #endif // HK_AI_OVERLAP_MANAGER
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

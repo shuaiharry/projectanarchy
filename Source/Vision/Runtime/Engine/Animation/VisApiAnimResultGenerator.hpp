@@ -245,7 +245,6 @@ protected:
   VISION_APIFUNC virtual void Serialize( VArchive &ar );
   VISION_APIFUNC IVisAnimResultGenerator_cl();
 
-  VisSkeletonPtr m_spSkeleton;
   unsigned int m_iLastFrameUpdatedSkeletalState;
   bool m_bCachedLocalResult;
   VisSkeletalAnimResult_cl m_LocalAnimResult;   ///< used to keep buffered pAnimResult
@@ -255,7 +254,7 @@ protected:
 #endif //VIS_ANIM_RESULT_GENERATOR_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

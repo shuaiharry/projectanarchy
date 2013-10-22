@@ -336,6 +336,30 @@ public:
   VBASE_IMPEXP bool CopyShadersFromResource (VShaderPassResource& resource, IVLog* pLog);
 
   /// \brief
+  ///   Clears all shader programs previously copied by CopyShadersFromResource().
+  ///
+  /// \sa CopyShadersFromResource
+  ///
+  VBASE_IMPEXP void ClearShaderPrograms();
+
+  /// \brief
+  ///   Checks if the shader program configuration is valid for this shader pass.
+  ///
+  /// This function will return false after calling ClearShaders(). 
+  ///
+  /// \sa ClearShaderPrograms CopyShadersFromResource
+  ///
+  VBASE_IMPEXP bool ShaderProgramsValid() const;
+
+  /// \brief
+  ///   Returns the shader pass resource, this compiled shader pass originates from.
+  ///
+  inline VShaderPassResource* GetSourceResource()
+  {
+    return m_spOrigin;
+  }
+
+  /// \brief
   ///   Gather resource dependencies of this compiled shader pass.
   ///
   /// \param snapshot
@@ -511,7 +535,7 @@ typedef VNameValueListParser<';', '=', 1024> VShaderParameterParser;
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

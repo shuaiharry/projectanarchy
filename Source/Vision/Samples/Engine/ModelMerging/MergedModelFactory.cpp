@@ -186,22 +186,31 @@ void MergedModelFactory_cl::PreviewModel()
   m_pPreviewModelEntities[BARBARIAN_SWORD] = Vision::Game.CreateEntity("VisBaseEntity_cl", hkvVec3(0.f, 0.f, 0.f), "Barbarian_Sword.model");
 
   // Setup animation system
-  VisAnimFinalSkeletalResult_cl* pFinalSkeletalResult;
-  VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateSkeletalConfig(m_pPreviewModelEntities[BARBARIAN_BODY]->GetMesh(), &pFinalSkeletalResult);
-  
-  // Set animation config
+  VDynamicMesh* pBodyMesh = m_pPreviewModelEntities[BARBARIAN_BODY]->GetMesh();
+  VisSkeletalAnimSequence_cl* pSequence = static_cast<VisSkeletalAnimSequence_cl*>(pBodyMesh->GetSequence("Idle", VIS_MODELANIM_SKELETAL));
+
+  // Create shared skeletal anim control to animate all models in sync
+  VisSkeletalAnimControl_cl* pSkeletalAnimControl = 
+    VisSkeletalAnimControl_cl::Create(pBodyMesh->GetSkeleton(), pSequence, VSKELANIMCTRL_DEFAULTS | VANIMCTRL_LOOP);
+
   for (int i = 0; i < BARBARIAN_MAX; i++)
   {
+    // Create anim config per entity
+    VisAnimFinalSkeletalResult_cl* pFinalSkeletalResult = NULL;
+    VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateSkeletalConfig(m_pPreviewModelEntities[i]->GetMesh(), &pFinalSkeletalResult);
+    pConfig->SetFlags(pConfig->GetFlags() | APPLY_MOTION_DELTA);
+
+    // Anim config uses shared skeletal anim control as input
+    pFinalSkeletalResult->SetSkeletalAnimInput(pSkeletalAnimControl);
+
     m_pPreviewModelEntities[i]->SetAnimConfig(pConfig);
-    m_pPreviewModelEntities[i]->GetAnimConfig()->StartSkeletalAnimation(m_pPreviewModelEntities[i], "Idle", VSKELANIMCTRL_DEFAULTS | VANIMCTRL_LOOP);
-    m_pPreviewModelEntities[i]->GetAnimConfig()->SetFlags(m_pPreviewModelEntities[i]->GetAnimConfig()->GetFlags() | APPLY_MOTION_DELTA);
     m_pPreviewModelEntities[i]->SetPosition(m_vPos);
     m_pPreviewModelEntities[i]->SetOrientation(m_vOri);
 #ifndef _VISION_PSP2
     m_pPreviewModelEntities[i]->SetCastShadows(TRUE);
 #endif
   }
-  
+
   m_pCameraEntity->AttachToParent(m_pPreviewModelEntities[BARBARIAN_BODY]);
   m_pPlayerCamera->ResetOldPosition();
   m_pPlayerCamera->Follow = true;
@@ -258,7 +267,7 @@ void MergedModelFactory_cl::DeleteModels()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

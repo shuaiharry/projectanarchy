@@ -26,7 +26,7 @@ inline void hkaiLocalSteeringInput::validate( bool callCheckDeterminism ) const
 
 	HK_ASSERT2(0x746c65a0, m_currentPosition.isOk<3>(), "Local steering input m_currentPosition is invalid");
 	HK_ASSERT2(0x746c65a1, m_currentForward.isOk<3>(), "Local steering input m_currentForward is invalid");
-	HK_ASSERT2(0x746c65a2, m_currentForward.isNormalized<3>(), "Local steering input m_currentForward is not normalized");
+	HK_ASSERT2(0x746c65a2, m_currentForward.isNormalized<3>() || m_currentForward.allExactlyEqualZero<3>(), "Local steering input m_currentForward is not normalized or zero");
 	HK_ASSERT2(0x746c65a3, m_currentVelocity.isOk<4>(), "Local steering input m_currentVelocity is invalid");
 	HK_ASSERT2(0x746c65a4, m_desiredVelocity.isOk<3>(), "Local steering input m_desiredVelocity is invalid");
 	HK_ASSERT2(0x746c65a5, m_desiredFutureDir.isOk<3>(), "Local steering input m_desiredFutureDir is invalid");
@@ -81,7 +81,7 @@ inline void hkaiLocalSteeringInput::checkDeterminism() const
 #undef HKAI_CHECK_DETERMINISM_VECTOR3
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

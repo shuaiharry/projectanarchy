@@ -32,8 +32,39 @@ float RPG_AiCharacter::GetWanderRadius() const
   return m_wanderRadius;
 }
 
+void RPG_AiCharacter::SpawnDeathPickups()
+{
+  // spawn health pickups
+  int numHealthPickupsToSpawn = m_numHealthPickupsDroppedOnDeathMin;
+
+  VASSERT(m_numHealthPickupsDroppedOnDeathMax >= m_numHealthPickupsDroppedOnDeathMin);
+  if(m_numHealthPickupsDroppedOnDeathMin != m_numHealthPickupsDroppedOnDeathMax)
+  {
+    numHealthPickupsToSpawn = m_numHealthPickupsDroppedOnDeathMin + Vision::Game.GetRand() % (m_numHealthPickupsDroppedOnDeathMax - m_numHealthPickupsDroppedOnDeathMin + 1);
+  }
+
+  for(int index = 0; index < numHealthPickupsToSpawn; ++index)
+  {
+    RPG_GameManager::s_instance.CreateEntityFromScript(m_healthPickupScriptName, GetEyePosition(), GetOrientation());
+  }
+
+  // spawn mana pickups
+  int numManaPickupsToSpawn = m_numManaPickupsDroppedOnDeathMin;
+
+  VASSERT(m_numManaPickupsDroppedOnDeathMax >= m_numManaPickupsDroppedOnDeathMin);
+  if(m_numManaPickupsDroppedOnDeathMin != m_numManaPickupsDroppedOnDeathMax)
+  {
+    numManaPickupsToSpawn = m_numManaPickupsDroppedOnDeathMin + Vision::Game.GetRand() % (m_numManaPickupsDroppedOnDeathMax - m_numManaPickupsDroppedOnDeathMin + 1);
+  }
+
+  for(int index = 0; index < numManaPickupsToSpawn; ++index)
+  {
+    RPG_GameManager::s_instance.CreateEntityFromScript(m_manaPickupScriptName, GetEyePosition(), GetOrientation());
+  }
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

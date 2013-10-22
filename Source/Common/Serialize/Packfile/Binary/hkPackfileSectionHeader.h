@@ -25,6 +25,7 @@ extern const class hkClass hkPackfileSectionHeaderClass;
 class hkPackfileSectionHeader
 {
 	public:
+		//+version(1)
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_SERIALIZE, hkPackfileSectionHeader);
 		HK_DECLARE_REFLECTION();
@@ -105,12 +106,15 @@ class hkPackfileSectionHeader
 		
 			/// Offset of the end of section. Also the section size.
 		hkInt32 m_endOffset;
+
+			/// 
+		hkInt32 m_pad[4];
 };
 
 #endif // HKSERIALIZE_SERIALIZE_BINARY_HKPACKFILESECTIONHEADER_XML_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

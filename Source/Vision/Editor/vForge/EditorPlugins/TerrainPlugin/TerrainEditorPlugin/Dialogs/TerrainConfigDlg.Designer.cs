@@ -381,6 +381,7 @@ namespace TerrainEditorPlugin.Dialogs
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.ShowInTaskbar = false;
       this.Name = "TerrainConfigDlg";
       this.Text = "Terrain Config";
       this.panel1.ResumeLayout(false);

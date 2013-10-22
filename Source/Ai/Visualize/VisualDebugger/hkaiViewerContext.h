@@ -40,8 +40,18 @@ class hkaiViewerContext :	public hkReferencedObject,
 		hkaiViewerContext();
 		virtual ~hkaiViewerContext();
 
-			/// Registers all AI viewers. This must be called for the AI viewers to appear in the VDB client.
-		static void HK_CALL registerAllAiProcesses();
+			/// Registers the recommended AI viewers. This must be called for the AI viewers to appear in the VDB client.
+		static void HK_CALL registerDefaultAiProcesses();
+
+			/// Registers some infrequently-used viewers. These are slow and aren't recommended for general usage.
+			/// The viewers are:
+			///	 - hkaiNavMeshVertexNormalsViewer
+			///	 - hkaiNavMeshEdgeNormalsViewer
+			///	 - hkaiNavMeshFaceNormalsViewer
+			///	 - hkaiNavMeshVertexLabelsViewer
+			///	 - hkaiNavMeshEdgeLabelsViewer
+			///	 - hkaiNavMeshFaceLabelsViewer
+		static void HK_CALL registerExtraAiProcesses();
 
 			/// Returns a string to identify this type of context.
 		virtual const char* getType() HK_OVERRIDE { return "ai"; }
@@ -112,7 +122,7 @@ class hkaiViewerContext :	public hkReferencedObject,
 #endif  // HKAI_VIEWER_CONTEXT_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

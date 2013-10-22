@@ -364,18 +364,21 @@ namespace VisionManaged
   }
 
 
-  void EngineInstanceDynLight::SetUsePreviewShadowComponent(bool bStatus)
+  void EngineInstanceDynLight::SetUsePreviewShadowComponent(bool bEnablePreview)
   {
     if (!m_pLight)
       return;
-    // if a shadowmap component is set by the user, then remove the preview component, regardless of enabled state
-    if (!bStatus 
-#if !defined( HK_ANARCHY )
-      || m_pLight->Components().GetComponentOfType<VShadowMapComponentPoint>()!=NULL 
+
+    bool bHasUserComponent =
+      m_pLight->Components().GetComponentOfType<SHADOW_MAP_COMPONENT_SPOT_DIRECTIONAL>() != NULL;
+
+#if !defined(HK_ANARCHY)
+    bHasUserComponent = bHasUserComponent || m_pLight->Components().GetComponentOfType<VShadowMapComponentPoint>() != NULL;
 #endif
-      || m_pLight->Components().GetComponentOfType<SHADOW_MAP_COMPONENT_SPOT_DIRECTIONAL>()!=NULL)
+
+    if (!bEnablePreview || bHasUserComponent)
     {
-#if !defined( HK_ANARCHY )
+#if !defined(HK_ANARCHY)
       RemovePreviewComponents(VShadowMapComponentPoint_PREVIEW::GetClassTypeId());
 #endif
       RemovePreviewComponents(VShadowMapComponentSpotDirectional_PREVIEW::GetClassTypeId());
@@ -384,7 +387,7 @@ namespace VisionManaged
 
     if ( m_pLight->GetType() != VIS_LIGHT_POINT )
     {
-#if !defined( HK_ANARCHY )
+#if !defined(HK_ANARCHY)
       RemovePreviewComponents(VShadowMapComponentPoint_PREVIEW::GetClassTypeId());
 #endif
       VShadowMapComponentSpotDirectional_PREVIEW *pComp = m_pLight->Components().GetComponentOfType<VShadowMapComponentSpotDirectional_PREVIEW>();
@@ -397,7 +400,7 @@ namespace VisionManaged
         if (pComp->GetShadowMapGenerator()!=NULL) // the only reason why this may be NULL is that the renderer failed to initialize (e.g. no renderer node)
           pComp->GetShadowMapGenerator()->SetConsiderCastShadowFlag(false);
       }
-    }
+    } 
 #if !defined( HK_ANARCHY )
     else
     {
@@ -411,14 +414,14 @@ namespace VisionManaged
         if (pComp->GetShadowMapGenerator()!=NULL) // the only reason why this may be NULL is that the renderer failed to initialize (e.g. no renderer node)
           pComp->GetShadowMapGenerator()->SetConsiderCastShadowFlag(false);
       }
-    } 
+    }
 #endif
   }
 
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

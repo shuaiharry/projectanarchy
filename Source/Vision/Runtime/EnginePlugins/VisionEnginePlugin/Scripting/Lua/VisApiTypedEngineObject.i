@@ -212,19 +212,19 @@ public:
 %}
 
 //Shortcut
-//%native(VisTypedEngineObject_cl_AddTimedValue) int VisTypedEngineObject_cl_AddTimedValue(lua_State *L);
-//%{
-//  SWIGINTERN int VisTypedEngineObject_cl_AddTimedValue(lua_State *L)
-//  {
-//    IS_MEMBER_OF(VisTypedEngineObject_cl)
-//    
-//    //insert the class name of the component as parameter #2
-//    lua_pushstring(L, "VTimedValueComponent");
-//    lua_insert(L, 2);
-//    
-//    return VisTypedEngineObject_cl_AddComponentOfType(L);
-//  }
-//%}
+%native(VisTypedEngineObject_cl_AddTimedValue) int VisTypedEngineObject_cl_AddTimedValue(lua_State *L);
+%{
+  SWIGINTERN int VisTypedEngineObject_cl_AddTimedValue(lua_State *L)
+  {
+    IS_MEMBER_OF(VisTypedEngineObject_cl)
+    
+    //insert the class name of the component as parameter #2
+    lua_pushstring(L, "VTimedValueComponent");
+    lua_insert(L, 2);
+    
+    return VisTypedEngineObject_cl_AddComponentOfType(L);
+  }
+%}
 
 //Shortcut
 %native(VisTypedEngineObject_cl_AddTransitionStateMachine) int VisTypedEngineObject_cl_AddTransitionStateMachine(lua_State *L);
@@ -253,7 +253,7 @@ public:
     SWIG_CONVERT_POINTER(L, 1, VisTypedEngineObject_cl, pSelf)
 
     //param #2: type name of the component
-    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_AddComponentOfType");
+    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_GetComponentOfType");
     const char * szComponentType = lua_tostring(L, 2);       
     
     //param #3: optional name of the component
@@ -288,7 +288,7 @@ public:
     SWIG_CONVERT_POINTER(L, 1, VisTypedEngineObject_cl, pSelf)
 
     //param #2: type name of the component
-    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_AddComponentOfType");
+    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_GetComponentOfBaseType");
     const char * szBaseTypeName = lua_tostring(L, 2);       
     
     //param #3: optional name of the component
@@ -543,6 +543,7 @@ public:
   
   /// @}  
   /// @name Callbacks
+  /// @note Please note that there might be more callbacks dependent on additional plugins.
   /// @{
   
   /// \brief Overridable callback function. Called before a scene is being updated.
@@ -636,21 +637,21 @@ public:
   /// \brief Overridable callback function. Called when the object collides with another object or a world polygon.
   /// \param self The object to which this script is attached.
   /// \param info A table containing the following fields:
-  ///   - hkvVec3 "HitPoint": collision type of this object
-  ///   - hkvVec3 "HitNormal": collision type of the collider
-  ///   - hkvVec3 "RelativeVelocity": this object
-  ///   - hkvVec3 "Force": this object (0 for Havok Physics)
-  ///   - string "ColliderType": the typpe object that we collided with
-  ///   - mixed "ColliderObject": the distance from this object to the collision point
+  ///   - hkvVec3 "HitPoint": location where the collision took place
+  ///   - hkvVec3 "HitNormal": the collision normal
+  ///   - hkvVec3 "RelativeVelocity": the relative velocity (0 for PhysX)
+  ///   - hkvVec3 "Force": force vector for the collision (0 for Havok Physics)
+  ///   - string "ColliderType": the type object that we collided with
+  ///   - mixed "ColliderObject": the object we collided with (can be nil, for e.g. terrain)
   /// \note Possible collider types are:
   ///   - "Entity" Collision with an entity (rigid body or character controller)
-  ///   - "Mesh" Collision eit a static mesh
+  ///   - "Mesh" Collision with a static mesh
   ///   - "Terrain" Collision with the terrain
-  ///   - "Decoration" Collisionn with a decoration group
+  ///   - "Decoration" Collision with a decoration group (PhysX only)
   /// \par Example
   ///   \code
   ///     function OnCollision(self, info)
-  ///       Debug:PrintLine("Collision at " .. tostring(info.HitPoint) .. " with " .. info.ColliderType .. ", force: " .. info.Force)
+  ///       Debug:PrintLine("Collision at " .. tostring(info.HitPoint) .. " with " .. info.ColliderType)
   ///     end
   ///   \endcode
   void OnCollision(mixed self, table info);
@@ -723,7 +724,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

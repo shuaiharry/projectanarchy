@@ -12,6 +12,7 @@
 #define _VRESOURCE_HPP_INCLUDED
 
 #include <Vision/Runtime/Base/System/IO/Serialization/VSerializationProxy.hpp>
+#include <Vision/Runtime/Base/System/Resource/VResourceManager.hpp>
 
 /// \brief Flags for resources.
 enum VResourceFlag
@@ -138,6 +139,10 @@ public:
     // do not remove the starting "/" on iOS when accessing the var directory
     if (m_szFilename && (_strnicmp(m_szFilename, "/var/", 5) == 0))
       return m_szFilename;
+#elif defined(_VISION_TIZEN)
+    // do not remove the starting "/" on Tizen
+    if (m_szFilename && (_strnicmp(m_szFilename, "/opt/apps/", 10) == 0))
+      return m_szFilename;	  
 #endif
 
     if (m_szFilename && ( m_szFilename[0]=='\\' || m_szFilename[0]=='/'))
@@ -274,10 +279,32 @@ public:
   VBASE_IMPEXP VFileTime GetFileTimeStamp() const;
 
   /// \brief
+  ///   Returns the resource's asset lookup hash. Can be used to identify resource meta data changes.
+  VBASE_IMPEXP unsigned int GetAssetLookupHash() { return m_uiAssetLookupHash; }
+
+  /// \brief
   ///   Sets the resource's asset lookup hash directly.
   /// \param iHashValue
   ///   the new hash value to set
   VBASE_IMPEXP void SetAssetLookupHash(unsigned int iHashValue);
+
+  /// \brief
+  ///   Checks if the resource has been modified.
+  /// 
+  /// The stream manager is used to retrieve the new time stamp.
+  /// 
+  /// For further details on the passed parameters, see VResourceManager::ReloadModifiedResourceFiles.
+  /// 
+  /// \param pManager
+  ///   The file stream manager used for retrieving the time stamp. Should be
+  ///   Vision::File.GetManager() when used in the engine.
+  /// 
+  /// \param eOptions
+  ///   The type of reloading which should be performed
+  /// 
+  /// \return
+  ///   TRUE if the resource has been detected to be modified
+  VBASE_IMPEXP BOOL CheckFileModified(IVFileStreamManager* pManager, VUnloadReloadOptions_e eOptions = VURO_COLD_RELOAD);
 
   /// \brief
   ///   Checks if the resource has been modified.
@@ -300,7 +327,11 @@ public:
   /// 
   /// \return
   ///   TRUE if the resource has been detected to be modified
-  VBASE_IMPEXP BOOL CheckFileModified(IVFileStreamManager* pManager, BOOL bUnload = TRUE, BOOL bReload = TRUE);
+  inline HKV_DEPRECATED_2013_2 BOOL CheckFileModified(IVFileStreamManager* pManager, BOOL bUnload, BOOL bReload)
+  {
+    VASSERT_MSG(bUnload || bReload, "at least one option has to be set");
+    return CheckFileModified(pManager, bReload ? VURO_COLD_RELOAD : VURO_ONLY_UNLOAD);
+  }
 
   /// \brief
   ///   Ignores file changes, so that the resource doesn't get reloaded the next time CheckFileModified()
@@ -502,7 +533,19 @@ public:
   /// \brief
   ///   Unloads and reloads the resource, based on the flags passed. Additionally triggers any
   ///   registered callbacks for before/after file modified.
-  VBASE_IMPEXP virtual void UnloadAndReload(BOOL bUnload, BOOL bReload);
+  ///
+  /// \param eOptions
+  ///   which type of unloading and reloading should happen
+  VBASE_IMPEXP virtual void UnloadAndReload(VUnloadReloadOptions_e eOptions);
+
+  /// \brief
+  ///   Unloads and reloads the resource, based on the flags passed. Additionally triggers any
+  ///   registered callbacks for before/after file modified.
+  inline HKV_DEPRECATED_2013_2 void UnloadAndReload(BOOL bUnload, BOOL bReload)
+  {
+    VASSERT_MSG(bUnload || bReload, "at least one option has to be set");
+    UnloadAndReload(bReload ? VURO_COLD_RELOAD : VURO_ONLY_UNLOAD);
+  }
 
   /// \brief triggers a resource changed callback
   /// \param changedFlag
@@ -635,6 +678,23 @@ public:
   /// called when the resource unloads or reloads.
   VBASE_IMPEXP void UpdateMemoryFootprint();
 
+  /// \brief
+  ///   Fills a string with information for the asset system about specific details of this resource.
+  ///
+  /// This information will be used by the asset framework when creating or updating an asset for a specific
+  /// resource. If the asset type supports it, you can return information such as default values for properties
+  /// in this string.
+  ///
+  /// The format of this string should follow the syntax understood by a VAssetMetadataParser: name/value pairs
+  /// should be separated by a comma (,), and within each pair, the name should be separated from the value by
+  /// an equals sign (=). For values that actually contain a list, the list elements should be separated with
+  /// semicolons (;).
+  ///
+  /// \param [out] hint
+  ///   the string to store the asset hint. If a class overrides this function, the overriding function should
+  ///   call the base function first and append its own data to \c hint afterwards. If there is no property hint
+  ///   data available, \c hint may remain unchanged.
+  VBASE_IMPEXP virtual void GetAssetPropertyHint(VString& hint) const {}
 
   ///
   /// @}
@@ -1081,7 +1141,7 @@ class VResourceCollection : public VRefCountedCollection<VManagedResource>
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -27,6 +27,8 @@ VisEntityCollection_cl VisionRenderLoop_cl::s_LitEntityCollection(2048, 1024);
 
 VisStaticGeometryInstanceCollection_cl VisionRenderLoop_cl::s_RenderGeoInstanceCollection(4096, 2048);
 
+unsigned int VisionRenderLoop_cl::s_iRenderOrderBitfield = UINT_MAX;
+
 // Should InitRenderLoop() and DeInitRenderLoop() be made part of the interface so
 // we can call it as soon as the renderloop is installed/deinstalled (like the
 // physics module)?
@@ -58,7 +60,6 @@ void VisionShaderProvider_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
     //setup shaders the first time
     if (!m_bInitialized)
     {
-      LoadDefaultTextures();
       m_bInitialized = true;
     }
     return;    
@@ -239,12 +240,6 @@ void VisionShaderProvider_cl::ReleaseDefaultTextures()
   m_spSpotlightTexture = NULL;
   m_spAttenSmoothTex = NULL;
 }
-
-
-void VisionShaderProvider_cl::LoadDefaultTextures()
-{
-}
-
 
 VTextureObject* VisionShaderProvider_cl::GetDefaultAttenuationTexture()
 {
@@ -570,6 +565,20 @@ void VisionRenderLoop_cl::OnWorldInit()
   #endif
 }
 
+void VisionRenderLoop_cl::SetRenderHookOrder(VRenderHook_e eRenderHook, bool bRenderMeshBufferObjectsFirst)
+{
+  VASSERT(eRenderHook >= VRH_PRE_RENDERING && eRenderHook <= VRH_CUSTOM);
+
+#ifdef HK_DEBUG
+  if (eRenderHook > VRH_CORONAS_AND_FLARES)
+    Vision::Error.Warning("VisionRenderLoop_cl::SetRenderHookOrder: Applying the order of render hooks above VRH_CORONAS_AND_FLARES will have no effect");
+#endif
+
+  if (bRenderMeshBufferObjectsFirst)
+    s_iRenderOrderBitfield |= eRenderHook;
+  else
+    s_iRenderOrderBitfield &= ~eRenderHook;
+}
 
 void VisionRenderLoop_cl::RenderHook(const VisMeshBufferObjectCollection_cl &visibleMeshBuffer, const VisParticleGroupCollection_cl *visibleParticleGroups, VRenderHook_e eRenderHook, bool bTriggerCallbacks)
 {
@@ -580,21 +589,50 @@ void VisionRenderLoop_cl::RenderHook(const VisMeshBufferObjectCollection_cl &vis
   INSERT_PERF_MARKER_SCOPE(szMarkerString);
 #endif
 
-  int iFilterMask = VisRenderContext_cl::GetCurrentContext()->GetRenderFilterMask();
+  VisRenderHookDataObject_cl data(&Vision::Callbacks.OnRenderHook, eRenderHook);
+  int iStartIndex = 0;
 
-  Vision::RenderLoopHelper.RenderMeshBufferObjects(visibleMeshBuffer, eRenderHook);
-  if (visibleParticleGroups != NULL)
-  {
-    Vision::RenderLoopHelper.RenderParticleSystems(visibleParticleGroups, eRenderHook, iFilterMask);
-  }
-
+  // --- 1. Trigger render hook callbacks with priority below or equal to PRE_MESHBUFFEROBJECTS_AND_PARTICLES
   if (bTriggerCallbacks)
-  {
-    VisRenderHookDataObject_cl data(&Vision::Callbacks.OnRenderHook, eRenderHook);
-    Vision::Callbacks.OnRenderHook.TriggerCallbacks(&data);
-  }
-}
+    iStartIndex = Vision::Callbacks.OnRenderHook.TriggerCallbacks(&data, VRHP_PRE_MESHBUFFEROBJECTS_AND_PARTICLES);
 
+  if ((s_iRenderOrderBitfield & eRenderHook) != 0) // check whether mesh buffer objects or particles should be rendered first
+  {
+    // --- 2. Render mesh buffer objects
+    Vision::RenderLoopHelper.RenderMeshBufferObjects(visibleMeshBuffer, eRenderHook);
+
+    // --- 3. Trigger outstanding render hook callbacks with priority below or equal to VRHP_BETWEEN_MESHBUFFEROBJECTS_AND_PARTICLES
+    if (bTriggerCallbacks)
+      iStartIndex = Vision::Callbacks.OnRenderHook.TriggerCallbacks(&data, VRHP_BETWEEN_MESHBUFFEROBJECTS_AND_PARTICLES, iStartIndex);
+
+    // --- 4. Render particles if present
+    if (visibleParticleGroups != NULL)
+    {
+      int iFilterMask = VisRenderContext_cl::GetCurrentContext()->GetRenderFilterMask();
+      Vision::RenderLoopHelper.RenderParticleSystems(visibleParticleGroups, eRenderHook, iFilterMask);
+    }
+  }
+  else
+  {
+    // --- 2. Render particles if present
+    if (visibleParticleGroups != NULL)
+    {
+      int iFilterMask = VisRenderContext_cl::GetCurrentContext()->GetRenderFilterMask();
+      Vision::RenderLoopHelper.RenderParticleSystems(visibleParticleGroups, eRenderHook, iFilterMask);
+    }
+
+    // --- 3. Trigger outstanding render hook callbacks with priority below or equal to VRHP_BETWEEN_MESHBUFFEROBJECTS_AND_PARTICLES
+    if (bTriggerCallbacks)
+      iStartIndex = Vision::Callbacks.OnRenderHook.TriggerCallbacks(&data, VRHP_BETWEEN_MESHBUFFEROBJECTS_AND_PARTICLES, iStartIndex);
+
+    // --- 4. Render mesh buffer objects
+    Vision::RenderLoopHelper.RenderMeshBufferObjects(visibleMeshBuffer, eRenderHook);
+  }
+
+  // --- 5. Trigger outstanding render hook callbacks
+  if (bTriggerCallbacks)
+    Vision::Callbacks.OnRenderHook.TriggerCallbacks(&data, VRHP_POST_MESHBUFFEROBJECTS_AND_PARTICLES, iStartIndex);
+}
 
 
 
@@ -624,14 +662,12 @@ VISION_APIFUNC void VisionRenderLoop_cl::OnDoRenderLoop(void *pUserData)
     Vision::Video.GetD3DDevice()->SetShaderGPRAllocation(0, 0, 0);
   #endif 
 
-  #if defined (WIN32) || defined (_VISION_XENON) || defined (_VISION_PS3) || defined(_VISION_PSP2) || defined(_VISION_WIIU)
-    if (Vision::RenderLoopHelper.GetReplacementRenderLoop())
-    {
-      // render with this renderloop instead
-      Vision::RenderLoopHelper.GetReplacementRenderLoop()->OnDoRenderLoop(pUserData);
-      return;
-    }
-  #endif
+  if (Vision::RenderLoopHelper.GetReplacementRenderLoop())
+  {
+    // render with this renderloop instead
+    Vision::RenderLoopHelper.GetReplacementRenderLoop()->OnDoRenderLoop(pUserData);
+    return;
+  }
 
   m_pShaderProvider = Vision::GetApplication()->GetShaderProvider();
   VASSERT(m_pShaderProvider);
@@ -1379,7 +1415,7 @@ void VVisibilityObjectCollector::HandleVisibleVisibilityObjects()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

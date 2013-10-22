@@ -150,6 +150,8 @@ enum VTargetPlatform_e
       TARGETPLATFORM_THIS = TARGETPLATFORM_GLES2
   #elif defined(_VISION_ANDROID)
       TARGETPLATFORM_THIS = TARGETPLATFORM_GLES2
+  #elif defined(_VISION_TIZEN)
+      TARGETPLATFORM_THIS = TARGETPLATFORM_GLES2
   #elif defined(_VISION_WIIU)
       TARGETPLATFORM_THIS = TARGETPLATFORM_WIIU
   #else
@@ -175,7 +177,8 @@ enum VTargetDevice_e
   TARGETDEVICE_IOS      = 5,
   TARGETDEVICE_ANDROID  = 6,
   TARGETDEVICE_WIIU     = 7,
-  TARGETDEVICE_COUNT    = 8,
+  TARGETDEVICE_TIZEN    = 8,
+  TARGETDEVICE_COUNT    = 9,
 
   #if defined (WIN32) && defined (_VR_DX9)
     TARGETDEVICE_THIS = TARGETDEVICE_DX9
@@ -191,6 +194,8 @@ enum VTargetDevice_e
     TARGETDEVICE_THIS = TARGETDEVICE_IOS
   #elif defined(_VISION_ANDROID)
     TARGETDEVICE_THIS = TARGETDEVICE_ANDROID
+  #elif defined(_VISION_TIZEN)
+    TARGETDEVICE_THIS = TARGETDEVICE_TIZEN
   #elif defined(_VISION_WIIU)
     TARGETDEVICE_THIS = TARGETDEVICE_WIIU
   #else
@@ -207,7 +212,8 @@ static const char* VTargetDeviceName[TARGETDEVICE_COUNT] =
   "psvita", 
   "ios",    
   "android",
-  "wiiu",   
+  "wiiu",
+  "tizen",
 };
 
 enum VTargetPlatformMask_e
@@ -529,7 +535,7 @@ enum VisLightingMethod_e
 #endif //VSHADERCONSTANTS_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

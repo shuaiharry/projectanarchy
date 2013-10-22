@@ -12,16 +12,16 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConstraint.hpp>
 
 /// \brief
-///   Descriptor for vHavok PointToPlane constraint.
+///   Descriptor for vHavokPhysics PointToPlane constraint.
 class vHavokPointToPlaneConstraintDesc : public vHavokConstraintDesc
 {
 public:
   VHAVOK_IMPEXP vHavokPointToPlaneConstraintDesc();
 
-  VHAVOK_IMPEXP virtual void Reset();
+  VHAVOK_IMPEXP virtual void Reset() HKV_OVERRIDE;
 
-  V_DECLARE_SERIAL_DLLEXP( vHavokPointToPlaneConstraintDesc, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokPointToPlaneConstraintDesc, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 public:
   hkvVec3 m_vPointToPlanePivot; ///< Specifies both the origin point for the constraining plane, and bodyA's pivot point, specified in world space
@@ -31,38 +31,34 @@ private:
   static const unsigned int s_iSerialVersion;
 };
 
-
-// ----------------------------------------------------------------------------
-// vHavokPointToPlaneConstraint
-// ----------------------------------------------------------------------------
-
 /// \brief
-///   Implementation of the vHavok PointToPlane constraint.
+///   Implementation of the vHavokPhysics PointToPlane constraint.
 class vHavokPointToPlaneConstraint : public vHavokConstraint
 {
 public:
   // serialization and type management
-  V_DECLARE_SERIAL_DLLEXP( vHavokPointToPlaneConstraint, VHAVOK_IMPEXP )
-    VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokPointToPlaneConstraint, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP VOVERRIDE void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 protected:
-  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData();
-  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc();
-  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, vHavokConstraintDesc const& desc);
+  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, 
+
+    vHavokConstraintDesc const& desc) HKV_OVERRIDE;
 public:
-  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc);
+  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc) HKV_OVERRIDE;
 
 private:
-  static const unsigned int s_iSerialVersion;
-
   vHavokPointToPlaneConstraintDesc m_savedPointToPlaneDesc;  ///< Saved PointToPlane constraint desc
 
+  static const unsigned int s_iSerialVersion;
 };
 
 #endif //V_HAVOK_POINTTOPLANE_CONSTRAINT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

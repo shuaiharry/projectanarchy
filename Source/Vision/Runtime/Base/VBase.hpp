@@ -177,19 +177,20 @@ typedef int intptr_t;
 #define vMemAlignedFree(ptr)              VBaseAlignedDealloc(ptr)
 #define vStrFree(the_string)              { vMemFree(the_string); the_string=NULL; }
 
-#define V_SAFE_DELETE(x)                  { if (x) { delete    x;        x=NULL; } }
-#define V_SAFE_DELETE_ARRAY(x)            { if (x) { delete [] x;        x=NULL; } }
-#define V_SAFE_FREE(x)                    { if (x) { vMemFree(x);        x=NULL; } }
-#define V_SAFE_FREE_ALIGNED(x)            { if (x) { vMemAlignedFree(x); x=NULL; } }
-#define V_SAFE_STRFREE(x)                 { if (x) { vStrFree(x);        x=NULL; } }
-#define V_SAFE_RELEASE(x)                 { if (x) { x->Release();       x=NULL; } }
-#define V_SAFE_DISPOSE(x)                 { if (x) { x->Dispose();       x=NULL; } }
-#define V_SAFE_DISPOSEOBJECT(x)           { if (x) { if (!x->IsDisposed()) x->DisposeObject(); x=NULL; } }
-#define V_SAFE_REMOVE(x)                  { if (x) { x->Remove();        x=NULL; } }
+#define V_SAFE_DELETE(x)                  { if (x) { delete    (x);           (x)=NULL; } }
+#define V_SAFE_DELETE_ARRAY(x)            { if (x) { delete [] (x);           (x)=NULL; } }
+#define V_SAFE_FREE(x)                    { if (x) { vMemFree(x);             (x)=NULL; } }
+#define V_SAFE_FREE_ALIGNED(x)            { if (x) { vMemAlignedFree(x);      (x)=NULL; } }
+#define V_SAFE_STRFREE(x)                 { if (x) { vStrFree(x);             (x)=NULL; } }
+#define V_SAFE_RELEASE(x)                 { if (x) { (x)->Release();          (x)=NULL; } }
+#define V_SAFE_DISPOSE(x)                 { if (x) { (x)->Dispose();          (x)=NULL; } }
+#define V_SAFE_DISPOSEOBJECT(x)           { if (x) { if (!(x)->IsDisposed()) (x)->DisposeObject(); (x)=NULL; } }
+#define V_SAFE_REMOVE(x)                  { if (x) { (x)->Remove();           (x)=NULL; } }
 
-#define V_VERIFY_MALLOC(p)                { if (!p) Vision::Error.FatalError("malloc failed (variable: %s)",#p); ANALYSIS_ASSUME(p) }
+#define V_VERIFY_MALLOC(p)                { if (!(p)) Vision::Error.FatalError("malloc failed (variable: %s)",#p); ANALYSIS_ASSUME(p) }
 
 #define V_BIT(_iBit)                      ( 1U<<(_iBit) )
+#define V_BIT_64(_iBit)                   ( 1ULL<<(_iBit) )
 #define V_STRINGIZE_AUX(s)                #s
 #define V_STRINGIZE(s)                    V_STRINGIZE_AUX(s)
 #define V_CAT_AUX(a, b)                   a##b
@@ -395,7 +396,6 @@ V_COMPILE_ASSERT(sizeof(vtime_t)==8);  ///< time_t must be 64-bits (see above)
 
   #include <Vision/Runtime/Base/Test/vTestUnit.hpp>
   #include <Vision/Runtime/Base/Test/vTestClassImpl.hpp>
-  #include <Vision/Runtime/Base/Test/VImageComparison.hpp>
 
   #include <Vision/Runtime/Base/System/Threading/ThreadManager/VThreadedTask.hpp>
   #include <Vision/Runtime/Base/System/Threading/ThreadManager/VManagedThread.hpp>
@@ -444,6 +444,9 @@ V_COMPILE_ASSERT(sizeof(vtime_t)==8);  ///< time_t must be 64-bits (see above)
   #elif defined(_VISION_ANDROID)
     #include <Vision/Runtime/Base/Input/VInputAndroid.hpp>
 
+  #elif defined(_VISION_TIZEN)
+    #include <Vision/Runtime/Base/Input/VInputTizen.hpp>
+
   #elif defined(_VISION_WIIU)
     #include <Vision/Runtime/Base/Input/VInputWiiU.hpp>
 
@@ -472,7 +475,7 @@ VBASE_IMPEXP void vBaseInterReleaseDebugLinkingCheck();
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

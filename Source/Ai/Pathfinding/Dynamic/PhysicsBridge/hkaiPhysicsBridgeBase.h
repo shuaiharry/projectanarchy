@@ -32,6 +32,7 @@ class hkaiPhysicsBridgeBase : public hkReferencedObject, public hkaiWorld::Liste
 			/// Disconnect any connected callbacks from the physics world.
 		virtual void disconnectFromPhysicsWorld() = 0;
 
+			/// Flags for different body types/
 		enum BodyTypeFlagBits
 		{
 			BODY_INVALID = 0,
@@ -48,8 +49,11 @@ class hkaiPhysicsBridgeBase : public hkReferencedObject, public hkaiWorld::Liste
 				/// Character body (usually dynamic but not necessarily)
 			BODY_CHARACTER = 1 << 3,
 
+				/// Trigger volume (usually static but not necessarily)
+			BODY_TRIGGER = 1 << 4,
+
 				/// Default ignored body types flags
-			DEFAULT_IGNORE = BODY_STATIC | BODY_CHARACTER,
+			DEFAULT_IGNORE = BODY_STATIC | BODY_CHARACTER | BODY_TRIGGER,
 		};
 
 		typedef hkFlags<BodyTypeFlagBits, hkUint8> BodyTypeFlags;
@@ -103,7 +107,7 @@ class hkaiPhysicsBridgeBase : public hkReferencedObject, public hkaiWorld::Liste
 #endif	// HKAI_PHYSICS_BRIDGE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

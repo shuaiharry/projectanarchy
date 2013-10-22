@@ -77,6 +77,7 @@ class hkbDockingGenerator : public hkbGenerator
 		hkInt16 m_dockingBone;	//+default(-1)
 								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
 								//+hk.Description("The bone to align while docking.")
+								//+hk.Ui(group="Docking Bone",label="Docking Bone Index")
 
 		/// The translational offset applied to the docking target.
 		hkVector4 m_translationOffset;	//+hk.Description("The translational offset applied to the docking target.")
@@ -164,7 +165,7 @@ class hkbDockingGenerator : public hkbGenerator
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

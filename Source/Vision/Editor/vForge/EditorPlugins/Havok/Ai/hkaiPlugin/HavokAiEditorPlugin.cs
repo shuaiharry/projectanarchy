@@ -224,13 +224,13 @@ namespace HavokAiEditorPlugin
       {
         if (e._newMode == EditorManager.Mode.EM_NONE)
         {
-          HavokAiManaged.ManagedModule.SetConnectToPhysicsWorld(false);
+          HavokAiManaged.ManagedModule.SetConnectToPhysicsWorld(false, true);
         }
         else if (e._newMode == EditorManager.Mode.EM_PLAYING_IN_EDITOR || e._newMode == EditorManager.Mode.EM_PLAYING_IN_GAME)
         {
           if (_panel.WantPhysicsConnection())
           {
-            HavokAiManaged.ManagedModule.SetConnectToPhysicsWorld(true);
+            HavokAiManaged.ManagedModule.SetConnectToPhysicsWorld(true, false);
           }
         }
       }
@@ -239,7 +239,7 @@ namespace HavokAiEditorPlugin
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

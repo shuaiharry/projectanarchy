@@ -62,6 +62,14 @@ class hkbModifier : public hkbNode
 		hkBool m_padModifier[3];	//+nosave
 
 	public:
+
+#if defined(HK_ENABLE_DETERMINISM_CHECKS)
+		virtual void checkDeterminism() HK_OVERRIDE
+		{
+			hkbNode::checkDeterminism();
+			hkCheckDeterminismUtil::checkMt(0xb0000021, m_enable);
+		}
+#endif
 		
 		hkbModifier( hkFinishLoadedObjectFlag flag ) : hkbNode(flag) {}
 };
@@ -69,7 +77,7 @@ class hkbModifier : public hkbNode
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

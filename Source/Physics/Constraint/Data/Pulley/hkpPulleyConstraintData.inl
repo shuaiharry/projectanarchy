@@ -14,7 +14,7 @@ inline void hkpPulleyConstraintData::setInWorldSpace(const hkTransform& bodyATra
 													 const hkTransform& bodyBTransform,
 													 const hkVector4& pivotAW,
 													 const hkVector4& pivotBW,
-													 const hkVector4& pulleyPivotAW, 
+													 const hkVector4& pulleyPivotAW,
 													 const hkVector4& pulleyPivotBW,
 													 hkReal leverageOnBodyB )
 {
@@ -26,7 +26,7 @@ inline void hkpPulleyConstraintData::setInWorldSpace(const hkTransform& bodyATra
 	hkVector4 sepDist;
 	sepDist.setSub( pivotAW, pulleyPivotAW );
 	sepDist.length<3>().store<1>( &m_atoms.m_pulley.m_ropeLength );
-	sepDist.setSub( pivotBW, pulleyPivotBW ); 
+	sepDist.setSub( pivotBW, pulleyPivotBW );
 	m_atoms.m_pulley.m_ropeLength += sepDist.length<3>().getReal() * leverageOnBodyB;
 
 	m_atoms.m_pulley.m_leverageOnBodyB = leverageOnBodyB;
@@ -42,38 +42,38 @@ inline void hkpPulleyConstraintData::setInBodySpace( const hkTransform& bodyATra
 													 const hkTransform& bodyBTransform,
 													 const hkVector4& pivotA,
 													 const hkVector4& pivotB,
-													 const hkVector4& pulleyPivotAW, 
+													 const hkVector4& pulleyPivotAW,
 													 const hkVector4& pulleyPivotBW,
 													 hkReal leverageOnBodyB )
 
 {
 	m_atoms.m_translations.m_translationA = pivotA;
-	m_atoms.m_translations.m_translationB = pivotB;	
+	m_atoms.m_translations.m_translationB = pivotB;
 	m_atoms.m_pulley.m_fixedPivotAinWorld = pulleyPivotAW;
 	m_atoms.m_pulley.m_fixedPivotBinWorld = pulleyPivotBW;
 
-	hkVector4 pivotAW, pivotBW; 
-	pivotAW._setTransformedPos(bodyATransform,pivotA); 
-	pivotBW._setTransformedPos(bodyBTransform,pivotB); 
+	hkVector4 pivotAW, pivotBW;
+	pivotAW._setTransformedPos(bodyATransform,pivotA);
+	pivotBW._setTransformedPos(bodyBTransform,pivotB);
 
-	hkVector4 sepDist; 
-	sepDist.setSub( pivotAW, pulleyPivotAW ); 
+	hkVector4 sepDist;
+	sepDist.setSub( pivotAW, pulleyPivotAW );
 	sepDist.length<3>().store<1>( &m_atoms.m_pulley.m_ropeLength );
-	sepDist.setSub( pivotBW, pulleyPivotBW ); 
+	sepDist.setSub( pivotBW, pulleyPivotBW );
 	m_atoms.m_pulley.m_ropeLength += sepDist.length<3>().getReal() * leverageOnBodyB;
 
 	m_atoms.m_pulley.m_leverageOnBodyB = leverageOnBodyB;
 }
 
 
-hkReal hkpPulleyConstraintData::getRopeLength(hkReal length) 
-{ 
-	return m_atoms.m_pulley.m_ropeLength; 
+hkReal hkpPulleyConstraintData::getRopeLength(hkReal length)
+{
+	return m_atoms.m_pulley.m_ropeLength;
 }
 
-hkReal hkpPulleyConstraintData::getLeverageOnBodyB() 
-{ 
-	return m_atoms.m_pulley.m_leverageOnBodyB; 
+hkReal hkpPulleyConstraintData::getLeverageOnBodyB()
+{
+	return m_atoms.m_pulley.m_leverageOnBodyB;
 }
 
 void hkpPulleyConstraintData::setRopeLength(hkReal length)
@@ -87,7 +87,7 @@ void hkpPulleyConstraintData::setLeverageOnBodyB(hkReal leverageOnBodyB)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

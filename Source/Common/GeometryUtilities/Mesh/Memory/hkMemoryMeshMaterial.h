@@ -20,7 +20,7 @@ extern const hkClass hkMemoryMeshMaterialClass;
 /// A memory based implementation of an hkMeshMaterial
 class hkMemoryMeshMaterial: public hkMeshMaterial
 {
-	//+version(1)
+	//+version(2)
 	public:
         HK_DECLARE_REFLECTION();
 
@@ -29,6 +29,9 @@ class hkMemoryMeshMaterial: public hkMeshMaterial
         hkMemoryMeshMaterial(const char* name = HK_NULL);
 			/// Serialization Ctor
 		hkMemoryMeshMaterial( hkFinishLoadedObjectFlag flag );
+
+			// Assignment operator
+		hkMemoryMeshMaterial& operator=(const hkMemoryMeshMaterial& other);
 
 			// hkReferencedObject implementation
 		virtual const hkClass* getClassType() const { return &hkMemoryMeshMaterialClass; }
@@ -53,12 +56,34 @@ class hkMemoryMeshMaterial: public hkMeshMaterial
 			// hkMeshMaterial implementation
 		virtual hkMeshTexture* getTexture(int index) const;
 			// hkMeshMaterial implementation
-		virtual void addTexture(hkMeshTexture* texture);		
+		virtual void addTexture(hkMeshTexture* texture);
+
+			// Sets a texture of the given slot
+		virtual void setTexture(int index, hkMeshTexture* texture) HK_OVERRIDE;
 	
 			// hkMeshMaterial implementation
 		virtual void getColors( hkVector4& diffuse, hkVector4& ambient, hkVector4& specular, hkVector4& emissive ) const;
 			// hkMeshMaterial implementation
 		virtual void setColors( const hkVector4& diffuse, const hkVector4& ambient, const hkVector4& specular, const hkVector4& emissive );
+
+		/// Gets user data
+		virtual hkUlong getUserData() const HK_OVERRIDE			{	return m_userData;		}
+
+		/// Sets user data
+		virtual void setUserData(hkUlong userData) HK_OVERRIDE	{	m_userData = userData;	}
+
+		/// Gets / sets the tesselation factor. Triangles will not be tesselated if the factor is 0.0f, and fully tesselated if the factor is 1.0f
+		virtual hkReal getTesselationFactor() const	HK_OVERRIDE		{	return m_tesselationFactor;	}
+		virtual void setTesselationFactor(hkReal f) HK_OVERRIDE		{	m_tesselationFactor = f;	}
+
+		/// Gets / sets the displacement amount. This represents the actual distance a vertex gets displaced for a displacement factor of 1.0f
+		virtual hkReal getDisplacementAmount() const HK_OVERRIDE	{	return m_displacementAmount;	}
+		virtual void setDisplacementAmount(hkReal f) HK_OVERRIDE	{	m_displacementAmount = f;		}
+
+	protected:
+
+		/// Reserves a texture slot for the given texture
+		int reserveTextureSlot(hkMeshTexture* newTex);
 		
 	public:
 
@@ -68,13 +93,16 @@ class hkMemoryMeshMaterial: public hkMeshMaterial
 		hkVector4 m_ambientColor;
 		hkVector4 m_specularColor;
 		hkVector4 m_emissiveColor;
+		hkUlong m_userData;
+		hkReal m_tesselationFactor;
+		hkReal m_displacementAmount;
 };
 
 
 #endif // HK_MEMORY_MESH_MATERIAL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

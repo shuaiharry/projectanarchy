@@ -30,14 +30,23 @@ class hkbDockingDriver : public hkReferencedObject
 			m_worldFromOldReference.setIdentity();
 		}
 
+			/// Called by the scene modifier utils to update the generator output for the current docking target
+			/// and reference frame.
 		void dock( const hkbContext& context, hkbGeneratorOutput& generatorOutput );
 
-		void setWorldFromReference(const hkQsTransform& worldFromReference);
-		void updateWorldFromReference(const hkQsTransform& worldFromReference);
+			/// If you character no longer has a reference frame, call this function.
+		void clearWorldFromReference() { setWorldFromReference( hkQsTransform::getIdentity() ); }
 
+			/// If you are changing to a new distinct reference frame, call this function.
+		void setWorldFromReference( const hkQsTransform& worldFromReference );
+
+			/// If you are updating a reference frame to new coordinates, call this function.
+		void updateWorldFromReference( const hkQsTransform& worldFromReference );
+
+			/// Gets the current reference frame
 		const hkQsTransform& getWorldFromReference() const { return m_worldFromNewReference; }
 
-		/// The object that defines how a character is to dock
+			/// The object that defines how a character is to dock
 		hkRefPtr<hkbDockingTarget> m_dockingTarget;
 
 		const hkQsTransform& getLastTarget() const { return m_lastTarget; }
@@ -45,11 +54,8 @@ class hkbDockingDriver : public hkReferencedObject
 		const hkQsTransform& getLastDesiredTarget() const { return m_lastDesiredTarget; }
 		hkReal getLastBlendParam() const { return m_lastBlend; }
 
-
-
 	protected:
 
-		/// A helper function to calculate the 
 		void getError(const hkQsTransform& transformA, const hkQsTransform& transformB, hkReal blendParam, hkReal lastBlendParam, hkQsTransform& error);
 
 		hkQsTransform	m_worldFromNewReference;
@@ -64,7 +70,7 @@ class hkbDockingDriver : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

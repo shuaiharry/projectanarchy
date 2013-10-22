@@ -41,11 +41,11 @@ public:
 
   /// \brief
   ///   Calls VCallback::TriggerCallbacks and additionally profiles this function call
-  /// 
+  ///
   /// \param pData
   ///   The data object to send to all handlers. If NULL, this function creates a base object with
   ///   only the sender defined.
-  /// 
+  ///
   /// \sa VCallback::TriggerCallbacks
   /// \sa VCallback::RegisterCallback
   /// \sa VCallback::DeregisterCallback
@@ -53,6 +53,45 @@ public:
   /// \sa IVisCallbackHandler_cl::OnHandleCallback
   VISION_APIFUNC void TriggerCallbacks(IVisCallbackDataObject_cl *pData=NULL);
 
+  /// \brief
+  ///   Calls VCallback::TriggerCallbacks and additionally profiles this function call.
+  ///
+  /// In addition to the function above, only the callbacks below or equal the given priority are
+  /// called. This is useful when splitting the callback calls with function calls that are in between.
+  /// A start index can be defined to increase performance by skipping already called callbacks (that
+  /// is in practice the return value of the last function call).
+  /// 
+  /// Example usage:
+  /// \code
+  ///    int iLastIndex = Vision::Callbacks.OnRenderHook.TriggerCallbacks(&data, -1000);
+  ///    DoSomething();
+  ///    Vision::Callbacks.OnRenderHook.TriggerCallbacks(&data, INT_MAX, iLastIndex);
+  /// \endcode
+  ///
+  /// \note
+  ///   When all remaining callbacks above the start index shall be called, best performance can be
+  /// achieved by defining MAX_INT as max priority instead of any high "magic value" like 1000000.
+  ///
+  /// \param pData
+  ///   The data object to send to all handlers. If NULL, this function creates a base object with
+  /// only the sender defined.
+  ///
+  /// \param iMaxPriority
+  ///   The maximum priority. All callback handlers containing a priority below or equal this value
+  ///  will be called.
+  ///
+  /// \param iStartIndex
+  ///   The start index within the sorted list of callback handlers where the iteration begins.
+  ///
+  /// \return
+  ///   Returns the last iterated index within the sorted list of callback handlers.
+  ///
+  /// \sa VCallback::TriggerCallbacks
+  /// \sa VCallback::RegisterCallback
+  /// \sa VCallback::DeregisterCallback
+  /// \sa class IVisCallbackHandler_cl
+  /// \sa IVisCallbackHandler_cl::OnHandleCallback
+  VISION_APIFUNC int TriggerCallbacks(IVisCallbackDataObject_cl *pData, int iMaxPriority, int iStartIndex = 0);
 };
 
 
@@ -1148,7 +1187,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

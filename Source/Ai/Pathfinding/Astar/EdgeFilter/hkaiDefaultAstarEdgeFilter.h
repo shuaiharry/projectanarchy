@@ -92,6 +92,12 @@ class hkaiDefaultAstarEdgeFilter : public hkaiAstarEdgeFilter
 			/// Returns true if traversal is enabled based on their masks.
 		virtual bool isEnabled( const NavVolumeIsEnabledCallbackContext& context ) const HK_OVERRIDE;
 
+			/// Default implementation to avoid "partially overridden" warnings.
+		virtual bool isEnabled( const DirectedGraphIsEnabledCallbackContext& context ) const HK_OVERRIDE
+		{
+			return hkaiAstarEdgeFilter::isEnabled(context);
+		}
+
 
 	protected:
 			/// The bitfield check used by isEnabled
@@ -112,7 +118,7 @@ class hkaiDefaultAstarEdgeFilter : public hkaiAstarEdgeFilter
 #endif // HK_AI_DEFAULT_NAV_MESH_EDGE_FILTER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

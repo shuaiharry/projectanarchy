@@ -126,9 +126,9 @@ BOOL VScriptResource::Reload()
   return TRUE;
 }
 
-void VScriptResource::UnloadAndReload(BOOL bUnload, BOOL bReload)
+void VScriptResource::UnloadAndReload(VUnloadReloadOptions_e eOptions)
 {
-  if(bUnload && bReload)
+  if(eOptions == VURO_HOT_RELOAD)
   {
     TriggerResourceChangedCallback(VRESOURCECHANGEDFLAG_BEFORE_FILEMODIFIED);
     Reload();
@@ -136,7 +136,7 @@ void VScriptResource::UnloadAndReload(BOOL bUnload, BOOL bReload)
   }
   else
   {
-    VManagedResource::UnloadAndReload(bUnload, bReload);
+    VManagedResource::UnloadAndReload(eOptions);
   }
 }
 
@@ -256,7 +256,7 @@ VScriptInstance* VScriptResource::CreateScriptInstance()
 //-----------------------------------------------------------------------------------
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -10,7 +10,7 @@
 
 #include <Vision/Runtime/Base/System/Memory/Manager/VGuardingMemoryManager.hpp>
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(_VISION_WINRT)
 
 #define NOMANSLANDSIZE 32
 #define MAGIC 0x52574152
@@ -264,7 +264,7 @@ size_t VGuardingMemoryManager::AlignedMemSize(void* ptr, int iAlignment)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -268,13 +268,6 @@ namespace TerrainManaged
     } 
     else
     {
-      if (VFileHelper::ExistsDir(absDir))
-      {
-        //Folder exists but we failed to load
-        VASSERT_MSG(false,"Failed to load terrain config file");
-        return; // Don't continue. This might overwrite existing data
-      }
-      
       //no directory on disc, so create it
       ConversionUtils::StringToVString(EditorManager::Project->ProjectDir,absDir);
       m_pTerrain->CreateTerrain(&cfg,absDir,true);
@@ -2454,6 +2447,10 @@ namespace TerrainManaged
     if (m_pTerrain==nullptr || pSettings==nullptr)
       return;
 
+    // Disable automatic asset transformation
+    bool bAutomaticAssetTransform = EditorManager::AssetManager->AutomaticAssetTransform;
+    EditorManager::AssetManager->AutomaticAssetTransform = false;
+
     // Ensure everything is saved
     SaveToFile();
 
@@ -2630,10 +2627,9 @@ namespace TerrainManaged
 
     VThreadManager *pManager = VThreadManager::GetManager();
 
-    int iProcessorCount = pManager->GetNumberOfProcessors();
+    // Use as much threads as are required for processing, but at most the available processor count
+    int iProcessorCount = hkvMath::Min(pManager->GetNumberOfProcessors(), (int)Sectors.size());
     int iThreadCount = pManager->GetThreadCount();
-
-    // Use all available processors for processing
     pManager->SetThreadCount(iProcessorCount);
 
     // We use as much tasks as there are sectors in the terrain
@@ -2672,12 +2668,12 @@ namespace TerrainManaged
       // Wait until all tasks are finished.
       // Note: We can't use pManager->WaitForAllThreads() here as we need the message pump to keep going...
       bool bFinished = false;
-      while ( !bFinished )
+      while (!bFinished)
       {
         bFinished = true;
-        for ( int i = 0; i < Tasks.GetSize(); ++i )
+        for (int i=0; i<(int)Tasks.GetSize(); ++i)
         {
-          bFinished &= ( Tasks[ i ].GetState() == TASKSTATE_FINISHED );
+          bFinished &= (Tasks[i].GetState() == TASKSTATE_FINISHED);
         }
 
         Application::DoEvents();
@@ -2742,6 +2738,9 @@ namespace TerrainManaged
     // Export prefab if required
     if (bExportPrefab)
       ExportPrefab();
+
+    // Restore automatic asset transformation status
+    EditorManager::AssetManager->AutomaticAssetTransform = bAutomaticAssetTransform;
   }
 
   void EngineInstanceTerrain::ExportPrefab()
@@ -2780,7 +2779,8 @@ namespace TerrainManaged
     }
 
     // Create prefab
-    String^ prefabFilename = Path::Combine(prefabDir, ConversionUtils::VStringToString(m_pTerrain->m_Config.m_sTerrainFolder) + ".prefab");
+    String^ prefabFilename = Path::Combine(prefabDir,
+      ConversionUtils::VStringToString(VPathHelper::GetFilename(m_pTerrain->m_Config.m_sTerrainFolder)) + ".prefab");
     PrefabDesc^ prefab = gcnew PrefabDesc(prefabFilename);
 
     // If the file exists, load it to get the properties
@@ -2896,7 +2896,7 @@ namespace TerrainManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130719)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

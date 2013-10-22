@@ -24,10 +24,10 @@ class hkLinearAllocator : public hkMemoryAllocator
 
 		hkLinearAllocator(hkUint8* buffer, int bufferSize);
 		virtual ~hkLinearAllocator();
-		virtual void* blockAlloc(int n);
-		virtual void blockFree(void*p, int n);
-		virtual void getMemoryStatistics( MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void* blockAlloc(int n) HK_OVERRIDE;
+		virtual void blockFree(void*p, int n) HK_OVERRIDE;
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
         template< hkUint32 BUFFER_SIZE >
         class Inplace;
@@ -41,7 +41,7 @@ class hkLinearAllocator : public hkMemoryAllocator
 		hkUint32 m_inUse; // without overhead
 		hkUint32 m_peakInUse; // usage peak without overhead
 		// critical section used for multi-threading
-		hkCriticalSection m_criticalSection;
+		mutable hkCriticalSection m_criticalSection;
 };
 
 template< hkUint32 BUFFER_SIZE >
@@ -61,7 +61,7 @@ class hkLinearAllocator::Inplace : public hkLinearAllocator
 #endif // HK_LINEAR_ALLOCATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

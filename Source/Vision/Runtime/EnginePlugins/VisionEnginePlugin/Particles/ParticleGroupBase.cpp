@@ -232,7 +232,7 @@ void HandleParticlesTask_cl::Run(VManagedThread *pThread)
   }
 
   // make sure the bounding box is up-to-date
-  const hkvAlignedBBox *pBBox = m_pParticleGroup->GetCurrentBoundingBox();
+  const hkvAlignedBBox *pBBox = m_pParticleGroup->CalcCurrentBoundingBox();
 }
 
 
@@ -379,6 +379,9 @@ void ParticleGroupBase_cl::InitGroup(bool bSpawnParticles, int iGeneration)
   if (!m_pHandlingTask)
     m_pHandlingTask = new HandleParticlesTask_cl(this);
 
+  #ifdef WIN32
+    m_pParticleDesaturationGroup = NULL;
+  #endif
   //VASSERT(GetVisibilityObject());
 }
 
@@ -788,7 +791,9 @@ void ParticleGroupBase_cl::OnDescriptorChanged()
     SetRenderOrder(VRH_ADDITIVE_PARTICLES);
   }
   else
+  {
     SetRenderOrder((unsigned int)m_spDescriptor->m_iRenderOrder);
+  }
 
   // group sorting key
   SetUserSortKey(m_spDescriptor->m_iGroupSortKey);
@@ -996,7 +1001,7 @@ void ParticleGroupBase_cl::SetLocalFactors(float fAtLifetimeStart, float fAtLife
 void ParticleGroupBase_cl::UpdateVisibilityObject()
 {
   m_bVisibilityUpdate = false;
-  const hkvAlignedBBox *pBBox = GetCurrentBoundingBox(); 
+  const hkvAlignedBBox *pBBox = CalcCurrentBoundingBox(); 
 
   if (!pBBox) // no valid visibility box
   {
@@ -1305,7 +1310,8 @@ void ParticleGroupBase_cl::HandleParticles(float dtime)
 
   m_pHandlingTask->m_fTimeDelta = dtime;
   
-  if (!m_pParentGroup) {
+  if (!m_pParentGroup) 
+  {
     m_vGroupMoveDelta = m_vGroupMoveDeltaAccum;
     m_vGroupMoveDeltaAccum.setZero();
     Vision::GetThreadManager()->ScheduleTask(m_pHandlingTask, 5);
@@ -1316,7 +1322,8 @@ void ParticleGroupBase_cl::HandleParticles(float dtime)
     // if this is a child particle group, copy position and orientation from parent
     CopyParentPosition();
     ParticleGroupBase_cl *pRootParent = m_pParentGroup;
-    while (pRootParent->m_pParentGroup) {
+    while (pRootParent->m_pParentGroup) 
+    {
       pRootParent = pRootParent->m_pParentGroup;
     }
     SetUpdateTask(pRootParent->m_pHandlingTask);
@@ -1376,7 +1383,7 @@ void ParticleGroupBase_cl::InflateBoundingBox(bool bForceValid)
     else
     {
       hkvVec3 vCenter;
-      if (!GetUseLocalSpaceMatrix())
+      if (!GetUseLocalSpaceMatrix()) //this should always happen in local space...
         vCenter = GetPosition();
 
       // create a default box around the origin
@@ -1897,7 +1904,11 @@ void VisParticleEffect_cl::SetVisibleBitmask(unsigned int iMask)
 void VisParticleEffect_cl::UpdateVisibilityBoundingBox()
 {
   FOR_ALL_GROUPS
+    //(1) current implementation:
     pGroup->UpdateVisibilityBoundingBox(); // halts the updater task
+    //(2) consider just doing:
+    //pGroup->EnsureUpdaterTaskFinished();
+
     pGroup->UpdateVisibilityObject();
   }
 }
@@ -2084,7 +2095,7 @@ bool VisParticleEffect_cl::GetCurrentBoundingBox(hkvAlignedBBox &destBox) const
 {
   destBox.setInvalid();
   FOR_ALL_GROUPS
-    destBox.expandToInclude(*pGroup->GetCurrentBoundingBox());
+    destBox.expandToInclude(*pGroup->CalcCurrentBoundingBox());
   }
   return destBox.isValid();
 }
@@ -2490,7 +2501,7 @@ VNetworkParticleEffectGroup VNetworkParticleEffectGroup::g_Instance;
 bool VNetworkParticleEffectGroup::QuerySynchronize(const VNetworkViewContext& context, VNetworkSynchronizationGroupInstanceInfo_t &instanceInfo, VMessageSettings& out_paketSettings)
 {
   VisParticleEffect_cl *pParticleEffect = (VisParticleEffect_cl *)instanceInfo.m_pInstance;
-  __int64 iNewHash = 0x0000000100000000;
+  __int64 iNewHash = (__int64(1) << 32);
   if (pParticleEffect->IsPaused()) iNewHash |= VCF_PAUSED;
   if (pParticleEffect->IsHalted()) iNewHash |= VCF_HALTED;
 
@@ -2522,7 +2533,7 @@ void VNetworkParticleEffectGroup::Synchronize(const VNetworkViewContext& context
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

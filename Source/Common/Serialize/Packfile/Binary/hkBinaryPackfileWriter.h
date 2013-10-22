@@ -19,7 +19,11 @@
 class hkBinaryPackfileWriter : public hkPackfileWriter
 {
 	public:
-	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
+		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
+
+		/// Current version number for binary packfiles.
+		static const hkUint32 CURRENT_FILE_VERSION;
+
 			///
 		hkBinaryPackfileWriter(const Options & options = Options());
 		
@@ -48,7 +52,7 @@ class hkBinaryPackfileWriter : public hkPackfileWriter
 #endif // HK_SERIALIZE_BINARY_PACKFILE_WRITER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

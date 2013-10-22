@@ -32,6 +32,7 @@ HK_FORCE_INLINE int hkBlockStreamBase::Stream::getTotalNumElems() const
 													   "by a hkBlockStream::Consumer" );
 	return m_numTotalElements;
 }
+
 HK_FORCE_INLINE int hkBlockStreamBase::Stream::getTotalBytesAllocated() const
 {
 	return m_blocks.getSize() * sizeof(hkBlockStreamBase::Block);
@@ -41,6 +42,7 @@ HK_FORCE_INLINE const hkBlockStreamAllocator* hkBlockStreamBase::Stream::getAllo
 { 
 	return m_allocator; 
 }
+
 #if !defined(HK_PLATFORM_SPU)
 // These functions have a non-inlined version in the .cpp file for SPU
 HK_FORCE_INLINE const hkBlockStreamBase::Block* hkBlockStreamBase::Stream::begin() const
@@ -65,8 +67,13 @@ HK_FORCE_INLINE hkBlockStreamBase::Block* hkBlockStreamBase::Stream::lastRw()
 	return const_cast<Block*>(last()); 
 }
 
+HK_FORCE_INLINE void hkBlockStreamBase::Stream::checkBlockOwnership(const Block* block) const
+{
+	HK_ASSERT( 0xf0ccfe37, block->m_blockStream == this );
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

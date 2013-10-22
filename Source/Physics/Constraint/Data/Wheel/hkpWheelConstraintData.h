@@ -27,7 +27,7 @@ class hkpWheelConstraintData : public hkpConstraintData
 			SOLVER_RESULT_ANG_0			= 0,	// angular constraint 0
 			SOLVER_RESULT_ANG_1			= 1,	// angular constraint 1
 			SOLVER_RESULT_LIMIT			= 2,    // linear limit 2
-			SOLVER_RESULT_LIN_0			= 3,	// linear constraint 
+			SOLVER_RESULT_LIN_0			= 3,	// linear constraint
 			SOLVER_RESULT_LIN_1			= 4,	// linear constraint
 			SOLVER_RESULT_TAU_AND_DAMP	= 5,	// tau and damping
 			SOLVER_RESULT_MAX			= 6
@@ -77,16 +77,20 @@ class hkpWheelConstraintData : public hkpConstraintData
 		};
 
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
 		/// Constructor.
 		hkpWheelConstraintData();
-		
+
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		hkpWheelConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
-		
+
+#endif
+
 		/// Sets the wheel up with world space information. The Wheel is A, the Chassis is B.
 		/// \param bodyATransform		The transform of the attached body, i.e., the wheel.
 		/// \param bodyBTransform		The transform of the reference body, i.e., the chassis.
@@ -94,8 +98,8 @@ class hkpWheelConstraintData : public hkpConstraintData
 		/// \param axle					The axle, specified in world space.
 		/// \param suspensionAxis		The suspension axis, in world space.
 		/// \param steeringAxis			The steering axis, in world space.
-		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, 
-							const hkVector4& pivot, const hkVector4& axle, 
+		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
+							const hkVector4& pivot, const hkVector4& axle,
 							const hkVector4& suspensionAxis, const hkVector4& steeringAxis);
 
 		/// Sets the wheel up with body space information. The Wheel is A, the Chassis is B.
@@ -105,16 +109,16 @@ class hkpWheelConstraintData : public hkpConstraintData
 		/// \param axleB				The axle, specified in bodyB space.
 		/// \param suspensionAxisB		The suspension axis, in bodyB space.
 		/// \param steeringAxisB		The steering axis, in bodyB space.
-		void setInBodySpace(const hkVector4& pivotA, const hkVector4& pivotB, 
-							const hkVector4& axleA, const hkVector4& axleB, 
+		void setInBodySpace(const hkVector4& pivotA, const hkVector4& pivotB,
+							const hkVector4& axleA, const hkVector4& axleB,
 							const hkVector4& suspensionAxisB, const hkVector4& steeringAxisB);
-		
+
 		/// Sets the steering angle.
 		void setSteeringAngle( hkReal angle );
 
 		/// Sets maximum limit of the suspension (0.5f by default).
 		HK_FORCE_INLINE void setSuspensionMaxLimit(hkReal maxLimit);
-			
+
 		/// Sets minimum limit of the suspension (-0.5f by default).
 		HK_FORCE_INLINE void setSuspensionMinLimit(hkReal minLimit);
 
@@ -137,9 +141,9 @@ class hkpWheelConstraintData : public hkpConstraintData
 		virtual void getConstraintInfo( ConstraintInfo& infoOut ) const;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
-	public:		
-		
+
+	public:
+
 		HK_ALIGN_REAL( Atoms m_atoms );
 
 		// Used for modifying the localRotation when settingSteeringAngle
@@ -172,7 +176,7 @@ void hkpWheelConstraintData::setSuspensionDamping(hkReal damping)
 #endif // HKP_WHEEL_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

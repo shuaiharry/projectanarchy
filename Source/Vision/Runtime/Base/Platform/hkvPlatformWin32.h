@@ -60,7 +60,9 @@
   #define SUPPORTS_RESOLUTION_CHANGE
   #define SUPPORTS_MULTIPLE_DEVICES
   #define SUPPORTS_8_AND_24BPP_MODES
+#if !defined( _VISION_WINRT )
   #define SUPPORTS_SNAPSHOT_CREATION
+#endif
   #define SUPPORTS_LIT_FILE_LOADING
   #define VSTREAMPROCESS_RUN_IN_THREADMANAGER
   #define V_IS_DIRECTX_PLATFORM
@@ -71,6 +73,8 @@
   #define SUPPORTS_KEYBOARD
   #define SUPPORTS_MOUSE
   #define SUPPORTS_MULTITOUCH
+#elif defined( _VISION_APOLLO )
+  #define SUPPORTS_MULTITOUCH
 #endif  
   // on Windows-based platforms, we support the file serve client for
   // vanilla win32 and x64, as well as Apollo
@@ -78,22 +82,29 @@
   #define SUPPORTS_FILESERVE_CLIENT
 #endif
   
+#if !defined(_VISION_WINRT)
   #define SUPPORTS_VTARGET
-  #define V_HAS_VARIABLE_NUMBER_OF_CPU_CORES
   #define V_HAS_STACKWALKER
+#endif
+
+  #define V_HAS_VARIABLE_NUMBER_OF_CPU_CORES
   #define V_SUPPORTS_EARLY_STATICS
 
+  #define SUPPORTS_DEBUG_SHADING
+
+#if !defined(_M_ARM)
   #include <mmintrin.h>
   #if defined( _MSC_VER) && _MSC_VER >= 1700
     #include <xmmintrin.h>
   #endif
   #define V_PRECACHE(offset, ptr) _mm_prefetch(((char*)ptr)+offset,_MM_HINT_T1)
   #define V_CACHE_LINE_SIZE 128
+#endif    // !defined(_M_ARM)
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -30,12 +30,42 @@ class hkaMorphingDeformer
 			/// The deformer must first be bound and the output buffer locked before deforming.
 		virtual void deform ( hkReal delta ) = 0;
 
+		struct Binding
+		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_ANIM_RUNTIME, hkaMorphingDeformer::Binding );
+
+			// Input buffer 1
+			const hkFloat32* m_i1PosBase;
+			const hkFloat32* m_i1NormBase;
+			const hkFloat32* m_i1BinormBase;
+			const hkFloat32* m_i1TangentBase;
+			hkUint8 m_i1Stride;
+
+			// Input Buffer 2
+			const hkFloat32* m_i2PosBase;
+			const hkFloat32* m_i2NormBase;
+			const hkFloat32* m_i2BinormBase;
+			const hkFloat32* m_i2TangentBase;
+			hkUint8 m_i2Stride;
+
+			// Output Buffer
+			hkFloat32* m_oPosBase;
+			hkFloat32* m_oNormBase;
+			hkFloat32* m_oBinormBase;
+			hkFloat32* m_oTangentBase;
+			hkUint8 m_oStride;
+
+			hkUint32 m_numVerts;
+		};
+
+		struct Binding m_binding;
+
 };
 
 #endif // HK_SKINNING_DEFORMER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

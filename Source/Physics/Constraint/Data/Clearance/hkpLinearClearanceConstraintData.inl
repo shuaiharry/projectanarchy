@@ -33,9 +33,9 @@ inline void hkpLinearClearanceConstraintData::setLimits(hkReal min0, hkReal max0
 
 inline void hkpLinearClearanceConstraintData::setMaxFrictionForce(hkReal fmag)
 {
-	m_atoms.m_friction0.m_maxFrictionForce = fmag;	
-	m_atoms.m_friction1.m_maxFrictionForce = fmag;	
-	m_atoms.m_friction2.m_maxFrictionForce = fmag;	
+	m_atoms.m_friction0.m_maxFrictionForce = fmag;
+	m_atoms.m_friction1.m_maxFrictionForce = fmag;
+	m_atoms.m_friction2.m_maxFrictionForce = fmag;
 }
 
 
@@ -65,7 +65,7 @@ inline hkReal hkpLinearClearanceConstraintData::getMotorTargetPosition()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

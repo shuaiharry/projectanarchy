@@ -277,7 +277,7 @@ bool vHavokAiModule::CreateAiWorld()
 	{
 		m_aiViewerContext = new hkaiViewerContext;
 		m_aiViewerContext->addWorld(m_aiWorld);
-		hkaiViewerContext::registerAllAiProcesses();
+		hkaiViewerContext::registerDefaultAiProcesses();
 	}
 
 	return true;
@@ -294,7 +294,7 @@ void vHavokAiModule::SetPhysicsWorld(hkpWorld* physics)
 	m_physicsWorld = physics;
 }
 
-void vHavokAiModule::SetConnectToPhysicsWorld(bool connect)
+void vHavokAiModule::SetConnectToPhysicsWorld(bool connect, bool stepSilhouettesAfterDisconnecting)
 {
 	m_connectToPhysicsWorld = connect;
 
@@ -304,7 +304,7 @@ void vHavokAiModule::SetConnectToPhysicsWorld(bool connect)
 	}
 	else
 	{
-		DisconnectFromPhysicsWorld();
+		DisconnectFromPhysicsWorld(stepSilhouettesAfterDisconnecting);
 	}
 }
 
@@ -324,7 +324,10 @@ void vHavokAiModule::RemoveAiWorld()
 
 	if (m_aiWorld != HK_NULL)
 	{
-		VASSERT(m_aiWorld->getReferenceCount() == 1);
+		// at this point we may have another reference to the aiWorld in vHavokCharacterModule ( on account of hkbAiBridge instance
+		// still referencing it ), so the following assert no longer applies
+		// VASSERT(m_aiWorld->getReferenceCount() == 1);
+
 		m_aiWorld->removeReference();
 		m_aiWorld = HK_NULL;
 	}
@@ -344,7 +347,7 @@ void vHavokAiModule::ConnectToPhysicsWorld()
 	}
 }
 
-void vHavokAiModule::DisconnectFromPhysicsWorld()
+void vHavokAiModule::DisconnectFromPhysicsWorld(bool stepSilhouettesAfterDisconnecting)
 {
 	if (m_physicsWorldListener != HK_NULL)
 	{
@@ -354,6 +357,13 @@ void vHavokAiModule::DisconnectFromPhysicsWorld()
 		// Really, m_physicsWorldListener should hold a reference to the physics world but it doesn't so we have to do it ourselves
 		VASSERT(m_physicsWorld != HK_NULL);
 		m_physicsWorld->removeReference();
+
+		// After exiting play-the-game mode in vForge we step the silhouettes once after disconnecting
+		// from the physics world in order to "reset" the nav mesh to its uncut state
+		if (stepSilhouettesAfterDisconnecting && m_aiWorld)
+		{
+			m_aiWorld->stepSilhouettes();
+		}
 	}
 }
 
@@ -485,7 +495,7 @@ bool vHavokAiModule::LoadNavMeshDeprecated(const char* filename, VArray<vHavokAi
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

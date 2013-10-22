@@ -12,7 +12,6 @@
 #include <Vision/Runtime/Engine/SceneElements/VisApiSky.hpp>
 
 
-
 VisMirrorManager_cl VisMirrorManager_cl::g_MirrorManager;
 VisCallback_cl VisMirrorManager_cl::OnMirrorRenderHook;
 
@@ -35,58 +34,10 @@ VisCallback_cl VisMirrorManager_cl::OnMirrorRenderHook;
 #define MIRROR_CURRENT_VERSION          MIRROR_VERSION_15
 
 
-
-///////////////////////////////////////////////////////////////////////
-// VisMirrorManager_cl : constructor of mirror resource manager
-///////////////////////////////////////////////////////////////////////
-VisMirrorManager_cl::VisMirrorManager_cl()
-{
-}
-
-///////////////////////////////////////////////////////////////////////
-// OneTimeInit : used to initialize everything one time
-///////////////////////////////////////////////////////////////////////
-void VisMirrorManager_cl::OneTimeInit()
-{
-  // we need the following callbacks:
-  Vision::Callbacks.OnWorldDeInit += this;
-  Vision::Callbacks.OnEnterBackground += this;
-  Vision::Callbacks.OnRendererNodeChanged += this;
-  Vision::Callbacks.OnRendererNodeSwitching += this;
-  Vision::Callbacks.OnReassignShaders += this;
-}
-
-///////////////////////////////////////////////////////////////////////
-// OneTimeInit : used to deinitialize everything one time
-///////////////////////////////////////////////////////////////////////
-void VisMirrorManager_cl::OneTimeDeInit()
-{
-  Vision::Callbacks.OnWorldDeInit -= this;
-  Vision::Callbacks.OnEnterBackground -= this;
-  Vision::Callbacks.OnRendererNodeChanged -= this;
-  Vision::Callbacks.OnRendererNodeSwitching -= this;
-  Vision::Callbacks.OnReassignShaders -= this;
-}
-
-///////////////////////////////////////////////////////////////////////
-// GlobalManager : accesses the one global instance of the manager
-///////////////////////////////////////////////////////////////////////
-VisMirrorManager_cl &VisMirrorManager_cl::GlobalManager() 
-{
-  return g_MirrorManager;
-}
-
-#define FOR_ALL_MIRRORS \
-    int iMirrorCount = m_Instances.Count();\
-    for (int i=0;i<iMirrorCount;i++)\
-    {\
-      VisMirror_cl *pMirror = m_Instances.GetAt(i);
-
-
 // Helper function which checks whether the current context is registered in an active renderer node
 static inline bool IsContextRegistered(VisRenderContext_cl *pContext)
 {
-  for (int iRendererNode=0; iRendererNode<V_MAX_RENDERER_NODES; iRendererNode++)
+  for (int iRendererNode=0; iRendererNode<Vision::Renderer.GetRendererNodeCount(); iRendererNode++)
   {
     IVRendererNode *pNode = Vision::Renderer.GetRendererNode(iRendererNode);
     if (pNode)
@@ -99,11 +50,34 @@ static inline bool IsContextRegistered(VisRenderContext_cl *pContext)
   return false;
 }
 
+VisMirrorManager_cl::VisMirrorManager_cl()
+{
+}
 
+void VisMirrorManager_cl::OneTimeInit()
+{
+  // we need the following callbacks:
+  Vision::Callbacks.OnWorldDeInit += this;
+  Vision::Callbacks.OnEnterBackground += this;
+  Vision::Callbacks.OnRendererNodeChanged += this;
+  Vision::Callbacks.OnRendererNodeSwitching += this;
+  Vision::Callbacks.OnReassignShaders += this;
+}
 
-///////////////////////////////////////////////////////////////////////
-// OnHandleCallback : handles important engine callbacks
-///////////////////////////////////////////////////////////////////////
+void VisMirrorManager_cl::OneTimeDeInit()
+{
+  Vision::Callbacks.OnWorldDeInit -= this;
+  Vision::Callbacks.OnEnterBackground -= this;
+  Vision::Callbacks.OnRendererNodeChanged -= this;
+  Vision::Callbacks.OnRendererNodeSwitching -= this;
+  Vision::Callbacks.OnReassignShaders -= this;
+}
+
+VisMirrorManager_cl &VisMirrorManager_cl::GlobalManager() 
+{
+  return g_MirrorManager;
+}
+
 void VisMirrorManager_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
   if (pData->m_pSender==&Vision::Callbacks.OnRendererNodeChanged)
@@ -112,15 +86,19 @@ void VisMirrorManager_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 
     if (data.m_spAddedNode != NULL)
     {
-      FOR_ALL_MIRRORS
-        data.m_spAddedNode->AddContext(pMirror->m_spReflectionContext);
+      const int iMirrorCount = m_Instances.Count();
+      for (int i=0; i<iMirrorCount; ++i)
+      {
+        data.m_spAddedNode->AddContext(m_Instances.GetAt(i)->m_spReflectionContext);
       }
     }
 
     if (data.m_spRemovedNode != NULL)
     {
-      FOR_ALL_MIRRORS
-        data.m_spRemovedNode->RemoveContext(pMirror->m_spReflectionContext);
+      const int iMirrorCount = m_Instances.Count();
+      for (int i=0; i<iMirrorCount; ++i)
+      {
+        data.m_spRemovedNode->RemoveContext(m_Instances.GetAt(i)->m_spReflectionContext);
       }
     }
 
@@ -129,10 +107,13 @@ void VisMirrorManager_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 
   if (pData->m_pSender==&Vision::Callbacks.OnRendererNodeSwitching)
   {
-    // handle all mirrors and see whether they have to be rendered
+    // Handle all mirrors and see whether they have to be rendered
     VisRendererNodeDataObject_cl &data = *static_cast<VisRendererNodeDataObject_cl *>(pData);
 
-    FOR_ALL_MIRRORS
+    const int iMirrorCount = m_Instances.Count();
+    for (int i=0; i<iMirrorCount; ++i)
+    {
+      VisMirror_cl *pMirror = m_Instances.GetAt(i);
       if (!pMirror->IsActive())
       {
         continue;
@@ -143,7 +124,7 @@ void VisMirrorManager_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
       }
 
       VisRenderContext_cl *pRefContext = data.m_pRendererNode->GetReferenceContext();
-      if (pRefContext==NULL) // this should not happen unless the node is in invalid (= de-initialized) state
+      if (pRefContext==NULL) // This should not happen unless the node is in invalid (= de-initialized) state
         continue;
       if ((pRefContext->GetRenderFlags() & (VIS_RENDERCONTEXT_FLAG_NOMIRRORS|VIS_RENDERCONTEXT_FLAG_NO_WORLDGEOM)))
         continue;
@@ -153,22 +134,14 @@ void VisMirrorManager_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
       VASSERT(data.m_pRendererNode->IsContextRegistered(pMirror->m_spReflectionContext));
 
       pMirror->HandleMirror(data);
-
-    /*
-    int iFlags = data.m_pContext->GetRenderFlags();
-    if ((iFlags&VIS_RENDERCONTEXT_FLAG_VIEWCONTEXT)==0 || (iFlags&VIS_RENDERCONTEXT_FLAG_NO_WORLDGEOM)) // this context isn't relevant for mirror rendering
-      return;
-      */
-
     }
     return;
   }
 
-
   if (pData->m_pSender==&Vision::Callbacks.OnWorldDeInit)
   {
     int iMirrorCount = m_Instances.Count();
-    for (int i=iMirrorCount-1;i>=0;i--) // backwards to keep collection intact
+    for (int i=iMirrorCount-1;i>=0;i--) // Backwards to keep collection intact
     {
       VisMirror_cl *pMirror = m_Instances.GetAt(i);
       pMirror->ClearViewVisibilityCollectors();
@@ -180,17 +153,22 @@ void VisMirrorManager_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 
   if (pData->m_pSender==&Vision::Callbacks.OnEnterBackground)
   {
-    FOR_ALL_MIRRORS
-      pMirror->ClearViewVisibilityCollectors();
+    const int iMirrorCount = m_Instances.Count();
+    for (int i=0; i<iMirrorCount; ++i)
+    {
+      m_Instances.GetAt(i)->ClearViewVisibilityCollectors();
     }
     return;
   }
-  // we only need to respond to this callback outside the editor, because vForge has its own re-assignment callback.
+
+  // We only need to respond to this callback outside the editor, because vForge has its own re-assignment callback.
   // also note that Vision::Callbacks.OnReassignShaders is not triggered during runtime
   if (pData->m_pSender==&Vision::Callbacks.OnReassignShaders && !Vision::Editor.IsInEditor())
   {
-    FOR_ALL_MIRRORS
-      pMirror->ReassignEffect();
+    const int iMirrorCount = m_Instances.Count();
+    for (int i=0; i<iMirrorCount; ++i)
+    {
+      m_Instances.GetAt(i)->ReassignEffect();
     }
     return;
   }
@@ -208,7 +186,6 @@ void VisMirror_cl::SetUseHDR(bool bUseHDR)
   SetResolution(m_iResolution);
 }
 
-
 void VisMirror_cl::SetResolution(int iRes)
 {
   if (iRes==m_iResolution && m_spRenderTarget_Refl)
@@ -216,7 +193,7 @@ void VisMirror_cl::SetResolution(int iRes)
 
   m_iResolution = iRes;
 
-  // create render target
+  // Create render target
   VisRenderableTextureConfig_t config;
   config.m_iHeight = m_iResolution;
   config.m_iWidth  = m_iResolution;
@@ -234,7 +211,7 @@ void VisMirror_cl::SetResolution(int iRes)
   }
   
   VisRenderableTexture_cl *pTex =  Vision::TextureManager.CreateRenderableTexture("<Mirror>",config);
-  VASSERT(pTex); // there is no alternative to renderable texture
+  VASSERT(pTex); // There is no alternative to renderable texture
   if (!pTex)
   {
     m_bSupported = false;
@@ -243,12 +220,13 @@ void VisMirror_cl::SetResolution(int iRes)
   pTex->SetResourceFlag(VRESOURCEFLAG_AUTODELETE);
   m_spRenderTarget_Refl = pTex;
 
-  // create depth stencil target
+  // Create depth stencil target
   config.m_eFormat = VVideo::GetSupportedDepthStencilFormat(VTextureLoader::D24S8, *Vision::Video.GetCurrentConfig());
   config.m_bIsDepthStencilTarget = true;
   config.m_bRenderTargetOnly = true;
+
   VisRenderableTexture_cl *pDepthTex =  Vision::TextureManager.CreateRenderableTexture("<MirrorDepthStencil>",config);
-  VASSERT(pDepthTex); // there is no alternative to renderable texture
+  VASSERT(pDepthTex); // There is no alternative to renderable texture
   if (!pDepthTex)
   {
     m_bSupported = false;
@@ -269,13 +247,10 @@ void VisMirror_cl::SetResolution(int iRes)
   }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// InitMirror : Initialises a mirror with the setup structure
-/////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::InitMirror()
 {
   SetUseEulerAngles(FALSE);
-  VisMeshBufferObject_cl::SetEnableSubOrderSorting(TRUE); // turn this globally on to have correct sorting across mirror objects
+  VisMeshBufferObject_cl::SetEnableSubOrderSorting(TRUE); // Turn this globally on to have correct sorting across mirror objects
   if (m_pParentManager)
     m_pParentManager->m_Instances.AddUnique(this);
 
@@ -285,7 +260,7 @@ void VisMirror_cl::InitMirror()
   m_spDynamicMesh = NULL;
   m_vModelScale.set(1.f,1.f,1.f);
 
-  // the shape of the mirror:
+  // The shape of the mirror:
   m_vLocalMirrorVert[0].set(-0.5f, 0.5f, 0.f);
   m_vLocalMirrorVert[1].set( 0.5f, 0.5f, 0.f);
   m_vLocalMirrorVert[2].set( 0.5f,-0.5f, 0.f);
@@ -293,14 +268,13 @@ void VisMirror_cl::InitMirror()
 
   SetResolution(m_iResolution);
 
-  // add mirror context to global list of active contexts
-  // create a render context
+  // Add mirror context to global list of active contexts create a render context
   m_spReflectionContext = new VisRenderContext_cl();
   m_spReflectionContext->SetUsageHint(VIS_CONTEXTUSAGE_MIRROR);
   m_spReflectionContext->SetName("Mirror");
 
   int iFlags = VIS_RENDERCONTEXT_FLAGS_SECONDARYCONTEXT;
-  // remove the following flags from context:
+  // Remove the following flags from context:
   iFlags &= ~VIS_RENDERCONTEXT_FLAG_SHOW_DEBUGOUTPUT;
   // We typically don't want occlusion query in mirrors
   iFlags &= ~VIS_RENDERCONTEXT_FLAG_USE_OCCLUSIONQUERY;
@@ -316,7 +290,8 @@ void VisMirror_cl::InitMirror()
 
   // Add the reflection context to all currently registered renderer nodes. If nodes are added/removed later on,
   // the OnRendererNodeChanged callback will take care of them.
-  for (int i=0; i<V_MAX_RENDERER_NODES; i++)
+  int iRendererNodeCount = Vision::Renderer.GetRendererNodeCount();
+  for (int i=0; i<iRendererNodeCount; i++)
   {
     IVRendererNode *pRendererNode = Vision::Renderer.GetRendererNode(i);
     if (pRendererNode != NULL)
@@ -330,12 +305,9 @@ void VisMirror_cl::InitMirror()
   SetRenderFilterMask(VIS_ENTITY_VISIBLE_IN_MIRROR);
   SetVisibleBitmask(VIS_ENTITY_VISIBLE_IN_WORLD);
   m_uiRenderHook = VRH_DECALS;
-  SetShowDebugMirrorTexture(false); // for debugging
+  SetShowDebugMirrorTexture(false);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// VisMirror_cl : mirror constructor
-/////////////////////////////////////////////////////////////////////////////////////
 VisMirror_cl::VisMirror_cl(VisMirrorManager_cl *pManager, int iResolution, bool bUseHDR)
 {
   m_pParentManager = pManager;
@@ -353,12 +325,9 @@ VisMirror_cl::VisMirror_cl(VisMirrorManager_cl *pManager, int iResolution, bool 
   m_bDoubleSided = false;
   m_bCameraOnFrontSide = true;
   m_fObliqueClippingPlaneOffset = 0.0f;
-  m_fFovScale = 1.0f; // will always remain at 1.0 when using mirrors (not water)
+  m_fFovScale = 1.0f; // Will always remain at 1.0 when using mirrors (not water)
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// VisMirror_cl : mirror constructor
-/////////////////////////////////////////////////////////////////////////////////////
 VisMirror_cl::VisMirror_cl()
 {
   SetUseEulerAngles(FALSE);
@@ -379,15 +348,12 @@ VisMirror_cl::VisMirror_cl()
   m_fObliqueClippingPlaneOffset = 0.0f;
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////
-// ~VisMirror_cl : mirror destructor
-/////////////////////////////////////////////////////////////////////////////////////
 VisMirror_cl::~VisMirror_cl()
 {
   if (m_spReflectionContext != NULL)
   {
-    for (int i=0; i<V_MAX_RENDERER_NODES; i++)
+    int iRendererNodeCount = Vision::Renderer.GetRendererNodeCount();
+    for (int i=0; i<iRendererNodeCount; i++)
     {
       IVRendererNode *pRendererNode = Vision::Renderer.GetRendererNode(i);
       if (pRendererNode != NULL)
@@ -400,7 +366,7 @@ VisMirror_cl::~VisMirror_cl()
 
   if (m_pParentZone)
   {
-    VisTypedEngineObject_cl::DisposeObject(); // hasn't been called obviously
+    VisTypedEngineObject_cl::DisposeObject();
     // Note that this has to be done for mirror shapes only since they are purged by the resource manager and disposed by a zone
   }
 
@@ -415,7 +381,6 @@ void VisMirror_cl::Init()
   AddDefaultVisibilityObject();
 }
 
-
 void VisMirror_cl::DisposeObject()
 {
   if (IsObjectFlagSet(VObjectFlag_Disposing))
@@ -426,9 +391,7 @@ void VisMirror_cl::DisposeObject()
   m_pParentManager->m_Instances.SafeRemove(this);
 }
 
-
 #ifdef SUPPORTS_SNAPSHOT_CREATION
-
 void VisMirror_cl::GetDependencies(VResourceSnapshot &snapshot)
 {
   VisObject3D_cl::GetDependencies(snapshot);
@@ -440,7 +403,6 @@ void VisMirror_cl::GetDependencies(VResourceSnapshot &snapshot)
 }
 #endif
 
-
 void VisMirror_cl::AddDefaultVisibilityObject()
 {
   if (!m_spDefaultBBoxVisObj)
@@ -449,6 +411,7 @@ void VisMirror_cl::AddDefaultVisibilityObject()
   UpdateDefaultVisibilityObject();
   m_VisibilityObjects.AddUnique(m_spDefaultBBoxVisObj);
   m_spDefaultBBoxVisObj->SetVisibleBitmask(m_iVisibleBitmask);
+  m_uiVisibilityRefreshFrame = VisRenderContext_cl::GetGlobalTickCount();
 }
 
 void VisMirror_cl::RemoveDefaultVisibilityObject()
@@ -464,12 +427,11 @@ void VisMirror_cl::UpdateDefaultVisibilityObject()
 {
   VASSERT(m_spDefaultBBoxVisObj);
   hkvAlignedBBox visBox = GetBoundingBox();
-  visBox.addBoundary(hkvVec3 (2.f*Vision::World.GetGlobalUnitScaling())); // make it slightly larger to prevent self occluding
+  visBox.addBoundary(hkvVec3 (2.f*Vision::World.GetGlobalUnitScaling())); // Make it slightly larger to prevent self occluding
   m_spDefaultBBoxVisObj->SetWorldSpaceBoundingBox(visBox);
-  if (!IsBusySerializing()) // during serialization we assume the vis assignment has been correctly de-serialized.
+  if (!IsBusySerializing()) // During serialization we assume the vis assignment has been correctly de-serialized.
     m_spDefaultBBoxVisObj->ReComputeVisibility();
 }
-
 
 void VisMirror_cl::RecreateRenderTarget()
 {
@@ -486,34 +448,23 @@ void VisMirror_cl::FreeRenderTarget()
   m_spRenderTarget_Refl->EnsureUnloaded();
 }
 
-
 VTextureObject* VisMirror_cl::GetMirrorTexture()
 {
   return m_spReflectionContext->GetRenderTarget();
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////
-// OnObject3DChanged : respond to transformation changes
-/////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::OnObject3DChanged(int iO3DFlags)
 {
   VisObject3D_cl::OnObject3DChanged(iO3DFlags);
   UpdateMirror();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// SetActive : Enables or disables the mirror
-/////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::SetActive(bool bStatus)
 {
   m_bActive = bStatus;
   m_spReflectionContext->SetRenderingEnabled(IsActive());
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// SetSize : Sets the plane size
-/////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::SetSize(float x, float y)
 {
   m_fSizeX = x;
@@ -521,10 +472,6 @@ void VisMirror_cl::SetSize(float x, float y)
   UpdateMirror();
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////
-// GetWorldSpaceVertices : Helper function to transform mirror corner vertices
-/////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::GetWorldSpaceVertices(hkvVec3* pVert) const
 {
   const hkvMat3 &rotMat(m_cachedRotMatrix);
@@ -539,9 +486,6 @@ void VisMirror_cl::GetWorldSpaceVertices(hkvVec3* pVert) const
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-// DebugRender : renders the mirror outline
-///////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::DebugRender(IVRenderInterface* pRenderer, VColorRef iColor) const
 {
   hkvVec3 vWorldPos[4];
@@ -554,10 +498,6 @@ void VisMirror_cl::DebugRender(IVRenderInterface* pRenderer, VColorRef iColor) c
   }
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////
-// GetBoundingBox : updates the m_BoundingBox member
-///////////////////////////////////////////////////////////////////////////////////////
 const hkvAlignedBBox& VisMirror_cl::GetBoundingBox()
 {
   m_BoundingBox.setInvalid();
@@ -579,17 +519,13 @@ const hkvAlignedBBox& VisMirror_cl::GetBoundingBox()
   return m_BoundingBox;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////
-// UpdateMirror : has to be called every time a mirror property has changed (position etc.)
-///////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::UpdateMirror()
 {
-  // build mirror plane and absolute bounding box
+  // Build mirror plane and absolute bounding box
   GetBoundingBox();
   const hkvMat3 &rotMat(m_cachedRotMatrix);
  
-  if (m_spMeshObj) // plane model
+  if (m_spMeshObj)
   {
     m_spMeshObj->SetPosition(m_vPosition);
     hkvMat3 mat;
@@ -603,14 +539,13 @@ void VisMirror_cl::UpdateMirror()
 
     m_spMeshObj->SetRotationMatrix(mat);
 
-    // render order
-    int iSubOrder = (int)(GetPosition().z * 100.f); // sort bottom to top
+    // Render order
+    int iSubOrder = (int)(GetPosition().z * 100.f); // Sort bottom to top
     m_spMeshObj->SetOrder(m_uiRenderHook, -iSubOrder);
   }
   if (m_spDefaultBBoxVisObj)
     UpdateDefaultVisibilityObject();
 }
-
 
 void VisMirror_cl::SetShowPlaneObject(bool bStatus)
 {
@@ -629,7 +564,6 @@ void VisMirror_cl::SetRenderFilterMask(unsigned int uiMask)
     m_spReflectionContext->SetRenderFilterMask(uiMask);
 }
 
-
 void VisMirror_cl::SetVisibleBitmask(unsigned int uiMask)
 {
   m_iVisibleBitmask = uiMask;
@@ -639,6 +573,8 @@ void VisMirror_cl::SetVisibleBitmask(unsigned int uiMask)
   int iCount = m_VisibilityObjects.Count();
   for (int i=0;i<iCount;i++)
     m_VisibilityObjects.GetAt(i)->SetVisibleBitmask(m_iVisibleBitmask);
+
+  m_uiVisibilityRefreshFrame = VisRenderContext_cl::GetGlobalTickCount();
 }
 
 void VisMirror_cl::SetRenderHook(unsigned int uiRenderHook)
@@ -654,9 +590,6 @@ void VisMirror_cl::SetUseLODFromRefContext(bool bLODFromRefContext)
     m_spReflectionContext->SetLODReferenceContext(m_bLODFromRefContext? m_pSourceContext : NULL);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// SetTechnique : sets the shader effect used for rendering the mirror polygons
-/////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::SetTechnique(VCompiledTechnique *pTechnique)
 {
   m_spMirrorTechnique = pTechnique;
@@ -668,7 +601,7 @@ void VisMirror_cl::SetTechnique(VCompiledTechnique *pTechnique)
 
   if (pTechnique)
   {
-    // analyze the shaders in the technique
+    // Analyze the shaders in the technique
     for (int i=0;i<pTechnique->GetShaderCount();i++)
     {
       const VStateGroupRasterizer& rasterState = pTechnique->GetShader(i)->GetRenderState()->GetRasterizerState();
@@ -680,8 +613,6 @@ void VisMirror_cl::SetTechnique(VCompiledTechnique *pTechnique)
     m_bValidFX = true;
   }
 }
-
-
 
 void VisMirror_cl::SetEffect(VCompiledEffect *pEffect)
 {
@@ -706,13 +637,11 @@ void VisMirror_cl::SetEffect(VCompiledEffect *pEffect)
   }
 }
 
-
 void VisMirror_cl::ReassignEffect()
 {
   m_MirrorEffect.ReAssignEffect();
-  SetEffect(m_MirrorEffect.GetEffect()); // re-apply the technique
+  SetEffect(m_MirrorEffect.GetEffect()); // Re-apply the technique
 }
-
 
 void VisMirror_cl::SetReferenceObject(VisObject3D_cl *pRefObject)
 {
@@ -731,7 +660,6 @@ void VisMirror_cl::ApplyToWorldSurface(VisSurface_cl *pWorldSrf, VisStaticMeshIn
   m_pWorldSurface->m_spDiffuseTexture = GetMirrorTexture();
   SetShowPlaneObject(false);
 }
-
 
 void VisMirror_cl::SetModelFile(const char *szModel)
 {
@@ -777,10 +705,6 @@ void VisMirror_cl::SetModelFile(const char *szModel)
   UpdateMirror();
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////
-// CreateMesh : Create a planar mesh from mirror vertices
-/////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::CreateMesh()
 {
   m_spDynamicMesh = NULL;
@@ -795,7 +719,7 @@ void VisMirror_cl::CreateMesh()
   desc.m_iColorOfs = offsetof(MirrorVertex_t, color);
   desc.SetFormatDefaults();
 
-  GetBoundingBox(); // necessary so we can obtain the normal
+  GetBoundingBox(); // Necessary so we can obtain the normal
   hkvVec3 vNormal = m_Plane.m_vNormal;
   pMesh->AllocateVertices(desc, 4);
   MirrorVertex_t *pVert = (MirrorVertex_t *)pMesh->LockVertices(0);
@@ -841,17 +765,14 @@ void VisMirror_cl::CreateMeshBufferObject(VisMeshBuffer_cl* pMesh)
   m_spMeshObj->SetObjectFlag(VObjectFlag_AutoDispose);
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////
-// SetShowDebugMirrorTexture : if enabled, the mirror texture is shown as a screenmask
-///////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::SetShowDebugMirrorTexture(bool bStatus)
 {
   if (bStatus)
   {
     if (m_spDebugMask!=NULL)
       return;
-    // create the mirror screenmask
+
+    // Create the mirror screenmask
     int iIndexX = GetNumber() % 4;
     int iIndexY = GetNumber() / 4;
     m_spDebugMask = new VisScreenMask_cl();
@@ -866,14 +787,9 @@ void VisMirror_cl::SetShowDebugMirrorTexture(bool bStatus)
   }
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-// TraceMirror : Helper function to trace the mirror quad
-///////////////////////////////////////////////////////////////////////////////////////
 float VisMirror_cl::TraceMirror(const hkvVec3& vStart, const hkvVec3& vEnd, bool bDoubleSided) const
 {
-  // make a quad out of two triangles and trace it
+  // Make a quad out of two triangles and trace it
   hkvVec3 vWorldPos[4];
   GetWorldSpaceVertices(vWorldPos);
   VTriangle tri;
@@ -892,48 +808,12 @@ float VisMirror_cl::TraceMirror(const hkvVec3& vStart, const hkvVec3& vEnd, bool
   return -1.f;
 }
 
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-// GetClosestDist : Get the maximum near clip plane for rendering
-///////////////////////////////////////////////////////////////////////////////////////
-float VisMirror_cl::GetClosestDist(const hkvVec3& vCamPos)
-{
-  float fDist = hkvMath::Abs (m_Plane.getDistanceTo(vCamPos));
-
-  if (fDist<1.f)
-    fDist = 1.f;
-  return fDist;
-}
-
-
 float VisMirror_cl::GetActualFarClipDistance() const
 {
   float fNearPlane,fFarPlane;
   m_spReflectionContext->GetClipPlanes(fNearPlane,fFarPlane);
   return fFarPlane;
 }
-
-
-float VisMirror_cl::GetMirrorDistanceFromCameraPlane(const VisContextCamera_cl &mainCam)
-{
-  hkvPlane camPlane; camPlane.setFromPointAndNormal (mainCam.GetPosition(), mainCam.GetDirection());
-  hkvVec3 mirrorVerts[4];
-  GetWorldSpaceVertices(mirrorVerts);
-
-  float fMinDist = FLT_MAX;
-  for (int i=0; i<4; i++)
-  {
-    float fDist = camPlane.getDistanceTo(mirrorVerts[i]);
-    if (fDist < fMinDist)
-      fMinDist = fDist;
-  }
-
-  return hkvMath::Max(fMinDist, Vision::World.GetGlobalUnitScaling());
-}
-
-
 
 void AddObliqueClippingPlane (hkvMat4& mMatrix, const hkvPlane& eyeSpacePlane)
 {
@@ -942,6 +822,7 @@ void AddObliqueClippingPlane (hkvMat4& mMatrix, const hkvPlane& eyeSpacePlane)
 #else
   const float fAdd = 0.0f;
 #endif
+
   // Calculate the clip-space corner point opposite the clipping plane
   // as (sgn(eyeSpacePlane.x), sgn(eyeSpacePlane.y), 1, 1) and
   // transform it into camera space by multiplying it
@@ -964,9 +845,6 @@ void AddObliqueClippingPlane (hkvMat4& mMatrix, const hkvPlane& eyeSpacePlane)
   mMatrix.m_Column[3][2] = c.w;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-// UpdateCamera : Updates the render camera every frame
-///////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::UpdateCamera(VisRenderContext_cl *pRefContext)
 {
   VASSERT(m_pSourceContext);
@@ -974,23 +852,33 @@ void VisMirror_cl::UpdateCamera(VisRenderContext_cl *pRefContext)
   VASSERT(pMainCam);
   hkvVec3 vMainCamPos;
 
-  // this one is 1 frame delayed (update core status not performed yet). But it would be nicer to use this
+  // This one is 1 frame delayed (update core status not performed yet). But it would be nicer to use this
   vMainCamPos = pMainCam->GetPosition();
 
-  m_bVisibleThisFrame = this->m_iContextBitmask > 0;
+  m_bVisibleThisFrame = this->m_iContextBitmask != 0;
 
   m_bCameraOnFrontSide = (m_Plane.getDistanceTo (vMainCamPos) >= 0.0f);
 
-  if (!m_bDoubleSided && !m_bCameraOnFrontSide) // camera on wrong side? -> don't render
+  if (!m_bDoubleSided && !m_bCameraOnFrontSide) // Camera on wrong side? -> don't render
+  {
     m_bVisibleThisFrame = false;
+  }
 
   int iCount = m_VisibilityObjects.Count();
   for (int i=0;i<iCount;i++)
+  {
     m_VisibilityObjects.GetAt(i)->SetOcclusionQueryPixelThreshold(32);
+  }
 
+  // Do not check visibility if either the renderer wasn't updated recently (e.g. when it was reinitialized) and hasn't even run visibility collection,
+  // or when our visibility objects have changed (e.g. when the mirror is new).
+  if(Vision::Renderer.GetCurrentRendererNode()->GetReferenceContext()->WasRecentlyRendered() && m_uiVisibilityRefreshFrame != VisRenderContext_cl::GetGlobalTickCount())
+  {
   if (m_bVisibleThisFrame && iCount>0 && !m_VisibilityObjects.IsAnyVisible(pRefContext))
+    {
     m_bVisibleThisFrame = false;
-
+    }
+  }
   
   if (m_bVisibleThisFrame && IsActive())
   {
@@ -999,6 +887,20 @@ void VisMirror_cl::UpdateCamera(VisRenderContext_cl *pRefContext)
   else
   {
     m_spReflectionContext->SetRenderingEnabled(false);
+    return;
+  }
+  
+  float fNearPlane, fFarPlane;
+  m_pSourceContext->GetClipPlanes(fNearPlane, fFarPlane);
+
+  // Far clip plane override
+  if (m_fFarClipDist > 0.0f)
+  {
+    fFarPlane = m_fFarClipDist;
+  }
+
+  if (fNearPlane > (fFarPlane - 1.0f))
+  {
     return;
   }
   
@@ -1012,29 +914,19 @@ void VisMirror_cl::UpdateCamera(VisRenderContext_cl *pRefContext)
   // NOTE: Handle the case for both above and below the mirror surface. The abs() above
   //       makes sure fCamDist moves away from 0 in both cases.
   if (fCamDist < -fEffectivePlaneOffset)
+  {
     fEffectivePlaneOffset = -fCamDist * Vision::World.GetGlobalUnitScaling();
+  }
   else if (fCamDist < fEffectivePlaneOffset)
+  {
     fEffectivePlaneOffset = fCamDist * Vision::World.GetGlobalUnitScaling();
+  }
 
   hkvVec3 v1,v2,v3;
 
-  // create the mirrored camera position and orientation
+  // Create the mirrored camera position and orientation
   hkvVec3 vMirrorNrml = m_Plane.m_vNormal;
   m_vMirrorPos = m_Plane.getMirrored (vMainCamPos);
-
-  float fNearPlane,fFarPlane;
-  m_pSourceContext->GetClipPlanes(fNearPlane,fFarPlane);
-
-
-  fNearPlane = GetClosestDist(m_vMirrorPos);
-  fNearPlane = hkvMath::Min(fNearPlane, GetMirrorDistanceFromCameraPlane(*pMainCam));
-  if (m_fFarClipDist>0.f)
-    fFarPlane=fNearPlane+m_fFarClipDist;
-
-  if (fNearPlane>fFarPlane-1.f)
-    return;
-
-  fNearPlane = hkvMath::Min(fNearPlane, fFarPlane*0.5f);
 
   const hkvMat3 mainCamRot = pMainCam->GetRotationMatrix();
   mainCamRot.getAxisXYZ(&v1,&v2,&v3);
@@ -1047,55 +939,53 @@ void VisMirror_cl::UpdateCamera(VisRenderContext_cl *pRefContext)
   VASSERT(pMirrorCam);
   pMirrorCam->Set(m_MirrorCamRot, m_vMirrorPos);
 
-
-  // set FOV as in main context
+  // Set FOV as in main context
   float fAngleX,fAngleY;
   m_pSourceContext->GetFinalFOV(fAngleX,fAngleY);
-  m_spReflectionContext->SetCustomProjectionMatrix(NULL); // force building a real projection matrix
+  m_spReflectionContext->SetCustomProjectionMatrix(NULL); // Force building a real projection matrix
   float fScaledX = fAngleX * m_fFovScale;
   float fScaledY = fAngleY * m_fFovScale;
   m_spReflectionContext->SetFOV(hkvMath::Min(fScaledX,179.f), hkvMath::Min(fScaledY,179.f));
 
-  // near and far plane
-  m_spReflectionContext->SetClipPlanes(fNearPlane,fFarPlane);
-
-  // we need the water plane in camera space
+  // We need the water plane in camera space
   hkvMat3 mWorldToCamRotation = pMirrorCam->GetWorldToCameraRotation();
 
   hkvVec3 vCSNrml = mWorldToCamRotation * vMirrorNrml;
   hkvVec3 vCSPos = mWorldToCamRotation * (m_vPosition + vMirrorNrml * fEffectivePlaneOffset - m_vMirrorPos);
   if (!m_bCameraOnFrontSide)
+  {
     vCSNrml = -vCSNrml;
+  }
 
   hkvPlane planeCS; planeCS.setFromPointAndNormal (vCSPos,vCSNrml);
   m_ObliqueClippingPlane = planeCS;
 
-  // apply oblique clipping plane - make sure we fetch the raw projection matrix from the view properties (without y-Flipping applied)
+  // Apply oblique clipping plane - make sure we fetch the raw projection matrix from the view properties (without y-Flipping applied)
   m_ObliqueClippingProjection = m_spReflectionContext->GetViewProperties()->getProjectionMatrix(hkvClipSpaceYRange::MinusOneToOne);
   AddObliqueClippingPlane (m_ObliqueClippingProjection, planeCS);
-
-
   m_spReflectionContext->SetCustomProjectionMatrix(m_ObliqueClippingProjection.getPointer(), false);
+
+  // Note: Setting the near and far plane after the oblique clipping projection has been created ensures that these clip plane values
+  //       are only used for visibility, this is a result of the circumstance that when using oblique clipping projection the far plane
+  //       does not have the same meaning than in an normal perspective projection.
+  m_spReflectionContext->SetClipPlanes(fNearPlane,fFarPlane);
 }
 
-
-
-
-
-// we need a visibility collector for each view, because visibility computation is decoupled
 IVisVisibilityCollector_cl *VisMirror_cl::GetVisibilityCollectorForView(VisRenderContext_cl *pView)
 {
-  // see whether we have stored the pair already
+  // We need a visibility collector for each view, because visibility computation is decoupled
+
+  // See whether we have stored the pair already
   for (int i=0;i<m_iViewContextCount;i++)
     if (m_pViewContext[i]==pView)
     {
-      // for more than one context we have to mark the camera as teleported
+      // For more than one context we have to mark the camera as teleported
       if (m_iViewContextCount>1)
         m_spReflectionContext->GetCamera()->ReComputeVisibility();
       return m_spViewVisibility[i];
     }
 
-  // cleanup the ones we do not need anymore (i.e. not registered)
+  // Cleanup the ones we do not need anymore (i.e. not registered)
   int iOldCount = m_iViewContextCount;
   m_iViewContextCount = 0;
   for (int i=0;i<iOldCount;i++)
@@ -1119,7 +1009,7 @@ IVisVisibilityCollector_cl *VisMirror_cl::GetVisibilityCollectorForView(VisRende
     return NULL;
   }
 
-  // create a new one:
+  // Create a new one:
   VisionVisibilityCollector_cl *pCollector = new VisionVisibilityCollector_cl();
 
   m_pViewContext[m_iViewContextCount] = pView;
@@ -1130,7 +1020,6 @@ IVisVisibilityCollector_cl *VisMirror_cl::GetVisibilityCollectorForView(VisRende
 
   return pCollector;
 }
-
 
 void VisMirror_cl::ClearViewVisibilityCollectors()
 {
@@ -1144,15 +1033,13 @@ void VisMirror_cl::ClearViewVisibilityCollectors()
   m_pSourceContext = NULL;
 }
 
-
-
 void VisMirror_cl::HandleMirror(VisRendererNodeDataObject_cl &data)
 {
   VASSERT(data.m_pRendererNode != NULL)
   
   VisRenderContext_cl *pViewContext = data.m_pRendererNode->GetReferenceContext();
 
-  // when rendering multiple times per frame we must turn off occlusion query, otherwise objects are culled
+  // When rendering multiple times per frame we must turn off occlusion query, otherwise objects are culled
   int iFlags = m_spReflectionContext->GetRenderFlags();
   if (m_pSourceContext && m_pSourceContext!=pViewContext && (iFlags&VIS_RENDERCONTEXT_FLAG_USE_OCCLUSIONQUERY))
   {
@@ -1162,7 +1049,7 @@ void VisMirror_cl::HandleMirror(VisRendererNodeDataObject_cl &data)
 
   m_pSourceContext = pViewContext;
 
-  // add this mirror context to the list of dependent contexts that are rendered before next frame
+  // Add this mirror context to the list of dependent contexts that are rendered before next frame
   IVisVisibilityCollector_cl *pOldVisColl = m_spReflectionContext->GetVisibilityCollector();
 
   // If we have multiple views:
@@ -1176,11 +1063,11 @@ void VisMirror_cl::HandleMirror(VisRendererNodeDataObject_cl &data)
 
   UpdateCamera(pViewContext);
 
-  // add this mirror context to the list of dependent contexts that are rendered before next frame
+  // Add this mirror context to the list of dependent contexts that are rendered before next frame
   IVisVisibilityCollector_cl *pVisColl = GetVisibilityCollectorForView(m_pSourceContext);
   if (!m_bVisibleThisFrame)
   {
-    // we have to clear the old result so old scene elements don't hang around in it. [#18302]
+    // We have to clear the old result so old scene elements don't hang around in it. [#18302]
     // This is critical if the source context changed the status for m_bVisibleThisFrame between the two callbacks
     ((VisionVisibilityCollector_cl *)pVisColl)->ClearVisibilityData();
   }
@@ -1194,17 +1081,13 @@ void VisMirror_cl::HandleMirror(VisRendererNodeDataObject_cl &data)
   PrepareProjectionPlanes();
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////
-// SetupSingleShaderProjection : Setup shader projection planes
-/////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::SetupSingleShaderProjection(VCompiledShaderPass *shader, const hkvVec3& campos, const hkvMat3 &camrot)
 {
-  // cull the whole shader?
+  // Cull the whole shader?
   if (((shader->GetRenderState ()->GetRasterizerState ().m_cCullMode == CULL_FRONT) &&  m_bCameraOnFrontSide) || 
       ((shader->GetRenderState ()->GetRasterizerState ().m_cCullMode == CULL_BACK)  && !m_bCameraOnFrontSide))
   {
-    shader->GetRenderState ()->SetRenderFlags (0); // prevent rendering
+    shader->GetRenderState ()->SetRenderFlags (0); // Prevent rendering
     return;
   }
   shader->GetRenderState ()->SetRenderFlags ((unsigned int) -1);
@@ -1215,8 +1098,7 @@ void VisMirror_cl::SetupSingleShaderProjection(VCompiledShaderPass *shader, cons
   float fAngleX,fAngleY;
   m_spReflectionContext->GetFinalFOV(fAngleX,fAngleY);
   
-
-  // setup cone width and height modifiers to match the projection
+  // Setup cone width and height modifiers to match the projection
   float tx = - 1.0f / hkvMath::tanDeg (fAngleX / 2.0f);
   float ty = 1.0f / hkvMath::tanDeg (fAngleY / 2.0f);
 
@@ -1284,12 +1166,9 @@ void VisMirror_cl::SetupSingleShaderProjection(VCompiledShaderPass *shader, cons
   shader->GetConstantBuffer(VSS_PixelShader)->SetSingleParameterF("TexSize", (float)m_spRenderTarget_Refl->GetTextureWidth(), (float)m_spRenderTarget_Refl->GetTextureHeight(),
     1.0f / m_spRenderTarget_Refl->GetTextureWidth(), 1.0f / m_spRenderTarget_Refl->GetTextureHeight());
 
-  shader->m_bModified = true; // avoid early-out in engine [#18302]
+  shader->m_bModified = true; // Avoid early-out in engine [#18302]
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-// PrepareProjectionPlanes : Updates the shader projection planes
-///////////////////////////////////////////////////////////////////////////////////////
 void VisMirror_cl::PrepareProjectionPlanes()
 {
   if (!m_spMirrorTechnique)
@@ -1297,16 +1176,11 @@ void VisMirror_cl::PrepareProjectionPlanes()
 
   const int iShaderCount = m_spMirrorTechnique->m_Shaders.Count();
 
-  // set planes for all shaders in the effect
+  // Set planes for all shaders in the effect
   for (int i=0;i<iShaderCount;i++)
     SetupSingleShaderProjection(m_spMirrorTechnique->m_Shaders.GetAt(i), m_vMirrorPos, m_MirrorCamRot);
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-// Serialize : Mirror serialization
-///////////////////////////////////////////////////////////////////////////////////////
 V_IMPLEMENT_SERIAL( VisMirror_cl, VisObject3D_cl, 0, &g_VisionEngineModule );
 void VisMirror_cl::Serialize( VArchive &ar )
 {
@@ -1321,20 +1195,21 @@ void VisMirror_cl::Serialize( VArchive &ar )
 
     ar >> iVers; VASSERT(iVers<=MIRROR_CURRENT_VERSION);
     if (iVers>=MIRROR_VERSION_8)
-      VisObject3D_cl::Serialize(ar); // vers. 8 uses object3d for position/orientation
+      VisObject3D_cl::Serialize(ar); // Version 8 uses object3d for position/orientation
 
     ar >> m_iResolution;
-    if (iVers>=MIRROR_VERSION_11) // version 11
+    if (iVers>=MIRROR_VERSION_11)
       ar >> m_bUseHDR;
 
-    if (iVers<MIRROR_VERSION_8) // old code path
+    if (iVers<MIRROR_VERSION_8) // Old code path
     {
       hkvVec3 vPos;
       hkvMat3 vRotation;
         
       vPos.SerializeAsVisVector (ar);
       ar >> vRotation;
-      // translate by custom offset defined in the archive
+
+      // Translate by custom offset defined in the archive
       hkvVec3 vOffset(hkvNoInitialization),vEulerOfs(hkvNoInitialization);
       hkvMat3 mRotationOfs(hkvNoInitialization);
       if (ar.GetCustomShapeTransformation(vOffset,mRotationOfs,vEulerOfs))
@@ -1386,10 +1261,11 @@ void VisMirror_cl::Serialize( VArchive &ar )
       m_fObliqueClippingPlaneOffset = 0.0f;
       m_fFovScale = 1.0f;
     }
+
     if (iVers>=MIRROR_VERSION_9)
-      ar >> m_bExecuteRenderHooks; // version 9
+      ar >> m_bExecuteRenderHooks;
     if (iVers>=MIRROR_VERSION_10)
-      m_vModelScale.SerializeAsVec3 (ar); // version 10
+      m_vModelScale.SerializeAsVec3(ar);
 
     if (iVers >= MIRROR_VERSION_15)
     {
@@ -1400,7 +1276,7 @@ void VisMirror_cl::Serialize( VArchive &ar )
       unsigned int iOrder;
       ar >> iOrder;
 
-      // toggle VRH_ADDITIVE_PARTICLES with VRH_TRANSLUCENT_VOLUMES so that the VRenderHook_e enum order matches the execution order
+      // Toggle VRH_ADDITIVE_PARTICLES with VRH_TRANSLUCENT_VOLUMES so that the VRenderHook_e enum order matches the execution order
       if (iOrder == VRH_ADDITIVE_PARTICLES)       m_uiRenderHook = VRH_TRANSLUCENT_VOLUMES;
       else if (iOrder == VRH_TRANSLUCENT_VOLUMES) m_uiRenderHook = VRH_ADDITIVE_PARTICLES;
       else                                        m_uiRenderHook = iOrder;
@@ -1427,33 +1303,33 @@ void VisMirror_cl::Serialize( VArchive &ar )
     if (m_spDynamicMesh)
       szModelFile = m_spDynamicMesh->GetFilename();
 
-    ar << (char)MIRROR_CURRENT_VERSION; // mirror version
+    ar << (char)MIRROR_CURRENT_VERSION;
 
-    VisObject3D_cl::Serialize(ar); // vers. 8 uses object3d for position/orientation
+    VisObject3D_cl::Serialize(ar);        // Version. 8 uses object3d for position/orientation
 
     ar << m_iResolution;
-    ar << m_bUseHDR; // vers. 11
+    ar << m_bUseHDR;                      // Version 11
     ar << m_fSizeX << m_fSizeY;
     ar << szModelFile;
     ar << m_MirrorEffect;
-    ar << m_VisibilityObjects; // version 2
-    ar << m_spDefaultBBoxVisObj; // version 4
-    ar << m_fFarClipDist; // version 3
-    ar << m_iContextBitmask; // version 5
-    ar << (int)m_eReflectionShaderMode; // version 6
-    ar << m_fObliqueClippingPlaneOffset; // version 7
-    ar << m_fFovScale;      // version 7
-    ar << m_bExecuteRenderHooks; // version 9
-    m_vModelScale.SerializeAsVec3 (ar); // vers. 10
-    ar << m_uiRenderHook; // vers. 15
-    ar << m_bLODFromRefContext; // vers. 14
+    ar << m_VisibilityObjects;            // Version 2
+    ar << m_spDefaultBBoxVisObj;          // Version 4
+    ar << m_fFarClipDist;                 // Version 3
+    ar << m_iContextBitmask;              // Version 5
+    ar << (int)m_eReflectionShaderMode;   // Version 6
+    ar << m_fObliqueClippingPlaneOffset;  // Version 7
+    ar << m_fFovScale;                    // Version 7
+    ar << m_bExecuteRenderHooks;          // Version 9
+    m_vModelScale.SerializeAsVec3 (ar);   // Version 10
+    ar << m_uiRenderHook;                 // Version 15
+    ar << m_bLODFromRefContext;           // Version 14
   }
 }
 
 VisMirror_cl::VReflectionShaderSets_e g_TempMode = VisMirror_cl::AlwaysSimple;
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

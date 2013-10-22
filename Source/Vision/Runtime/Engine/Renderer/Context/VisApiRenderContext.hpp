@@ -2100,12 +2100,14 @@ public:
   ///
 
   /// \brief
-  ///   Static function to increase global counters. Should be called as shown in the
-  ///   VisionApp_cl::Run() function.
+  ///   Static function to increase global render context tick counter.
   static VISION_APIFUNC void GlobalTick();
 
   /// \brief
-  ///   Returns the current number of global ticks, i.e. the number of frames globally rendered
+  ///   Returns the current number of global ticks, i.e. the number of render contexts globally rendered.
+  ///
+  /// If there is more than one render context to be rendered, the global tick count and the frame count 
+  /// are not the same.
   static VISION_APIFUNC unsigned int GetGlobalTickCount();
 
   /// \brief
@@ -2119,7 +2121,10 @@ public:
   /// \brief
   ///   Returns whether the render context is the reference context of its visibility collector as
   ///   previously set with SetVisibilityCollector().
-  inline bool IsReferenceContextForVisibilityCollector() const { return m_bIsReferenceContext; }
+  inline bool IsReferenceContextForVisibilityCollector() const 
+  { 
+    return m_bIsReferenceContext; 
+  }
 
   /// \brief
   ///   Returns the index of the passed render target (-1 if the passed texture object is not a
@@ -2392,7 +2397,7 @@ VISION_ELEMENTMANAGER_TEMPLATE_DECL(VisRenderContext_cl)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

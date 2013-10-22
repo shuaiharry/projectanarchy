@@ -20,12 +20,12 @@ public:
 	HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BEHAVIOR );
 	HK_DECLARE_REFLECTION();
 	//+version(1)
-	hkbProceduralBlenderGenerator(hkbNodeType nodeType);
+	hkbProceduralBlenderGenerator( hkbNodeType nodeType );
 	virtual ~hkbProceduralBlenderGenerator();
-	hkbProceduralBlenderGenerator(hkFinishLoadedObjectFlag flag);
+	hkbProceduralBlenderGenerator( hkFinishLoadedObjectFlag flag );
 
 protected:
-	hkbProceduralBlenderGenerator(hkbProceduralBlenderGenerator const& other);
+	hkbProceduralBlenderGenerator( hkbProceduralBlenderGenerator const& other );
 
 public:
 
@@ -77,10 +77,10 @@ private:
 	virtual int getNumGenerators() const = 0;
 
 	/// Should return the child generator at the indicated index
-	virtual hkbGenerator* getGenerator(int generatorIdx) const = 0;
+	virtual hkbGenerator* getGenerator( int generatorIdx ) const = 0;
 
 	/// Called each frame to compute the new blend weights.
-	virtual void computeBlendWeights(hkReal* blendWeightsOut) const = 0;
+	virtual void computeBlendWeights( hkReal* blendWeightsOut ) const = 0;
 
 protected:
 	/// Called to deallocate structures built in precompute(). Sublcasses which override cleanup()
@@ -90,12 +90,12 @@ protected:
 	/// Get the template's internal blender.
 	hkbBlenderGenerator* getBlender() const;
 	/// Set the blender directly. This is used by subclasses' copyNode() functions.
-	void setBlender(hkbBlenderGenerator* blender);
+	void setBlender( hkbBlenderGenerator* blender );
 
 private:
-	void createBlender();
+	void createBlender( const hkbContext& context );
 	void destroyBlender();
-	void updateWeights(const hkbContext& context);
+	void updateWeights( const hkbContext& context );
 
 private:
 	/// Blender used to blend together the clips in the generator.
@@ -106,7 +106,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

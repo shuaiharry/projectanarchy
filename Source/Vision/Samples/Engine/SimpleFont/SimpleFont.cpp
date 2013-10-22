@@ -47,14 +47,11 @@ public:
   {
     // hook ourselves to the printing
     VisFont_cl::OnPrintCallback += this;
-    // handle backgrounding
-    Vision::Callbacks.OnReassignShaders += this;
   }
 
   ~CallbackListener()
   {
     VisFont_cl::OnPrintCallback -= this;
-    Vision::Callbacks.OnReassignShaders -= this;
   }
 
   // this callback gets triggered whenever text printing hits our reserved character
@@ -88,10 +85,6 @@ public:
         modifier.m_szRemainingString += 8; // advance the text so these chars are not printed
       }
     }
-    else if (pData->m_pSender == &Vision::Callbacks.OnReassignShaders)
-    {
-      LoadCustomShaderPass();
-    }
   }
 };
 
@@ -104,7 +97,7 @@ VISION_INIT
   // Create and init an application
   spApp = new VisSampleApp();
 #if defined( _VISION_MOBILE ) || defined( HK_ANARCHY )
-  if (!spApp->InitSample("Maps\\ViewerMap" /*DataDir*/, "ViewerMap" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS))
+  if (!spApp->InitSample("Maps\\ViewerMap" /*DataDir*/, "ViewerMap" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS))
     return false;
 #else
   int iX = VVIDEO_DEFAULTWIDTH;
@@ -116,7 +109,7 @@ VISION_INIT
     iY *= 2;
   #endif  
     
-  if (!spApp->InitSample("Maps\\ViewerMap" /*DataDir*/, "ViewerMap" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS, iX, iY))
+  if (!spApp->InitSample("Maps\\ViewerMap" /*DataDir*/, "ViewerMap" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS, iX, iY))
     return false;
 #endif    
   
@@ -235,7 +228,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

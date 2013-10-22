@@ -20,7 +20,7 @@ struct HK_SIGNAL_TYPE : hkSignal
 		
 		/// Contructor.
 		template <typename TYPE>
-		HK_FORCE_INLINE Slot(hkSlot*& _slots, TYPE* object, const char* name) : hkSlot(_slots, object, name) {}
+		HK_FORCE_INLINE Slot(SlotList& _slots, TYPE* object, const char* name) : hkSlot(_slots, object, name) {}
 
 		/// Virtual destructor.
 		virtual			~Slot() {}
@@ -36,7 +36,7 @@ struct HK_SIGNAL_TYPE : hkSignal
 		//+hk.MemoryTracker(ignore=True)
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, GlobalSlot);
 		
-		HK_FORCE_INLINE		GlobalSlot(hkSlot*& _slots, METHOD method, const char* name) : Slot(_slots, (void*)HK_NULL, name), m_method(method) {}
+		HK_FORCE_INLINE		GlobalSlot(SlotList& _slots, METHOD method, const char* name) : Slot(_slots, (void*)HK_NULL, name), m_method(method) {}
 		virtual void		call(HK_SIGNAL_ARGUMENTS) { m_method(HK_SIGNAL_NAMES); }
 		virtual hkBool32	matchMethod(const void* methodData, int methodLength) const { return methodLength == sizeof(METHOD) && *reinterpret_cast<const METHOD*>(methodData) == m_method; }
 
@@ -50,7 +50,7 @@ struct HK_SIGNAL_TYPE : hkSignal
 		//+hk.MemoryTracker(ignore=True)
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, MemberSlot);
 		
-		HK_FORCE_INLINE		MemberSlot(hkSlot*& _slots, TYPE* object, METHOD method, const char* name) : Slot(_slots, object, name), m_method(method) {}
+		HK_FORCE_INLINE		MemberSlot(SlotList& _slots, TYPE* object, METHOD method, const char* name) : Slot(_slots, object, name), m_method(method) {}
 
 		/// Call the signal handler. If you have a compile error here, your functions signiture does not match the signiture of the signal.
 		virtual void		call(HK_SIGNAL_ARGUMENTS) { (reinterpret_cast<TYPE*>(Slot::m_object)->*m_method)(HK_SIGNAL_NAMES); }
@@ -115,14 +115,18 @@ struct HK_SIGNAL_TYPE : hkSignal
 	// Fire the signal inlined.
 	HK_FORCE_INLINE	void	_fire(HK_SIGNAL_ARGUMENTS)
 	{
-		hkSlot**	prev = &m_slots;
-		for(hkSlot* slot = *prev; slot;)
+		// lock the list by setting a flag in m_slots to prevent immediate deletion of the slots in the list
+		// if one of the called slots unsubscribes them
+		m_slots.setInt(1);
+
+		SlotList*	prev = &m_slots;
+		for(hkSlot* slot = getSlots(); slot;)
 		{
 			hkSlot*	next = slot->getNext();
 			if(slot->hasNoSubscription())
 			{
 				delete slot;
-				*prev = next;
+				prev->setPtr(next);
 			}
 			else
 			{
@@ -133,7 +137,7 @@ struct HK_SIGNAL_TYPE : hkSignal
 				{
 					// We need to delete right now; otherwise there is a chance this slot will be left orphan
 					delete slot;
-					*prev = next;
+					prev->setPtr(next);
 				}
 				else
 				{
@@ -143,12 +147,15 @@ struct HK_SIGNAL_TYPE : hkSignal
 			}
 			slot = next;
 		}
+
+		// unlock the list
+		m_slots.setInt(0);
 	}
 	#endif
 };
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

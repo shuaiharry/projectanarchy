@@ -69,13 +69,7 @@ typedef VSmartPtr<VCompiledEffect>        VCompiledEffectPtr;
 #elif defined(_VISION_PS3)
   typedef VLoadedCGProgram VVertexShaderObject;
   typedef VLoadedCGProgram VPixelShaderObject;
-#elif defined(_VISION_LINUX) //@@@L might be merged with ps3 section
-  typedef VLoadedCGProgram VVertexShaderObject;
-  typedef VLoadedCGProgram VPixelShaderObject;
-#elif defined(_VISION_IOS)
-  typedef VLoadedGLES2Program VVertexShaderObject;
-  typedef VLoadedGLES2Program VPixelShaderObject;
-#elif defined(_VISION_ANDROID)
+#elif defined(_VR_GLES2) // Android, iOS, Tizen
   typedef VLoadedGLES2Program VVertexShaderObject;
   typedef VLoadedGLES2Program VPixelShaderObject;
 #elif defined(_VISION_WIIU)
@@ -157,7 +151,7 @@ VBASE_IMPEXP VulpType_e ValueTypeToVulpType(VValueType_e eType);
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

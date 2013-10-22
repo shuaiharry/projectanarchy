@@ -287,8 +287,9 @@ void vHavokStaticMesh::UpdateVision2Havok()
 	hkVector4Comparison::Mask largeEnough = bbox_extent.greaterEqual(meshTol).getMask<hkVector4ComparisonMask::MASK_XYZ>();
 	if (hkMath::countBitsSet(largeEnough) < 2)
     {
-      Vision::Error.Warning("Attempted to create a vHavokStaticMesh with undersized extents (%.4f, %4f, %.4f)", 
-							bbox_extent(0), bbox_extent(1), bbox_extent(2));
+      const char *szMeshFilename = (m_staticMeshes[i]->GetMesh()->GetFilename()!=NULL) ? m_staticMeshes[i]->GetMesh()->GetFilename() : "Unnamed";
+      Vision::Error.Warning("Attempted to create a vHavokStaticMesh with a mesh [%s] with undersized extents (%.4f, %4f, %.4f)", 
+							szMeshFilename, bbox_extent(0), bbox_extent(1), bbox_extent(2));
       return;
     }
   }
@@ -356,7 +357,7 @@ const hkpShape *vHavokStaticMesh::GetHkShape() const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

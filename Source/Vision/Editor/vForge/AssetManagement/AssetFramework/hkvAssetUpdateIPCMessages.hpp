@@ -17,6 +17,7 @@ enum AssetUpdateIPCMessages
   MSG_ADD_DATA_DIRECTORY,
   MSG_PROCESS_ASSET,
   MSG_ASSET_DEPENDENCY,
+  MSG_ASSET_PROPERTY_HINT,
   MSG_ASSET_PROCESSED,
 };
 
@@ -71,11 +72,12 @@ public:
   const char* m_thumbnailPath;
   bool m_createThumbnail;
   bool m_determineDependencies;
+  bool m_getPropertyHint;
 
   hkvMsgProcessAsset(const char* resourceManager, const char* assetPath, const char* thumbnailPath, 
-    bool createThumbnail, bool determineDependencies) 
+    bool createThumbnail, bool determineDependencies, bool getPropertyHint) 
   : Message(MSG_PROCESS_ASSET), m_createThumbnail(createThumbnail), 
-    m_determineDependencies(determineDependencies)
+    m_determineDependencies(determineDependencies), m_getPropertyHint(getPropertyHint)
   {
     if (thumbnailPath == NULL)
     {
@@ -87,6 +89,7 @@ public:
     m_thumbnailPath = AddData(thumbnailPath, (UINT)strlen(thumbnailPath) + 1);
     AddData(&m_createThumbnail, sizeof(bool));
     AddData(&m_determineDependencies, sizeof(bool));
+    AddData(&m_getPropertyHint, sizeof(bool));
   }
 
   hkvMsgProcessAsset(const Message& msg)
@@ -98,6 +101,7 @@ public:
     m_thumbnailPath = GetData<char>();
     m_createThumbnail = *GetData<bool>();
     m_determineDependencies = *GetData<bool>();
+    m_getPropertyHint = *GetData<bool>();
   }
 };
 
@@ -107,23 +111,20 @@ public:
 class hkvMsgAssetProcessed : public Message
 {
 public:
-  bool m_thumbnailCreated;
-  bool m_dependenciesDetermined;
+  bool m_successful;
 
-  hkvMsgAssetProcessed(bool thumbnailCreated, bool dependenciesDetermined)
+  hkvMsgAssetProcessed(bool successful)
   : Message(MSG_ASSET_PROCESSED),
-    m_thumbnailCreated(thumbnailCreated), m_dependenciesDetermined(dependenciesDetermined)
+    m_successful(successful)
   {
-    AddData(&m_thumbnailCreated, sizeof(bool));
-    AddData(&m_dependenciesDetermined, sizeof(bool));
+    AddData(&m_successful, sizeof(bool));
   }
 
   hkvMsgAssetProcessed(const Message& msg)
   : Message(MSG_ASSET_PROCESSED)
   {
     CopyFrom(msg);
-    m_thumbnailCreated = *GetData<bool>();
-    m_dependenciesDetermined = *GetData<bool>();
+    m_successful = *GetData<bool>();
   }
 };
 
@@ -149,10 +150,32 @@ public:
   }
 };
 
+
+/// \brief
+///  Wrapper class for a MSG_ASSET_PROPERTY_HINT
+class hkvMsgAssetPropertyHint : public Message
+{
+public:
+  const char* m_hint;
+
+  hkvMsgAssetPropertyHint(const char* hint) 
+  : Message(MSG_ASSET_PROPERTY_HINT)
+  {
+    m_hint = AddData(hint, (UINT)strlen(hint) + 1);
+  }
+
+  hkvMsgAssetPropertyHint(const Message& msg)
+  : Message(MSG_ASSET_PROPERTY_HINT)
+  {
+    CopyFrom(msg);
+    m_hint = GetData<char>();
+  }
+};
+
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

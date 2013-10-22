@@ -26,6 +26,8 @@ class hkxAnimatedFloat : public hkReferencedObject
 	hkxAnimatedFloat() {}
 	hkxAnimatedFloat(hkFinishLoadedObjectFlag f) : hkReferencedObject(f), m_floats(f) {}
 
+	virtual const hkClass* getClassType() const HK_OVERRIDE { return &hkxAnimatedFloatClass;	}
+
 		/// The array of sampled floats. Array can be of length 1 for not animated,
 		/// or one per frame so assumes that the value is then fully sampled.
 	hkArray<hkFloat32> m_floats;
@@ -38,7 +40,7 @@ class hkxAnimatedFloat : public hkReferencedObject
 #endif // HK_SCENEDATA_HKX_ANIMATED_FLOAT_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

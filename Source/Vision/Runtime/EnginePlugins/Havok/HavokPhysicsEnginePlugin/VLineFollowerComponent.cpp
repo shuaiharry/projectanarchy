@@ -398,17 +398,18 @@ BOOL VLineFollowerComponent::StartAnimation(const char *szAnimName)
   // If both a vertex and a skeletal animation with the given name has been found
   // create a combined config for skeletal and vertex animation.
   VisAnimConfig_cl* pConfig = NULL;
-  if ((pAnimSequenceSkeletal) && (pAnimSequenceVertex))
+  if ((pAnimSequenceSkeletal != NULL) && (pAnimSequenceVertex != NULL))
     pConfig = VisAnimConfig_cl::CreateSkeletalVertexConfig(pMesh, &pFinalSkeletalResult, &pVertexAnimDeformer);
 
   // If it is just a skeletal animation, create a config for it
   if (pAnimSequenceSkeletal)
   {    
-    if (!pConfig)
+    if (pConfig == NULL)
       pConfig = VisAnimConfig_cl::CreateSkeletalConfig(pMesh, &pFinalSkeletalResult);
 
     // If a skeletal animation has been found create a control for it
-    VisSkeletalAnimControl_cl* pSkeletalAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), pAnimSequenceSkeletal, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+    VisSkeletalAnimControl_cl* pSkeletalAnimControl = 
+      VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), pAnimSequenceSkeletal, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
     // And set it as the input for the final skeletal result
     pFinalSkeletalResult->SetSkeletalAnimInput(pSkeletalAnimControl);
   }
@@ -416,11 +417,12 @@ BOOL VLineFollowerComponent::StartAnimation(const char *szAnimName)
   // If it is just a vertex animation, create a config for it
   if (pAnimSequenceVertex)
   {
-    if (!pConfig)
+    if (pConfig == NULL)
       pConfig = VisAnimConfig_cl::CreateVertexConfig(pMesh, &pVertexAnimDeformer);
 
     // If a vertex animation has been found create a control for it
-    VisVertexAnimControl_cl* pVertexAnimControl = VisVertexAnimControl_cl::Create(pAnimSequenceVertex, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+    VisVertexAnimControl_cl* pVertexAnimControl = 
+      VisVertexAnimControl_cl::Create(pAnimSequenceVertex, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
     // And set add it to the vertex anim deformer
     pVertexAnimDeformer->AddVertexAnimControl(pVertexAnimControl, 1.0f);
   }
@@ -488,20 +490,20 @@ void VLineFollowerComponent::Serialize(VArchive &ar)
 
 START_VAR_TABLE(VLineFollowerComponent, IVObjectComponent,"Line Follower Component", VVARIABLELIST_FLAGS_NONE, "Line Follower" )
   DEFINE_VAR_STRING (VLineFollowerComponent, Path_Key, "Key of the path to follow", "", 128, 0, NULL);
-  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Path_NumberSteps, "Approximate Path with a given number of steps", "50.0", 0, NULL);
-  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Path_TriggerDistance, "Distance to trigger new destination calculation", "40.0", 0, NULL);
+  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Path_NumberSteps, "Approximate Path with a given number of steps", "50.0", 0, "Clamp(0,10000)");
+  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Path_TriggerDistance, "Distance to trigger new destination calculation", "40.0", 0, "Clamp(0,1e12)");
   DEFINE_VAR_FLOAT  (VLineFollowerComponent, Path_InitialOffset, "Initial offset position inside the path (0: start; 1: end;)", "0.0", 0, "Slider(0,1)");
   DEFINE_VAR_STRING (VLineFollowerComponent, Model_AnimationName, "Name of the animation sequence to play", "", 128, 0, "dropdownlist(Animation)");
-  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Model_DeltaRotation, "Rotation of the offset delta around the Z axis", "0.0", 0, NULL);
-  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Model_GroundOffset, "Physics Alignment Offset of the Model on the Z axis", "5", 0, NULL);
-  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Model_CapsuleHeight, "Height of capsule controller shape", "90", 0, NULL);
-  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Model_CapsuleRadius, "Radius of capsule controller shape", "40", 0, NULL);
+  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Model_DeltaRotation, "Rotation in degrees of the offset delta around the Z axis", "0.0", 0, "Clamp(-360,360)");
+  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Model_GroundOffset, "Physics Alignment Offset of the Model on the Z axis", "5", 0, "Clamp(-1e6,1e6)");
+  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Model_CapsuleHeight, "Height of capsule controller shape", "90", 0, "Clamp(1e-6,1e6)");
+  DEFINE_VAR_FLOAT  (VLineFollowerComponent, Model_CapsuleRadius, "Radius of capsule controller shape", "40", 0, "Clamp(1e-6,1e6)");
   DEFINE_VAR_BOOL   (VLineFollowerComponent, Debug_DisplayBoxes, "Display target boxes during animation", "FALSE", 0, NULL);
   DEFINE_VAR_BOOL   (VLineFollowerComponent, Debug_RenderMesh, "Display visible capsule mesh", "FALSE", 0, NULL);
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

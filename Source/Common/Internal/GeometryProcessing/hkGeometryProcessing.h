@@ -263,8 +263,10 @@ struct hkGeometryProcessing
 	/// KISS Based PRNG (http://www.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf)
 	struct Prng
 	{
-		Prng(hkUint32 seed = 123456789) : m_x(seed), m_y(234567891), m_z(345678912), m_w(456789123), m_c(0) {}
-
+		/// Ctor.
+		HK_FORCE_INLINE Prng(hkUint32 seed = 123456789) : m_x(seed), m_y(234567891), m_z(345678912), m_w(456789123), m_c(0) {}
+				
+		/// Return the next unsigned int, range: [0,4294967295]
 		HK_FORCE_INLINE hkUint32	nextUint32()
 		{
 			m_y ^= (m_y<<5);
@@ -279,16 +281,19 @@ struct hkGeometryProcessing
 			return m_x + m_y + m_w;
 		}
 
+		/// Return the next signed int, range: [0,2147483647]
 		HK_FORCE_INLINE hkInt32		nextInt32()
 		{
 			return (hkInt32) (nextUint32() >> 1);
 		}
 
+		/// Return the next hkReal, range: [0,1]
 		HK_FORCE_INLINE hkReal		nextReal()
 		{
 			return nextUint32() / 4294967296.0f;
 		}
 
+		/// Return the next vector, range: [0,1] x N
 		template <int N>
 		HK_FORCE_INLINE void		nextVector(hkVector4& v)
 		{
@@ -296,14 +301,29 @@ struct hkGeometryProcessing
 			for(int i=0; i<N; ++i) v(i) = nextReal();
 		}
 
-		HK_FORCE_INLINE void		nextUnitVector3(hkVector4& n)
+		/// Return the next normal vector.
+		HK_FORCE_INLINE void		nextUnitVector3(hkVector4& v, const hkVector4& normal = hkVector4::getZero())
 		{
-			const hkReal	u = nextReal() * 2 * HK_REAL_PI;
-			const hkReal	v = hkMath::acos(1 - 2 * nextReal());
-			n.setZero();
-			n(0) = hkMath::sin(v) * hkMath::cos(u);
-			n(1) = hkMath::sin(v) * hkMath::sin(u);
-			n(2) = hkMath::cos(v);
+			const hkReal	x = nextReal() * 2 * HK_REAL_PI;
+			const hkReal	y = hkMath::acos(1 - 2 * nextReal());
+			v.set( hkMath::sin(y) * hkMath::cos(x), hkMath::sin(y) * hkMath::sin(x), hkMath::cos(y), hkReal(0));
+			if(v.dot<3>(normal).isLessZero()) v.mul(hkSimdReal_Minus1);
+		}
+
+		/// Return the next 3d bary-center.
+		HK_FORCE_INLINE void		nextBaryCenter3D(hkVector4& bc)
+		{
+			const hkSimdReal	x = hkSimdReal::fromFloat(nextReal()).sqrt<HK_ACC_FULL,HK_SQRT_SET_ZERO>();
+			const hkSimdReal	y = hkSimdReal::fromFloat(nextReal());
+			bc.set( hkSimdReal_1 - x, x * (hkSimdReal_1 - y), x * y, hkSimdReal_0);
+		}
+
+		/// Returns a new PRNG.
+		inline Prng		nextPrng()
+		{
+			Prng prng(nextUint32());
+			for(int i=0,n=int(nextUint32() % NEXT_PRIME_AFTER_64); i<n; ++i) prng.nextUint32();
+			return prng;
 		}
 
 		hkUint32	m_x, m_y, m_z, m_w, m_c;
@@ -313,24 +333,80 @@ struct hkGeometryProcessing
 	struct SurfaceSampler
 	{
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_GEOMETRY,SurfaceSampler);
+		
 		struct Element
 		{
-			hkVector4	m_vertices[3];
-			hkVector4	m_normal;
-			hkReal		m_value;
-			hkUint32	m_key;
+			HK_DECLARE_POD_TYPE();
+
+			hkReal	m_value;
+			int		m_index;
 		};
 
-		void	addElement(hkVector4Parameter a, hkVector4Parameter b, hkVector4Parameter c, hkUint32 key);
-		void	remElement(hkUint32 key);
-		int		findElement(hkUint32 key) const;
-		int		search(hkReal value) const;
-		void	update();
+				SurfaceSampler() { clear(); }
 
-		void	getSample(Prng& prng, hkVector4& position, hkVector4& normal) const;
+		void	clear();
+		void	addGeometry(const hkGeometry& geometry, int baseIndex = 0);
+		void	addElement(hkVector4Parameter a, hkVector4Parameter b, hkVector4Parameter c, int index);
+		int		findElement(int index) const;
+		int		searchElement(hkReal value) const;
+
+		/// Pick a random sample, returns the index of the element and set baryCenter to the barymetric coordinates of the sample.
+		int		getSample(Prng& prng, hkVector4& baryCenter) const;
 			
 		hkArray<Element>	m_elements;
 		hkReal				m_domain;
+	};
+
+	/// Online mean and variance accumulator.
+	/// T must implement the following 'hkVector4' like methods: setZero, setSub, setMul, addMul, add.
+	template <typename T>
+	struct MeanVariance
+	{
+		HK_FORCE_INLINE MeanVariance()
+		{
+			setZero();
+		}
+	
+		HK_FORCE_INLINE void setZero()
+		{
+			m_sum.setZero();
+			m_sum2.setZero();
+			m_weight.setZero();
+			m_n = 0;
+		}
+
+		HK_FORCE_INLINE void	add(const T& x, hkSimdRealParameter w)
+		{
+			T	value; value.setMul(x,w);
+			T	squared; squared.setMul(value,value);
+			m_sum.add(value);
+			m_sum2.add(squared);
+			m_weight.add(w);
+			m_n++;
+		}
+
+		HK_FORCE_INLINE void	add(const MeanVariance& other)
+		{
+			m_sum.add(other.m_sum);
+			m_sum2.add(other.m_sum2);
+			m_weight.add(other.m_weight);
+			m_n += other.m_n;
+		}
+
+		HK_FORCE_INLINE void	computeMeanAndVariance(T& meanOut, T& varianceOut) const
+		{
+			hkSimdReal	invW; invW.setReciprocal<HK_ACC_FULL,HK_DIV_SET_ZERO>(m_weight);
+			meanOut.setMul(m_sum, invW);
+
+			hkSimdReal	invN; invN.setReciprocal<HK_ACC_FULL,HK_DIV_SET_ZERO>(hkSimdReal::fromInt32(m_n-1));
+			T			prod; prod.setMul(m_sum, meanOut);
+			T			diff; diff.setSub(m_sum2, prod);
+			varianceOut.setMul(diff, invN);
+		}
+	
+		T			m_sum,m_sum2;	///< Sum and sum squared of the samples.
+		hkSimdReal	m_weight;		///< Sum of the weights.
+		int			m_n;			///< Number of samples.
 	};
 	
 	//
@@ -429,6 +505,9 @@ struct hkGeometryProcessing
 	template <typename A,typename B>
 	static HKGP_FORCE_INLINE hkUlong	makeSymmetricHash(A a,B b);
 
+	/// Evaluate tri-linear barycentric coordinates on hkVector4
+	static HK_FORCE_INLINE hkVector4	evaluateBarycentricCoordinates(hkVector4Parameter baryCenter, hkVector4Parameter a, hkVector4Parameter b, hkVector4Parameter c);
+	
 	/// Choose N from M with N <= M , count permutations.
 	static HKGP_FORCE_INLINE int		chooseMN_count(int m,int n);
 	
@@ -470,8 +549,15 @@ struct hkGeometryProcessing
 	/// Note: weights be can set to HK_NULL, in which case 1.0 will be used for all data points.
 	static void HK_CALL					generateClusters(const hkArray<hkReal>& data, const hkArray<hkSimdReal>* weights, int numClusters, hkArray<int>& clusterIds, int maxIterations = 512);
 
+	/// Generate clusters from a set of hkAabb.
+	/// On return, the 'clusterRoots' array contains the first AABB index of each cluster and 'clusterNexts' contains the next AABB index in the cluster or -1.
+	static void HK_CALL					generateClusters(const hkAabb* aabbs, int numAabbs, int maxClusters, hkArray<int>& clusterRoots, hkArray<int>& clusterNexts);
+
 	/// Stores max curvature in the W component of the vertices.
 	static void HK_CALL					computeCurvature(hkGeometry& geometry, hkSimdReal& maxCurvature);
+
+	/// Resolve T-junctions in geometry.
+	static void	HK_CALL					fixTJunctions(hkGeometry& geometry, hkReal maxDistance);
 
 	/// Minimize a scalar function of a normalized vector.
 	/// Returns the normal that minimize the function as well as the value in its W component.
@@ -532,7 +618,7 @@ struct hkGeometryProcessing
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

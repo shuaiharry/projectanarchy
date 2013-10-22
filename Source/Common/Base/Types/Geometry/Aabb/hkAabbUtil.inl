@@ -14,20 +14,14 @@ namespace hkAabbUtil
 
 void HK_CALL calcAabb( const hkTransform& localToWorld, const hkVector4& halfExtents, hkSimdRealParameter extraRadius, hkAabb& aabbOut )
 {
-	hkVector4 he0; he0.setBroadcast<0>( halfExtents );
-	hkVector4 he1; he1.setBroadcast<1>( halfExtents );
-	hkVector4 he2; he2.setBroadcast<2>( halfExtents );
-
-	hkVector4 transformedX; transformedX.setMul( he0, localToWorld.getRotation().getColumn<0>());
-	hkVector4 transformedY; transformedY.setMul( he1, localToWorld.getRotation().getColumn<1>());
-	hkVector4 transformedZ; transformedZ.setMul( he2, localToWorld.getRotation().getColumn<2>());
+	hkVector4 transformedX; transformedX.setMul( halfExtents.getComponent<0>(), localToWorld.getRotation().getColumn<0>());
+	hkVector4 transformedY; transformedY.setMul( halfExtents.getComponent<1>(), localToWorld.getRotation().getColumn<1>());
+	hkVector4 transformedZ; transformedZ.setMul( halfExtents.getComponent<2>(), localToWorld.getRotation().getColumn<2>());
 	
 	transformedX.setAbs( transformedX );
 	transformedY.setAbs( transformedY );
 	transformedZ.setAbs( transformedZ );
-
-	hkVector4 extra; extra.setAll( extraRadius );
-	transformedZ.add( extra );
+	transformedZ.setAdd( transformedZ, extraRadius );
 
 	hkVector4 max;
 	max.setAdd( transformedX, transformedY );
@@ -36,7 +30,7 @@ void HK_CALL calcAabb( const hkTransform& localToWorld, const hkVector4& halfExt
 	hkVector4 min;	min.setNeg<4>(max);
 
 	max.add( localToWorld.getTranslation() );
-	min.add( localToWorld.getTranslation()  );
+	min.add( localToWorld.getTranslation() );
 
 	aabbOut.m_max = max;
 	aabbOut.m_min = min;
@@ -45,21 +39,14 @@ void HK_CALL calcAabb( const hkTransform& localToWorld, const hkVector4& halfExt
 
 void HK_CALL calcAabb( const hkTransform& localToWorld, const hkVector4& halfExtents, const hkVector4& center, hkSimdRealParameter extraRadius, hkAabb& aabbOut )
 {
-	hkVector4 he0; he0.setBroadcast<0>( halfExtents );
-	hkVector4 he1; he1.setBroadcast<1>( halfExtents );
-	hkVector4 he2; he2.setBroadcast<2>( halfExtents );
-
-	hkVector4 transformedX; transformedX.setMul( he0, localToWorld.getRotation().getColumn<0>());
-	hkVector4 transformedY; transformedY.setMul( he1, localToWorld.getRotation().getColumn<1>());
-	hkVector4 transformedZ; transformedZ.setMul( he2, localToWorld.getRotation().getColumn<2>());
+	hkVector4 transformedX; transformedX.setMul( halfExtents.getComponent<0>(), localToWorld.getRotation().getColumn<0>());
+	hkVector4 transformedY; transformedY.setMul( halfExtents.getComponent<1>(), localToWorld.getRotation().getColumn<1>());
+	hkVector4 transformedZ; transformedZ.setMul( halfExtents.getComponent<2>(), localToWorld.getRotation().getColumn<2>());
 
 	transformedX.setAbs( transformedX );
 	transformedY.setAbs( transformedY );
 	transformedZ.setAbs( transformedZ );
-
-
-	hkVector4 extra; extra.setAll( extraRadius );
-	transformedZ.add( extra );
+	transformedZ.setAdd( transformedZ, extraRadius );
 
 	hkVector4 max;
 	max.setAdd( transformedX, transformedY );
@@ -78,13 +65,9 @@ void HK_CALL calcAabb( const hkTransform& localToWorld, const hkVector4& halfExt
 
 void HK_CALL calcAabb( const hkTransform& localToWorld, const hkVector4& halfExtents, const hkVector4& center, hkAabb& aabbOut )
 {
-	hkVector4 he0; he0.setBroadcast<0>( halfExtents );
-	hkVector4 he1; he1.setBroadcast<1>( halfExtents );
-	hkVector4 he2; he2.setBroadcast<2>( halfExtents );
-
-	hkVector4 transformedX; transformedX.setMul( he0, localToWorld.getRotation().getColumn<0>());
-	hkVector4 transformedY; transformedY.setMul( he1, localToWorld.getRotation().getColumn<1>());
-	hkVector4 transformedZ; transformedZ.setMul( he2, localToWorld.getRotation().getColumn<2>());
+	hkVector4 transformedX; transformedX.setMul( halfExtents.getComponent<0>(), localToWorld.getRotation().getColumn<0>());
+	hkVector4 transformedY; transformedY.setMul( halfExtents.getComponent<1>(), localToWorld.getRotation().getColumn<1>());
+	hkVector4 transformedZ; transformedZ.setMul( halfExtents.getComponent<2>(), localToWorld.getRotation().getColumn<2>());
 
 	transformedX.setAbs( transformedX );
 	transformedY.setAbs( transformedY );
@@ -139,9 +122,8 @@ void HK_CALL transformAabbIntoLocalSpace( const hkTransform& localToWorld, const
 //
 void calcAabb( const hkVector4& center, hkSimdRealParameter innerRadius, hkAabb& aabbOut)
 {
-	hkVector4	ir;	ir.setAll(innerRadius);
-	aabbOut.m_min.setSub(center,ir);
-	aabbOut.m_max.setAdd(center,ir);
+	aabbOut.m_min.setSub(center,innerRadius);
+	aabbOut.m_max.setAdd(center,innerRadius);
 	aabbOut.m_min.zeroComponent<3>();
 	aabbOut.m_max.zeroComponent<3>();
 }
@@ -155,6 +137,23 @@ HK_FORCE_INLINE hkSimdReal getOuterRadius(const hkAabb& aabb)
 //
 HK_FORCE_INLINE hkSimdReal	distanceSquared(const hkAabb& a, hkVector4Parameter b)
 {
+#if (HK_CONFIG_SIMD == HK_CONFIG_SIMD_ENABLED)
+	hkVector4 c; c.setMin(b,a.m_max);
+	hkVector4 d; d.setMax(c,a.m_min);
+	hkSimdReal dist = d.distanceToSquared(b);
+
+	// a.containsPoint(b)
+	hkVector4Comparison contains;
+	{
+		hkVector4Comparison mincomp = a.m_min.lessEqual(b);
+		hkVector4Comparison maxcomp = b.lessEqual(a.m_max);
+		hkVector4Comparison both; both.setAnd( mincomp, maxcomp );
+		contains = both.horizontalAnd<3>();
+	}
+	dist.zeroIfTrue(contains);
+
+	return dist;
+#else
 	if (a.containsPoint(b))
 	{
 		return hkSimdReal_0;
@@ -167,6 +166,7 @@ HK_FORCE_INLINE hkSimdReal	distanceSquared(const hkAabb& a, hkVector4Parameter b
 		d.setMax(c,a.m_min);
 		return d.distanceToSquared(b);
 	}
+#endif
 }
 
 HK_FORCE_INLINE hkSimdReal calcMinGap( const hkAabb& innerAabb, const hkAabb& outerAabb )
@@ -178,7 +178,6 @@ HK_FORCE_INLINE hkSimdReal calcMinGap( const hkAabb& innerAabb, const hkAabb& ou
 }
 
 
-//
 HK_FORCE_INLINE void getVertex(const hkAabb& aabb, int index, hkVector4& vertexOut)
 {
 	HK_ASSERT2(0x1ACBA392,0 <= index && index <=7,"Invalid vertex index");
@@ -187,6 +186,27 @@ HK_FORCE_INLINE void getVertex(const hkAabb& aabb, int index, hkVector4& vertexO
 	vertexOut.zeroComponent<3>();
 }
 
+#if (HK_CONFIG_SIMD == HK_CONFIG_SIMD_ENABLED)
+template <int index>
+HK_FORCE_INLINE void getVertex(const hkAabb& aabb, hkVector4& vertexOut)
+{
+	HK_ASSERT2(0x1ACBA392,0 <= index && index <=7,"Invalid vertex index");
+	vertexOut.setSelect<(hkVector4ComparisonMask::Mask)index>(aabb.m_min, aabb.m_max);
+	vertexOut.zeroComponent<3>();
+}
+
+HK_FORCE_INLINE void get8Vertices(const hkAabb& aabb, hkVector4* HK_RESTRICT verticesOut)
+{
+	getVertex<0>( aabb, verticesOut[0] );
+	getVertex<1>( aabb, verticesOut[1] );
+	getVertex<2>( aabb, verticesOut[2] );
+	getVertex<3>( aabb, verticesOut[3] );
+	getVertex<4>( aabb, verticesOut[4] );
+	getVertex<5>( aabb, verticesOut[5] );
+	getVertex<6>( aabb, verticesOut[6] );
+	getVertex<7>( aabb, verticesOut[7] );
+}
+#else
 HK_FORCE_INLINE void get8Vertices(const hkAabb& aabb, hkVector4* HK_RESTRICT verticesOut)
 {
 	for (int i =0; i < 8; i++)
@@ -194,6 +214,7 @@ HK_FORCE_INLINE void get8Vertices(const hkAabb& aabb, hkVector4* HK_RESTRICT ver
 		getVertex( aabb, i, verticesOut[i] );
 	}
 }
+#endif
 
 //
 HK_FORCE_INLINE	void scaleAabb(const hkVector4& scale, const hkAabb& aabbIn, hkAabb& aabbOut)
@@ -219,14 +240,13 @@ HK_FORCE_INLINE void	expandAabbByMotion(const hkAabb& aabbIn, const hkVector4& m
 //
 HK_FORCE_INLINE void	expandAabbByMotion(const hkAabb& aabbIn, const hkVector4& motion, hkSimdRealParameter anyDirectionExpansion, hkAabb& aabbOut)
 {
-	hkVector4	radius; radius.setAll(anyDirectionExpansion);
 	hkVector4	minOffset; minOffset.setAdd(aabbIn.m_min, motion);
 	hkVector4	maxOffset; maxOffset.setAdd(aabbIn.m_max, motion);
 	hkVector4	newMin; newMin.setMin(minOffset, aabbIn.m_min);
 	hkVector4	newMax; newMax.setMax(maxOffset, aabbIn.m_max);
 
-	aabbOut.m_min.setSub(newMin, radius);
-	aabbOut.m_max.setAdd(newMax, radius);
+	aabbOut.m_min.setSub(newMin, anyDirectionExpansion);
+	aabbOut.m_max.setAdd(newMax, anyDirectionExpansion);
 }
 
 HK_FORCE_INLINE void expandAabbByMotion(const hkAabb& aabbIn, hkVector4Parameter motionA, hkVector4Parameter motionB, hkSimdRealParameter anyDirectionExpansion, hkAabb& aabbOut)
@@ -242,9 +262,8 @@ HK_FORCE_INLINE void expandAabbByMotion(const hkAabb& aabbIn, hkVector4Parameter
 	expandLinMin.setMin(expandLinMin, motionB );
 	expandLinMax.setMax(expandLinMax, motionB );
 
-	hkVector4 expandAny; expandAny.setAll(anyDirectionExpansion);
-	expandLinMin.sub( expandAny );
-	expandLinMax.add( expandAny );
+	expandLinMin.setSub( expandLinMin, anyDirectionExpansion );
+	expandLinMax.setAdd( expandLinMax, anyDirectionExpansion );
 
 	hkVector4 ma; ma.setAdd(aabbIn.m_max, expandLinMax);	// helper variable to avoid LHS avoidance
 	aabbOut.m_min.setAdd(aabbIn.m_min, expandLinMin);
@@ -259,7 +278,7 @@ HK_FORCE_INLINE void expandAabbByMotionCircle(const hkAabb& aabbIn, hkVector4Par
 	{
 		// Calculate the minimum aabb expansion that includes the bounding sphere around the motion.
 		hkSimdReal distmoved = motionA.length<3>();
-		hkVector4 expansionSize; expansionSize.setAll(distmoved*hkSimdReal_Inv2);
+		hkSimdReal expansionSize = distmoved*hkSimdReal_Inv2;
 		hkVector4 moveCenter; moveCenter.setMul(motionA, hkSimdReal_Inv2);
 
 		expandLinMin.setSub(moveCenter, expansionSize);
@@ -269,9 +288,8 @@ HK_FORCE_INLINE void expandAabbByMotionCircle(const hkAabb& aabbIn, hkVector4Par
 	expandLinMin.setMin(expandLinMin, motionB );
 	expandLinMax.setMax(expandLinMax, motionB );
 
-	hkVector4 expandAny; expandAny.setAll(anyDirectionExpansion);
-	expandLinMin.sub( expandAny );
-	expandLinMax.add( expandAny );
+	expandLinMin.setSub( expandLinMin, anyDirectionExpansion );
+	expandLinMax.setAdd( expandLinMax, anyDirectionExpansion );
 
 	hkVector4 ma; ma.setAdd(aabbIn.m_max, expandLinMax);	// helper variable to avoid LHS avoidance
 	aabbOut.m_min.setAdd(aabbIn.m_min, expandLinMin);
@@ -311,10 +329,9 @@ HK_FORCE_INLINE void	projectAabbMaxOnAxis(const hkVector4& axis, const hkAabb& a
 //
 HK_FORCE_INLINE void	computeAabbPlaneSpan(const hkVector4& plane, const hkAabb& aabb, hkSimdReal& minOut, hkSimdReal& maxOut)
 {
-	hkSimdReal prj[2];
-	projectAabbOnAxis(plane, aabb, prj[0], prj[1]);
-	minOut = prj[0] + plane.getComponent<3>();
-	maxOut = prj[1] + plane.getComponent<3>();
+	projectAabbOnAxis(plane, aabb, minOut, maxOut);
+	minOut.add(plane.getComponent<3>());
+	maxOut.add(plane.getComponent<3>());
 }
 
 void sweepAabb(const hkMotionState* motionState, hkReal tolerance, const hkAabb& aabbIn, hkAabb& aabbOut)
@@ -326,9 +343,8 @@ void sweepAabb(const hkMotionState* motionState, hkReal tolerance, const hkAabb&
 	hkSimdReal objectRadius; objectRadius.setFromFloat(motionState->m_objectRadius);
 	{
 		const hkSimdReal radius = motionState->m_deltaAngle.getW() * objectRadius;
-		hkVector4 rotationalGain; rotationalGain.setAll(radius);
-		aabbOut.m_min.setSub(aabbIn.m_min, rotationalGain);
-		aabbOut.m_max.setAdd(aabbIn.m_max, rotationalGain);
+		aabbOut.m_min.setSub(aabbIn.m_min, radius);
+		aabbOut.m_max.setAdd(aabbIn.m_max, radius);
 	}
 
 	//
@@ -336,7 +352,7 @@ void sweepAabb(const hkMotionState* motionState, hkReal tolerance, const hkAabb&
 	//
 	{
 		hkSimdReal toleranceSr;  toleranceSr.setFromFloat(tolerance);
-		hkVector4 radius4; radius4.setAll( objectRadius + toleranceSr );
+		hkSimdReal radius4 = objectRadius + toleranceSr;
 		hkVector4 maxR; maxR.setAdd( motionState->getSweptTransform().m_centerOfMass1, radius4 );
 		hkVector4 minR; minR.setSub( motionState->getSweptTransform().m_centerOfMass1, radius4 );
 
@@ -369,13 +385,9 @@ void sweepAabb(const hkMotionState* motionState, hkReal tolerance, const hkAabb&
 	aabbOut.m_max.add( maxPath );
 
 #if defined(HK_DEBUG)
-	hkReal diffMinX = aabbIn.m_min(0) - aabbOut.m_min(0);
-	hkReal diffMinY = aabbIn.m_min(1) - aabbOut.m_min(1);
-	hkReal diffMinZ = aabbIn.m_min(2) - aabbOut.m_min(2);
-	hkReal diffMaxX = aabbOut.m_max(0) - aabbIn.m_max(0);
-	hkReal diffMaxY = aabbOut.m_max(1) - aabbIn.m_max(1);
-	hkReal diffMaxZ = aabbOut.m_max(2) - aabbIn.m_max(2);
-	HK_ASSERT2( 0xaf63e413, diffMinX >= 0.0f && diffMinY >= 0.0f && diffMinZ >= 0.0f && diffMaxX >= 0.0f && diffMaxY >= 0.0f && diffMaxZ >= 0.0f, "Expanded AABB is smaller than the unexpanded AABB." );
+	hkVector4 diffMin; diffMin.setSub(aabbIn.m_min, aabbOut.m_min);
+	hkVector4 diffMax; diffMax.setSub(aabbOut.m_max, aabbIn.m_max);
+	HK_ASSERT2( 0xaf63e413, diffMin.greaterEqualZero().allAreSet<hkVector4ComparisonMask::MASK_XYZ>() && diffMax.greaterEqualZero().allAreSet<hkVector4ComparisonMask::MASK_XYZ>(), "Expanded AABB is smaller than the unexpanded AABB." );
 #endif
 }
 
@@ -499,7 +511,7 @@ HK_FORCE_INLINE void HK_CALL compressExpandedAabbUint32(const hkAabbUint32& expa
 		outMin.setComponent<3>(shift);
 		outMin.setConvertSaturateS32ToS16(outMin,outMin);
 		outMin.setConvertSaturateS16ToU8(outMin,outMin);
-		outMin.storeNotAligned<1>((hkUint32*)&unexpandedAabbInt_InOut.m_expansionMin[0]); // write 3x expansionMin 1x expansionShift
+		outMin.store<1, HK_IO_NATIVE_ALIGNED>((hkUint32*)&unexpandedAabbInt_InOut.m_expansionMin[0]); // write 3x expansionMin 1x expansionShift
 	}
 	{
 		hkIntVector outMax; 
@@ -507,7 +519,7 @@ HK_FORCE_INLINE void HK_CALL compressExpandedAabbUint32(const hkAabbUint32& expa
 		outMax.setComponent<3>(hkInt32(unexpandedAabbInt_InOut.m_shapeKeyByte));
 		outMax.setConvertSaturateS32ToS16(outMax,outMax);
 		outMax.setConvertSaturateS16ToU8(outMax,outMax);
-		outMax.storeNotAligned<1>((hkUint32*)&unexpandedAabbInt_InOut.m_expansionMax[0]); // write 3x expansionMax 1x shapeKeyByte
+		outMax.store<1, HK_IO_NATIVE_ALIGNED>((hkUint32*)&unexpandedAabbInt_InOut.m_expansionMax[0]); // write 3x expansionMax 1x shapeKeyByte
 	}
 #else
 	hkInt32 mix = unexpandedAabbInt_InOut.m_min[0] - expandedAabbInt.m_min[0];
@@ -542,7 +554,7 @@ HK_FORCE_INLINE void HK_CALL uncompressExpandedAabbUint32(const hkAabbUint32& un
 
 	{
 		hkIntVector expansion; 
-		expansion.loadNotAligned<1>((const hkUint32*)&unexpandedAabbInt.m_expansionMin[0]); // 3x expansionMin 1x expansionShift
+		expansion.load<1, HK_IO_NATIVE_ALIGNED>((const hkUint32*)&unexpandedAabbInt.m_expansionMin[0]); // 3x expansionMin 1x expansionShift
 		expansion.setMergeHead8(expansion,zero); 
 		expansion.setMergeHead16(expansion,zero);
 		shift = expansion.getComponent<3>();
@@ -553,7 +565,7 @@ HK_FORCE_INLINE void HK_CALL uncompressExpandedAabbUint32(const hkAabbUint32& un
 	}
 	{
 		hkIntVector expansion; 
-		expansion.loadNotAligned<1>((const hkUint32*)&unexpandedAabbInt.m_expansionMax[0]); // 3x expansionMax 1x shapeKeyByte
+		expansion.load<1, HK_IO_NATIVE_ALIGNED>((const hkUint32*)&unexpandedAabbInt.m_expansionMax[0]); // 3x expansionMax 1x shapeKeyByte
 		expansion.setMergeHead8(expansion,zero); 
 		expansion.setMergeHead16(expansion,zero);
 		hkIntVector shiftedExpansion; shiftedExpansion.setShiftLeft32(expansion,shift);
@@ -583,7 +595,7 @@ HK_FORCE_INLINE void HK_CALL uncompressExpandedAabbUint32(const hkAabbUint32& un
 } // namespace hkAabbUtil
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

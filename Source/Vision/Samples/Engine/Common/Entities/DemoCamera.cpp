@@ -39,7 +39,6 @@ VisDemoCamera_cl::VisDemoCamera_cl(float fModelHeight, float fMinDistance, float
 
 VisDemoCamera_cl::~VisDemoCamera_cl()
 {
-  V_SAFE_DELETE(m_pInputMap);
 }
 
 void VisDemoCamera_cl::SetCollide(bool bColl)
@@ -50,6 +49,8 @@ void VisDemoCamera_cl::SetCollide(bool bColl)
 void VisDemoCamera_cl::InitFunction()
 {
   hkvVec3 tmpvector(0, 0, 0);
+
+  Vision::Callbacks.OnFrameUpdatePreRender += this;
 
   m_fHalfScreenSizeX = (float)(Vision::Video.GetXRes()>>1);
   m_fHalfScreenSizeY = (float)(Vision::Video.GetYRes()>>1);
@@ -133,9 +134,15 @@ void VisDemoCamera_cl::InitFunction()
   m_pInputMap->MapTriggerAxis(CAMERA_DEMO_VERTICAL,   VInputManagerWiiU::GetDRC(V_DRC_FIRST), CT_PAD_RIGHT_THUMB_STICK_UP, CT_PAD_RIGHT_THUMB_STICK_DOWN,    VInputOptions::DeadZone(0.2f, true));
 
 #else
-  #error Undefinded platform!
+  #error Undefined platform!
 #endif
+}
 
+void VisDemoCamera_cl::DeInitFunction()
+{
+  Vision::Callbacks.OnFrameUpdatePreRender -= this;
+
+  V_SAFE_DELETE(m_pInputMap);
 }
 
 void VisDemoCamera_cl::SetTargetEntity(VisBaseEntity_cl *pEntity)
@@ -242,8 +249,10 @@ void VisDemoCamera_cl::HandleInput()
     m_fDistance = m_fMaxDistance;
 }
 
-void VisDemoCamera_cl::ThinkFunction()
+void VisDemoCamera_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
+  VASSERT(pData->m_pSender == &Vision::Callbacks.OnFrameUpdatePreRender);
+
   if (!m_bFixed)
     HandleInput();
 
@@ -297,14 +306,12 @@ void VisDemoCamera_cl::ThinkFunction()
   Vision::Camera.Set(mLookAtMatrix, vNewCamPos);
 }
 
-
-
 V_IMPLEMENT_SERIAL( VisDemoCamera_cl, VisBaseEntity_cl, 0, Vision::GetEngineModule() );
 START_VAR_TABLE(VisDemoCamera_cl, VisBaseEntity_cl, "VisDemoCamera_cl", 0, "")  
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

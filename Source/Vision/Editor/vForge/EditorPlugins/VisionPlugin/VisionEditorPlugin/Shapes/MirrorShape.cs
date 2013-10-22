@@ -495,9 +495,8 @@ namespace VisionEditorPlugin.Shapes
       get { return _iResolution; }
       set
       {
-        int iNewVal = value;
-        if (iNewVal < 16) iNewVal = 16;
-        if (iNewVal > 2048) iNewVal = 2048;
+        int iNewVal = Math.Max(16, Math.Min(value, 4096));
+
         if (_iResolution == iNewVal)
           return;
 
@@ -944,7 +943,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

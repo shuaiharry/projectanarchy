@@ -38,6 +38,9 @@ class hkaiPhysics2012BodyObstacleGenerator : public hkaiObstacleGenerator
 
 		hkReal getVelocityThreshold() const { return m_velocityThreshold; }
 
+			/// Accessor for the rigid body.
+		const hkpRigidBody* getRigidBody() const { return m_rigidBody; }
+
 	protected:
 
 			/// Velocity below which obstacle generation is diabled.
@@ -50,7 +53,7 @@ class hkaiPhysics2012BodyObstacleGenerator : public hkaiObstacleGenerator
 #endif	// HKAI_PHYSICS_2012_BODY_OBSTACLE_GENERATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

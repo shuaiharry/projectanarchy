@@ -760,8 +760,7 @@ void VFmodSoundObjectCollection::PurgeNotPlaying()
   for (int i=iCount-1;i>=0;i--)
   {
     VFmodSoundObject* pInst = GetAt(i);
-    if(!pInst->m_bPlayedOnce || pInst->IsPlaying() ||
-       (pInst->m_iFlags&VFMOD_FLAG_NODISPOSE) != 0)
+    if(!pInst->m_bPlayedOnce || pInst->IsPlaying() || pInst->IsPaused() || (pInst->m_iFlags&VFMOD_FLAG_NODISPOSE) != 0)
     {
       continue; // Valid sound - cannot be removed
     }
@@ -810,7 +809,7 @@ VFmodSoundObject* VFmodSoundObjectCollection::SearchObject(const char* szName) c
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

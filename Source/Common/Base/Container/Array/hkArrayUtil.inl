@@ -6,12 +6,12 @@
  *
  */
 template <typename T>
-HK_FORCE_INLINE void hkArrayUtil::construct(T* t, int n, hkTypeIsPod)
+HK_FORCE_INLINE void hkArrayUtil::construct(T* t, int n, hkTrait::TypeIsPod)
 {
 }
 
 template <typename T>
-HK_FORCE_INLINE void hkArrayUtil::construct(T* t, int n, hkTypeIsClass)
+HK_FORCE_INLINE void hkArrayUtil::construct(T* t, int n, hkTrait::TypeIsClass)
 {
 	for(int i = 0; i < n; ++i)
 	{
@@ -20,7 +20,7 @@ HK_FORCE_INLINE void hkArrayUtil::construct(T* t, int n, hkTypeIsClass)
 }
 
 template <typename T>
-HK_FORCE_INLINE void hkArrayUtil::constructWithCopy(T* t, int n, const T& tcopy, hkTypeIsPod)
+HK_FORCE_INLINE void hkArrayUtil::constructWithCopy(T* t, int n, const T& tcopy, hkTrait::TypeIsPod)
 {
 	for(int i = 0; i < n; ++i)
 	{
@@ -29,7 +29,7 @@ HK_FORCE_INLINE void hkArrayUtil::constructWithCopy(T* t, int n, const T& tcopy,
 }
 
 template <typename T>
-HK_FORCE_INLINE void hkArrayUtil::constructWithCopy(T* t, int n, const T& tcopy, hkTypeIsClass)
+HK_FORCE_INLINE void hkArrayUtil::constructWithCopy(T* t, int n, const T& tcopy, hkTrait::TypeIsClass)
 {
 	for(int i = 0; i < n; ++i)
 	{
@@ -39,7 +39,7 @@ HK_FORCE_INLINE void hkArrayUtil::constructWithCopy(T* t, int n, const T& tcopy,
 }
 
 template <typename T>
-HK_FORCE_INLINE void hkArrayUtil::constructWithArray(T* t, int n, const T* tcopy, hkTypeIsPod)
+HK_FORCE_INLINE void hkArrayUtil::constructWithArray(T* t, int n, const T* tcopy, hkTrait::TypeIsPod)
 {
 	for(int i = 0; i < n; ++i)
 	{
@@ -48,7 +48,7 @@ HK_FORCE_INLINE void hkArrayUtil::constructWithArray(T* t, int n, const T* tcopy
 }
 
 template <typename T>
-HK_FORCE_INLINE void hkArrayUtil::constructWithArray(T* t, int n, const T* tcopy, hkTypeIsClass)
+HK_FORCE_INLINE void hkArrayUtil::constructWithArray(T* t, int n, const T* tcopy, hkTrait::TypeIsClass)
 {
 	for(int i = 0; i < n; ++i)
 	{
@@ -57,12 +57,12 @@ HK_FORCE_INLINE void hkArrayUtil::constructWithArray(T* t, int n, const T* tcopy
 }
 
 template <typename T>
-HK_FORCE_INLINE void hkArrayUtil::destruct(T* t, int n, hkTypeIsPod)
+HK_FORCE_INLINE void hkArrayUtil::destruct(T* t, int n, hkTrait::TypeIsPod)
 {
 }
 
 template <typename T>
-HK_FORCE_INLINE void hkArrayUtil::destruct(T* t, int n, hkTypeIsClass )
+HK_FORCE_INLINE void hkArrayUtil::destruct(T* t, int n, hkTrait::TypeIsClass )
 {
 	for(int i = n-1; i >= 0; --i)
 	{
@@ -71,7 +71,7 @@ HK_FORCE_INLINE void hkArrayUtil::destruct(T* t, int n, hkTypeIsClass )
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

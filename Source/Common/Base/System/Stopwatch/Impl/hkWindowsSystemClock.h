@@ -59,11 +59,11 @@ hkUint64 HK_CALL hkSystemClock::getTicksPerSecond()
 		hkUint64 qticks;
 		hkUint64 ticks2;
 		hkUint64 qticks2;
-		double minFactor = 1e6f;
+		double avgFactor = 0;
+		const int numIters = 100;
 
 		// Iterate several times
-		// We take the minimum value beacuse Sleep() sleeps for at least the specified time
-		for (int iter = 0; iter <10; iter++)
+		for (int iter = 0; iter < numIters; iter++)
 		{
 			ticks = getTickCounter();
 			QueryPerformanceCounter( (LARGE_INTEGER*) &qticks);
@@ -72,7 +72,7 @@ hkUint64 HK_CALL hkSystemClock::getTicksPerSecond()
 			///	Sleep for a little while
 			///
 			volatile int x=1;
-			for (int j=0; j< 5000; j++)
+			for (int j=0; j< 50000; j++)
 			{
 				x += x*x;
 			}
@@ -90,13 +90,11 @@ hkUint64 HK_CALL hkSystemClock::getTicksPerSecond()
 
 			double factor = double(diff)/ double(qdiff);
 			
-			// Is this smaller?
-			if (factor < minFactor)
-			{
-				minFactor = factor;
+			avgFactor += factor;
 			}
-		}
-		freq = hkUint64(minFactor * freq);
+
+		avgFactor /= numIters;
+		freq = hkUint64(avgFactor * freq);
 	}
 	return freq;
 }
@@ -104,7 +102,7 @@ hkUint64 HK_CALL hkSystemClock::getTicksPerSecond()
 #endif  // HK_WINDOWS_SYSTEM_CLOCK
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

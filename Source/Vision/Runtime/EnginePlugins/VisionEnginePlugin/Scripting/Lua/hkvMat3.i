@@ -593,7 +593,7 @@ public:
   /// \return The result matrix.
   hkvMat3 __sub (hkvMat3 other);
   
-  /// \brief Operator * to multiply two matrices. The behavor of this multiplication depends on the underlying C++ implmentation of the operator!
+  /// \brief Operator * to multiply two matrices. The behavior of this multiplication depends on the underlying C++ implmentation of the operator!
   /// \note You can just use this operator when the VisionEnginePlugin was build with 'HKVMATH_ENABLE_NEW_OPERATORS'!
   ///   Otherwise please use hkvMat3::multiplyReverse and hkvMat3::multiply for matrix multiplication!
   /// \param other The matrix to multiply with.

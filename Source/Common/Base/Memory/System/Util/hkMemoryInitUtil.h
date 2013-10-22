@@ -90,6 +90,11 @@ namespace hkMemoryInitUtil
 		hkMemoryRouter* m_memoryRouter;
 		hkMemorySystem* m_memorySystem;
 		hkSingletonInitNode* m_singletonList;
+		void* m_stackTracerImpl; // the stack tracer implementation
+		hkCriticalSection* m_mtCheckSection; // the multithreading debug check 
+		hkMonitorStream* m_monitors; // montor ptrs as monitors not a normal singleton
+		hkStackTracer::CallTree* m_mtCheckStackTree; // the multithreading debug check 
+		hkUint32* m_mtRefLockedAllPtr;
 	};
 
 	extern hkMemorySystem* s_system;
@@ -101,7 +106,7 @@ namespace hkMemoryInitUtil
 #endif // HKBASE_hkMemoryInitUtil_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

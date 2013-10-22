@@ -118,7 +118,7 @@ HK_FORCE_INLINE hkBool32 HK_CALL hkcdRayCastCylinder(
 			{
 				return false;
 			}
-			t2 = -hkSimdReal_Max;
+			t2 = hkSimdReal_MinusMax;
 			t3 = hkSimdReal_Max;
 		}
 		else
@@ -176,7 +176,7 @@ HK_FORCE_INLINE hkBool32 HK_CALL hkcdRayCastCylinder(
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

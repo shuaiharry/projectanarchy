@@ -34,7 +34,7 @@ class hkaAnnotationTrack
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_ANIMATION, hkaAnnotationTrack::Annotation );
 			HK_DECLARE_REFLECTION();
 
-			Annotation() : m_time( 0.0f ) {}
+			Annotation() : m_time( 0 ) {}
 
 				/// The animation time associated with this annotation
 			hkReal m_time;
@@ -65,7 +65,7 @@ class hkaAnnotationTrack
 #endif // HKANIMATION_ANIMATION_HKANIMATIONTRACK_HKCLASS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

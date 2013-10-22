@@ -151,6 +151,7 @@ class hkbBlendingTransitionEffect : public hkbTransitionEffect
 		hkInt16 m_alignmentBone;	//+default(-1)
 									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
 									//+hk.Description("The bone to align during the blend.")
+									//+hk.Ui(group="Alignment Bone",label="Alignment Bone Index")
 
 	protected:
 
@@ -175,17 +176,19 @@ class hkbBlendingTransitionEffect : public hkbTransitionEffect
 			// Is this the first frame of the transition.
 		virtual bool isFirstFrame() const;
 
-		HKB_BEGIN_INTERNAL_STATE(0);
+		HKB_BEGIN_INTERNAL_STATE(1);
 
 			// The most recent world-from-model for the from-generator (used when m_alignmentBone is set).
 		mutable hkVector4 m_fromPos; //+nosave
 		mutable hkQuaternion m_fromRot; //+nosave
+
 			// The most recent world-from-model for the to-generator (used when m_alignmentBone is set).
 		mutable hkVector4 m_toPos; //+nosave
 		mutable hkQuaternion m_toRot; //+nosave
+
 			// The last world-from-model we output.
 		mutable hkVector4 m_lastPos; //+nosave
-		mutable hkQuaternion m_lastRot; //+nosave			
+		mutable hkQuaternion m_lastRot; //+nosave
 
 			// The pose of the character when the transition begins.
 		hkArray<hkQsTransform> m_characterPoseAtBeginningOfTransition; //+nosave
@@ -196,8 +199,13 @@ class hkbBlendingTransitionEffect : public hkbTransitionEffect
 			// The number of seconds the transition has been active.
 		hkReal m_timeInTransition; //+nosave
 
-			// Whether to apply self-transition on the next frame.
-		hkBool m_applySelfTransition; //+nosave
+			// Whether to reset the to generator on the next frame.
+			// This happens during self-transition.
+		hkBool m_resetToGenerator; //+nosave
+
+			// Effective self transition mode of the to-generator to be applied when updateSync() is called.
+			// After this is applied it is changed to SELF_TRANSITION_MODE_CONTINUE to avoid applying more than once.
+		hkEnum< hkbTransitionEffect::SelfTransitionMode, hkInt8 > m_toGeneratorSelfTranstitionMode; //+nosave
 
 			// Initialize the character pose.
 		mutable hkBool m_initializeCharacterPose; //+nosave
@@ -230,7 +238,7 @@ class hkbBlendingTransitionEffect : public hkbTransitionEffect
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

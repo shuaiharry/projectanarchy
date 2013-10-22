@@ -146,9 +146,15 @@ public:
   void clearOutputs();
 
 protected:
+  virtual void onRetryCountExceeded(const Input& input);
+
   virtual void beforeStart();
   virtual void onStopping();
   virtual void afterStop();
+  virtual void beforeClearInputs();
+
+  template <typename InputAction>
+  void forEachInput(InputAction action);
 
   hkvCriticalSectionLock acquireLock();
   void addCrossThreadWork(hkvCrossThreadWork* work);
@@ -184,6 +190,7 @@ private:
 
   hkvFifoSet<InputEntry> m_inputs;
   hkUint32 m_maxNumInputs;
+  InputEntry** m_currentInputs;
   hkArray<Output> m_outputs;
   hkArray<hkvCrossThreadWork*> m_crossThreadWork;
 
@@ -201,8 +208,11 @@ hkvBackgroundProcessor<Input, Output>::hkvBackgroundProcessor(
   m_numThreads = (numThreads < 1) ? 1 : numThreads;
   m_threads = new hkThread*[m_numThreads];
   memset(m_threads, 0, m_numThreads * sizeof(hkThread*));
-  m_threadNumUsage.setSize(m_numThreads, 0);
+  m_threadNumUsage.setSizeAndFill(0, m_numThreads, 0);
   HK_THREAD_LOCAL_SET(m_threadNum, (hkUlong)(-1));
+
+  m_currentInputs = new InputEntry*[m_numThreads];
+  memset(m_currentInputs, 0, m_numThreads * sizeof(InputEntry*));
 
   m_wakeUpEvents = new hkSemaphore(0, m_numThreads);
   m_threadsRunning = new hkSemaphore(m_numThreads, m_numThreads);
@@ -217,6 +227,7 @@ hkvBackgroundProcessor<Input, Output>::~hkvBackgroundProcessor()
   VASSERT_MSG(m_crossThreadWork.isEmpty(), "Not all cross-thread work has been cleared!");
   
   delete[] m_threads;
+  delete[] m_currentInputs;
   delete m_wakeUpEvents;
   delete m_threadsRunning;
 }
@@ -259,7 +270,7 @@ void hkvBackgroundProcessor<Input, Output>::start()
       m_threads[i]->startThread(staticThreadFunc, this, "hkvBackgroundProcessor");
     }
 
-    m_wakeUpEvents->release((int)m_inputs.GetElementCount());
+    m_wakeUpEvents->release((int)m_inputs.GetSize());
   }
 
   // Wait until all threads are really running. We can check this by waiting until each thread
@@ -346,7 +357,7 @@ void hkvBackgroundProcessor<Input, Output>::stop(bool keepCurrentWork)
 
     if (!keepCurrentWork)
     {
-      m_inputs.Clear();
+      clearInputs();
     }
 
     afterStop();
@@ -374,7 +385,16 @@ template <typename Input, typename Output>
 void hkvBackgroundProcessor<Input, Output>::addInput(const Input& input)
 {
   hkCriticalSectionLock lock(&m_mtProtect);
-  
+
+  // Don't add if an equivalent input is currently being processed
+  for (hkUint32 i = 0; i < m_numThreads; ++i)
+  {
+    if ((m_currentInputs[i] != NULL) && (*m_currentInputs[i] == input))
+    {
+      return;
+    }
+  }
+
   if (!m_inputs.Insert(InputEntry(input)))
   {
     return;
@@ -402,7 +422,7 @@ void hkvBackgroundProcessor<Input, Output>::queryProgressInformation(
   hkUint32& out_maxInputs, hkUint32& out_remainingInputs) const
 {
   hkCriticalSectionLock lock(&m_mtProtect);
-  out_remainingInputs = (hkUint32)m_inputs.GetElementCount() + m_numActiveThreads;
+  out_remainingInputs = (hkUint32)m_inputs.GetSize() + m_numActiveThreads;
   out_maxInputs = hkMath::max2(m_maxNumInputs, out_remainingInputs);
 }
 
@@ -418,6 +438,8 @@ void hkvBackgroundProcessor<Input, Output>::clearAll()
 template <typename Input, typename Output>
 void hkvBackgroundProcessor<Input, Output>::clearInputs()
 {
+  beforeClearInputs();
+
   hkCriticalSectionLock lock(&m_mtProtect);
   m_inputs.Clear();
   if (m_numActiveThreads == 0)
@@ -436,6 +458,12 @@ void hkvBackgroundProcessor<Input, Output>::clearOutputs()
 
 
 template <typename Input, typename Output>
+void hkvBackgroundProcessor<Input, Output>::onRetryCountExceeded(const Input& input)
+{
+}
+
+
+template <typename Input, typename Output>
 void hkvBackgroundProcessor<Input, Output>::beforeStart()
 {
 }
@@ -450,6 +478,24 @@ void hkvBackgroundProcessor<Input, Output>::onStopping()
 template <typename Input, typename Output>
 void hkvBackgroundProcessor<Input, Output>::afterStop()
 {
+}
+
+
+template <typename Input, typename Output>
+void hkvBackgroundProcessor<Input, Output>::beforeClearInputs()
+{
+}
+
+
+template <typename Input, typename Output>
+template <typename InputAction>
+void hkvBackgroundProcessor<Input, Output>::forEachInput(InputAction action)
+{
+  hkCriticalSectionLock lock(&m_mtProtect);
+  for (hkvFifoSet<InputEntry>::EntryIterator it = m_inputs.EntriesBegin(); it != m_inputs.EntriesEnd(); ++it)
+  {
+    action(it->GetData().m_input);
+  }
 }
 
 
@@ -536,8 +582,11 @@ void hkvBackgroundProcessor<Input, Output>::threadFunc()
         {
           break;
         }
+
         input = m_inputs.GetFrontElement();
         m_inputs.RemoveFrontElement();
+        m_currentInputs[getThreadNum()] = &input;
+
         ++m_numActiveThreads;
       }
 
@@ -565,6 +614,8 @@ void hkvBackgroundProcessor<Input, Output>::threadFunc()
           m_outputs.pushBack(output);
         }
 
+        m_currentInputs[getThreadNum()] = NULL;
+
         // This thread is finished... for now!
         --m_numActiveThreads;
 
@@ -573,6 +624,13 @@ void hkvBackgroundProcessor<Input, Output>::threadFunc()
         {
           m_maxNumInputs = 0;
         }
+      }
+
+      // If we had an input that was not ready, wait a short time before the next iteration to avoid
+      // a excessive CPU usage in case there are multiple such input
+      if (result == HKV_BACKGROUND_RESULT_NOT_READY)
+      {
+        Sleep(100);
       }
     }
   }
@@ -616,6 +674,7 @@ bool hkvBackgroundProcessor<Input, Output>::handleRetryResult(const InputEntry& 
 {
   if (lastResult == HKV_BACKGROUND_RESULT_SHOULD_RETRY && input.m_retryCount >= m_maxRetries)
   {
+    onRetryCountExceeded(input.m_input);
     return false;
   }
 
@@ -640,7 +699,7 @@ bool hkvBackgroundProcessor<Input, Output>::handleRetryResult(const InputEntry& 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

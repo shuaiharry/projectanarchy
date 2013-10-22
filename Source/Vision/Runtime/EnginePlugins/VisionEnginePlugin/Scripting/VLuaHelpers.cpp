@@ -11,7 +11,7 @@
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/VScriptIncludes.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/RSDClient/VRSDClient.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Components/VAnimationComponent.hpp>
-//#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Components/VTimedValueComponent.hpp>
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Components/VTimedValueComponent.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Lua/VBitmask.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Particles/ParticleGroupBase.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Entities/TriggerBoxEntity.hpp>
@@ -317,44 +317,53 @@ void LUA_CreateNewWrapper(lua_State*L, VTypedObject* pObject, VisTypedEngineObje
   if(data.m_bProcessed) return;
 
   //no callback handled the data so we do the default handling here
-  if(pObject->IsOfType(V_RUNTIME_CLASS(PathCameraEntity)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_PathCameraEntity, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(TriggerBoxEntity_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_TriggerBoxEntity_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(CubeMapHandle_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_CubeMapHandle_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisBaseEntity_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisBaseEntity_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisLightSource_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisLightSource_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisParticleEffect_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisParticleEffect_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisPath_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisPath_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisStaticMeshInstance_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisStaticMeshInstance_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisObject3D_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisObject3D_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VTransitionStateMachine)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VTransitionStateMachine, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisTriggerSourceComponent_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisTriggerSourceComponent_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisTriggerTargetComponent_cl)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisTriggerTargetComponent_cl, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VAnimationComponent)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VAnimationComponent, VLUA_MANAGE_MEM_MANUAL);
-  //else if(pObject->IsOfType(V_RUNTIME_CLASS(VTimedValueComponent)))
-  //  VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VTimedValueComponent, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(IVRendererNode)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_IVRendererNode, VLUA_MANAGE_MEM_MANUAL);
-  else if(pObject->IsOfType(V_RUNTIME_CLASS(VPostProcessingBaseComponent)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VPostProcessingBaseComponent, VLUA_MANAGE_MEM_MANUAL);
+  
+  //VisObject3D_cl derived classes
+  if(pObject->IsOfType(V_RUNTIME_CLASS(VisObject3D_cl)))
+  {
+    if(pObject->IsOfType(V_RUNTIME_CLASS(PathCameraEntity)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_PathCameraEntity, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(TriggerBoxEntity_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_TriggerBoxEntity_cl, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(CubeMapHandle_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_CubeMapHandle_cl, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VisBaseEntity_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisBaseEntity_cl, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VisLightSource_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisLightSource_cl, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VisParticleEffect_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisParticleEffect_cl, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VisPath_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisPath_cl, VLUA_MANAGE_MEM_MANUAL);
+    else //if(pObject->IsOfType(V_RUNTIME_CLASS(VisObject3D_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisObject3D_cl, VLUA_MANAGE_MEM_MANUAL);
+  }
+  //IVObjectComponent derived classes
   else if(pObject->IsOfType(V_RUNTIME_CLASS(IVObjectComponent)))
-    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_IVObjectComponent, VLUA_MANAGE_MEM_MANUAL);
+  {
+    if(pObject->IsOfType(V_RUNTIME_CLASS(VTransitionStateMachine)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VTransitionStateMachine, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VisTriggerSourceComponent_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisTriggerSourceComponent_cl, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VisTriggerTargetComponent_cl)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisTriggerTargetComponent_cl, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VAnimationComponent)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VAnimationComponent, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VTimedValueComponent)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VTimedValueComponent, VLUA_MANAGE_MEM_MANUAL);
+    else if(pObject->IsOfType(V_RUNTIME_CLASS(VPostProcessingBaseComponent)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VPostProcessingBaseComponent, VLUA_MANAGE_MEM_MANUAL);
+    else //if(pObject->IsOfType(V_RUNTIME_CLASS(IVObjectComponent)))
+      VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_IVObjectComponent, VLUA_MANAGE_MEM_MANUAL);
+  }
   else if(pObject->IsOfType(V_RUNTIME_CLASS(VDialog)))
     VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VDialog, VLUA_MANAGE_MEM_MANUAL);
   else if(pObject->IsOfType(V_RUNTIME_CLASS(VWindowBase)))
     VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VWindowBase, VLUA_MANAGE_MEM_MANUAL);
+  else if(pObject->IsOfType(V_RUNTIME_CLASS(IVRendererNode)))
+    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_IVRendererNode, VLUA_MANAGE_MEM_MANUAL);
+  else if(pObject->IsOfType(V_RUNTIME_CLASS(VisStaticMeshInstance_cl)))
+    VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisStaticMeshInstance_cl, VLUA_MANAGE_MEM_MANUAL);
   else if(pObject->IsOfType(V_RUNTIME_CLASS(VisTypedEngineObject_cl)))
     VSWIG_Lua_NewPointerObj(L,pObject, SWIGTYPE_p_VisTypedEngineObject_cl, VLUA_MANAGE_MEM_MANUAL);
   else // base class VTypedObject
@@ -1070,7 +1079,7 @@ VScriptMember * VLuaTableIterator::next()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

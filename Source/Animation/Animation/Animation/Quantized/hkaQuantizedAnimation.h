@@ -58,7 +58,7 @@ class hkaQuantizedAnimation : public hkaAnimation
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ANIM_COMPRESSED,hkaQuantizedAnimation::PerTrackCompressionParams);
 
 			/// List of CompressionParams to enable per-bone compression settings.
-			/// On initialisation only a single element is allocated.
+			/// On initialization only a single element is allocated.
 			hkArray< class hkaQuantizedAnimation::TrackCompressionParams > m_parameterPalette;
 
 			/// An array of indices into the palette above
@@ -94,7 +94,7 @@ class hkaQuantizedAnimation : public hkaAnimation
 		virtual ~hkaQuantizedAnimation();
 
 		/// Useful query returning the size of this compressed animation in bytes
-		int getSizeInBytes() const;
+		virtual int getSizeInBytes() const;
 
 
 		//
@@ -236,8 +236,8 @@ class hkaQuantizedAnimation : public hkaAnimation
 		static void HK_CALL swizzleEndian32( void* valInOut, int n );
 
 		/// Utility functions for sampling
-		static void HK_CALL sampleStaticScalars( hkReal* poseOut, int numPoseOut, const hkUint16* elements, const hkReal* values, int n );
-		static void HK_CALL sampleDynamicScalars( hkReal* poseOut, int numPoseOut, const hkUint16* elements, const hkReal* minimums, const hkReal* spans, const hkUint16* values, int n );
+		static void HK_CALL sampleStaticScalars( hkReal* poseOut, int numPoseOut, const hkUint16* elements, const hkFloat32* values, int n );
+		static void HK_CALL sampleDynamicScalars( hkReal* poseOut, int numPoseOut, const hkUint16* elements, const hkFloat32* minimums, const hkFloat32* spans, const hkUint16* values, int n );
 		static void HK_CALL sampleRotations( hkQuaternion* poseOut, int numPoseOut, const hkUint16* elements, const hkUint16* values, int n );
 
 		/// Data header description
@@ -250,7 +250,7 @@ class hkaQuantizedAnimation : public hkaAnimation
 			hkUint16 m_numBones;
 			hkUint16 m_numFloats;
 			hkUint16 m_numFrames;
-			hkReal m_duration;
+			hkFloat32 m_duration;
 
 			hkUint16 m_numStaticTranslations;
 			hkUint16 m_numStaticRotations;
@@ -289,11 +289,11 @@ class hkaQuantizedAnimation : public hkaAnimation
 		const hkaSkeleton* m_skeleton; //+nosave
 
 		/// Table for converting bytes to reals
-		static hkFloat32 hkUint8toFloat32Fraction[ 256 ];
+//		static hkFloat32 hkUint8toFloat32Fraction[ 256 ];
 
 	public:
 		
-		/// Constructor for initialisation of vtable fixup.
+		/// Constructor for initialization of vtable fixup.
 		HK_FORCE_INLINE hkaQuantizedAnimation( hkFinishLoadedObjectFlag flag ) :
 			hkaAnimation( flag ),
 			m_data( flag )
@@ -319,18 +319,21 @@ class hkaQuantizedAnimationBuilder
 
 		struct Range
 		{
-			hkReal m_minimum;
-			hkReal m_span;
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ANIM_COMPRESSED,hkaQuantizedAnimationBuilder::Range);
+			hkSimdReal m_minimum;
+			hkSimdReal m_span;
 		};
 
 		struct StaticScalar
 		{
-			hkReal m_value;
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ANIM_COMPRESSED,hkaQuantizedAnimationBuilder::StaticScalar);
+			hkSimdReal m_value;
 			hkUint16 m_boneElement;
 		};
 
 		struct DynamicScalar
 		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ANIM_COMPRESSED,hkaQuantizedAnimationBuilder::DynamicScalar);
 			Range m_range;
 			hkUint16 m_trackElement;
 			hkUint16 m_boneElement;
@@ -338,12 +341,14 @@ class hkaQuantizedAnimationBuilder
 
 		struct StaticRotation
 		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ANIM_COMPRESSED,hkaQuantizedAnimationBuilder::StaticRotation);
 			hkQuaternion m_value;
 			hkUint16 m_boneElement;
 		};
 
 		struct DynamicRotation
 		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ANIM_COMPRESSED,hkaQuantizedAnimationBuilder::DynamicRotation);
 			hkUint16 m_trackElement;
 			hkUint16 m_boneElement;
 		};
@@ -354,7 +359,7 @@ class hkaQuantizedAnimationBuilder
 
 		/// Determines the maximum and minimum value of a real value in an array
 		static void HK_CALL getRange( Range& rangeOut, const hkReal* base, int stride, int n );
-		static void HK_CALL getRange( hkReal& minimumOut, hkReal& spanOut, const hkReal* base, int stride, int n );
+		static void HK_CALL getRange( hkSimdReal& minimumOut, hkSimdReal& spanOut, const hkReal* base, int stride, int n );
 
 		static void HK_CALL identifyScalarElements( hkUint16 trackElement, hkUint16 boneElement,
 											const Range* rangeBase, const hkReal* referenceBase, hkReal tolerance,
@@ -399,7 +404,7 @@ class hkaQuantizedAnimationBuilder
 #endif // HK_ANIMATION_QUANTIZED_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

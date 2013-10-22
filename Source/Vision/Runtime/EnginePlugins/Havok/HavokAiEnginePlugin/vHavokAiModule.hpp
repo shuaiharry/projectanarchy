@@ -19,6 +19,10 @@ class hkaiViewerContext;
 
 class hkpWorld;
 
+/// 
+/// \brief
+///   Module responsible for the AI simulation.
+///
 class vHavokAiModule : public IVisCallbackHandler_cl, public IHavokStepper
 {
 public:
@@ -28,29 +32,36 @@ public:
 	///
 
 	vHavokAiModule();
-	VOVERRIDE ~vHavokAiModule();
-	VHAVOKAI_IMPEXP static vHavokAiModule* GetInstance() {return &g_GlobalManager;}
+	virtual ~vHavokAiModule();
+
+	VHAVOKAI_IMPEXP static vHavokAiModule* GetInstance() 
+  {
+    return &g_GlobalManager;
+  }
 
 	///
 	/// @}
 	///
 
 	///
-	/// @name One time Initialization/Deinitialization to register callbacks
+	/// @name One time Initialization / Deinitialization to register callbacks
 	/// @{
 	///
 
 	/// \brief
-	/// should be called at plugin initialization time
+	///   Should be called at plugin initialization time.
 	void OneTimeInit();
 
 	/// \brief
-	/// should be called at plugin de-initialization time
+	///   Should be called at plugin de-initialization time.
 	void OneTimeDeInit();
 
 	/// \brief
-	/// should be called before/after Havok base system initialization, respectively
+	///   Called after Havok base system initialization.
 	void Init();
+
+  /// \brief
+  ///   Called before Havok base system deinitialization,.
 	void DeInit();
 
 	///
@@ -63,23 +74,28 @@ public:
 	///
 
 	/// \brief
-	/// implements IVisCallbackHandler_cl
-	VOVERRIDE void OnHandleCallback( IVisCallbackDataObject_cl* pData ) HKV_OVERRIDE;
+	///   IVisCallbackHandler_cl implementation
+	virtual void OnHandleCallback( IVisCallbackDataObject_cl* pData ) HKV_OVERRIDE;
 
-	VOVERRIDE int GetCallbackSortingKey(VCallback *pCallback) HKV_OVERRIDE;
+	virtual int GetCallbackSortingKey(VCallback *pCallback) HKV_OVERRIDE;
 
 	///
 	/// @}
 	///
 
 	///
-	/// @name Functions to create/modify ai world
+	/// @name Functions to create / modify AI world
 	/// @{
 	///
 
 	/// \brief
-	/// manual access to world construction/destruction.  Note that world gets automatically created when plugin gets loaded
+	///   Manual access to world construction. 
+  ///
+  /// Note that world gets automatically created when plugin gets loaded.
 	VHAVOKAI_IMPEXP bool CreateAiWorld();
+
+  /// \brief
+  ///   Manual access to world destruction. 
 	VHAVOKAI_IMPEXP void RemoveAiWorld();
 
 	///
@@ -87,14 +103,21 @@ public:
 	///
 
 	///
-	/// @name Functions to create/modify ai world
+	/// @name Functions to create/modify AI world
 	/// @{
 	///
 
-	/// \brief
-	/// For manually connecting to Havok physics world.  Note that this connection should already happen if specified in exported scene.
+  /// \brief
+  ///   Manually sets the physics world to be able to connect to it.
+  ///
+  /// \sa SetConnectToPhysicsWorld
 	VHAVOKAI_IMPEXP void SetPhysicsWorld(hkpWorld* physics);
-	VHAVOKAI_IMPEXP void SetConnectToPhysicsWorld(bool connect);
+
+  /// \brief
+  ///   Manually connects the Havok AI module to Havok physics world.  
+  ///
+  /// Note that this connection should already have happened if specified in the exported scene.
+	VHAVOKAI_IMPEXP void SetConnectToPhysicsWorld(bool connect, bool stepSilhouettesAfterDisconnecting = false);
 
 	///
 	/// @}
@@ -105,11 +128,13 @@ public:
 	/// @{
 	///
 
-	VHAVOKAI_IMPEXP VOVERRIDE void Step( float dt ) HKV_OVERRIDE;
+	VHAVOKAI_IMPEXP virtual void Step(float dt) HKV_OVERRIDE;
 
-	/// Called by the Havok physics module on de-initialization. It is called before anything
-	/// was actually deleted, with the hkpWorld marked for write.
-	VHAVOKAI_IMPEXP VOVERRIDE void OnDeInitPhysicsModule() HKV_OVERRIDE;
+	/// \brief
+  ///   Called by the Havok physics module on de-initialization.
+  ///
+  /// It is called before anything was actually deleted, with the hkpWorld marked for write.
+	VHAVOKAI_IMPEXP virtual void OnDeInitPhysicsModule() HKV_OVERRIDE;
 
 	///
 	/// @}
@@ -120,13 +145,27 @@ public:
 	/// @{
 	///
 
-	VHAVOKAI_IMPEXP hkaiWorld* GetAiWorld() { return m_aiWorld; }
-	VHAVOKAI_IMPEXP const hkaiWorld* GetAiWorld() const { return m_aiWorld; }
+	VHAVOKAI_IMPEXP hkaiWorld* GetAiWorld() 
+  { 
+    return m_aiWorld; 
+  }
 
-	VHAVOKAI_IMPEXP hkArray<class hkaiBehavior*>& getCharacterBehaviors()				{ return m_behaviors; }
-	VHAVOKAI_IMPEXP const hkArray<class hkaiBehavior*>& getCharacterBehaviors() const	{ return m_behaviors; }
+	VHAVOKAI_IMPEXP const hkaiWorld* GetAiWorld() const 
+  { 
+    return m_aiWorld; 
+  }
 
-		/// deprecated interface
+	VHAVOKAI_IMPEXP hkArray<class hkaiBehavior*>& getCharacterBehaviors()				
+  { 
+    return m_behaviors; 
+  }
+
+	VHAVOKAI_IMPEXP const hkArray<class hkaiBehavior*>& getCharacterBehaviors() const
+  { 
+    return m_behaviors;
+  }
+
+	/// deprecated interface
 	VHAVOKAI_IMPEXP bool LoadNavMeshDeprecated(const char* filename, VArray<vHavokAiNavMeshInstance*>* navMeshInstancesOut = HK_NULL);
 
 	///
@@ -139,15 +178,15 @@ public:
 	///
 
 	/// \brief
-	/// for computing a path (note that a lot more options are available by instead issuing pathfinding requests through the hkaiWorld object)
+	///   For computing a path (note that a lot more options are available by instead issuing pathfinding requests through the hkaiWorld object).
 	VHAVOKAI_IMPEXP bool ComputePath(hkvVec3* startPoint, hkvVec3* endPoint, float radius, VArray<hkvVec3>& pathPoints) const;
 
 	/// \brief
-	/// for computing and drawing a path
+	///   For computing and drawing a path.
 	VHAVOKAI_IMPEXP bool ComputeAndDrawPath(IVRenderInterface *pRenderer, hkvVec3* startPoint, hkvVec3* endPoint, float radius, float height, float displayOffset, unsigned int color) const;
 
 	/// \brief
-	/// for debug rendering all nav mesh instances in ai world
+	///   For debug rendering all nav mesh instances in AI world.
 	VHAVOKAI_IMPEXP void DebugRender(float displayOffsetHavokScale, bool colorRegions = true);
 
 	///
@@ -160,9 +199,12 @@ protected:
 	void GlobalsChunkFileExchange(VChunkFile &file, CHUNKIDTYPE iID);
 
 	/// \brief
-	/// connects/disconnects to hkpWorld
+	///   Connects to hkpWorld
 	void ConnectToPhysicsWorld();
-	void DisconnectFromPhysicsWorld();
+
+	/// \brief
+	///   Disconnects from hkpWorld
+	void DisconnectFromPhysicsWorld(bool stepSilhouettesAfterDisconnecting = false);
 
 	hkaiWorld* m_aiWorld;
 
@@ -180,7 +222,7 @@ protected:
 #endif	// __VHAVOK_AI_MODULE_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

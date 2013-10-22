@@ -20,7 +20,7 @@ VCoronaManager VCoronaManager::g_GlobalManager;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// Constructor lens flare manager functions
+// Constructor corona manager functions
 /////////////////////////////////////////////////////////////////////////////
 
 VCoronaManager::VCoronaManager()
@@ -97,7 +97,7 @@ void VCoronaManager::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Lens Flare Public Functions
+// Corona Manager Public Functions
 /////////////////////////////////////////////////////////////////////////////
 struct VCubeFormat
 {
@@ -613,7 +613,7 @@ VCoronaManager& VCoronaManager::GlobalManager()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

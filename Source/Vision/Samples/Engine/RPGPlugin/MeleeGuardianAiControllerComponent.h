@@ -17,42 +17,37 @@ public:
   // Constructor needs to be public for FORCE_LINKDYNCLASS on mobile
   RPG_MeleeGuardianAiControllerComponent();
 
-protected:
-  //@{
-  // States
-  void SelectState() HKV_OVERRIDE;
-  //@}
-
-  //@{
-  // Commands
-  void UpdateWandering(float const deltaTime) HKV_OVERRIDE;
-  void UpdateMeleeAttacking(float const deltaTime) HKV_OVERRIDE;
-  //@}
-
-  //@{
-  // Attacking state
-  float m_lastAttackTime;     ///< When did this character last attack?
-  float m_attackInterval;     ///< Randomly assigned delay between attacks
-  float m_attackIntervalMin;
-  float m_attackIntervalMax;
-  //@}
-
-  //@{
-  // Wander state
-  hkvVec3 m_wanderOrigin;
-  float m_wanderAngle;
-  float m_wanderIdleTime;
-  //@}
-
 private:
+  // IVObjectComponent
+  void SetOwner(VisTypedEngineObject_cl *newOwner) HKV_OVERRIDE;
+
   V_DECLARE_SERIAL_DLLEXP(RPG_MeleeGuardianAiControllerComponent, RPG_PLUGIN_IMPEXP);
   V_DECLARE_VARTABLE(RPG_MeleeGuardianAiControllerComponent, RPG_PLUGIN_IMPEXP);
 };
 
+namespace RPG_MeleeGuardianAiControllerState
+{
+  // Idling
+  class Idling : public RPG_ControllerStateBase
+  {
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const { return "Melee::Idling"; }
+  };
+
+  // Moving
+  class Moving : public RPG_ControllerState::Moving
+  {
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const { return "Melee::Moving"; }
+  };
+}
+
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -127,13 +127,20 @@ class hkInertiaTensorComputer
 		// Geometric/vertex-based calculations
 		///////////////////////////////////////
 
+			/// Calculate mass properties of a convex hull specified by its vertices.
+			/// The convex hull might by expanded by 'radius' or automatically if the convex hull is not a value.
+			/// Returns HK_FAILURE only if no vertices are provided, else always compute a valid mass properties and HK_SUCCESS
+			/// NOTE: The full accuracy version of this method is rather large and is not linked by default.
+			/// If the function pointer s_computeConvexHullMassPropertiesFunction is not null, it will be used (and normally points to hkpAccurateInertiaTensorComputer::computeConvexHullMassProperties)
+			/// Otherwise, if this pointer is null, hkInertiaTensorComputer::computeApproximateConvexHullMassProperties is used.
+			/// See HK_OPTIONAL_COMPONENT_REQUEST(hkpAccurateInertiaTensorComputer) in hkProductFeatures.cxx
+		static hkResult HK_CALL computeConvexHullMassProperties(const hkStridedVertices& vertices, hkReal radius, hkMassProperties& result);
 
 			/// Function ptr type to override convex hull mass properties calculation
 		typedef hkResult (HK_CALL *ConvexHullMassPropertiesFunction)(const hkStridedVertices&, hkReal, hkMassProperties&);
 
-			/// Function ptr to calculate convex hull mass properties.
-			/// To enable dead-stripping of geometry code, this points to a simple implementation
-		static ConvexHullMassPropertiesFunction computeConvexHullMassProperties;
+			/// This will be null unless the full accuracy inertia code is linked in.
+		static ConvexHullMassPropertiesFunction s_computeConvexHullMassPropertiesFunction;
 
 	protected:
 
@@ -220,7 +227,7 @@ class hkInertiaTensorComputer
 #endif // HK_BASE_INERTIA_TENSOR_COMPUTER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

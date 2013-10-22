@@ -75,7 +75,7 @@ public:
 		for(int lcv = 0; lcv<m_octaves; lcv++)
 		{
 			total.add(_smooth(x * frequency, y * frequency) * amplitude);
-			frequency.mul(hkSimdReal_2);
+			frequency.add(frequency);
 			amplitude.mul(m_persistence);
 		}
 
@@ -116,7 +116,7 @@ public:
 #endif // HK_PERLIN_NOISE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -24,45 +24,51 @@ class hkaSkeletonUtils
 	public:
 			/// Converts a local space pose to a pose in model space.
 			/// This routine is alias safe if the indices are parent first order i.e. (parentIndices[i] < i)
-		static void HK_CALL transformLocalPoseToModelPose ( int numTransforms, const hkInt16* parentIndices, const hkQsTransform* poseLocal, hkQsTransform* poseModelOut);
+		static void HK_CALL transformLocalPoseToModelPose ( int numTransforms, const hkInt16* parentIndices, const hkQsTransform* HK_RESTRICT poseLocal, hkQsTransform* HK_RESTRICT poseModelOut);
 
 			/// Converts a bone transform from a local space to model space.
 		static void HK_CALL transformLocalBoneToModelBone( int boneIndex, const hkInt16* parentIndices, const hkQsTransform* poseLocal, hkQsTransform& boneModelOut );
 
 			/// Converts a model space pose to a pose in local space.
 			/// This routine is not alias safe.
-		static void HK_CALL transformModelPoseToLocalPose ( int numTransforms, const hkInt16* parentIndices, const hkQsTransform* poseModel, hkQsTransform* poseLocalOut);
+		static void HK_CALL transformModelPoseToLocalPose ( int numTransforms, const hkInt16* parentIndices, const hkQsTransform* HK_RESTRICT poseModel, hkQsTransform* HK_RESTRICT poseLocalOut);
 
 			/// Converts a model space pose to a pose in world space.
 			/// This simply multiplies through the model pose by the reference frame.
 			/// The worldFromModel transform gives the reference frame in world space.
-		static void HK_CALL transformModelPoseToWorldPose ( int numTransforms, const hkQsTransform& worldFromModel, const hkQsTransform* poseModel, hkQsTransform* poseWorldOut);
+		static void HK_CALL transformModelPoseToWorldPose ( int numTransforms, const hkQsTransform& worldFromModel, const hkQsTransform* HK_RESTRICT poseModel, hkQsTransform* HK_RESTRICT poseWorldOut);
 
 			/// Converts a world space pose to a pose in model space.
 			/// This simply multiplies through the world pose by the inverse of the reference frame.
 			/// The worldFromModel transform gives the reference frame in world space.
-		static void HK_CALL transformWorldPoseToModelPose ( int numTransforms, const hkQsTransform& worldFromModel, const hkQsTransform* poseWorld, hkQsTransform* poseModelOut);
+		static void HK_CALL transformWorldPoseToModelPose ( int numTransforms, const hkQsTransform& worldFromModel, const hkQsTransform* HK_RESTRICT poseWorld, hkQsTransform* HK_RESTRICT poseModelOut);
 
 			/// Converts a local space pose to a pose in world space.
 			/// This first converts to model space and then to world space using the reference frame.
 			/// The worldFromModel transform gives the reference frame in world space.
 			/// This routine is alias safe if the indices are parent first order i.e. (parentIndices[i] < i)
-		static void HK_CALL transformLocalPoseToWorldPose ( int numTransforms, const hkInt16* parentIndices, const hkQsTransform& worldFromModel, const hkQsTransform* poseLocal, hkQsTransform* poseWorldOut);
+		static void HK_CALL transformLocalPoseToWorldPose ( int numTransforms, const hkInt16* parentIndices, const hkQsTransform& worldFromModel, const hkQsTransform* HK_RESTRICT poseLocal, hkQsTransform* HK_RESTRICT poseWorldOut);
 
 			/// Converts a local space pose to a pose in world space.
 			/// This first converts to model space and then to local space using the reference frame.
 			/// The worldFromModel transform gives the reference frame in world space.
 			/// This routine is not alias safe.
-		static void HK_CALL transformWorldPoseToLocalPose ( int numTransforms, const hkInt16* parentIndices, const hkQsTransform& worldFromModel, const hkQsTransform* poseWorld, hkQsTransform* poseLocalOut);
+		static void HK_CALL transformWorldPoseToLocalPose ( int numTransforms, const hkInt16* parentIndices, const hkQsTransform& worldFromModel, const hkQsTransform* HK_RESTRICT poseWorld, hkQsTransform* HK_RESTRICT poseLocalOut);
 
 			/// Blends two (usually local) poses using per-bone weight array (0.0 = A, 1.0 = B)
-		static void HK_CALL blendPoses( hkUint32 numBones, const hkQsTransform* poseA, const hkQsTransform* poseB, const hkReal* weights, hkQsTransform* poseOut );
+		static void HK_CALL blendPoses( hkUint32 numBones, const hkQsTransform* HK_RESTRICT poseA, const hkQsTransform* poseB, const hkReal* HK_RESTRICT weights, hkQsTransform* poseOut );
 
 			/// Blends two (usually local) poses using a single weight, where 0.0 = A and 1.0 = B
-		static void HK_CALL blendPoses( hkUint32 numBones, const hkQsTransform* poseA, const hkQsTransform* poseB, const hkReal weight, hkQsTransform* poseOut );
+		static void HK_CALL blendPoses( hkUint32 numBones, const hkQsTransform* HK_RESTRICT poseA, const hkQsTransform* poseB, const hkReal weight, hkQsTransform* poseOut );
+
+			/// Blends two (usually local) poses using per-bone weight array (0.0 = A, 1.0 = B)
+		static void HK_CALL blendPosesNoAlias( hkUint32 numBones, const hkQsTransform* HK_RESTRICT poseA, const hkQsTransform* HK_RESTRICT poseB, const hkReal* HK_RESTRICT weights, hkQsTransform* HK_RESTRICT poseOut );
+
+			/// Blends two (usually local) poses using a single weight, where 0.0 = A and 1.0 = B
+		static void HK_CALL blendPosesNoAlias( hkUint32 numBones, const hkQsTransform* HK_RESTRICT poseA, const hkQsTransform* HK_RESTRICT poseB, const hkReal weight, hkQsTransform* HK_RESTRICT poseOut );
 
 			/// Blends two bone chain (usually local) poses using a single weight, where 0.0 = A and 1.0 = B
-		static void HK_CALL blendPartialPoses( hkUint32 numBones, hkInt16* bones, const hkQsTransform* poseA, const hkQsTransform* poseB, const hkReal weight, hkQsTransform* poseOut );
+		static void HK_CALL blendPartialPoses( hkUint32 numBones, hkInt16* bones, const hkQsTransform* HK_RESTRICT poseA, const hkQsTransform* HK_RESTRICT poseB, const hkReal weight, hkQsTransform* HK_RESTRICT poseOut );
 
 			/// Given a local space pose, it will ensure that any bone constraint in the skeleton are enforced.
 			/// Currently the only bone constraint is "lockTranslation".
@@ -148,7 +154,7 @@ class hkaSkeletonUtils
 #endif // HK_SKELETON_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

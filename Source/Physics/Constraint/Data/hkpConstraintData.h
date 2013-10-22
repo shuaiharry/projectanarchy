@@ -147,7 +147,7 @@ class hkpConstraintData : public hkReferencedObject
 
 		/// Choose the body to be notified when the constraint's breach impulse limit is exceeded.
 		/// Only one of the bodies can be notified. Typically you will want to notify the body with the lesser strength.
-		/// 
+		///
 		/// The callbacks are passed by the world to any attached hkpContactImpulseLimitBreachedListeners.
 		/// The suggested way to handle those callbacks is to use a hkpBreakOffPartsUtil.
 		/// hkpBreafOffPartsUtil converts breached constraints into the "breached contact point" representation
@@ -207,7 +207,7 @@ class hkpConstraintData : public hkReferencedObject
 
 		// The callback. Note that all callbacks are performed in single threaded mode.
 		virtual void buildJacobianCallback( const hkpConstraintQueryIn &in, const hkpConstraintQueryOut& out );
-		
+
 		// Utility function to build a constraint info given a set of atoms.
 		static void HK_CALL getConstraintInfoUtil( const hkpConstraintAtom* atoms, int sizeOfAllAtoms, ConstraintInfo& infoOut );
 
@@ -224,7 +224,7 @@ class hkpConstraintData : public hkReferencedObject
 #endif // HKP_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

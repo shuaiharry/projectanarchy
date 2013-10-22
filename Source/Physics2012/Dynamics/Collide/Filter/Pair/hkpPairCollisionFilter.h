@@ -11,7 +11,7 @@
 
 
 #include <Physics2012/Collide/Filter/hkpCollisionFilter.h>
-
+#include <Common/Base/Container/PointerMap/hkMap.cxx>
 
 class hkpEntity;
 
@@ -25,7 +25,7 @@ class hkpPairCollisionFilter : public hkpCollisionFilter
 	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		struct PairFilterKey
 		{
-			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,PairFilterKey);
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkpPairCollisionFilter::PairFilterKey);
 			hkpEntity* m_a;
 			hkpEntity* m_b;
 		};
@@ -64,7 +64,17 @@ class hkpPairCollisionFilter : public hkpCollisionFilter
 
 		HK_DECLARE_REFLECTION();
 
-		 hkpPairCollisionFilter(const hkpCollisionFilter* childFilter = HK_NULL);
+		 hkpPairCollisionFilter(const hkpCollisionFilter* childFilter = HK_NULL)
+			: m_disabledPairs()
+			, m_childFilter(childFilter)
+		{
+			m_type = HK_FILTER_PAIR;
+
+			if ( m_childFilter )
+			{
+				m_childFilter->addReference();
+			}
+		}
 		 hkpPairCollisionFilter( class hkFinishLoadedObjectFlag flag ) : hkpCollisionFilter( flag ) {}
 		~hkpPairCollisionFilter();
 
@@ -120,7 +130,7 @@ class hkpPairCollisionFilter : public hkpCollisionFilter
 			int m_hashMod;
 		};
 
-		class hkMap<PairFilterKey, hkUint64, PairFilterPointerMapOperations> m_disabledPairs; //+overridetype(class hkpPairCollisionFilter::MapPairFilterKeyOverrideType) +nosave
+		hkMap<hkpPairCollisionFilter::PairFilterKey, hkUint64, hkpPairCollisionFilter::PairFilterPointerMapOperations> m_disabledPairs; //+overridetype(class hkpPairCollisionFilter::MapPairFilterKeyOverrideType) +nosave
 
 
 		const hkpCollisionFilter* m_childFilter;
@@ -133,7 +143,7 @@ class hkpPairCollisionFilter : public hkpCollisionFilter
 #endif // HK_DYNAMICS_PAIR_COLLISION_FILTER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

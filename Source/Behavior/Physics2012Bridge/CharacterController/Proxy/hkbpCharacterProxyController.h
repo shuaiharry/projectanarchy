@@ -29,6 +29,15 @@ class hkbpCharacterProxyController : public hkbpCharacterController
 	// hkbCharacterController interface
 	//////////////////////////////////////////////////////////////////////////
 
+		// hkbCharacterController interface
+		virtual void applyVelocityModifiers(
+			const hkbContext& context,
+			const hkbGeneratorOutput& currentOutput,
+			hkVector4Parameter desiredVelocity,
+			hkBinaryReal gravityBlendFactor,
+			hkReal timestep,
+			hkVector4& newVelocityOut ) HK_OVERRIDE;
+
 			// hkbCharacterController interface
 		virtual void integrate( hkVector4Parameter newVelocity, hkReal timestep ) HK_OVERRIDE;
 
@@ -66,7 +75,7 @@ class hkbpCharacterProxyController : public hkbpCharacterController
 #endif // HKB_CHARACTER_PROXY_CONTROLLER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

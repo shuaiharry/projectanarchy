@@ -240,11 +240,11 @@ void VThrowItemComponent::RemoveAllItems()
 
 START_VAR_TABLE(VThrowItemComponent, IVObjectComponent, "Throw Item Comnponent. Use the Q key to throw an item.", VVARIABLELIST_FLAGS_NONE, "Throw Item" )
   DEFINE_VAR_VSTRING(VThrowItemComponent, ModelFile, "Filename of the model to throw table (.model)", "", 0, 0, "assetpicker(Model)");
-  DEFINE_VAR_FLOAT  (VThrowItemComponent, Velocity, "Velocity that is applied to the item", "500.0", 0, NULL); 
+  DEFINE_VAR_FLOAT  (VThrowItemComponent, Velocity, "Velocity that is applied to the item", "500.0", 0, "Clamp(0, 10000)"); 
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

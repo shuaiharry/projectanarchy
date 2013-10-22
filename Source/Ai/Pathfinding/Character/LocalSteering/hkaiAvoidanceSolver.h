@@ -36,7 +36,7 @@ extern const class hkClass hkaiAvoidanceSolverMovementPropertiesClass;
 /// Movement properties define kinematic and dynamic constraints for agent movement
 struct hkaiMovementProperties
 {
-	//+version(7)
+	//+version(8)
 	HK_DECLARE_REFLECTION();
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI_STEERING, hkaiMovementProperties );
 
@@ -64,11 +64,6 @@ struct hkaiMovementProperties
 	/// Sets m_maxAngularVelocity
 	HK_FORCE_INLINE void setMaxAngularVelocity( hkReal newMaxAngVel );
 
-	/// Returns m_maxAngularAcceleration and warns if constraint mode is not CONSTRAINTS_LINEAR_AND_ANGULAR
-	HK_FORCE_INLINE hkReal getMaxAngularAcceleration() const;
-
-	/// Sets m_maxAngularAcceleration and warns if constraint mode is not CONSTRAINTS_LINEAR_AND_ANGULAR
-	HK_FORCE_INLINE void setMaxAngularAcceleration( hkReal newMaxAngAccel );
 
 	/// Minimal speed
 	hkReal m_minVelocity; //+default(.02f)
@@ -90,9 +85,6 @@ struct hkaiMovementProperties
 	hkReal m_maxAngularVelocity; //+default( 1.25f * HK_REAL_PI )
 
 protected:
-
-	/// Maximal angular acceleration
-	hkReal m_maxAngularAcceleration; //+default( 37.5f * HK_REAL_PI )
 
 	/// Maximal linear speed during a full turn (Default: 50% of maximum speed).
 	/// This is intended to be smaller than m_maxVelocity (i.e. slowing down going into a turn)
@@ -475,9 +467,6 @@ class hkaiAvoidanceSolver
 				/// The agent weight for particular agent-obstacle pair
 			hkReal m_weight;
 
-				/// Cosine of view angle is extension to sensor. Only obstacles inside view angle cone are taken into account (Valid only for agents)
-			hkReal m_cosViewAngle;			
-
 		};
 
 			/// SteeringAgent is the main input to the avoidance solver.
@@ -551,7 +540,7 @@ class hkaiAvoidanceSolver
 #endif // HK_AI_AVOIDANCE_SOLVER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -14,39 +14,39 @@
 class vHavokAiNavMeshDebugDisplayHandler : public hkDebugDisplayHandler
 {
 public:
-	VOVERRIDE ~vHavokAiNavMeshDebugDisplayHandler() {}
+	virtual ~vHavokAiNavMeshDebugDisplayHandler() {}
 
 	// Unhandled functions
-	VOVERRIDE hkResult addGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, const hkTransform& transform, hkUlong id, int tag, hkUlong shapeIdHint, hkGeometry::GeometryType geomType) HKV_OVERRIDE;
-	VOVERRIDE hkResult addGeometry(hkDisplayGeometry* geometry, hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
-	VOVERRIDE hkResult addGeometryInstance(hkUlong origianalGeomId, const hkTransform& transform, hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
-	VOVERRIDE hkResult setGeometryColor(hkColor::Argb color, hkUlong id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult setGeometryTransparency(float alpha, hkUlong id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult setGeometryPickable( hkBool isPickable, hkUlong id, int tag ) HKV_OVERRIDE;
-	VOVERRIDE hkResult setGeometryVisibility(int geometryIndex, bool isEnabled, hkUlong id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult updateGeometry(const hkTransform& transform, hkUlong id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult updateGeometry(const hkMatrix4& transform, hkUlong id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult skinGeometry(hkUlong* ids, int numIds, const hkMatrix4* poseModel, int numPoseModel, const hkMatrix4& worldFromModel, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult removeGeometry(hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
-	VOVERRIDE hkResult updateCamera(const hkVector4& from, const hkVector4& to, const hkVector4& up, hkReal nearPlane, hkReal farPlane, hkReal fov, const char* name) HKV_OVERRIDE;
-	VOVERRIDE hkResult displayPoint(const hkVector4& position, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult displayText(const char* text, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult displayGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, const hkTransform& transform, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult displayGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult sendMemStatsDump(const char* data, int length) HKV_OVERRIDE;
-	VOVERRIDE hkResult holdImmediate() HKV_OVERRIDE;
+	virtual hkResult addGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, const hkTransform& transform, hkUlong id, int tag, hkUlong shapeIdHint, hkGeometry::GeometryType geomType) HKV_OVERRIDE;
+	virtual hkResult addGeometry(hkDisplayGeometry* geometry, hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
+	virtual hkResult addGeometryInstance(hkUlong origianalGeomId, const hkTransform& transform, hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
+	virtual hkResult setGeometryColor(hkColor::Argb color, hkUlong id, int tag) HKV_OVERRIDE;
+	virtual hkResult setGeometryTransparency(float alpha, hkUlong id, int tag) HKV_OVERRIDE;
+	virtual hkResult setGeometryPickable( hkBool isPickable, hkUlong id, int tag ) HKV_OVERRIDE;
+	virtual hkResult setGeometryVisibility(int geometryIndex, bool isEnabled, hkUlong id, int tag) HKV_OVERRIDE;
+	virtual hkResult updateGeometry(const hkTransform& transform, hkUlong id, int tag) HKV_OVERRIDE;
+	virtual hkResult updateGeometry(const hkMatrix4& transform, hkUlong id, int tag) HKV_OVERRIDE;
+	virtual hkResult skinGeometry(hkUlong* ids, int numIds, const hkMatrix4* poseModel, int numPoseModel, const hkMatrix4& worldFromModel, int tag) HKV_OVERRIDE;
+	virtual hkResult removeGeometry(hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
+	virtual hkResult updateCamera(const hkVector4& from, const hkVector4& to, const hkVector4& up, hkReal nearPlane, hkReal farPlane, hkReal fov, const char* name) HKV_OVERRIDE;
+	virtual hkResult displayPoint(const hkVector4& position, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+	virtual hkResult displayText(const char* text, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+	virtual hkResult displayGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, const hkTransform& transform, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+	virtual hkResult displayGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+	virtual hkResult sendMemStatsDump(const char* data, int length) HKV_OVERRIDE;
+	virtual hkResult holdImmediate() HKV_OVERRIDE;
 
 	// only these functions are implemented
-	VOVERRIDE hkResult displayLine(const hkVector4& start, const hkVector4& end, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult displayTriangle(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-	VOVERRIDE hkResult display3dText(const char* text, const hkVector4& pos, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+	virtual hkResult displayLine(const hkVector4& start, const hkVector4& end, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+	virtual hkResult displayTriangle(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+	virtual hkResult display3dText(const char* text, const hkVector4& pos, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
 
 	// compatibility with VisionIntegration branch
 #if defined(HAVOK_SDK_VERSION_MAJOR) && (HAVOK_SDK_VERSION_MAJOR >= 2012)
-	VOVERRIDE hkResult displayPoint2d(const hkVector4& position, hkColor::Argb color, int id, int tag)  HKV_OVERRIDE { return HK_SUCCESS; }
-	VOVERRIDE hkResult displayLine2d(const hkVector4& start, const hkVector4& end, hkColor::Argb color, int id, int tag)  HKV_OVERRIDE { return HK_SUCCESS; }
-	VOVERRIDE hkResult displayTriangle2d(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkColor::Argb color, int id, int tag)  HKV_OVERRIDE { return HK_SUCCESS; }
-	VOVERRIDE hkResult displayText2d(const char* text, const hkVector4& pos, hkReal sizeScale, hkColor::Argb color, int id, int tag)  HKV_OVERRIDE { return HK_SUCCESS; }
+	virtual hkResult displayPoint2d(const hkVector4& position, hkColor::Argb color, int id, int tag)  HKV_OVERRIDE { return HK_SUCCESS; }
+	virtual hkResult displayLine2d(const hkVector4& start, const hkVector4& end, hkColor::Argb color, int id, int tag)  HKV_OVERRIDE { return HK_SUCCESS; }
+	virtual hkResult displayTriangle2d(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkColor::Argb color, int id, int tag)  HKV_OVERRIDE { return HK_SUCCESS; }
+	virtual hkResult displayText2d(const char* text, const hkVector4& pos, hkReal sizeScale, hkColor::Argb color, int id, int tag)  HKV_OVERRIDE { return HK_SUCCESS; }
 #endif
 };
 
@@ -54,7 +54,7 @@ public:
 #endif	// __VHAVOK_AI_NAVMESH_DEBUG_DISPLAY_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

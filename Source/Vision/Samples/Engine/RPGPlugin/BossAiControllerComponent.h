@@ -17,67 +17,37 @@ public:
   // Constructor needs to be public for FORCE_LINKDYNCLASS on mobile
   RPG_BossAiControllerComponent();
 
-protected:
-  // States
-  void SelectState() HKV_OVERRIDE;
-  //@}
-
-  //@{
-  // Commands
-  void UpdateWandering(float const deltaTime) HKV_OVERRIDE;
-  void UpdateMeleeAttacking(float const deltaTime) HKV_OVERRIDE;
-  void UpdateRangedAttacking(float const deltaTime) HKV_OVERRIDE;
-  void UpdateAoeAttacking(float const deltaTime) HKV_OVERRIDE;
-  void UpdateMovingToPosition(float const deltaTime) HKV_OVERRIDE;
-  void UpdateFleeing(float const deltaTime) HKV_OVERRIDE;
-  RPG_AIState_e ChooseAttack() const;
-  //@}
-
-  //@{
-  // Conditions
-  bool HasValidTargetInMeleeRange() const;
-  //@}
-
-  //@{
-  // Attacking state
-  float m_lastAttackTime;     ///< When did this character last attack?
-  float m_attackInterval;     ///< Randomly assigned delay between attacks
-  float m_attackIntervalMin;
-  float m_attackIntervalMax;
-  //@}
-
-  float m_rangedAttackRange;  
-
-  //@{
-  // Wander state
-  hkvVec3 m_wanderOrigin;
-  float m_wanderAngle;
-  float m_wanderIdleTime;
-  //@}
-
-  //@{
-  // Fleeing state
-  float m_holdOffRange;
-  float m_fleeMaxDuration;
-  float m_fleeMinInterval;
-  float m_lastFleeTime;
-  //@}
-
-  //@{
-  // AoE Attacking state
-  float m_aoeMinInterval;
-  float m_lastAoeTime;
-  //@}
-
 private:
+  // IVObjectComponent
+  void SetOwner(VisTypedEngineObject_cl *newOwner) HKV_OVERRIDE;
+
   V_DECLARE_SERIAL_DLLEXP(RPG_BossAiControllerComponent, RPG_PLUGIN_IMPEXP);
   V_DECLARE_VARTABLE(RPG_BossAiControllerComponent, RPG_PLUGIN_IMPEXP);
 };
 
+namespace RPG_BossAiControllerState
+{
+  // Idling
+  class Idling : public RPG_ControllerStateBase
+  {
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const { return "Boss::Idling"; }
+  };
+
+  // Moving
+  class Moving : public RPG_ControllerState::Moving
+  {
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const { return "Boss::Moving"; }
+  };
+}
+
 #endif // RPG_PLUGIN_BOSS_AI_CONTROLLER_COMPONENT_H__
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

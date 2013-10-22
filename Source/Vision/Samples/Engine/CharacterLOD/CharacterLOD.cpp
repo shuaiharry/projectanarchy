@@ -13,14 +13,18 @@
 // This sample shows how to use characters with multiple models at different quality levels (LOD),
 // which automatically change according to distance of the camera.
 // ***********************************************************************************************
+
 #include <Vision/Samples/Engine/CharacterLOD/CharacterLODPCH.h>
-#include <Vision/Samples/Engine/CharacterLOD/LODObject.h>
-#include <Vision/Samples/Engine/Common/Entities/StaticCamera.hpp>
-#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/GUI/VMenuIncludes.hpp>
+#include <Vision/Samples/Engine/CharacterLOD/DemoCamera.hpp>
 #include <Vision/Samples/Engine/CharacterLOD/GUI/MenuSystem.hpp>
+#include <Vision/Samples/Engine/Common/Entities/StaticCamera.hpp>
+
 #include <Vision/Runtime/Base/System/IO/Stream/VMemoryStream.hpp>
 #include <Vision/Runtime/Base/System/IO/Clipboard/VClipboard.hpp>
-#include <Vision/Samples/Engine/CharacterLOD/DemoCamera.hpp>
+
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/GUI/VMenuIncludes.hpp>
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Components/VEntityLODComponent.hpp>
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Entities/_AnimEntity.hpp>
 
 #define DONT_SHOW_DEFAULT_COMPANY_LOGO
 
@@ -47,9 +51,9 @@ VISION_INIT
 #endif
   
 #if defined( _VISION_MOBILE ) || defined( HK_ANARCHY )
-  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground_mobile" /*SampleScene*/, (VSAMPLE_INIT_DEFAULTS & ~VSAMPLE_HAVOKLOGO) | VSAMPLE_FORCEMOBILEMODE ))
+  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground_mobile" /*SampleScene*/, (VSampleFlags::VSAMPLE_INIT_DEFAULTS & ~VSampleFlags::VSAMPLE_HAVOKLOGO) | VSampleFlags::VSAMPLE_FORCEMOBILEMODE ))
 #else
-  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS&~VSAMPLE_HAVOKLOGO ))
+  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS & ~VSampleFlags::VSAMPLE_HAVOKLOGO ))
 #endif
     return false;
   
@@ -61,29 +65,54 @@ VISION_SAMPLEAPP_AFTER_LOADING
   spApp->AddSampleDataDir("Common");
   
   // setup dynamic light
-  hkvVec3 lightPos( 0.f, 0.f, 300.f );
-  VisLightSource_cl *pLight = Vision::Game.CreateLight( lightPos, VIS_LIGHT_POINT, 15000.f );
+  hkvVec3 lightPos(0.f, 0.f, 300.f);
+  VisLightSource_cl *pLight = Vision::Game.CreateLight(lightPos, VIS_LIGHT_POINT, 15000.f);
   
   pLight->SetMultiplier( 1.1f );
   pLight->SetPosition( lightPos );
 
   //Create the entities
-  LODObject *pLODObject, *pLookatEntity=NULL;
-  for (int i=0;i<ENTITY_COUNT;i++)
+  VisBaseEntity_cl *pLODObject, *pLookatEntity=NULL;
+  for (int i = 0; i < ENTITY_COUNT; i++)
   {
     char szKey[64];
-    hkvVec3 origin(((float)(i%3)-1.f)*400.f,((float)(i/3)-1.f)*400.f, 80.f);
-    pLODObject = (LODObject *) Vision::Game.CreateEntity("LODObject",origin);
-    if (i==ENTITY_COUNT/2)
+
+    hkvVec3 origin(
+      (static_cast<float>(i % 3) - 1.0f) * 400.f,
+      (static_cast<float>(i / 3) - 1.0f) * 400.f, 
+      80.f);
+
+    pLODObject = Vision::Game.CreateEntity("VisBaseEntity_cl", origin,
+      "Models/Soldier/soldier_high.MODEL");
+    
+    if (i == ENTITY_COUNT/2)
       pLookatEntity = pLODObject;
-    sprintf(szKey,"Soldier_%i",i);
-    pLODObject->m_LOD.SetLODLevel(LOD_AUTO);
+
+    sprintf(szKey, "Soldier_%i", i);
     pLODObject->SetEntityKey(szKey);
+
+    // Add Animation component first
+    VSimpleAnimationComponent* pAnimationComponent = new VSimpleAnimationComponent();
+    pAnimationComponent->AnimationName = "Walk";
+    pLODObject->AddComponent(pAnimationComponent);
+
+    // Add LOD component
+    VEntityLODComponent* pLODComponent = new VEntityLODComponent();
+    pLODComponent->SetLODLevel(VLOD_AUTO);
+    pLODComponent->SetLODLevelCount(3);
+    pLODComponent->SetMediumLevelMesh("Models/Soldier/soldier_medium.MODEL");
+    pLODComponent->SetMediumLevelDistance(600.0f);
+    pLODComponent->SetLowLevelMesh("Models/Soldier/soldier_low.MODEL");
+    pLODComponent->SetLowLevelDistance(1200.0f);
+    pLODComponent->SetUltraLowLevelMesh("Models/Soldier/soldier_ultralow.MODEL");
+    pLODComponent->SetUltraLowLevelDistance(2400.0f);
+    pLODObject->AddComponent(pLODComponent);
   }
 
   // Setup the camera
-  hkvVec3 cameraOrigin( 0, 0, 0 );
-  VisDemoCamera_cl *pCamera = (VisDemoCamera_cl *)Vision::Game.CreateEntity("VisDemoCamera_cl", cameraOrigin );
+  hkvVec3 cameraOrigin(0.0f, 0.0f, 0.0f);
+  VisDemoCamera_cl *pCamera = static_cast<VisDemoCamera_cl*>(
+    Vision::Game.CreateEntity("VisDemoCamera_cl", cameraOrigin));
   pCamera->SetTargetEntity( pLookatEntity );
 
   // load some GUI resources
@@ -157,8 +186,6 @@ VISION_SAMPLEAPP_AFTER_LOADING
 #endif
 
   Vision::Video.SetAllowAutomaticUseOf2xAssets( bAllow2x );
-
-  //bool bShadow = false;
 }
 
 VISION_SAMPLEAPP_RUN
@@ -169,9 +196,11 @@ VISION_SAMPLEAPP_RUN
 
   // main loop
   return spApp->Run();
+
 #else
   // main loop
   return spApp->Run() && !spMainDlg->GetDialogResult();
+
 #endif
 }
 
@@ -194,7 +223,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

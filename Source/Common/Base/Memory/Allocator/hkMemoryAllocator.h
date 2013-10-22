@@ -48,7 +48,7 @@ class hkMemoryAllocator
 	public:
 		HK_DECLARE_PLACEMENT_ALLOCATOR();
 
-		typedef void (HK_CALL *MemoryWalkCallback)(void* start, hk_size_t size, hkBool allocated, int pool, void* param);
+		typedef void (HK_CALL *MemoryWalkCallback)(void* start, hk_size_t size, bool allocated, int pool, void* param);
 
 			/// A struct holding memory allocation information.
 			/// Not all allocators support all statistics. If a statistic is
@@ -165,7 +165,7 @@ class hkMemoryAllocator
 			/// See hkMemoryStatistics for details of the information returned.
 			/// NOTE! That if you have a memory limit set (via setMemoryLimit) the values returned will reflect that limit
 			/// you must have the limit set to zero if you want to find out the 'true' memory statistics.
-		virtual void getMemoryStatistics( MemoryStatistics& u )= 0;
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const = 0;
 
 			/// Return the padded size. Most memory system will round up the allocation size or add extra headers and footers.
 			/// This function should return the (padded) size which potentially is usable by the user
@@ -173,7 +173,7 @@ class hkMemoryAllocator
 			/// The size (and any size between the original allocated size, and the value returned from getAllocatedSize) can be passed
 			/// to this method, and it will produce the same result. Also note the block/bufFree can take any value between the original
 			/// allocated size, and the size returned from getAllocatedSize, and work correctly.
-		virtual int getAllocatedSize(const void* obj, int nbytes) = 0;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const = 0;
 
 			/// Reset internal counts of mem usage.
 		virtual void resetPeakMemoryStatistics() {}
@@ -237,7 +237,7 @@ class hkMemoryAllocator
 #endif // HKBASE_hkMemoryAllocator_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -141,7 +141,7 @@ extern "C"
 
 hkSimplexSolverInput::hkSimplexSolverInput()
 {
-	m_upVector.set(0.f,1.f,0.f);
+	m_upVector = hkVector4::getConstant<HK_QUADREAL_0100>();
 	m_maxSurfaceVelocity.setAll( hkSimdReal_Eps );
 	m_position.setZero();
 }
@@ -149,7 +149,7 @@ hkSimplexSolverInput::hkSimplexSolverInput()
 #endif //HK_SIMPLEX_SOLVER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -7,9 +7,9 @@
  */
 
 #include <Physics/Constraint/hkpConstraint.h>
+#include <Physics/Constraint/Data/hkpConstraintData.h>
 
 class hkpConstraintMotor;
-class hkpConstraintData;
 struct hkpConstraintRuntime;
 
 /// Utility functions to operate on a constraint data.
@@ -23,7 +23,7 @@ namespace hkpConstraintDataUtils
 
 	/// Extracts pivot vectors from the constraint.
 	hkResult HK_CALL getConstraintPivots ( const hkpConstraintData* data, hkVector4& pivotInAOut, hkVector4& pivotInBOut );
-	
+
 
 	/// Extracts motors from the constraints.
 	hkResult HK_CALL getConstraintMotors( const hkpConstraintData* data, hkpConstraintMotor*& motor0, hkpConstraintMotor*& motor1, hkpConstraintMotor*& motor2 );
@@ -36,7 +36,10 @@ namespace hkpConstraintDataUtils
 	hkResult HK_CALL loosenConstraintLimits( hkpConstraintData* data, const hkTransform& bodyATransform, const hkTransform& bodyBTransform );
 
 	/// Returns largest linear impulse. Needs runtime info.
-	hkVector4 getLargestLinearImpulse( const hkpConstraintData* dataIn, const hkpConstraintRuntime* runtimeIn, const hkQTransform& transformA, const hkQTransform& transformB );
+	hkVector4 getLargestLinearImpulse( hkpConstraintData::ConstraintType constraintType, const hkpConstraintRuntime* runtimeIn, const hkQTransform& transformA, const hkQTransform& transformB );
+
+	/// Returns the maximum size of the runtime for the given constraint data
+	int HK_CALL getSizeOfRuntime(const hkpConstraintData* dataIn);
 
 	/// Checks if the constraint supports getting and setting of its pivot points.
 	hkBool HK_CALL constraintSupportsPivotGetSet(const hkpConstraintData* data);
@@ -72,7 +75,7 @@ namespace hkpConstraintDataUtils
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -18,6 +18,7 @@
 
 class hkvMsgAssetDependency;
 class hkvMsgAssetProcessed;
+class hkvMsgAssetPropertyHint;
 
 struct hkvAssetUpdateInput
 {
@@ -79,15 +80,25 @@ public:
   ~hkvAssetUpdateIPCInterface();
 
 public:
+  enum ProcessResult {
+    PROCESS_OK,
+    PROCESS_FAILED,
+    PROCESS_ABORTED,
+    PROCESS_TIMED_OUT
+  };
+
+public:
   virtual void OnMessageReceived(const Message& msg) HKV_OVERRIDE;
 
   bool isValid() const;
-  bool processAsset(hkvAsset& asset, bool createThumbnail, bool determineDependencies);
-  
+  ProcessResult processAsset(hkvAsset& asset, bool createThumbnail, bool determineDependencies, 
+    bool getPropertyHint, float timeoutSeconds = 0);
+
   void abort();
   bool isAborted() const;
 
   const std::vector<hkStringPtr>& getAssetDependencies() const;
+  const char* getAssetPropertyHint() const;
 
 private:
   void send(const Message& msg);
@@ -95,6 +106,7 @@ private:
   bool startResourceHelper();
 
   void handleAssetDependency(const hkvMsgAssetDependency& msg);
+  void handleAssetPropertyHint(const hkvMsgAssetPropertyHint& msg);
   void handleAssetProcessed(const hkvMsgAssetProcessed& msg);
 
 private:
@@ -108,38 +120,51 @@ private:
   volatile bool m_aborted;
 
   std::vector<hkStringPtr> m_assetDependencies;
+  hkStringPtr m_assetPropertyHint;
   bool m_processingFinished;
-  bool m_createdThumbnail;
-  bool m_determinedDependencies;
+  bool m_processingSuccessful;
 };
 
 
 class hkvAssetUpdateBackgroundProcessor : public hkvBackgroundProcessor<hkvAssetUpdateInput, hkvAssetUpdateOutput>
 {
+  friend class hkvAssetUpdate;
+
 public:
   hkvAssetUpdateBackgroundProcessor(hkUint32 numThreads = 1);
 private:
   hkvAssetUpdateBackgroundProcessor(const hkvAssetUpdateBackgroundProcessor&);
   hkvAssetUpdateBackgroundProcessor& operator=(const hkvAssetUpdateBackgroundProcessor&);
 
+public:
+  void setAddThumbnailsToRCS(bool addThumbnailsToRCS);
+  bool getAddThumbnailsToRCS() const;
+
 protected:
-  hkvAssetUpdateIPCInterface* ensureValidIPC();
+  virtual void onRetryCountExceeded(const hkvAssetUpdateInput& input) HKV_OVERRIDE;
 
   virtual void beforeStart() HKV_OVERRIDE;
   virtual void onStopping() HKV_OVERRIDE;
   virtual void afterStop() HKV_OVERRIDE;
+  virtual void beforeClearInputs() HKV_OVERRIDE;
 
   virtual hkvBackgroundProcessingResult process(const hkvAssetUpdateInput& input, hkvAssetUpdateOutput& output) HKV_OVERRIDE;
 
 private:
+  hkvAssetUpdateIPCInterface* ensureValidIPC();
+
+private:
   hkCriticalSection m_protect;
   hkvAssetUpdateIPCInterface** m_ipcInterfaces;
+
+  bool m_addThumbnailsToRCS;
 };
+
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -15,7 +15,7 @@ void HK_CALL hkSkinningUtil::computeBoneIndicesAndWeights(	const hkArray<Entry>&
 {
 	const hkSimdReal maxDistance = hkSimdReal::fromFloat(maxD);
 	const hkSimdReal maxDistance2 = (maxDistance * maxDistance);
-	hkSimdReal invMaxDistance2; invMaxDistance2.setSelect( maxDistance2.greaterZero(), maxDistance2.reciprocal(), hkSimdReal_0);
+	hkSimdReal invMaxDistance2; invMaxDistance2.setReciprocal<HK_ACC_23_BIT,HK_DIV_SET_ZERO>( maxDistance2 );
 	const int numEntries = entries.getSize();
 
 	for (int i = 0; i < numEntries; i += numEntriesPerVertex)
@@ -30,7 +30,7 @@ void HK_CALL hkSkinningUtil::computeBoneIndicesAndWeights(	const hkArray<Entry>&
 			if (cur[j].m_index >= 0)
 			{
 				const hkSimdReal curDist = hkSimdReal::fromFloat(cur[j].m_distanceSquared);
-				hkSimdReal e; e.setSelect(curDist.less(maxDistance2), hkSimdReal_1 - (curDist * invMaxDistance2), hkSimdReal_0);
+				hkSimdReal e = hkSimdReal_1 - (curDist * invMaxDistance2); e.zeroIfFalse(curDist.less(maxDistance2));
 				hkSimdReal dist; dist.setMax(hkSimdReal::fromFloat(hkReal(0.001f)), e);	// To avoid division by zero if all are on the 'edge' of the bounding sphere
 					
 				indicesOut[i + j]	= (IndexType)(cur[j].m_index);
@@ -66,7 +66,7 @@ void HK_CALL hkSkinningUtil::computeBoneIndicesAndWeights(	const hkArray<Entry>&
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -70,7 +70,7 @@ void VMonitorGUIContext::TestPicking()
   m_bPicked = false;
 
   hkvVec3 vStart = Vision::Camera.GetCurrentCameraPosition();
-#if defined(_VISION_MOBILE)
+#if defined(_VISION_MOBILE) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )       // TODO: Define _VISION_MOBILE on Apollo.
   hkvVec3 vDir(0.0f, 0.0f, 0.0f);
   if(VInputManager::GetTouchScreen().IsActiveTouch(0))
   {
@@ -131,7 +131,7 @@ int VMonitorGUIContext::GetButtonMask(VGUIUserInfo_t &user)
   if (VisSampleApp::GetInputMap()->GetTrigger(GUI_DEMO_ACTION_2)) iMask |= BUTTON_RMOUSE;
   if (VisSampleApp::GetInputMap()->GetTrigger(GUI_DEMO_ACTION_3)) iMask |= BUTTON_MMOUSE;
 
-#if defined(_VISION_MOBILE)
+#if defined(_VISION_MOBILE) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )       // TODO: Define _VISION_MOBILE on Apollo.
   if(VInputManager::GetTouchScreen().GetControlValue(CT_TOUCH_ANY, 0.0f) > 0.0f)
     iMask |= BUTTON_LMOUSE;
 #endif
@@ -155,7 +155,7 @@ void VMonitorGUIContext::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

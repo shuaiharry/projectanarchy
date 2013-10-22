@@ -11,6 +11,7 @@
 extern const hkClass hkaiNavMeshInstanceClass;
 #include <Ai/Pathfinding/Common/hkaiReferenceFrame.h>
 #include <Ai/Pathfinding/NavMesh/hkaiNavMesh.h>
+#include <Ai/Pathfinding/Utilities/hkaiUserDataUtils.h>
 
 class hkaiNavMeshUtils;
 
@@ -37,12 +38,14 @@ class hkaiNavMeshInstance : public hkReferencedObject
 
 		typedef hkUint16 CutInfo;
 
+			/// Debugging value - faces or edges that are to be removed have their userdata set to these values.
 		enum DebugValues
 		{
 			DEAD_FACE = 0xDEADFACE,
 			DEAD_EDGE = 0xDEADED6E,
 		};
 
+			/// Value for m_cuttingInfo to indicate that the edge isn't cut.
 		enum CutInfoValues
 		{
 			NOT_CUT_EDGE = 0xFFFF,
@@ -267,6 +270,7 @@ class hkaiNavMeshInstance : public hkReferencedObject
 		// These are called by nav mesh cutting and never need to be called by the user.
 		//
 
+			/// Information to add a face.
 		struct AddFaceContext
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI, AddFaceContext);
@@ -276,6 +280,7 @@ class hkaiNavMeshInstance : public hkReferencedObject
 			hkaiNavMesh::FaceData m_data[hkaiNavMesh::MAX_DATA_PER_FACE];
 		};
 
+			/// Information to add an edge.
 		struct AddEdgeContext
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI, AddEdgeContext);
@@ -310,7 +315,13 @@ class hkaiNavMeshInstance : public hkReferencedObject
 		static inline int HK_CALL getNumClearanceValuesForFace( int numEdges ) { return 3*(numEdges-2); }
 		inline bool hasClearanceInfo() const;
 		inline hkReal getMaxGlobalClearance() const { return m_maxGlobalClearance; }
+
+		/// Set the maximum value for global clearance calculations (by default,
+		/// 5 units). This should be set greater than the maximum character
+		/// diameter used in A* queries, including any character radius 
+		/// multiplier.
 		void setMaxGlobalClearance( hkReal globalClear );
+
 		inline hkHalf getClearance(int index) const;
 		inline hkHalf getGlobalClearance( hkaiNavMesh::VertexIndex v) const;
 		inline int getClearanceIndexForFace( hkaiNavMesh::FaceIndex f ) const { return m_faceClearanceIndices[f]; }
@@ -475,7 +486,7 @@ typedef class hkaiSpuNavMeshAccessor hkaiNavMeshAccessor;
 #endif //HKAI_NAVMESH_INSTANCE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

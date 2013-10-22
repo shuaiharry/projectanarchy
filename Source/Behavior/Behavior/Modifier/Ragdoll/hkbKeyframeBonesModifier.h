@@ -96,6 +96,7 @@ class hkbKeyframeBonesModifier : public hkbModifier
 			hkInt16 m_boneIndex;	//+default(-1)
 									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL")
 									//+hk.Description("The ragdoll bone to be keyframed.")
+									//+hk.Ui(group="Target Bone",label="Target Bone Index")
 
 				/// Whether or not m_keyframedPosition and m_keyframedRotation are valid.
 			hkBool m_isValid;	//+default(false)
@@ -108,8 +109,9 @@ class hkbKeyframeBonesModifier : public hkbModifier
 		hkArray<struct KeyframeInfo> m_keyframeInfo;	//+hk.Description("The bones that will be keyframed to explicit targets, not the pose.")
 
 			/// Keyframed bone list that HAT can set.
-		hkRefPtr<hkbBoneIndexArray> m_keyframedBonesList;	//+hkb.RoleAttribute("ROLE_DEFAULT","FLAG_RAGDOLL|FLAG_NOT_VARIABLE")
+		hkRefPtr<hkbBoneIndexArray> m_keyframedBonesList;	//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL|FLAG_NOT_VARIABLE")
 															//+hk.Description("The bones that will be keyframed to the pose.")
+															//+hk.Ui(group="Keyframed Bones")
 
 	public:
 
@@ -120,7 +122,7 @@ class hkbKeyframeBonesModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

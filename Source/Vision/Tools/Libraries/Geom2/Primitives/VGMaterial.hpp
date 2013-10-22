@@ -69,7 +69,8 @@ public:
     VGMF_FORCE_TRANSPARENTPASS     = V_BIT(4),
     VGMF_FORCE_SECONDARYOPAQUEPASS   = V_BIT(5),
     VGMF_DISABLE_CAST_STATIC_SHADOWS = V_BIT(6),
-    VGMF_DISABLE_DEPTH_WRITE         = V_BIT(7)
+    VGMF_DISABLE_DEPTH_WRITE         = V_BIT(7),
+    VGMF_DATA_DIR_RELATIVE_PATHS     = V_BIT(8)
   };
 
   /// \brief
@@ -613,7 +614,7 @@ private:
 };
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -16,24 +16,12 @@
 
 ///
 /// \brief
-///   Structure that holds information about a trigger, fired by a vHavokTriggerVolume.
-///
-struct RPG_HavokBehaviorEventInfo
-{
-  hkbCharacter *m_character;
-  hkbEvent m_event;
-};
-
-///
-/// \brief
 ///    Class that implements the hkbWorldListener Interface which is responsible for Havok Behavior callbacks.
 /// 
 class RPG_HavokBehaviorWorldListener : public hkbWorldListener
 {
 public:
   RPG_HavokBehaviorWorldListener();
-
-  void SendEnqueuedNotifications();
 
   ///
   /// @name vHavokBehaviorWorldListener Virtual Overrides
@@ -47,11 +35,6 @@ public:
   /// @}
   ///
 
-protected:
-
-  DynArray_cl<RPG_HavokBehaviorEventInfo> m_BehaviorEventNotificationQueue;
-  unsigned int m_BehaviorEventNotificationQueueSize;
-
 public:
   
   static RPG_HavokBehaviorWorldListener s_instance;
@@ -60,7 +43,7 @@ public:
 #endif // RPG_PLUGIN_VISION_HAVOK_BEHAVIOR_WORLD_LISTENER_H__
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -25,6 +25,7 @@ struct hkaiAstarOutputParameters;
 /// Jobs for computing shortest paths on directed graphs and nav meshes.
 struct hkaiPathfindingJob : public hkJob
 {
+		/// Job subtypes for hkaiPathfindingJob
 	enum JobSubType
 	{
 		JOB_PATHFINDING_DIRECTED_GRAPH_ASTAR,
@@ -74,6 +75,11 @@ struct hkaiDirectedGraphAStarCommand
 	/// This defaults to a very large value, but can be reduced to avoid spending too much time per frame.
 	int m_maxNumberOfIterations;
 
+	/// Width and filter information for a character.
+	/// If an hkaiAstarCostModifier is specified, these can determine which edges are traversable,
+	/// or change the cost of crossing certain faces
+	hkaiAgentTraversalInfo m_agentInfo;
+
 	//
 	// Output
 	//
@@ -96,13 +102,16 @@ struct hkaiDirectedGraphAStarJob : public hkaiPathfindingJob
 {
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI, hkaiDirectedGraphAStarJob );
 	
-	HK_FORCE_INLINE hkaiDirectedGraphAStarJob( const hkaiStreamingCollection& collection );
+	HK_FORCE_INLINE hkaiDirectedGraphAStarJob( const hkaiStreamingCollection& collection, const hkaiStreamingCollection* hierarchyCollection = HK_NULL);
 
 	/// Search parameters
 	hkaiGraphPathSearchParameters m_searchParameters;
 
 	/// Pointer to streaming collection's information
 	const hkaiStreamingCollection::InstanceInfo* m_streamingSectionInfo;
+
+	/// Pointer to hierarchy collection's information
+	const hkaiStreamingCollection::InstanceInfo* m_hierarchySectionInfo;
 
 	/// Array of search commands to be processed
 	hkaiDirectedGraphAStarCommand* m_commands;
@@ -314,7 +323,7 @@ struct hkaiNavMeshLineOfSightJob : public hkaiPathfindingJob
 #endif // HK_AI_PATHFINDING_JOBS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

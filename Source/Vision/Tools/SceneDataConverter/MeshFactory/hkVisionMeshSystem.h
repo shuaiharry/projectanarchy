@@ -60,6 +60,9 @@ class hkVisionMeshSystem : public hkMeshSystem
 			/// appear correctly code for a specific engine implementation needs to set the internal state appropriately.
 		virtual hkMeshMaterial* createMaterial() HK_OVERRIDE;
 
+			/// Clones the given material
+		virtual hkMeshMaterial* cloneMaterial(const hkMeshMaterial* source) HK_OVERRIDE;
+
 			/// Create a texture with no data
 		virtual hkMeshTexture* createTexture() HK_OVERRIDE;
 
@@ -83,7 +86,7 @@ class hkVisionMeshSystem : public hkMeshSystem
 #endif	//	HK_VISION_MESH_SYSTEM_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -12,6 +12,7 @@ template<
 	typename OpenSetType,
 	typename FlagsType,
 	typename ParentType,
+	typename HeuristicType,
 	typename PathCostType,
 	typename ListenerType
 >
@@ -21,6 +22,7 @@ static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
 	OpenSetType& openset,
 	FlagsType& flags,
 	ParentType& parent,
+	HeuristicType& heuristic,
 	PathCostType& pathCost,
 	ListenerType& listener )
 {
@@ -100,7 +102,7 @@ static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
 			HK_INTERNAL_TIMER_SPLIT_LIST("Set");
 			listener.setParent(adjNodeIndex, curNodeIndex, curEdgeId );
 
-			pathCost.setCost(adjNodeIndex, newCost);
+			pathCost.setCost(&heuristic, adjNodeIndex, newCost);
 			parent.setParentCurrent(adjNodeIndex, curNodeIndex);
 			const hkBool32 isOpen = flags.isOpen(adjNodeIndex);
 			const PathCost adjNodeEstimatedCost = pathCost.estimatedCostCurrent( adjNodeIndex );
@@ -157,6 +159,7 @@ template<
 	typename OpenSetType,
 	typename FlagsType,
 	typename ParentType,
+	typename HeuristicType,
 	typename PathCostType
 >
 static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
@@ -165,30 +168,15 @@ static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
 	OpenSetType& openset,
 	FlagsType& flags,
 	ParentType& parent,
+	HeuristicType& heuristic,
 	PathCostType& pathCost )
 {
 	hkaiNoopListener<typename OpenSetType::SearchIndex, typename GraphType::EdgeKey> listener;
-	return hkaiAstarSearchIteration(graph, edgeCost, openset, flags, parent, pathCost, listener);
-}
-
-template<
-	typename GraphType,
-	typename EdgeCostType,
-	typename OpenSetType,
-	typename AllStateType
->
-static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
-	GraphType& graph,
-	EdgeCostType& edgeCost,
-	OpenSetType& openset,
-	AllStateType& allState )
-{
-	hkaiNoopListener<typename OpenSetType::SearchIndex, typename GraphType::EdgeKey> listener;
-	return hkaiAstarSearchIteration(graph, edgeCost, openset, allState, allState, allState, listener);
+	return hkaiAstarSearchIteration(graph, edgeCost, openset, flags, parent, heuristic, pathCost, listener);
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

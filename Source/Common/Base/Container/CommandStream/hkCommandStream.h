@@ -40,7 +40,7 @@ class hkCommand
 			TYPE_MAX
 		};
 
-		hkCommand( PrimaryType type, hkUint16 subType, int sizeInBytes );
+		HK_FORCE_INLINE hkCommand( PrimaryType type, hkUint16 subType, int sizeInBytes );
 
 		/// Called by block stream functions.
 		HK_FORCE_INLINE int getSizeInBytes() const { return m_sizePaddedTo16; }
@@ -56,7 +56,7 @@ class hkCommand
 		hkEnum<PrimaryType, hkUint8> m_primaryType;
 		hkUint16 m_secondaryType;
 
-#if defined (HK_ENABLE_DETERMINISM_CHECKS)  
+#if defined (HK_WANT_DETERMINISM_CHECKS)  
 		hkUint16 m_determinismSizeInBytes;		///< Real size in bytes needed for determinism checks.
 #endif
 };
@@ -129,7 +129,7 @@ class hkPrimaryCommandDispatcher
 #endif //HK_COMMAND_STREAM_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

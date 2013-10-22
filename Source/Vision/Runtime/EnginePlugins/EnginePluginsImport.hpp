@@ -33,14 +33,18 @@ VIMPORT IVisPlugin_cl* GetEnginePlugin_vHavokDestruction();
 VIMPORT IVisPlugin_cl* GetEnginePlugin_vHavokBehavior();
 VIMPORT IVisPlugin_cl* GetEnginePlugin_vHavokCharacter();
 VIMPORT IVisPlugin_cl* GetEnginePlugin_vHavokVehicle();
-VIMPORT IVisPlugin_cl* GetEnginePlugin_RakNetEnginePlugin();
-VIMPORT IVisPlugin_cl* GetEnginePlugin_vScaleformPlugin();
+
+#if !defined(_VISION_TIZEN)
+  VIMPORT IVisPlugin_cl* GetEnginePlugin_RakNetEnginePlugin();
+  VIMPORT IVisPlugin_cl* GetEnginePlugin_vScaleformPlugin();
+#endif
+
 VIMPORT IVisPlugin_cl* GetEnginePlugin_vFmodEnginePlugin();
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

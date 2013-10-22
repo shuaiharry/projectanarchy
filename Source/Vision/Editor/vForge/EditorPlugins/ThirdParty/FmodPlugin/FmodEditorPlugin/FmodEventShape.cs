@@ -27,6 +27,7 @@ using CSharpFramework.Serialization;
 using CSharpFramework.Math;
 using CSharpFramework.Scene;
 using System.Windows.Forms.Design;
+using CSharpFramework.DynamicProperties;
 
 namespace FmodEditorPlugin
 {
@@ -77,6 +78,7 @@ namespace FmodEditorPlugin
     public FmodEventShape(string name)
       : base(name)
     {
+      
     }
 
     #endregion
@@ -360,6 +362,35 @@ namespace FmodEditorPlugin
         _bDisposeWhenFinished = value;
         OnEventPropertyChanged(); // set everything because an event instance is to be created
       }
+    }
+
+    // Only allow positive scaling.
+    [RangeCheckAttribute(0.0f, float.PositiveInfinity, RangeCheckAttribute.Flags.MinExclusive)]
+    public override float UniformScaling
+    {
+      get { return base.UniformScaling; }
+      set { base.UniformScaling = value; }
+    }
+
+    [RangeCheckAttribute(0.0f, float.PositiveInfinity, RangeCheckAttribute.Flags.MinExclusive)]
+    public override float ScaleX
+    {
+      get { return base.ScaleX; }
+      set { base.ScaleX = value; }
+    }
+
+    [RangeCheckAttribute(0.0f, float.PositiveInfinity, RangeCheckAttribute.Flags.MinExclusive)]
+    public override float ScaleY
+    {
+      get { return base.ScaleY; }
+      set { base.ScaleY = value; }
+    }
+
+    [RangeCheckAttribute(0.0f, float.PositiveInfinity, RangeCheckAttribute.Flags.MinExclusive)]
+    public override float ScaleZ
+    {
+      get { return base.ScaleZ; }
+      set { base.ScaleZ = value; }
     }
 
     #endregion
@@ -701,7 +732,7 @@ namespace FmodEditorPlugin
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

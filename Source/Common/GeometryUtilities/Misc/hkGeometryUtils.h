@@ -102,6 +102,10 @@ class hkGeometryUtils
 			/// Computes the AABB of the given geometry
 		static void HK_CALL computeAabb(const hkGeometry& geomIn, hkAabb& aabbOut);
 
+			/// Computes the AABB of the given geometry, using the triangle list.
+			/// This gives a more accurate AABB calculation if there are unreferenced vertices.
+		static void HK_CALL computeAabbFromTriangles(const hkGeometry& geomIn, hkAabb& aabbOut);
+
 			/// Data structure to allow linear time operations on triangle meshes
 		struct Node
 		{
@@ -163,7 +167,7 @@ class hkGeometryUtils
 #endif //HK_GEOMETRY_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

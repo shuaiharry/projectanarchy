@@ -7,14 +7,14 @@
  */
 
 HK_FORCE_INLINE void hkpSolverResults::init()
-{ 
-	m_impulseApplied = 0.0f; 
-	m_internalSolverData = 0.0f; 
+{
+	m_impulseApplied = 0.0f;
+	m_internalSolverData = 0.0f;
 }
 
 HK_FORCE_INLINE hkpSolverResults::hkpSolverResults()
-{ 
-	init(); 
+{
+	init();
 }
 
 HK_FORCE_INLINE hkReal hkpSolverResults::getImpulseApplied() const
@@ -23,7 +23,7 @@ HK_FORCE_INLINE hkReal hkpSolverResults::getImpulseApplied() const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

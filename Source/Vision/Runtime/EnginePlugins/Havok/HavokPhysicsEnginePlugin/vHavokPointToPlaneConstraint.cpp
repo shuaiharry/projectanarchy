@@ -17,12 +17,15 @@
 // ----------------------------------------------------------------------------
 // vHavokPointToPlaneConstraintDesc
 // ----------------------------------------------------------------------------
+
 V_IMPLEMENT_SERIAL( vHavokPointToPlaneConstraintDesc, vHavokConstraintDesc, 0, &g_vHavokModule);
 
 // ----------------------------------------------------------------------------
+
 const unsigned int vHavokPointToPlaneConstraintDesc::s_iSerialVersion = 1;
 
 // ----------------------------------------------------------------------------
+
 vHavokPointToPlaneConstraintDesc::vHavokPointToPlaneConstraintDesc()
 :vHavokConstraintDesc(false)
 {
@@ -30,6 +33,7 @@ vHavokPointToPlaneConstraintDesc::vHavokPointToPlaneConstraintDesc()
 }
 
 // ----------------------------------------------------------------------------
+
 void vHavokPointToPlaneConstraintDesc::Reset()
 {
   vHavokConstraintDesc::Reset();
@@ -39,6 +43,7 @@ void vHavokPointToPlaneConstraintDesc::Reset()
 }
 
 // ----------------------------------------------------------------------------
+
 void vHavokPointToPlaneConstraintDesc::Serialize( VArchive &ar )
 {
   vHavokConstraintDesc::Serialize(ar);
@@ -59,16 +64,17 @@ void vHavokPointToPlaneConstraintDesc::Serialize( VArchive &ar )
   }
 }
 
-
 // ----------------------------------------------------------------------------
 // vHavokPointToPlaneConstraint
 // ----------------------------------------------------------------------------
+
 V_IMPLEMENT_SERIAL( vHavokPointToPlaneConstraint, vHavokConstraint, 0, &g_vHavokModule);
 
 // ----------------------------------------------------------------------------
 const unsigned int vHavokPointToPlaneConstraint::s_iSerialVersion = 1;
 
 // ----------------------------------------------------------------------------
+
 hkpConstraintData* vHavokPointToPlaneConstraint::CreateConstraintData()
 {
   return new hkpPointToPlaneConstraintData();
@@ -79,8 +85,13 @@ vHavokConstraintDesc *vHavokPointToPlaneConstraint::CreateConstraintDesc()
 {
   return new vHavokPointToPlaneConstraintDesc();
 }
-#pragma optimize("", off)
+
 // ----------------------------------------------------------------------------
+
+#pragma warning(push)
+#pragma warning(disable: 4748)
+#pragma optimize("", off)
+
 void vHavokPointToPlaneConstraint::InitConstraintDataFromDesc(hkpConstraintData& data, vHavokConstraintDesc const& desc)
 {
   vHavokConstraint::InitConstraintDataFromDesc(data, desc);
@@ -107,8 +118,12 @@ void vHavokPointToPlaneConstraint::InitConstraintDataFromDesc(hkpConstraintData&
 
   m_savedPointToPlaneDesc = *pPointToPlaneDesc;
 }
+
 #pragma optimize("", on)
+#pragma warning(pop)
+
 // ----------------------------------------------------------------------------
+
 void vHavokPointToPlaneConstraint::SaveToDesc(vHavokConstraintDesc& desc)
 {
   vHavokConstraint::SaveToDesc(desc);
@@ -120,6 +135,7 @@ void vHavokPointToPlaneConstraint::SaveToDesc(vHavokConstraintDesc& desc)
 }
 
 // ----------------------------------------------------------------------------
+
 void vHavokPointToPlaneConstraint::Serialize( VArchive &ar )
 {
   vHavokConstraint::Serialize(ar);
@@ -136,7 +152,7 @@ void vHavokPointToPlaneConstraint::Serialize( VArchive &ar )
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

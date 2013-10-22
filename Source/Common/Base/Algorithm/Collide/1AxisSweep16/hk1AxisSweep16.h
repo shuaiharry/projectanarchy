@@ -62,12 +62,13 @@ class hk1AxisSweep16
 			KeyPair* HK_RESTRICT pairsOut, int maxNumPairs, hkPadSpu<int>& numPairsSkippedOut );
 
 		static void HK_CALL sortAabbs(hkAabb16* aabbs, int size);
+		static void HK_CALL sortAabbs(hkAabb16* aabbs, int size, hkArray<hkRadixSort::SortData16>& sortBuffer, hkArray<hkAabb16>& tempAabbs);
 };
 
 #endif // HK_1AXIS_SWEEP_16_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

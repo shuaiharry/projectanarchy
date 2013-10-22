@@ -209,7 +209,7 @@ class hkbBlenderGenerator : public hkbGenerator
 		hkInt16 m_flags; //+default(0)+hkb.RoleAttribute("ROLE_DEFAULT","FLAG_HIDDEN")
 
 			/// If this is set to true then the last child will be a subtracted from the blend of the rest
-		hkBool m_subtractLastChild; //+default(false)
+		hkBool m_subtractLastChild; //+default(false)+hkb.RoleAttribute("ROLE_DEFAULT","FLAG_HIDDEN")
 
 			/// The children and their info.  This is exposed publically for HAT.  You are
 			/// better off calling setGenerator() to add children.
@@ -290,7 +290,7 @@ class hkbBlenderGenerator : public hkbGenerator
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

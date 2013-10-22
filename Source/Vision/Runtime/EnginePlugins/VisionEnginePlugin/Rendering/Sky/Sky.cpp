@@ -14,9 +14,7 @@
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Postprocessing/VGlobalFogPostprocess.hpp>
 #endif
 
-#if !defined( _VISION_MOBILE )
-  #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/RenderingHelpers/TimeOfDay.hpp>
-#endif
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/RenderingHelpers/TimeOfDay.hpp>
 
 extern VProgressStatus g_DiscardProgress;
 #define LOADINGPROGRESS   Vision::GetApplication()->GetLoadingProgress()
@@ -65,10 +63,8 @@ float VSkyBase::CalculateFogDepth() const
       VFogParameters fog = Vision::World.GetFogParameters();
       if (!fog.bMaskSky && (fog.depthMode != VFogParameters::Off) && (fog.fDepthEnd > fog.fDepthStart))
       {
-        float camFar;
-        float camNear;
-        VisRenderContext_cl::GetMainRenderContext()->GetClipPlanes(camNear, camFar);
-        return (camFar - fog.fDepthStart) / (fog.fDepthEnd - fog.fDepthStart);
+        const float fSkyDepth = (fog.fVirtualSkyDepth >= 0.0f) ? fog.fVirtualSkyDepth : VisRenderContext_cl::GetMainRenderContext()->GetViewProperties()->getFar();
+        return (fSkyDepth - fog.fDepthStart) / (fog.fDepthEnd - fog.fDepthStart);
       }
     }
   }
@@ -231,6 +227,9 @@ void VSky::DisposeObject()
 
 void VSky::CreateLayers(int iCount)
 {
+  if (iCount > MAX_SKY_LAYERS)
+    iCount = MAX_SKY_LAYERS;
+
   VASSERT(iCount>=0 && iCount<=MAX_SKY_LAYERS);
   if (iCount==LayerCount)
     return;
@@ -275,7 +274,6 @@ void VSky::Tick(float dtime)
   for (int i=0; i<LayerCount; i++) 
     m_pLayers[i].Tick(dtime);
 
-#if !defined(_VISION_MOBILE)
   IVTimeOfDay *pTimeOfDayInterface = Vision::Renderer.GetTimeOfDayHandler();
   if (pTimeOfDayInterface == NULL)
     return;
@@ -298,11 +296,6 @@ void VSky::Tick(float dtime)
     if (GetLayerCount()>3)
       GetLayer(3).SetIntensity(fDuskWeight);
   }
-
-  VColorRef vAmbientColor(false);
-  pTimeOfDay->EvaluateColorValue(0.1f, vAmbientColor, fDawnWeight, fDuskWeight, fNightWeight);
-  Vision::Renderer.SetGlobalAmbientColor(vAmbientColor.ToFloat().getAsVec4 (1.0f));
-#endif
 }
 
 
@@ -923,7 +916,7 @@ START_VAR_TABLE(VisSky_cl,VSky, "Sky box", VVARIABLELIST_FLAGS_NONE, "Sky box" )
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

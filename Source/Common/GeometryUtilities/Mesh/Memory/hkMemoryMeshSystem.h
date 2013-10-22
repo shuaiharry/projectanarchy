@@ -57,6 +57,9 @@ class hkMemoryMeshSystem: public hkMeshSystem
 
             // hkMeshSystem implementation
         virtual hkMeshMaterial* createMaterial() HK_OVERRIDE;
+
+			// Clones the given material.
+		virtual hkMeshMaterial* cloneMaterial(const hkMeshMaterial* source) HK_OVERRIDE;
 	
 			// hkMeshSystem implementation
 		virtual hkMeshTexture* createTexture() HK_OVERRIDE;
@@ -90,7 +93,7 @@ class hkMemoryMeshSystem: public hkMeshSystem
 #endif // HK_MEMORY_MESH_SYSTEM_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

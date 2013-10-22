@@ -61,7 +61,7 @@ public:
   {
   }
 
-  VOVERRIDE void OnShaderPassDestroyed(VCompiledShaderPass *pPass);
+  virtual void OnShaderPassDestroyed(VCompiledShaderPass *pPass) HKV_OVERRIDE;
 };
 
 
@@ -107,7 +107,7 @@ public:
   /// The filename must contain the project relative path to the shader library.
   /// 
   /// \param szFilename
-  ///   filename of the library including .ShaderLib extension (accessed through standard file
+  ///   filename of the library including the .ShaderLib filename extension (accessed through standard file
   ///   filemanager)
   /// 
   /// \param iFlags
@@ -262,20 +262,12 @@ public:
   VISION_APIFUNC void DisplayDebugTexture(VTextureObject *pTex);
 
   /// \brief
-  ///   Reloads all shader libraries that have changed (according to timestamp) and re-applies
-  ///   affected shaders
-  /// 
-  /// This function re-applies changed shader effects to known surfaces, i.e. all surfaces of
-  /// static meshes and entity models
-  /// 
+  ///   Reloads all (known) shader assignment material files and reassigns the shaders. 
+  ///
   /// To respond to changes for custom materials, you can listen to the
   /// Vision::Callbacks.OnReassignShaders callback.
-  /// 
-  /// The return value corresponds to the number of changed library files.
-  VISION_APIFUNC int ReloadChangedShaderLibraries();
-
-  /// \brief
-  ///   Reloads all (known) shader assignment material files and reassigns the shaders. Known material files include models and static meshes.
+  ///
+  /// Known material files include models and static meshes.
   VISION_APIFUNC void ReloadAllShaderAssignmentFiles();
 
   ///
@@ -353,41 +345,50 @@ private:
 class VisShaderFXLibManager_cl : public VisResourceManager_cl
 {
 public:
-
-
   /// \brief
   ///   Constructor
   VisShaderFXLibManager_cl();
 
   /// \brief
-  ///   Load a shader library file (.ShaderLib file). See VisShaders_cl::LoadShaderLibrary
+  ///   Load a shader library file (.ShaderLib file). 
+  ///
+  /// \param szFilename
+  ///   filename of the library including the .ShaderLib filename extension.
+  /// 
+  /// \param iFlags
+  ///   Optional loading flags.
+  ///
+  /// \sa VisShaders_cl::LoadShaderLibrary
   VISION_APIFUNC VShaderEffectLib* LoadShaderLibrary(const char *szFilename, int iFlags=SHADERLIBFLAG_NONE);
 
   /// \brief
   ///   Loops through all loaded shader libraries and returns the first effect resource with
-  ///   specified effect name
+  ///   specified effect name.
   VISION_APIFUNC VShaderEffectResource* FindEffect(const char *szEffectName) const;
 
   /// \brief
   ///   Loops through all loaded shader libraries and calls VShaderEffectLib::FreeCompiledEffects
-  ///   on each
+  ///   on each.
   VISION_APIFUNC void ResetCompiledEffectCaches();
 
   /// \brief
-  ///   Overridden resource manager function
-  VISION_APIFUNC VOVERRIDE VManagedResource *CreateResource(const char *szFilename, VResourceSnapshotEntry *pExtraInfo);
+  ///   Overridden resource manager function.
+  VISION_APIFUNC virtual VManagedResource *CreateResource(const char *szFilename, VResourceSnapshotEntry *pExtraInfo) HKV_OVERRIDE;
 
   /// \brief
-  ///   Return the respective shaderbin file rather than shaderlib
-  VISION_APIFUNC VOVERRIDE const char *GetStreamingReplacementFilename(VResourceSnapshotEntry &resourceDesc, const char *szResolvedFilename, char *szBuffer);
+  ///   Return the respective shaderbin file rather than shaderlib.
+  VISION_APIFUNC virtual const char *GetStreamingReplacementFilename(VResourceSnapshotEntry &resourceDesc, 
+    const char *szResolvedFilename, char *szBuffer) HKV_OVERRIDE;
 
-  VISION_APIFUNC VOVERRIDE void OnAfterUnusedResourcesPurged();
+  /// \brief
+  ///   Purges all unused shader instances managed by the shader effect lib manager.
+  VISION_APIFUNC virtual void OnAfterUnusedResourcesPurged() HKV_OVERRIDE;
 
   VisCompiledShaderManager_cl m_ShaderInstances;
+
   ///
   /// @}
   ///
-
 };
 
 
@@ -586,7 +587,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

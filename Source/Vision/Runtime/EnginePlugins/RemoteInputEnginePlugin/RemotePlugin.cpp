@@ -93,7 +93,7 @@ private:
   float m_fRealUpdateRate;
   float m_fAverageUpdateRate;
   float m_fIncomingWidth,m_fIncomingHeight;
-
+  TouchInfo m_lastReceivedInit;
 
   char m_szHostname[128];
   int m_iNumAddresses;
@@ -318,6 +318,17 @@ void* VRemoteInput::OnRequest(mg_event event, mg_connection *conn, const mg_requ
 
         m_queueMutex.Lock();
 
+        // Check whether we have a stored VTT_INIT TouchInfo and whether it contains a res different from the current one.
+        if (m_lastReceivedInit.TouchType == VTT_INIT)
+        {
+          if (m_iXRes != m_lastReceivedInit.iAbsX || m_iYRes != m_lastReceivedInit.iAbsY)
+          {
+            // Queue the res change and invalidate 'm_lastReceivedInit'. It will be set again once the res change was applied in the main thread.
+            m_touchQueue.Append(m_lastReceivedInit);
+            m_lastReceivedInit.TouchType = VTT_INVALID;
+          }
+        }
+
         m_fRealUpdateRate = m_fTimeSinceLastUpdate;
         if(!isValidFloat(m_fRealUpdateRate))
           m_fRealUpdateRate = EXPECTED_UPDATE_RATE;
@@ -354,7 +365,7 @@ void* VRemoteInput::OnRequest(mg_event event, mg_connection *conn, const mg_requ
                   }
                 }
 
-                if(iIndex != -1)  //only insert start if we have a slot aviable
+                if(iIndex != -1)  //only insert start if we have a slot available
                 {
                   TouchPoint& point = m_touchPoints[iIndex];
                   point.iId = iTouchId;
@@ -445,7 +456,7 @@ void* VRemoteInput::OnRequest(mg_event event, mg_connection *conn, const mg_requ
           m_fIncomingHeight = (float)iHeight;
 
           //insert resize message into queue
-          m_touchQueue.Append( TouchInfo(-1, -1, iWidth, iHeight, VTT_INIT) );
+          m_touchQueue.Append(TouchInfo(-1, -1, iWidth, iHeight, VTT_INIT));
         }
 
         //Deactivate all active touchpoints
@@ -642,6 +653,15 @@ void VRemoteInput::OnHandleCallback(IVisCallbackDataObject_cl *pData)
               Vision::Editor.Set3DCanvasSize(info.iAbsX,info.iAbsY);
             else
               Vision::Video.ChangeScreenResolution(info.iAbsX,info.iAbsY,false,0);
+
+            // Store the applied res change in 'm_lastReceivedInit' so we can set it again when new input
+            // comes in but we restarted the scene in the meantime.
+            // NOTE: We need to store the res after is was applied as Vision::Video.ChangeScreenResolution
+            // will alter the values in case it deems them invalid and we need the exact values to decide
+            // whether we need to set the res again or not.
+            int iWidth = Vision::Video.GetCurrentConfig()->m_iXRes;
+            int iHeight = Vision::Video.GetCurrentConfig()->m_iYRes;
+            m_lastReceivedInit = TouchInfo(-1, -1, iWidth, iHeight, VTT_INIT);
           }
           if(m_bDisableMouseInput)
           {
@@ -955,7 +975,7 @@ void VRemoteInput::SetDisableMouseInput(bool bOn)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -113,7 +113,7 @@ struct hkpSolverInfo
 	hkBool		m_forceCoherentConstraintOrderingInSolver;
 
 
-	inline void incrementDeactivationFlags() 
+	inline void incrementDeactivationFlags()
 	{
 		m_deactivationIntegrateCounter++;
 		// we need each consecutive bi-flag to be not a negation of the previous one
@@ -140,22 +140,22 @@ struct hkpSolverInfo
 };
 
 
-struct hkp1dMotorSolverInfo 
+struct hkp1dMotorSolverInfo
 {
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT_SOLVER, hkp1dMotorSolverInfo );
-	
+
 	/// max impulse that can be applied forward
 	hkReal				m_maxImpulsePerSubstep;
-	
+
 	/// max impulse that can be applied backwards. This is a negative value. This has not been tested for positive values!
 	hkReal				m_minImpulsePerSubstep;
-	
+
 	/// the velocity target
 	hkReal				m_velocity;
-	
+
 	/// The strength of the constraint between 0 and 1
 	hkReal				m_tau; // Consider changing this to a hkHalf
-	
+
 	/// The damping of the motor between 0 and 1
 	hkReal				m_damping; // Consider changing this to a hkHalf
 };
@@ -195,11 +195,11 @@ struct hkp3dAngularMotorSolverInfo
 
 	// Flags that mark individual angular constraints as broken.
 	Status m_broken;
-	
-	inline int getState(int idx) const 
+
+	inline int getState(int idx) const
 	{
 		HK_ASSERT2(0xad67d8d8, idx >= 0  && idx <= 2, "Idx must be in {1,2,3}.");
-		return (m_broken >> (2 * idx)) & ANGULAR_1ST; 
+		return (m_broken >> (2 * idx)) & ANGULAR_1ST;
 	}
 
 	inline void setState(int idx, int value)
@@ -242,7 +242,7 @@ struct hkpViolatedConstraintArray
 #endif // HKP_SOLVER_INFO_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

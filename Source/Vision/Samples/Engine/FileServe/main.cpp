@@ -7,11 +7,10 @@
  */
 
 // ***********************************************************************************************
-// Tutorial 01 : Getting started
+// FileServe sample application
 // Copyright (C) Havok.com Inc. All rights reserved.
 // ***********************************************************************************************
-// Shows the basic steps needed to initialize the Vision Engine.
-// This sample uses Source/Vision/Runtime/Common/VisSampleApp.cpp to initialize the engine
+// Shows how to set up an application to consume data using a file serving client.
 // ***********************************************************************************************
 #include <Vision/Samples/Engine/FileServe/FileServePCH.h>
 #include <Vision/Runtime/EnginePlugins/EnginePluginsImport.hpp>
@@ -20,7 +19,11 @@ VisSampleAppPtr spApp;
 
 VISION_INIT
 {
-  // setup directories, does nothing on platforms other than iOS, 
+  // Deactivate automatic probing for alternative files (i.e., only use the asset system to determine
+  // potential replacement resources)
+  AssetSettings::SetUseAlternativeFiles(false);
+
+  // Set up directories, does nothing on platforms other than iOS, 
   // pass true if you want load from the documents directory
   VISION_SET_DIRECTORIES(false);
 
@@ -66,7 +69,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -33,9 +33,11 @@ class hkaiObstacleGenerator : public hkReferencedObject
 		virtual void recalcCachedData() {}
 
 			/// Sets aabbOut to the world-space AABB of the generator.
-		virtual void getAabb(hkAabb& aabbOut) const = 0;
+		virtual void getAabb(hkAabb& aabbOut) const;
 
 		virtual void shiftWorldSpace( hkVector4Parameter shift );
+
+		void calcLocalAabb( hkAabb& aabbOut ) const;
 
 			/// Gets the sphere and line obstacles for the generator, and appends them to the collector
 		void appendObstacles(const hkAabb& sensorAabb, class hkaiObstacleCollector& collectorInOut) const;
@@ -63,7 +65,7 @@ class hkaiObstacleGenerator : public hkReferencedObject
 #endif	// HKAI_OBSTACLE_GENERATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -31,7 +31,7 @@ public:
 	typedef hkVector4 Position;
 
 	typedef hkaiGraphMultiDistanceHeuristic<hkaiNavVolumeGraph> Heuristic;
-	typedef hkaiHashSearchState<Heuristic> SearchState;
+	typedef hkaiHashSearchState SearchState;
 
 	HK_FORCE_INLINE hkaiNavVolumeGraph();
 
@@ -153,7 +153,7 @@ private:
 #endif // HKAI_NAV_VOLUME_GRAPH_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

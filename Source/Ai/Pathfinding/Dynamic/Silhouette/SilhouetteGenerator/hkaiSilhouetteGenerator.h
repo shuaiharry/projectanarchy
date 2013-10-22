@@ -25,6 +25,8 @@ class hkaiSilhouetteGenerator : public hkReferencedObject
 		HK_DECLARE_REFLECTION();
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI);
 
+			/// What type of hkaiSilhouetteGenerator this is.
+			/// This is used to fix up the vtable on SPU, otherwise it is unused.
 		enum GeneratorType
 		{
 				/// Previously used by hkaiPhysics2012BodySilhouetteGenerator, but now this inherits from hkaiPointCloudSilhouetteGenerator.
@@ -43,6 +45,7 @@ class hkaiSilhouetteGenerator : public hkReferencedObject
 			GENERATOR_MAX,
 		};
 
+			/// Max allowable size for a generator on SPU.
 		enum
 		{
 			
@@ -51,13 +54,13 @@ class hkaiSilhouetteGenerator : public hkReferencedObject
 			MAX_SIZE_FOR_SPU = 256
 		};
 
+			/// Material index to indicate that the silhouette is cutting (as opposed to painting).
 		enum
 		{
-				/// Material index to indicate that the silhouette is cutting (as opposed to painting).
 			CUTTING_MATERIAL = -1,
 		};
 
-
+			/// Flags for forcing a silhouette generator onto PPU.
 		enum ForceGenerateOntoPpuReasons
 		{
 			/// Requested by user
@@ -118,6 +121,10 @@ class hkaiSilhouetteGenerator : public hkReferencedObject
 			/// Returns the size of the generator. Necessary for DMA transfers to SPU.
 		virtual int getSize() const = 0;
 
+			/// Used to update some internal fields before serialization, especially for physics-driven silhouettes that
+			/// might not save their physics data.
+		virtual void preSerialize() {};
+
 			/// Whether or not m_cachedSilhouettes are valid for the given transform
 		hkBool32 canReuseCachedSilhouettes( const hkQTransform& localTransform, hkVector4Parameter referenceUp ) const;
 
@@ -165,6 +172,7 @@ class hkaiSilhouetteGenerator : public hkReferencedObject
 			/// If materialId == CUTTING_MATERIAL (the default value), the silhouette will cut instead of applying the material
 		inline void setMaterialId( int material ) { m_materialId = material; }
 
+			/// How the AABB should be expanded.
 		enum ExpansionFlags
 		{
 				/// No expansion
@@ -220,7 +228,7 @@ typedef void (HK_CALL *hkaiGetAabbFunc)(const hkaiSilhouetteGenerator* gen, cons
 #endif // HK_SILHOUETTE_GENERATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

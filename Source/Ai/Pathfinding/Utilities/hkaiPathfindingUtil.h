@@ -66,21 +66,10 @@ class hkaiPathfindingUtil
 			// If a pointer is not specified here, memory will be allocated during the search
 			//
 
-				/// Open set buffer.
-				/// Assumed to be of size m_searchParameters.m_maxOpenSetSizeBytes
-			char* m_openSetBuffer; //+nosave
-
-				/// Search state buffer.
-				/// Assumed to be of size m_searchParameters.m_maxSearchStateSizeBytes
-			char* m_searchStateBuffer; //+nosave
-
-				/// Open set buffer for hierarchical heuristic subsearch.
-				/// Assumed to be of size m_searchParameters.m_maxHierarchySearchStateSizeBytes
-			char* m_hierarchyOpenSetBuffer; //+nosave
-
-				/// Search state buffer for hierarchical heuristic subsearch.
-				/// Assumed to be of size m_searchParameters.m_maxHierarchySearchStateSizeBytes
-			char* m_hierarchySearchStateBuffer; //+nosave
+				/// Search buffer.
+			hkaiSearchParameters::SearchBuffers m_searchBuffers; //+nosave
+				/// Hierarchical search buffer.
+			hkaiSearchParameters::SearchBuffers m_hierarchySearchBuffers; //+nosave
 
 			FindPathInput( int numGoals = 0 );
 			FindPathInput(hkFinishLoadedObjectFlag f);
@@ -135,11 +124,8 @@ class hkaiPathfindingUtil
 				/// This defaults to a very large value, but can be reduced to avoid spending too much time per frame.
 			int m_maxNumberOfIterations;
 
-				/// Maximum number of bytes used to store the open set
-			int m_maxOpenSetSizeBytes; //+default(hkaiNavMeshPathSearchParameters::OPEN_SET_SIZE)
-
-				/// Maximum number of bytes used to store the search state.
-			int m_maxSearchStateSizeBytes; //+default(hkaiNavMeshPathSearchParameters::SEARCH_STATE_SIZE)
+				/// Maximum sizes used to store the open set and search state.
+			hkaiSearchParameters::BufferSizes m_bufferSizes;
 
 				/// Width and filter information for a character.
 				/// If an hkaiAstarCostModifier is specified, these can determine which edges are traversal,
@@ -189,24 +175,52 @@ class hkaiPathfindingUtil
 			/// Input structure for findGraphPath()
 		struct FindGraphPathInput
 		{
-			// +version(0)
+			// +version(2)
 			HK_DECLARE_REFLECTION();
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI_ASTAR, FindGraphPathInput );
 
 			FindGraphPathInput();
 			FindGraphPathInput(hkFinishLoadedObjectFlag f);
 
-			/// Key of the starting node.
-			hkaiPackedKey m_startNodeKey;
+				/// Set the start node.
+			void setStartNode( hkaiPackedKey startNode );
 
-			/// Key of the goal node.
-			hkaiPackedKey m_goalNodeKey;
+				/// Creates two start nodes: the specified startNodeKey, and the target of the edge specified by
+				/// startEdgeKey. The initial cost for the first node will be fraction * oppositeEdgeCost, and the
+				/// initial cost for the second node will be (1-fraction) * edgeCost.
+			void setStartEdge( const hkaiStreamingCollection* collection, hkaiPackedKey startNodeKey, hkaiPackedKey startEdgeKey, hkReal fraction );
 
-			/// The maximum number of A* iterations that should be performed.
-			/// This defaults to a very large value, but can be reduced to avoid spending too much time per frame.
+				/// Set the goal node.
+			void setGoalNode( hkaiPackedKey goalNode );
+
+				/// Creates two goal nodes: the specified goalNodeKey, and the target of the edge specified by
+				/// goalEdgeKey. The final cost for the first node will be fraction * edgeCost, and the
+				/// initial cost for the second node will be (1-fraction) * oppositeEdgeCost.
+			void setGoalEdge( const hkaiStreamingCollection* collection, hkaiPackedKey goalNodeKey, hkaiPackedKey goalEdgeKey, hkReal fraction );
+
+				/// Keys of the starting nodes. Only the first is considered by the hierarchical heuristic, so make sure
+				/// they're nearby
+			hkArray<hkaiPackedKey> m_startNodeKeys;
+
+				/// Initial costs for the corresponding start nodes
+			hkArray<hkReal> m_initialCosts;
+
+				/// Key of the goal node.
+			hkArray<hkaiPackedKey> m_goalNodeKeys;
+
+				/// Final costs, added to the path cost for the corresponding goal nodes
+			hkArray<hkReal> m_finalCosts;
+
+				/// The maximum number of A* iterations that should be performed.
+				/// This defaults to a very large value, but can be reduced to avoid spending too much time per frame.
 			int m_maxNumberOfIterations; //+default(100000)
 
-			/// Request search parameters
+				/// Width and filter information for a character.
+				/// If an hkaiAstarCostModifier is specified, these can determine which edges are traversable,
+				/// or change the cost of crossing certain faces
+			hkaiAgentTraversalInfo m_agentInfo;
+
+				/// Request search parameters
 			hkaiGraphPathSearchParameters m_searchParameters;
 
 			//
@@ -214,13 +228,10 @@ class hkaiPathfindingUtil
 			// If a pointer is not specified here, memory will be allocated during the search
 			//
 
-			/// Open set buffer.
-			/// Assumed to be of size m_searchParameters.m_maxOpenSetSizeBytes
-			char* m_openSetBuffer; //+nosave
-
-			/// Search state buffer.
-			/// Assumed to be of size m_searchParameters.m_maxSearchStateSizeBytes
-			char* m_searchStateBuffer; //+nosave
+				/// Search buffer.
+			hkaiSearchParameters::SearchBuffers m_searchBuffers; //+nosave
+				/// Hierarchical search buffer.
+			hkaiSearchParameters::SearchBuffers m_hierarchySearchBuffers; //+nosave
 		};
 
 		/// Output structure for findGraphPath()
@@ -268,14 +279,16 @@ class hkaiPathfindingUtil
 		static hkBool32 HK_CALL _checkInitialFace(const hkaiStreamingCollection& collection, const FindPathInput& input, int& closestGoalIndex );
 
 
-			/// Find a path between two nodes in the mesh cluster graphs.
-		static void HK_CALL findGraphPath( const hkaiStreamingCollection& collection, const FindGraphPathInput& input, FindGraphPathOutput& output);
 
-		/// Same as above, but using a single mesh cluster graph.
-		static void HK_CALL findGraphPath(const hkaiDirectedGraphExplicitCost& clusterGraph, const FindGraphPathInput& input, FindGraphPathOutput& output);
+			/// Find a path between two nodes in the mesh cluster graphs.
+		static void HK_CALL findGraphPath(const hkaiStreamingCollection& collection, const FindGraphPathInput& input, FindGraphPathOutput& output, const hkaiStreamingCollection* hierarchyCollection = HK_NULL);
+
+			/// Same as above, but using a single mesh cluster graph.
+		static void HK_CALL findGraphPath(const hkaiDirectedGraphExplicitCost& graph, const FindGraphPathInput& input, FindGraphPathOutput& output, const hkaiDirectedGraphExplicitCost* clusterGraph = HK_NULL);
 
 	protected:
 
+			/// What type of feature the query is collecting.
 		enum NearestFeatureType
 		{
 			CALLBACK_EDGE,
@@ -289,7 +302,7 @@ class hkaiPathfindingUtil
 #endif // HK_AI_PATHFINDING_UTILITIES_PATHFINDING_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

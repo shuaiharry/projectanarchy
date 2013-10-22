@@ -11,54 +11,46 @@
 
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConstraint.hpp>
 
-// ----------------------------------------------------------------------------
-// vHavokStiffSpringConstraintDesc
-// ----------------------------------------------------------------------------
-
 /// \brief
-///   Descriptor for vHavok Stiff-Spring constraints.
+///   Descriptor for vHavokPhysics Stiff-Spring constraints.
 class vHavokStiffSpringConstraintDesc : public vHavokConstraintDesc
 {
 public:
   VHAVOK_IMPEXP vHavokStiffSpringConstraintDesc();
   
-  VHAVOK_IMPEXP virtual void Reset();
+  VHAVOK_IMPEXP virtual void Reset() HKV_OVERRIDE;
 
-  V_DECLARE_SERIAL_DLLEXP( vHavokStiffSpringConstraintDesc, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokStiffSpringConstraintDesc, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 private:
   static const unsigned int s_iSerialVersion; ///< The current serialization version for objects of this class.
 };
 
-
-// ----------------------------------------------------------------------------
-// vHavokStiffSpringConstraint
-// ----------------------------------------------------------------------------
-
 /// \brief
-///   Implementation of the vHavok Stiff-Spring constraint.
+///   Implementation of the vHavokPhysics Stiff-Spring constraint.
 class vHavokStiffSpringConstraint : public vHavokConstraint
 {
 public:
   // serialization and type management
-  V_DECLARE_SERIAL_DLLEXP( vHavokStiffSpringConstraint, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokStiffSpringConstraint, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 protected:
-  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData();
-  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc();
-  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, vHavokConstraintDesc const& desc);
-  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc);
+  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, 
+    vHavokConstraintDesc const& desc) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc) HKV_OVERRIDE;
 
 private:
   static const unsigned int s_iSerialVersion; ///< The current serialization version for objects of this class.
 };
 
-#endif //V_HAVOK_STIFF_SPRING_CONSTRAINT_HPP_INCLUDED
+#endif // V_HAVOK_STIFF_SPRING_CONSTRAINT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

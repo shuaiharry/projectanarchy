@@ -10,6 +10,9 @@
 
 #include <Common/Base/Container/Array/hkArrayUtil.h>
 #include <Common/Base/Container/hkContainerAllocators.h>
+#if defined(HK_PLATFORM_PPU)
+#	include <Common/Base/Memory/PlatformUtils/Spu/hkMemoryRouterSpuUtil.h>
+#endif
 
 class hkTrackerArrayLayoutHandler;
 
@@ -251,16 +254,16 @@ class hkArrayBase
 			/// be respected.
 		HK_FORCE_INLINE void _setDataUnchecked(T *ptr, int size, int capacityAndFlags);
 
-            /// Get the capacity and the flags - advanced use
-        HK_FORCE_INLINE int getCapacityAndFlags() const;
+			/// Get the capacity and the flags - advanced use
+		HK_FORCE_INLINE int getCapacityAndFlags() const;
 
 	protected:
 
 			// Internal type checking
-		HK_FORCE_INLINE void _setData(T *ptr, int size, int capacityAndFlags, hkTypeIsPod);
+		HK_FORCE_INLINE void _setData(T *ptr, int size, int capacityAndFlags, hkTrait::TypeIsPod);
 
-		HK_FORCE_INLINE hkArrayBase<T>& copyFromArray(hkMemoryAllocator&, const hkArrayBase<T>& src, hkTypeIsPod);
-		HK_FORCE_INLINE hkArrayBase<T>& copyFromArray(hkMemoryAllocator&, const hkArrayBase<T>& src, hkTypeIsClass);
+		HK_FORCE_INLINE hkArrayBase<T>& copyFromArray(hkMemoryAllocator&, const hkArrayBase<T>& src, hkTrait::TypeIsPod);
+		HK_FORCE_INLINE hkArrayBase<T>& copyFromArray(hkMemoryAllocator&, const hkArrayBase<T>& src, hkTrait::TypeIsClass);
 
 	public:
 
@@ -270,6 +273,7 @@ class hkArrayBase
 			CAPACITY_MASK = int(0x3FFFFFFF),
 			FLAG_MASK = int(0xC0000000),
 			DONT_DEALLOCATE_FLAG = int(0x80000000), // Indicates that the storage is not the array's to delete
+			ALLOCATED_FROM_SPU = int(0x40000000),	// Ps3 specific. Indicates that the array storage has been allocated as a result of a SPU request.
 			FORCE_SIGNED = -1
 		};
 
@@ -461,7 +465,7 @@ class hkInplaceArrayAligned16 : public hkArray<T>
 #endif // HKBASE_HKARRAY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

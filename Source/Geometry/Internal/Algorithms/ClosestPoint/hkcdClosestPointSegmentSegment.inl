@@ -18,8 +18,7 @@ HK_FORCE_INLINE void hkcdClosestPointSegmentSegment(hkVector4Parameter A, hkVect
 	const hkSimdReal D1 = dA.lengthSquared<3>();
 	const hkSimdReal D2 = dB.lengthSquared<3>();
 
-	const hkSimdReal zero = hkSimdReal::getConstant<HK_QUADREAL_0>();
-	const hkSimdReal eps = hkSimdReal::getConstant<HK_QUADREAL_EPS>();
+	const hkSimdReal eps = hkSimdReal_Eps;
 
 	// denom == 0 means lines are parallel
 	// denom always >= 0 by triangle inequality
@@ -34,25 +33,24 @@ HK_FORCE_INLINE void hkcdClosestPointSegmentSegment(hkVector4Parameter A, hkVect
 	hkSimdReal t;
 	{
 		t = (S1 * D2 - S2 * R);
-		t.setClamped(t, zero, denom);
+		t.setClamped(t, hkSimdReal_0, denom);
 		t.mul( invDenom ); // use invDenom as late as possible
 	}
 
 	// By convention, if the segments are parallel (i.e. denom == 0 <= eps) we choose t = 1. This is how the previous version worked.
-	const hkSimdReal one = hkSimdReal::getConstant<HK_QUADREAL_1>();
-	t.setSelect(denom.lessEqual(eps), one, t);
+	t.setSelect(denom.lessEqual(eps), hkSimdReal_1, t);
 
 	// find the closest point on B to the point we just found
 	hkSimdReal u;
 	{
 		u = t * (invD2*R) - (invD2*S2);	// invD2 is already available earlier, multiple the factors instead of u
-		u.setClamped(u, zero, one);
+		u.setClampedZeroOne(u);
 	}
 
 	// if the point on B was clamped, we may need to update the point on A
 	{
 		t = u * (invD1*R) + (invD1*S1);	// invD1 is already available earlier, multiple the factors instead of t
-		t.setClamped(t, zero, one);
+		t.setClampedZeroOne(t);
 	}
 	uOut = u;
 	tOut = t;
@@ -81,7 +79,7 @@ HK_FORCE_INLINE hkVector4Comparison hkcdClosestPointSegmentSegment(hkVector4Para
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

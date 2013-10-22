@@ -84,7 +84,7 @@
 #		define HK_CONFIG_SIMD HK_CONFIG_SIMD_DISABLED
 
 	// Linux
-#	elif defined(HK_PLATFORM_LINUX)
+#	elif defined(HK_PLATFORM_LINUX) && !defined(HK_PLATFORM_TIZEN)
 #		define HK_CONFIG_SIMD HK_CONFIG_SIMD_ENABLED
 
 	// Mac
@@ -108,6 +108,9 @@
 #		else // ARMv6 etc
 #			define HK_CONFIG_SIMD HK_CONFIG_SIMD_DISABLED
 #		endif
+
+#	elif defined(HK_PLATFORM_TIZEN)
+#		define HK_CONFIG_SIMD HK_CONFIG_SIMD_DISABLED
 
 	// CTR 
 #	elif defined(HK_PLATFORM_CTR)
@@ -135,6 +138,8 @@
 // HK_SSE_VERSION
 #if defined(HK_PLATFORM_PS4)
 #	define HK_SSE_VERSION 0x42
+#elif defined(HK_PLATFORM_DURANGO)
+#	define HK_SSE_VERSION 0x42 //0x50
 #else
 #	define HK_SSE_VERSION 0x20
 // todo howto detect ? or specify SSE > 2
@@ -151,7 +156,7 @@
 #endif // HK_BASE_CONFIGSIMD_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

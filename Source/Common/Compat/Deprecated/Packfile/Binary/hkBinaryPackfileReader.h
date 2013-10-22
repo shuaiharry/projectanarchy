@@ -98,7 +98,7 @@ class hkBinaryPackfileReader : public hkPackfileReader
 
 			/// Return a reference to the i'th section.
 			/// Must have called loadSectionHeader() or loadEntireFile() first.
-		hkPackfileSectionHeader& getSectionHeader(int idx) const;
+		const hkPackfileSectionHeader& getSectionHeader(int idx) const;
 
 			/// Read a single section.
 			/// A user buffer for the data may be supplied. The required size is given
@@ -168,6 +168,8 @@ class hkBinaryPackfileReader : public hkPackfileReader
 		void useClassesFromRegistry(const hkClassNameRegistry& registry) const;
 
 	private:
+		/// Updates loaded hkPackfileSectionHeaders from version 3 to version 4.
+		void updateSectionHeaders();
 
 		class BinaryPackfileData : public hkPackfileData
 		{
@@ -178,12 +180,34 @@ class hkBinaryPackfileReader : public hkPackfileReader
 				void untrackAndDestructObject( void* o );
 		};
 
+		/// The section headers may have a different layout depending on the binary packfile version,
+		/// we use this class to access the sections with the correct stride.
+		class SectionHeaderArray
+		{
+			public:
+				HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(SectionHeaderArray, HK_MEMORY_CLASS_BASE);
+				
+				SectionHeaderArray();
+				/// Initializes the section accessor, the sectionHeaderSize is the number of bytes between two 
+				/// successive hkPackfileSectionHeaders.
+				void init(void* baseSection, int sectionHeaderSize);
+				/// True if the section header array has been initialized.
+				bool isValid() const;
+				/// The hkPackfileSectionHeaders can be accessed like an array. No bound checking.
+				hkPackfileSectionHeader& operator[](int i);
+				const hkPackfileSectionHeader& operator[](int i) const;
+
+			protected:
+				void* m_baseSection;
+				int m_sectionHeaderSize;
+		};
+
 			// Our allocations
 		BinaryPackfileData* m_packfileData;
 			// The overall header or null if not read yet.
 		hkPackfileHeader* m_header;
 			// Array of section headers. See m_header->m_numSections.
-		hkPackfileSectionHeader* m_sections;
+		SectionHeaderArray m_sections;
 			// Pointers to sectiondata.
 		hkInplaceArray<void*,16> m_sectionData;
 			// Offset of packfile from start of stream.
@@ -199,7 +223,7 @@ class hkBinaryPackfileReader : public hkPackfileReader
 #endif // HK_BINARY_PACKFILE_READER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

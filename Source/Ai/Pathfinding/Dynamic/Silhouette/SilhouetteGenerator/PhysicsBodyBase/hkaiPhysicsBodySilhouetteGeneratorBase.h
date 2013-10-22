@@ -11,6 +11,8 @@
 
 #include <Ai/Pathfinding/Dynamic/Silhouette/SilhouetteGenerator/PointCloud/hkaiPointCloudSilhouetteGenerator.h>
 
+extern const hkClass hkaiPhysicsBodySilhouetteGeneratorBaseClass;
+
 	/// An abstract base class for handling silhouette generation from rigid bodies.
 	/// This can be used for Havok Physics (see Ai/PhysicsBridge/Silhouette/hkaiPhysicsBodySilhouetteGenerator.h),
 	/// Or adapted to another physics engine.
@@ -29,6 +31,8 @@ class hkaiPhysicsBodySilhouetteGeneratorBase : public hkaiPointCloudSilhouetteGe
 
 			/// Destructor
 		virtual ~hkaiPhysicsBodySilhouetteGeneratorBase();
+
+		void updateCachedTransform();
 		
 		//
 		// hkaiSilhouetteGenerator interface
@@ -61,6 +65,12 @@ class hkaiPhysicsBodySilhouetteGeneratorBase : public hkaiPointCloudSilhouetteGe
 			/// Get the world-space linear velocity of the rigid body.
 		virtual void getBodyLinearVelocity( hkVector4& velocityOut ) const = 0;
 
+			/// Whether or not the body is in the physics world.
+		virtual bool isInWorld() const = 0;
+
+			/// Update the cached transform, since we might not have access to the world after loading.
+		virtual void preSerialize() HK_OVERRIDE;
+
 		//
 		// Static utility methods
 		//
@@ -88,7 +98,7 @@ class hkaiPhysicsBodySilhouetteGeneratorBase : public hkaiPointCloudSilhouetteGe
 #endif // HK_PHYSICS_BODY_SILHOUETTE_GENERATOR_BASE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

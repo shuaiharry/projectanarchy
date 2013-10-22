@@ -36,6 +36,7 @@ enum hkvTargetPlatform
   HKV_TARGET_PLATFORM_IOS,
   HKV_TARGET_PLATFORM_ANDROID,
   HKV_TARGET_PLATFORM_WIIU,
+  HKV_TARGET_PLATFORM_TIZEN,
 
   HKV_TARGET_PLATFORM_COUNT,
 
@@ -43,8 +44,10 @@ enum hkvTargetPlatform
 };
 
 extern const char* hkvTargetPlatformNames[];
+extern const char* hkvTargetPlatformShaderBinExtensions[]; // This is a hack for the PackageTool. We need to clean this up and probably remove hkvTargetPlatform altogether, and instead use the vBase defines.
 
 ASSETFRAMEWORK_IMPEXP const hkvEnumDefinition& hkvGetTargetPlatformDefinition();
+ASSETFRAMEWORK_IMPEXP const char* hkvGetTargetPlatformShaderBinExtension(hkvTargetPlatform Platform);
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -71,6 +74,7 @@ struct hkvLookupTableEntry
 typedef hkvAsset* (*hkvCreateAssetFunc)(void);
 typedef bool (*hkvDetermineDependenciesFunc)(const char* libraryPath, const char* assetPath, std::vector<hkStringPtr>& out_dependencies);
 typedef bool (*hkvGenerateThumbnailFunc)(const char* libraryPath, const char* assetPath, const char* thumbnailPath);
+typedef bool (*hkvGetPropertyHintFunc)(const char* libraryPath, const char* assetPath, hkStringBuf& out_propertyHint);
 
 /// \brief
 ///   The hkvAssetTypeInfo struct is used to register a new asset type
@@ -78,9 +82,10 @@ typedef bool (*hkvGenerateThumbnailFunc)(const char* libraryPath, const char* as
 struct hkvAssetTypeInfo
 {
   hkvAssetTypeInfo() 
-  : m_createFunc(NULL), m_determineDependenciesFunc(NULL), m_generateThumbnailFunc(NULL), 
+  : m_createFunc(NULL), 
+    m_determineDependenciesFunc(NULL), m_generateThumbnailFunc(NULL), m_getPropertyHintFunc(NULL),
     m_resourceManagerName(NULL), 
-    m_useEngineForDependencies(false), m_useEngineForThumbnails(false)
+    m_useEngineForDependencies(false), m_useEngineForThumbnails(false), m_useEngineForPropertyHint(false)
   {
     m_szTypeIconQt = "";
   }
@@ -97,11 +102,13 @@ struct hkvAssetTypeInfo
     m_createFunc = rhs.m_createFunc;
     m_determineDependenciesFunc = rhs.m_determineDependenciesFunc;
     m_generateThumbnailFunc = rhs.m_generateThumbnailFunc;
+    m_getPropertyHintFunc = rhs.m_getPropertyHintFunc;
     m_supportedFileExtensions = rhs.m_supportedFileExtensions;
     m_defaultThumbnailPath = rhs.m_defaultThumbnailPath;
     m_resourceManagerName = rhs.m_resourceManagerName;
     m_useEngineForDependencies = rhs.m_useEngineForDependencies;
     m_useEngineForThumbnails = rhs.m_useEngineForThumbnails;
+    m_useEngineForPropertyHint = rhs.m_useEngineForPropertyHint;
     m_szTypeIconQt = rhs.m_szTypeIconQt;
   }
 
@@ -129,14 +136,16 @@ struct hkvAssetTypeInfo
   hkvCreateAssetFunc m_createFunc;
   hkvDetermineDependenciesFunc m_determineDependenciesFunc;
   hkvGenerateThumbnailFunc m_generateThumbnailFunc;
+  hkvGetPropertyHintFunc m_getPropertyHintFunc;
   hkArray<hkStringPtr> m_supportedFileExtensions;
 
   hkStringPtr m_defaultThumbnailPath;
   const char* m_szTypeIconQt;
 
   const char* m_resourceManagerName;
-  hkBool m_useEngineForDependencies;
-  hkBool m_useEngineForThumbnails;
+  bool m_useEngineForDependencies;
+  bool m_useEngineForThumbnails;
+  bool m_useEngineForPropertyHint;
 };
 
 
@@ -177,6 +186,14 @@ struct hkvTransformationInput
 };
 
 
+enum hkvMessageCategory
+{
+  HKV_MESSAGE_CATEGORY_ANY = 0,
+  HKV_MESSAGE_CATEGORY_ASSET_UPDATE,
+  HKV_MESSAGE_CATEGORY_ASSET_TRANSFORMATION
+};
+
+
 enum hkvMessageSeverity
 {
   HKV_MESSAGE_SEVERITY_INFO,
@@ -184,13 +201,15 @@ enum hkvMessageSeverity
   HKV_MESSAGE_SEVERITY_ERROR
 };
 
-struct hkvTransformationMessage
+
+struct hkvAssetLogMessage
 {
-  hkvTransformationMessage(hkvMessageSeverity severity, const char* message) :
-    m_severity(severity), m_message(message)
+  hkvAssetLogMessage(hkvMessageCategory category, hkvMessageSeverity severity, const char* message) 
+  : m_category(category), m_severity(severity), m_message(message)
   {
   }
 
+  hkvMessageCategory m_category;
   hkvMessageSeverity m_severity;
   hkStringPtr m_message;
 };
@@ -238,7 +257,7 @@ struct hkvTransformationOutput
     return *this;
   }
 
-  hkArray<hkvTransformationMessage> m_messages;
+  hkArray<hkvAssetLogMessage> m_messages;
   hkArray<hkvTransformationOutputFileSpec> m_outputFileSpecs;
 };
 
@@ -279,7 +298,7 @@ struct hkvTransformationRuleTypeInfo
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

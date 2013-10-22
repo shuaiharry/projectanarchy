@@ -27,8 +27,17 @@ inline hkaiAstarEdgeFilter::NavVolumeIsEnabledCallbackContext::NavVolumeIsEnable
 
 }
 
+inline hkaiAstarEdgeFilter::DirectedGraphIsEnabledCallbackContext::DirectedGraphIsEnabledCallbackContext(
+	const hkaiStreamingCollection::InstanceInfo* streamingInfo, const hkaiAgentTraversalInfo& agentInfo, 
+	const hkaiDirectedGraphNodePairInfo& nodeEdgeInfo)
+	: m_streamingInfo(streamingInfo),
+	m_agentInfo(agentInfo),
+	m_nodeEdgeInfo(nodeEdgeInfo)
+{
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

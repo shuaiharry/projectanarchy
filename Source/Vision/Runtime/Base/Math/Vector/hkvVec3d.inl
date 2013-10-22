@@ -201,11 +201,11 @@ HKV_FORCE_INLINE hkvResult hkvVec3d::normalizeIfNotZero (double fEpsilon /* = HK
   return HKV_SUCCESS;
 }
 
-HKV_FORCE_INLINE double hkvVec3d::normalizedEnsureUnitLength ()
+HKV_FORCE_INLINE double hkvVec3d::normalizedEnsureUnitLength (double fEpsilon /* = HKVMATH_EPSILON */, const hkvVec3d& vFallback /* = hkvVec3d(1.0, 0.0, 0.0) */)
 {
-  if ((isZero (HKVMATH_EPSILON))/* || (!isValid ())*/)
+  if ((isZero (fEpsilon))/* || (!isValid ())*/)
   {
-    set (1, 0, 0);
+    *this = vFallback;
     return 0.0;
   }
 
@@ -460,7 +460,7 @@ HKV_FORCE_INLINE double hkvVec3d::getAngleBetween (const hkvVec3d& rhs) const
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

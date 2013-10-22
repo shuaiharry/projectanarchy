@@ -33,6 +33,8 @@ VMotionInputPSP2* pMotionInput = NULL;
 VMotionInputIOS* pMotionInput = NULL;
 #elif defined(_VISION_ANDROID)
 VMotionInputAndroid* pMotionInput = NULL;
+#elif defined(_VISION_TIZEN)
+VMotionInputTizen* pMotionInput = NULL;
 #elif defined(_VISION_WINRT)
 VMotionInputWinRT* pMotionInput = NULL;
 #endif
@@ -141,7 +143,10 @@ void MobileOffRoadGame::SetPlayTheGame(bool status)
 #elif defined(_VISION_ANDROID)
     pMotionInput = (VMotionInputAndroid*)(&VInputManager::GetInputDevice(INPUT_DEVICE_MOTION_SENSOR));
     pMotionInput->SetEnabled(true);
-#endif 
+#elif defined(_VISION_TIZEN)
+    pMotionInput = (VMotionInputTizen*)(&VInputManager::GetInputDevice(INPUT_DEVICE_MOTION_SENSOR));
+    pMotionInput->SetEnabled(true);
+#endif
 
 #if defined(_VISION_MOBILE)
     const float width = (float)VVideo::GetVideoConfig()->ViewWidth;
@@ -165,14 +170,18 @@ void MobileOffRoadGame::SetPlayTheGame(bool status)
 
 #endif
 
-    // Set the timer to a fixed step timer to guarantees that logic updates are run with a fixed time difference
-    int fps = 60;
-    Vision::GetApplication()->SetSceneUpdateController(new VFixStepSceneUpdateController(fps, 10));
+    // Set the timer to a fixed step timer to guarantee that logic updates are run with a fixed time difference.
+    // This allows for more stable vehicle physics.
+#if defined(_VISION_MOBILE)
+    const int fps = 30;
+#else
+    const int fps = 60;
+#endif
+    Vision::GetApplication()->SetSceneUpdateController(new VFixStepSceneUpdateController(fps, 2));
     s_timer = new VFixStepTimer(fps);
     s_timer->Init();
     Vision::SetTimer(s_timer);
 
-    //vHavokPhysicsModule::GetInstance()->SetPhysicsTickCount(60, 1, true);
     g_cruiser.Init();
 
     RecordBodyState();
@@ -231,7 +240,7 @@ void MobileOffRoadGame::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 
 void MobileOffRoadGame::RecordBodyState()
 {
-  // Find all dynmaic rbs in thw world and grab enough state to send them back to here
+  // Find all dynamic rbs in the world and grab enough state to send them back to here
   vHavokPhysicsModule::GetInstance()->WaitForSimulationToComplete();
   vHavokPhysicsModule::GetInstance()->MarkForRead();
 
@@ -368,7 +377,7 @@ void MobileOffRoadGame::Update()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

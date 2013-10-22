@@ -315,8 +315,34 @@ hkUint32 hkAabb16::yzDisjoint( const hkAabb16& a, const hkAabb16& b )
 	return maxA & 0x80008000;
 }
 
+
+
+void hkAabb16::setIntersection( const hkAabb16& aabb0, const hkAabb16& aabb1  )
+{
+#if defined(HK_USING_GENERIC_INT_VECTOR_IMPLEMENTATION)
+	{
+		m_max[0] = hkMath::min2( aabb0.m_max[0], aabb1.m_max[0] );
+		m_max[1] = hkMath::min2( aabb0.m_max[1], aabb1.m_max[1] );
+		m_max[2] = hkMath::min2( aabb0.m_max[2], aabb1.m_max[2] );
+
+		m_min[0] = hkMath::max2( aabb0.m_min[0], aabb1.m_min[0] );
+		m_min[1] = hkMath::max2( aabb0.m_min[1], aabb1.m_min[1] );
+		m_min[2] = hkMath::max2( aabb0.m_min[2], aabb1.m_min[2] );
+
+	}
+#else
+	hkIntVector vmin; vmin.load<4>( (const hkUint32*)&aabb0 );
+	hkIntVector vmax = vmin;
+	hkIntVector a; a.load<4>( (const hkUint32*)&aabb1  );
+	vmin.setMaxS16( vmin, a );
+	vmax.setMinS16( vmax, a );
+	vmax.store<4>( (hkUint32*)this);
+	vmin.store<2>( (hkUint32*)this);
+#endif
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

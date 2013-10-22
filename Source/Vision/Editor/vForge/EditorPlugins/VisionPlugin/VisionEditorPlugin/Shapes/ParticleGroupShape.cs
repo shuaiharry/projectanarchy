@@ -976,6 +976,7 @@ namespace VisionEditorPlugin.Shapes
 
 
     static ParticlePreviewType_e _previewType = ParticlePreviewType_e.None;
+    static int _previewLayer = 0;
 
     /// <summary>
     /// This global property should be set by the particle editor so that the engine instance can render some preview properties
@@ -992,6 +993,24 @@ namespace VisionEditorPlugin.Shapes
         EditorManager.ActiveView.UpdateView(false);
       }
     }
+
+    /// <summary>
+    /// This global property should be set by the particle editor so that the engine instance can render some preview properties
+    /// </summary>
+    [PrefabRelevant(false)]
+    public static int PreviewLayer
+    {
+      get { return _previewLayer; }
+      set
+      {
+        if (_previewLayer == value) return;
+        _previewLayer = value;
+        EngineInstanceParticleGroup.SetPreviewLayer(value);
+        EditorManager.ActiveView.UpdateView(false);
+      }
+    }
+
+    
 
     /// <summary>
     /// Static instance of user-installable string editor. This string editor is used to edit the description of the layer
@@ -1094,7 +1113,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

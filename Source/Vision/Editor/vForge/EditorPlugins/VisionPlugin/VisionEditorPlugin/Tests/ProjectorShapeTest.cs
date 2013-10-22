@@ -39,7 +39,7 @@ namespace VisionEditorPlugin.Tests
         EditorManager.ActiveView.UpdateView(true);
       }
       // now export and see whether projector looks identically
-      EditorManager.Scene.ExportScene(null, false);
+      EditorManager.Scene.ExportScene(null, null);
       EditorManager.Scene.Close();
       TestManager.Helpers.LoadExportedScene("ProjectorScene.vscene");
       for (int i = 0; i < iFrameCount; i++)
@@ -91,7 +91,7 @@ namespace VisionEditorPlugin.Tests
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

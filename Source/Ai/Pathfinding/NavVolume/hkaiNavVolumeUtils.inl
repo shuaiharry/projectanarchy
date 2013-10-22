@@ -116,7 +116,7 @@ inline void HK_CALL hkaiNavVolumeUtils_getCellWorldAabb(const Volume& volume, co
 	// float-to-int conversion there.
 
 	hkIntVector vectorCell;
-	vectorCell.loadNotAligned<4>((const hkUint32*)&cell);
+	vectorCell.load<4, HK_IO_NATIVE_ALIGNED>((const hkUint32*)&cell);
 
 	hkIntVector minUint, maxUint;
 	hkIntVector zero; zero.setZero();
@@ -186,7 +186,7 @@ inline void HK_CALL hkaiNavVolumeUtils::getCellWorldAabb(const hkaiNavVolumeAcce
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

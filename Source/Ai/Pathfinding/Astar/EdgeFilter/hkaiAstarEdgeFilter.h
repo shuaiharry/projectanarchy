@@ -13,6 +13,8 @@
 #include <Ai/Pathfinding/NavMesh/hkaiNavMeshEdgePairInfo.h>
 #include <Ai/Pathfinding/NavVolume/hkaiNavVolumeInstance.h>
 #include <Ai/Pathfinding/NavVolume/hkaiNavVolumeCellPairInfo.h>
+#include <Ai/Pathfinding/Graph/hkaiDirectedGraphNodePairInfo.h>
+#include <Ai/Pathfinding/NavMesh/Streaming/hkaiStreamingCollection.h>
 
 extern const class hkClass hkaiAstarEdgeFilterClass;
 
@@ -39,6 +41,8 @@ class hkaiAstarEdgeFilter : public hkReferencedObject
 			MAX_SIZE_FOR_SPU = 256
 		};
 
+			/// Whether the edge fitler is an hkaiDefaultAstarEdgeFitler or a user-specified one.
+			/// This is used to fix up the vtable on SPU, otherwise it is unused.
 		enum EdgeFilterType
 		{
 			EDGE_FILTER_DEFAULT,
@@ -95,6 +99,25 @@ class hkaiAstarEdgeFilter : public hkReferencedObject
 		/// Returns true if traversal between the agent and the edge is enabled.
 		virtual bool isEnabled( const NavVolumeIsEnabledCallbackContext& context ) const;
 
+			/// Context structure for the isEnabled callback
+		struct DirectedGraphIsEnabledCallbackContext
+		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI,DirectedGraphIsEnabledCallbackContext);
+
+			inline DirectedGraphIsEnabledCallbackContext( const hkaiStreamingCollection::InstanceInfo* streamingInfo, const hkaiAgentTraversalInfo& agentInfo, 
+				const hkaiDirectedGraphNodePairInfo& nodeEdgeInfo );
+
+			/// Accessor for the graphs(s)
+			const hkaiStreamingCollection::InstanceInfo* const m_streamingInfo;
+			/// Traversal info for the A* search
+			const hkaiAgentTraversalInfo& m_agentInfo;
+			/// Information on the Node->Edge->Node to check
+			const hkaiDirectedGraphNodePairInfo& m_nodeEdgeInfo;
+		};
+
+		/// Returns true if traversal between the agent and the edge is enabled.
+		virtual bool isEnabled( const DirectedGraphIsEnabledCallbackContext& context ) const;
+
 		static hkaiAstarEdgeFilter* getFromMainMemory(const hkaiAstarEdgeFilter* costModifier);
 };
 
@@ -103,7 +126,7 @@ class hkaiAstarEdgeFilter : public hkReferencedObject
 #endif // HK_AI_NAV_MESH_EDGE_FILTER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

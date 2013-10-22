@@ -21,7 +21,7 @@ V_IMPLEMENT_SERIAL(RPG_LevelInfo, RPG_BaseEntity, 0, &g_RPGPluginModule);
 
 START_VAR_TABLE (RPG_LevelInfo, RPG_BaseEntity, "RPG LevelInfo Entity", 0, "")
   DEFINE_VAR_OBJECT_REFERENCE (RPG_LevelInfo, m_initialPlayerSpawnPoint, "Initial Player Spawn", 0, 0, 0 ); 
-  DEFINE_VAR_VSTRING_AND_NAME (RPG_LevelInfo, m_minimapImagePath, "Minimap Image File", "Path to the map image file to be used in this scene's minimap. (.jpg)", "", 0, 0, "filepicker(.jpg)");
+  DEFINE_VAR_VSTRING_AND_NAME (RPG_LevelInfo, m_minimapImagePath, "Minimap Image File", "Path to the map image file to be used in this scene's minimap. (JPG or TGA)", "", 0, 0, "filepicker(.jpg,.tga)");
   DEFINE_VAR_FLOAT_AND_NAME (RPG_LevelInfo, m_minimapImageDimensions.x, "Minimap Image Dimensions: X", "XY dimensions of the minimap image file.", "512.0", 0,0);
   DEFINE_VAR_FLOAT_AND_NAME (RPG_LevelInfo, m_minimapImageDimensions.y, "Minimap Image Dimensions: Y", "XY dimensions of the minimap image file.", "512.0", 0,0);
   DEFINE_VAR_FLOAT_AND_NAME (RPG_LevelInfo, m_minimapImageOriginPosition.x, "Minimap Image Origin Position: X", "XY coordinates of the world origin in the minimap image file.", "256.0", 0,0);
@@ -171,7 +171,11 @@ void RPG_LevelInfo::PreloadFmodEventProject(VString const& projectFilename)
   VASSERT_MSG(!projectFilename.IsEmpty(), "No FMod Event Project was specified.");
 
   FMOD::EventProject* eventProject = VFmodManager::GlobalManager().LoadEventProject(projectFilename.AsChar());
+#if !(RPG_FMOD_SUPPRESS_NONNULL_ASSERTS)
   VVERIFY_MSG(eventProject != NULL, "Specified FMod Event Project failed to load.");
+#endif
+  if(!eventProject)
+    return;
 
   int numGroups;
   eventProject->getNumGroups(&numGroups);
@@ -205,7 +209,7 @@ void RPG_LevelInfo::PreloadFmodEventProject(VString const& projectFilename)
 //}
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

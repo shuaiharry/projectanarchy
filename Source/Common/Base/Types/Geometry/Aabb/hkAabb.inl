@@ -153,9 +153,8 @@ void hkAabb::getVertex(int index, hkVector4& vertex) const
 
 void hkAabb::expandBy( hkSimdRealParameter exp )
 {
-	hkVector4 expansion; expansion.setAll(exp);
-	m_max.add(expansion);
-	m_min.sub(expansion);
+	m_max.setAdd(m_max, exp);
+	m_min.setSub(m_min, exp);
 }
 
 void hkAabb::expandInDirection( hkVector4Parameter exp )
@@ -176,9 +175,8 @@ void hkAabb::scaleBy( hkSimdRealParameter scale )
 
 void hkAabb::setExpandBy( const hkAabb& aabb, hkSimdRealParameter exp )
 {
-	hkVector4 expansion; expansion.setAll(exp);
-	m_max.setAdd( aabb.m_max, expansion );
-	m_min.setSub( aabb.m_min, expansion );
+	m_max.setAdd( aabb.m_max, exp );
+	m_min.setSub( aabb.m_min, exp );
 }
 
 
@@ -251,7 +249,7 @@ void hkAabbUint32::operator=( const hkAabbUint32& other )
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

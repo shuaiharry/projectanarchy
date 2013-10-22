@@ -89,7 +89,7 @@ class hkbGeneratorTransitionEffect : public hkbTransitionEffect
 
 	private:
 
-		void updateInternal( hkbBehaviorGraph& rootBehaviorGraph );
+		void updateInternal( const hkbContext& context );
 
 	public:
 
@@ -167,7 +167,7 @@ class hkbGeneratorTransitionEffect : public hkbTransitionEffect
 			// The generator that is being transitioned to (not reference counted)
 		hkbGenerator* m_toGenerator; //+nosave
 
-		HKB_BEGIN_INTERNAL_STATE(0);
+		HKB_BEGIN_INTERNAL_STATE(1);
 
 			// The number of seconds the transition has been active.
 		hkReal m_timeInTransition; //+nosave
@@ -187,8 +187,8 @@ class hkbGeneratorTransitionEffect : public hkbTransitionEffect
 			// Whether to start an echo of the transition generator when updateSync() is called.
 		hkBool m_echoTransitionGenerator; //+nosave
 
-			// Whether to start an echo of the to-generator when updateSync() is called.
-		hkBool m_echoToGenerator;	//+nosave
+			// Effective self transition mode of the to-generator to be applied when updateSync() is called.
+		hkEnum< hkbTransitionEffect::SelfTransitionMode, hkInt8 > m_toGeneratorSelfTransitionMode;	//+nosave
 
 			// Set to true by activate() and false by updateSync().
 		hkBool m_justActivated; //+nosave
@@ -215,7 +215,7 @@ class hkbGeneratorTransitionEffect : public hkbTransitionEffect
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

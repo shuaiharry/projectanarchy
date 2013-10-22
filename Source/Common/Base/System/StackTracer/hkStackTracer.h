@@ -14,11 +14,11 @@ class hkOstream;
 	/// An object which can generate stack traces.
 	/// Some platforms may also be able to associate addresses to
 	/// function and source file information.
-class hkStackTracer : public hkReferencedObject, public hkSingleton<hkStackTracer>
+class hkStackTracer
 {
 	public:
 
-		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE_CLASS);
+		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE_CLASS, hkStackTracer);
 
 			/// Stores multiple call stacks in a tree to save space.
 			/// Call stacks are inserted and return a TraceId which can be
@@ -109,7 +109,7 @@ class hkStackTracer : public hkReferencedObject, public hkSingleton<hkStackTrace
 
 		virtual ~hkStackTracer();
 
-			/// The type of the callback given to dumpStackTrace.
+		/// The type of the callback given to dumpStackTrace.
 		typedef void (HK_CALL *printFunc)(const char*, void* context);
 
 			/// Print the stack trace with pfunc.
@@ -119,7 +119,7 @@ class hkStackTracer : public hkReferencedObject, public hkSingleton<hkStackTrace
 
 			/// Write at most maxtrace stack entries into 'trace'.
 			/// Return the number of entries written.
-		int getStackTrace( hkUlong* trace, int maxtrace );
+		int getStackTrace( hkUlong* trace, int maxtrace, int framesToSkip = 0 );
 
 			/// If you dynamically load DLLs then you will need to refresh the symbols
 			/// so that the stack tracer can see them
@@ -130,19 +130,24 @@ class hkStackTracer : public hkReferencedObject, public hkSingleton<hkStackTrace
 			/// The output format is platform specific.
 		void getModuleInfo( printFunc pfunc, void* context=HK_NULL ) const;
 		
-	protected:
+		/// Gets an opaque pointer to the singleton implementation.
+		static void* getImplementation();
 
-		void* m_impl;
+		/// Replace the singleton implementation with the provided pointer.
+		static void replaceImplementation(void* newInstance);
+		
+		///< COM-2250
+		/// Windows-specific, sets whether hkStackTracer initialization and cleanup must call SymInitialize.
+		/// By default, SymInitialize will be called on the first call to one of the methods of 
+		/// hkStackTracer. setNeedsSymInitialize must be called with enabled = false *before* the first call
+		/// to any of the hkStackTracer methods in order to prevent this behavior.
+		static void setNeedsSymInitialize(bool enabled);
 };
-
-#if defined(HK_COMPILER_ARMCC) || defined(HK_COMPILER_GHS) // have to specialize before use so that generalized one not auto gen-d
-HK_SINGLETON_SPECIALIZATION_DECL(hkStackTracer);
-#endif
 
 #endif // HKBASE_STACKTRACER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

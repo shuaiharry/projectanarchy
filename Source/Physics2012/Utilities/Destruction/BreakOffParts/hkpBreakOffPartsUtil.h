@@ -10,6 +10,7 @@
 #define INC_UTILITIES_BREAK_OFF_PARTS_UTIL_H
 
 #include <Common/Base/Container/PointerMap/hkPointerMap.h>
+#include <Common/Base/Container/BitField/hkBitField.h>
 
 #include <Physics2012/Dynamics/World/Listener/hkpWorldDeletionListener.h>
 #include <Physics2012/Dynamics/Constraint/Contact/hkpContactImpulseLimitBreachedListener.h>
@@ -20,7 +21,6 @@
 
 class hkpPhysicsSystem;
 class hkpRigidBody;
-class hkBitField;
 
 	/// This is an interface to the game/graphics engine and implements the user part of the hkpBreakOffPartsUtil
 class hkpBreakOffPartsListener
@@ -286,7 +286,7 @@ class hkpBreakOffPartsUtil: public hkpWorldExtension, public hkpContactImpulseLi
 #endif //INC_UTILITIES_BREAK_OFF_PARTS_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

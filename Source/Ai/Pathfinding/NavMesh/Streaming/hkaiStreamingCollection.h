@@ -10,6 +10,7 @@
 
 #include <Ai/Pathfinding/NavMesh/hkaiNavMesh.h>
 #include <Ai/Pathfinding/NavMesh/hkaiNavMeshInstance.h>
+#include <Ai/Pathfinding/Graph/hkaiDirectedGraphExplicitCost.h>
 
 class hkaiNavMeshInstance;
 class hkaiNavVolumeInstance;
@@ -145,6 +146,12 @@ public:
 	HK_FORCE_INLINE const hkaiNavMesh::Edge& getEdgeFromPacked(     hkaiPackedKey edgeKey) const;
 	HK_FORCE_INLINE       hkaiNavMesh::Edge& getWritableEdgeFromPacked( hkaiPackedKey edgeKey, hkBool32 instanceIfNeeded  = false );
 
+	void getGraphNodePositionFromPacked( hkaiPackedKey nodeKey, hkVector4& posOut ) const;
+	static void HK_CALL getGraphNodePositionFromPacked( const InstanceInfo* info, hkaiPackedKey nodeKey, hkVector4& posOut );
+	static const hkaiDirectedGraphExplicitCost::Node& HK_CALL getNodeFromPacked( const InstanceInfo* info, hkaiPackedKey nodeKey);
+	const hkaiDirectedGraphExplicitCost::Edge& HK_CALL getGraphEdgeFromPacked( hkaiPackedKey edgeKey )const ;
+	static const hkaiDirectedGraphExplicitCost::Edge& HK_CALL getGraphEdgeFromPacked( const InstanceInfo* info, hkaiPackedKey edgeKey);
+
 	HK_FORCE_INLINE const hkaiNavMesh::FaceData* getFaceDataPtrFromPacked(hkaiPackedKey faceKey) const;
 	HK_FORCE_INLINE       hkaiNavMesh::FaceData* getWritableFaceDataPtrFromPacked(hkaiPackedKey faceKey, hkBool32 instanceIfNeeded = false );
 
@@ -215,7 +222,7 @@ public:
 #endif // HKAI_STREAMING_COLLECTION_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -158,12 +158,12 @@ void VLensFlareComponent::UpdateVisibility (float& fLastVisibilityQuery, float& 
     // PreGlow/AfterGlow
     if (fLastVisibilityQuery > fCurrentVisibility)
     {
-      float fSpeed = Vision::GetTimer()->GetTimeDifference() / ((PreGlowMS + 1) * 0.001f);
+      float fSpeed = Vision::GetUITimer()->GetTimeDifference() / ((PreGlowMS + 1) * 0.001f);
       fCurrentVisibility = hkvMath::Min(fCurrentVisibility + fSpeed, fLastVisibilityQuery);
     }
     else if (fLastVisibilityQuery < fCurrentVisibility)
     {
-      float fSpeed = Vision::GetTimer()->GetTimeDifference() / ((AfterGlowMS + 1) * 0.001f);
+      float fSpeed = Vision::GetUITimer()->GetTimeDifference() / ((AfterGlowMS + 1) * 0.001f);
       fCurrentVisibility = hkvMath::Max(fCurrentVisibility - fSpeed, fLastVisibilityQuery);
     }
 
@@ -569,7 +569,7 @@ START_VAR_TABLE(VLensFlareComponent,IVObjectComponent,"Lens flare component",VVA
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -32,6 +32,7 @@ using Editor.Dialogs;
 using Editor.Vision;
 using ManagedFramework;
 using CSharpFramework.AssetManagement;
+using System.Linq;
 
 namespace Editor
 {
@@ -111,8 +112,16 @@ namespace Editor
       }
       set
       {
-        if (_currentProfile != value)
+        if (_currentProfile == value)
+        {
+          return;
+        }
+
+        if (!_currentProfile.Equals(value))
+        {
+          Dirty = true;
           _currentProfile = value;
+        }
       }
     }
 
@@ -704,6 +713,11 @@ namespace Editor
                     shape.SetParentInternal(layer.Root);
                     shape.SetParentLayerInternal(layer);
                   }
+                }
+                if (!string.IsNullOrEmpty(dummyPrefab.LastError))
+                {
+                  string msg = "An error occurred while parsing file: \n\n" + filename + "\n\nThe layer won't contain any shapes.\nDetailed message:\n" + dummyPrefab.LastError;
+                  EditorManager.ShowMessageBox(msg, "Error parsing layer file", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 continue;
               }
@@ -1630,73 +1644,15 @@ namespace Editor
       }
     }
 
-    private bool bAssetPreviewModeWasOn = false;
-
-    private void PrepareAssetsForExport()
+    public override bool ExportScene(string absPath, List<string> assetProfiles)
     {
-      bAssetPreviewModeWasOn = EditorManager.ProfileManager.GetAssetPreviewMode();
-
-      // make sure that the 'Asset Preview Mode' is always enabled during export
-      if (!bAssetPreviewModeWasOn)
-      {
-        // if it is not enabled, do enable runtime mode
-        EditorManager.Actions.Add(new ChangeActiveProfileAction(EditorManager.ProfileManager.GetActiveProfile()._name, true));
-      }
-    }
-
-    private void ResetAssetManagementStateAfterExport()
-    {
-      if (!bAssetPreviewModeWasOn)
-      {
-        // reset the asset runtime mode back to the state before export
-        EditorManager.Actions.Add(new ChangeActiveProfileAction(EditorManager.ProfileManager.GetActiveProfile()._name, false));
-      }
-    }
-
-    public override bool ExportScene(string absPath, bool bShowDialog)
-    {
-      string assetProfileOverride = null;
-
-      // if we do not show the dialog, we must use the active profile
-      if (!bShowDialog)
-      {
-        assetProfileOverride = EditorManager.ProfileManager.GetActiveProfile()._name;
-      }
-
-      if (bShowDialog)
-      {
-        // Open export dialog
-        ExportDialog dlg = new ExportDialog();
-        using (dlg)
-        {
-          CurrentExportProfile.ExportedLayersFromScene(); // retrieve current status
-          dlg.Settings = CurrentExportProfile; // clones the settings
-          dlg.AutoSaveExportProfile = Settings.AutoSaveExportProfile;
-
-          // Show dialog
-          if (dlg.ShowDialog() != DialogResult.OK)
-            return true;
-
-
-          // Get back settings
-          SceneExportProfile newProfile = dlg.Settings;
-          if (!CurrentExportProfile.Equals(newProfile))
-            Dirty = true;
-          _currentProfile = newProfile;
-          Settings.ExportProfileName = CurrentExportProfile.ProfileName;
-          Settings.AutoSaveExportProfile = dlg.AutoSaveExportProfile;
-
-          if (dlg.ExportActiveProfileOnly)
-          {
-            assetProfileOverride = EditorManager.ProfileManager.GetActiveProfile()._name;
-          }
-
-          EditorManager.EngineManager.CheckLightGridDataExists();
-        }
-      }
-
       // Deactivate isolate selection mode temporarily
       EditorManager.ActiveView.IsolateSelection(false, true);
+
+      if (assetProfiles == null)
+      {
+        assetProfiles = new List<string> { EditorManager.ProfileManager.GetActiveProfile().ToString() };
+      }
 
       // Ensure that scene script file is set in script manager
       // This is e.g. required if the script was broken when the scene was loaded but it was corrected in the meantime
@@ -1708,7 +1664,13 @@ namespace Editor
       }
 
       // Export
-      bool bSuccess = ExportScene(absPath, assetProfileOverride);
+
+      if (absPath != null)
+        CurrentExportProfile.ExportPath = absPath;
+      else
+        absPath = AbsoluteExportPath;
+      bool bSuccess = ExportSceneNotSaveSettings(absPath, assetProfiles);
+
       string absExportPath = absPath;
       if (absExportPath == null)
         absExportPath = AbsoluteExportPath;
@@ -1721,25 +1683,20 @@ namespace Editor
       if (bSuccess && CurrentExportProfile.RunAfterExport)
       {
         // Try to find the optimal profile to run:
-        string profileToRun = null;
-        if (assetProfileOverride != null)
-        {
-          // If exporting for one specific profile, use that one
-          profileToRun = assetProfileOverride;
-        }
-        else if (CurrentExportProfile.SelectedAssetProfiles.IsActiveProfileSet)
+        IProfileManager.Profile profileToRun = null;
+        if (CurrentExportProfile.SelectedAssetProfiles.IsActiveProfileSet)
         {
           // If the current profile is among the selected profiles, use that one
-          profileToRun = EditorManager.ProfileManager.GetActiveProfile()._name;
+          profileToRun = EditorManager.ProfileManager.GetActiveProfile();
         }
         else
         {
           // Otherwise, use the first profile we can find.
           foreach (IProfileManager.Profile profile in EditorManager.ProfileManager.GetProfiles())
           {
-            if (CurrentExportProfile.SelectedAssetProfiles.IsProfileSet(profile._name))
+            if (CurrentExportProfile.SelectedAssetProfiles.IsProfileSet(profile.ToString()))
             {
-              profileToRun = profile._name;
+              profileToRun = profile;
               break;
             }
           }
@@ -1750,70 +1707,82 @@ namespace Editor
         {
           string sceneToRun = absExportPath;
           string oldExtension = Path.GetExtension(sceneToRun);
-          sceneToRun = Path.ChangeExtension(sceneToRun, profileToRun) + oldExtension;
+          sceneToRun = Path.ChangeExtension(sceneToRun, profileToRun.ToString()) + oldExtension;
 
-          string path = Path.GetDirectoryName(Application.ExecutablePath);
-          string absSceneViewerPath = Path.Combine(path, "vSceneViewer.exe");
-          FileHelper.RunExternalTool("Scene Viewer", absSceneViewerPath, "\"" + sceneToRun + "\"", false);
+          if (profileToRun.IsMobilePlatform())
+          {
+            // write the exported scene name to the exported scene Lua file so the scene viewer will find it
+            string mobilePlatforms = "";
+            List<IProfileManager.Profile> profiles = EditorManager.ProfileManager.GetProfiles();
+            HashSet<string> mobilePlatformsSet = new HashSet<string>(profiles.Where(x => x.IsMobilePlatform()).Select(x => x.ToString().ToUpper()));
+            // Tizen has a fallback to android, to we add it to the list as well.
+            if (mobilePlatformsSet.Contains("ANDROID") && !mobilePlatformsSet.Contains("TIZEN"))
+              mobilePlatformsSet.Add("TIZEN");
+
+            mobilePlatforms = string.Join(" + ", mobilePlatformsSet);
+
+            string projectDir = EditorManager.Project.ProjectDir;
+            string relativeSceneFileName = absExportPath.Substring(projectDir.Length);
+            string customDataDirs = "";
+            if (EditorManager.Project.CustomDataDirectories != null)
+            {
+              foreach (IProject.CustomDataDirectoryEntry customDataDir in EditorManager.Project.CustomDataDirectories)
+              {
+                if (customDataDirs.Length > 0)
+                  customDataDirs += ";";
+                customDataDirs += customDataDir.AbsolutePath;
+              }
+            }
+
+            try
+            {
+              System.IO.File.WriteAllText(@"..\..\..\..\Data\Vision\Tools\vSceneViewer\Dialogs\ExportedScenes.lua",
+                String.Format("SetHomeDir({0}, \"\")\nAddScene ( {0}, \"Exported Scene: {1}\", \"{2};{3}\", \"{4}\")",
+                              mobilePlatforms, EditorManager.Scene.FileNameNoExt, projectDir.Replace("\\", "\\\\"),
+                              relativeSceneFileName.Replace("\\", "\\\\"), customDataDirs.Replace("\\", "\\\\"))
+              );
+              EditorManager.ShowMessageBox("Export finished. Please run the vSceneViewer on your mobile device or hit the refresh scene list button in the vSceneViewer select scene dialog.", "Export successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (System.IO.IOException ex)
+            {
+              EditorManager.ShowMessageBox("An error occurred while writing ExportedScenes.lua:\n" + ex.Message,
+                                           "File write error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+          }
+          else
+          {
+            // Launch the vSceneViewer executable
+            string path = Path.GetDirectoryName(Application.ExecutablePath);
+            string absSceneViewerPath = Path.Combine(path, "vSceneViewer.exe");
+            FileHelper.RunExternalTool("Scene Viewer", absSceneViewerPath, "\"" + sceneToRun + "\"", false);
+          }
         }
       }
       return bSuccess;
     }
 
     /// <summary>
-    /// Export the scene to vscene file
-    /// </summary>
-    /// <param name="absPath">the absolute export path. Can be null to use the setting's path</param>
-    /// <param name="profileOverride">an optional asset profile name, which overrides the asset profiles set in the current scene export profile</param>
-    /// <returns></returns>
-    public bool ExportScene(string absPath, string assetProfileOverride)
-    {
-      if (absPath != null)
-        CurrentExportProfile.ExportPath = absPath;
-      else
-        absPath = AbsoluteExportPath;
-      return ExportSceneNotSaveSettings(absPath, assetProfileOverride);
-    }
-
-    /// <summary>
     /// Export the scene to vscene file and do not save the path to the settings
     /// </summary>
     /// <param name="absPath">the absolute export path. Can be null to use the setting's path</param>
-    /// <param name="profileOverride">an optional asset profile name, which overrides the asset profiles set in the current scene export profile</param>
+    /// <param name="assetProfilesToExport">Required list of asset profiles to export</param>
     /// <returns></returns>
-    public bool ExportSceneNotSaveSettings(string absPath, string assetProfileOverride)
+    public bool ExportSceneNotSaveSettings(string absPath, List<string> assetProfilesToExport)
     {
       EditorManager.AssetManager.UpdateAssetTransformationsOnExport = CurrentExportProfile.UpdateAssetTransformations;
 
       bool savedAssetPreviewMode = EditorManager.ProfileManager.GetAssetPreviewMode();
-      string savedAssetProfile = EditorManager.ProfileManager.GetActiveProfile()._name;
+      string savedAssetProfile = EditorManager.ProfileManager.GetActiveProfile().ToString();
 
       // Determine the asset settings (preview mode, profiles) to be used for export
       bool newAssetPreviewMode = CurrentExportProfile.UpdateAssetTransformations;
-      List<string> assetProfilesToExport = new List<string>();
-      if (assetProfileOverride != null)
-      {
-        assetProfilesToExport.Add(assetProfileOverride);
-      }
-      else
-      {
-        foreach (IProfileManager.Profile profile in EditorManager.ProfileManager.GetProfiles())
-        {
-          // Add all selected profiles, but not the active one
-          if (profile != EditorManager.ProfileManager.GetActiveProfile() && CurrentExportProfile.SelectedAssetProfiles.IsProfileSet(profile._name))
-          {
-            assetProfilesToExport.Add(profile._name);
-          }
-        }
 
-        // Add the active profile last, if it is selected. When exporting, we may be able to save us a
-        // time-consuming profile/preview mode switch this way.
-        if (CurrentExportProfile.SelectedAssetProfiles.IsActiveProfileSet)
-        {
-          assetProfilesToExport.Add(EditorManager.ProfileManager.GetActiveProfile()._name);
-        }
+      // Make sure active profile is first to save one profile switch
+      if (assetProfilesToExport.Contains(savedAssetProfile))
+      {
+        assetProfilesToExport.Remove(savedAssetProfile);
+        assetProfilesToExport.Insert(0, savedAssetProfile);
       }
-
 
       bool bResult = true;
       foreach (string profileName in assetProfilesToExport)
@@ -1853,7 +1822,7 @@ namespace Editor
         EditorManager.TriggerSaveResources();
 
       // Incorporate the current asset profile name into the given export path...
-      string profileName = EditorManager.ProfileManager.GetActiveProfile()._name;
+      string profileName = EditorManager.ProfileManager.GetActiveProfile().ToString();
       string oldExtension = Path.GetExtension(absPath);
       absPath = Path.ChangeExtension(absPath, profileName) + oldExtension;
 
@@ -1901,7 +1870,7 @@ namespace Editor
         info.RelevantExportZones = GetExportRelevantZones();
         info.RelevantEmbeddedZones = GetRelevantEmbeddedZones(); // this collection might change later
 
-        switch (EditorManager.ProfileManager.GetActiveProfile()._platform)
+        switch (EditorManager.ProfileManager.GetActiveProfile().GetPlatform())
         {
           case TargetDevice_e.TARGETDEVICE_DX9:
             info.ShapeFilter = (int)TargetPlatformSupport.DX9;
@@ -2313,7 +2282,7 @@ namespace Editor
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -18,25 +18,44 @@ class vHavokAiNavMeshLinker
 public:
   struct NavMeshLinkSetting
   {
-    float m_edgeMatchTolerance;
-    float m_maxStepHeight;
-    float m_maxSeparation;
-    float m_maxOverhang;
-    float m_cosPlanarAlignmentAngle;
-    float m_cosVerticalAlignmentAngle;
-    float m_minEdgeOverlap;
+    float m_edgeMatchTolerance;         ///< AABB expansion tolerance used when detecting nearby edges.
+    float m_maxStepHeight;              ///< The maximum step height.
+    float m_maxSeparation;              ///< Maximum allowed separation when considering connecting a pair of edges.
+    float m_maxOverhang;                ///< Maximum allowed overhang when considering connecting a pair of edges.
+    float m_cosPlanarAlignmentAngle;    ///< Minimum planar alignment required when considering connecting a pair of edges.
+    float m_cosVerticalAlignmentAngle;  ///< Minimum vertical alignment required when considering connecting a pair of edges.
+    float m_minEdgeOverlap;             ///< Minimum overlap required when considering connecting a pair of edges.
   };
+
+  ///
+  /// @name Constructor / Destructor
+  /// @{
+  ///
 
 	VHAVOKAI_IMPEXP vHavokAiNavMeshLinker();
 	VHAVOKAI_IMPEXP ~vHavokAiNavMeshLinker();
 
+  ///
+  /// @}
+  ///
+
+  /// \brief
+  ///   Removes all nav meshes from the linker.
 	VHAVOKAI_IMPEXP void ClearNavMeshes();
 
-		/// add navmesh to be linked
+  /// \brief
+  ///   Add nav mesh for linking.
 	VHAVOKAI_IMPEXP void AddNavMesh(vHavokAiNavMeshInstance* navMesh);
 
-		/// Call this function to stitch together the navmeshes that have been added to this linker.
+  /// \brief
+  ///   Stitches together the nav meshes that have been added previously.
   VHAVOKAI_IMPEXP bool LinkNavMeshes();
+
+  /// \brief
+  ///   Stitches together the nav meshes that have been added previously.
+  ///
+  /// \param navMeshLinkSetting
+  ///   Custom nav mesh link settings.
   VHAVOKAI_IMPEXP bool LinkNavMeshes(const NavMeshLinkSetting& navMeshLinkSetting);
 
 protected:
@@ -46,7 +65,7 @@ protected:
 #endif	// __VHAVOK_AI_NAVMESH_BUILDER_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

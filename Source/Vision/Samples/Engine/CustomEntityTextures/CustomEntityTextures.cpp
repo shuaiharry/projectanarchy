@@ -40,9 +40,9 @@ VISION_INIT
   // Create and init an application
   spApp = new VisSampleApp();
 #if defined( _VISION_MOBILE ) || defined( HK_ANARCHY )
-  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground_mobile" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS | VSAMPLE_FORCEMOBILEMODE))
+  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground_mobile" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_FORCEMOBILEMODE))
 #else
-  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS))
+  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS))
 #endif
     return false;
   
@@ -132,7 +132,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

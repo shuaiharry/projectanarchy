@@ -23,7 +23,7 @@
 #		include <sys/synchronization.h>	
 #	endif
 #elif defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_LINUX) || \
-      defined(HK_PLATFORM_LRBXENSIM) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_PS4) 
+      defined(HK_PLATFORM_LRBXENSIM) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_TIZEN) || defined(HK_PLATFORM_PS4) 
 #	include <pthread.h>
 #elif defined(HK_PLATFORM_WIIU) 
 #	include <cafe/os.h>
@@ -124,7 +124,7 @@ class hkCriticalSection
 #		endif
 
 
-#	elif defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_LINUX) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_PS4)
+#	elif defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_LINUX) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_TIZEN) || defined(HK_PLATFORM_PS4)
 
 		/// OS mutex
 		pthread_mutex_t m_mutex;
@@ -172,7 +172,7 @@ class hkCriticalSection
 #		include <Common/Base/Thread/CriticalSection/Ps3/hkPs3SpuCriticalSection.inl>
 #   elif defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_IOS)
 #		include <Common/Base/Thread/CriticalSection/Mac/hkMacCriticalSection.inl>
-#	elif defined(HK_PLATFORM_LINUX) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_PS4)
+#	elif defined(HK_PLATFORM_LINUX) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_TIZEN) || defined(HK_PLATFORM_PS4)
 #		include <Common/Base/Thread/Thread/Posix/hkPosixCheck.h>
 #		include <Common/Base/Thread/CriticalSection/Posix/hkPosixCriticalSection.inl>
 #	elif defined(HK_PLATFORM_WIIU)
@@ -219,7 +219,7 @@ typedef hkCriticalSection hkDmaManager;
 #endif // HKBASE_HK_CRITICAL_SECTION_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

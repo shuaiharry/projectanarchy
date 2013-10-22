@@ -41,6 +41,9 @@ class hkBarycentricVertexInterpolator
             /// Calculate barycentric coordinates
         static void HK_CALL calcBarycentricCoordinates(hkVector4Parameter pos, hkVector4Parameter t0, hkVector4Parameter t1, hkVector4Parameter t2, hkVector4& lambdas);
 
+			/// Computes the support normal
+		void computeSupportNormal(hkVector4& normalOut) const;
+
     protected:
         hkBool m_isStarted;                                             ///< Set if calculator is started
 		hkMeshVertexBuffer::LockedVertices m_srcLockedVertices;
@@ -57,7 +60,7 @@ class hkBarycentricVertexInterpolator
 #endif // HK_BARYCENTRIC_VERTEX_INTERPOLATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

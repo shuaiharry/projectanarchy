@@ -37,6 +37,7 @@ enum VMeshType_e
 #define VMAT_FLAG_FORCESECONDARYOPAQUEPASS    V_BIT(5)
 #define VMAT_FLAG_DISABLE_CAST_STATIC_SHADOWS V_BIT(6)
 #define VMAT_FLAG_DISABLE_DEPTH_WRITE         V_BIT(7)
+#define VMAT_FLAG_DATA_DIR_RELATIVE_PATHS     V_BIT(8)
 
 //Geometry Info flags
 #define VGIF_CAST_DYNAMIC_SHADOWS 1
@@ -92,10 +93,16 @@ public:
   }
 
   /// \brief
-  ///   Helper function to determine whether the object is clipped given the passed camera position
-  bool IsNearOrFarClipped(const hkvVec3& vCameraPos) const
+  ///   Helper function to determine whether the object is clipped given the passed camera position and a factor to scale the squared distance of the object to the camera.
+  bool IsNearOrFarClipped(const hkvVec3& vCameraPos, float fLODScaleSqr=1.f) const
   {
-    float fDistSqr = GetClipDistanceSqr(vCameraPos);
+    return IsNearOrFarClipped(GetClipDistanceSqr(vCameraPos) * fLODScaleSqr);
+  }
+
+  /// \brief
+  ///   Simplified version of the helper function above that directly takes the squared distance.
+  bool IsNearOrFarClipped(float fDistSqr) const
+  {
     return ((m_fNearClipDistance>0.f) && (fDistSqr<(m_fNearClipDistance*m_fNearClipDistance))) 
         || ((m_fFarClipDistance>0.f) && (fDistSqr>=(m_fFarClipDistance*m_fFarClipDistance)));
   }
@@ -126,8 +133,11 @@ public:
 /// base class. 
 class VBaseMesh : public VManagedResource
 {
-public:
+  // Non-copyable
+  VBaseMesh(const VBaseMesh& mesh);
+  VBaseMesh& operator=(const VBaseMesh& mesh);
 
+public:
   ///
   /// @name Construction and Destruction; Allocation/deallocation
   /// @{
@@ -171,6 +181,32 @@ public:
   ///   Frees the geometry info allocated for a mesh.
   VISION_APIFUNC void FreeGeometryInfo();
   
+  /// \brief
+  ///   Loops through all geometry infos in this model and finds the amount of LOD used through the VBaseGeometryInfo::m_iLODIndex member
+  inline int EvaluateLODCount() const
+  {
+    int iMaxLevel = m_DefaultGeometryInfo.m_iLODIndex;
+    for (int i=0;i<m_iGeometryInfoCount;i++) 
+      iMaxLevel = hkvMath::Max(iMaxLevel, m_pGeometryInfo[i].m_iLODIndex);
+    return iMaxLevel+1;
+  }
+
+  /// \brief
+  ///   Assigns new LOD distances to the geometry infos.
+  ///
+  /// The indexing in this array works through the respective VBaseGeometryInfo::m_iLODIndex member (if it is >=0). So the array should hold
+  /// EvaluateLODCount() array members, but iCount smaller than that is handled gracefully as well.
+  ///
+  /// \param pDistances:
+  ///   An array of at least iCount values. Each value represents a distance at which the respective LOD geometry should be clipped. The clip
+  ///   distance of the last LOD can (and should) be -1.0 to indicate no clipping
+  ///
+  /// \param iCount:
+  ///   The capacity of the pased pDistances array
+  VISION_APIFUNC void SetLODSwitchDistances(const float *pDistances, int iCount);
+
+  VISION_APIFUNC void GetLODSwitchDistances(float *pDistances, int iCount) const;
+
   ///
   /// @}
   ///
@@ -422,6 +458,10 @@ public:
   VISION_APIFUNC VBaseGeometryInfo& GetGeometryInfo(int iGeometryInfoIndex);
   
   /// \brief
+  ///   Same function than above, but returning a constant reference
+  VISION_APIFUNC const VBaseGeometryInfo& GetGeometryInfo(int iGeometryInfoIndex) const;
+
+  /// \brief
   ///   Returns the number of Geometry Info entries in the mesh
   inline int GetGeometryInfoCount() const
   { 
@@ -465,10 +505,15 @@ public:
   ///   Reloads the associated materials.xml file and reassigns the shaders in it
   VISION_APIFUNC BOOL ReloadShaderAssignmentFile(const char *szFilename);
 
+  VISION_APIFUNC virtual void GetAssetPropertyHint(VString& hint) const HKV_OVERRIDE;
+
+protected:
   /// \brief
-  ///   Enables/Disables the loading of materials from the materials.xml file for all meshes.
-  ///   It is enabled by default.
-  VISION_APIFUNC static void EnableLoadingMaterialsFromXML(bool enable);
+  ///   Applies any information contained in the passed asset metadata that can be applied after
+  ///   successfully loading the mesh.
+  /// \param szMetadata
+  ///   the metadata to check for applicable information
+  VISION_APIFUNC void ApplyAssetMetadataAfterLoad(const char* szMetadata);
 
   ///
   /// @}
@@ -479,6 +524,7 @@ public:
   /// @{
   ///
 
+public:
   /// \brief
   ///   Returns the number of surfaces referenced by the mesh. The array can be accessed via GetSurface(iIndex). Note that this is not the same indexing as for submeshes.
   inline int GetSurfaceCount() const 
@@ -738,6 +784,16 @@ public:
   }
 
   /// \brief
+  ///   Returns whether this model contains clip distances (e.g. when using LOD)
+  /// 
+  /// \return
+  ///   Whether this model contains clip distances
+  inline bool ContainsClipDistance() const
+  {
+    return m_bContainsClipDistance;
+  }
+
+  /// \brief
   ///   Updates internal information about the mesh's material data.
   /// 
   ///   This method has to be called whenever one of the mesh's materials (VisSurface_cl objects) has been modified.
@@ -888,8 +944,11 @@ protected:
 /// Writing data to submeshes is typically only required when creating mesh objects manually.
 class VBaseSubmesh
 {
-public:
+  // Non-copyable
+  VBaseSubmesh(const VBaseSubmesh& mesh);
+  VBaseSubmesh& operator=(const VBaseSubmesh& mesh);
 
+public:
   /// \brief
   ///   Destructor of the base submesh class.
   virtual ~VBaseSubmesh();
@@ -994,7 +1053,7 @@ public:
 
   /// \brief
   ///   Sets the geometry info index of this submesh. Can be -1 for default geometry info
-  inline void SetGeometryInfoIndex(int iIndex) 
+  inline void SetGeometryInfoIndex(int iIndex)
   { 
     VASSERT(m_pMesh);
     VASSERT(iIndex<m_pMesh->GetGeometryInfoCount()); 
@@ -1003,7 +1062,7 @@ public:
   
   /// \brief
   ///   Returns the geometry info of this submesh
-  inline VBaseGeometryInfo& GetGeometryInfo() 
+  inline VBaseGeometryInfo& GetGeometryInfo() const
   { 
     VASSERT(m_pMesh);
     return m_pMesh->GetGeometryInfo(m_iGeometryInfoIndex); 
@@ -1153,7 +1212,7 @@ protected:
 #endif // DEFINE_VISAPIBASEMESH
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

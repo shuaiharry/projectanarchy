@@ -71,12 +71,21 @@ public:
   ///   \c true to add transformed assets to RCS
   ASSETFRAMEWORK_IMPEXP void setAddTransformedToRCS(bool addTransformed);
 
+  /// \brief
+  ///   Sets whether generated asset thumbnails should be added to RCS.
+  ///
+  /// \param addThumbnails
+  ///   \c true to add generated asset thumbnails to RCS
+  ASSETFRAMEWORK_IMPEXP void setAddThumbnailsToRCS(bool addThumbnails);
+
   ASSETFRAMEWORK_IMPEXP Status getStatus();
 
   ASSETFRAMEWORK_IMPEXP void start();
   ASSETFRAMEWORK_IMPEXP void cancel();
 
   ASSETFRAMEWORK_IMPEXP float estimateProgress();
+
+  ASSETFRAMEWORK_IMPEXP bool collectStatistics(std::vector<hkvAsset::RefCPtr>& failedAssets, hkvAssetLibrary::AssetStatistics& statistics);
 
 private:
   static void* HK_CALL threadProcStatic(void* param);
@@ -102,12 +111,13 @@ private:
   hkStringPtr m_relativePath;
   std::vector<hkvAsset::RefPtr> m_assets;
   bool m_addTransformedToRCS;
+  bool m_addThumbnailsToRCS;
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

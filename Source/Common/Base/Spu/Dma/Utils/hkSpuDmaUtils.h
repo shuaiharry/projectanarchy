@@ -14,8 +14,14 @@
 
 enum
 {
-	HK_SPU_DMA_GROUP_STALL	= 14,
-	HK_SPU_DMA_GROUP_IDLE	= 15, // DO NOT use this dma group for any get/put operations! use it only for 'idle' waiting.
+	HK_SPU_DMA_GROUP_STALL				= 14,
+
+	// DO NOT use this dma group for any get/put operations! use it only for 'idle' waiting.
+	HK_SPU_DMA_GROUP_IDLE				= 15, 
+
+	// Groups used by hkSpuMonitorCache to transfer monitor streams back to PPU using double buffering.
+	HK_SPU_DMA_GROUP_MONITOR_CACHE_0	= 29,
+	HK_SPU_DMA_GROUP_MONITOR_CACHE_1	= 30
 };
 
 	/// this utility allows simple access to variables in main memory and can be used either from the SPU, PPU or CPU
@@ -66,7 +72,7 @@ struct hkSpuDmaUtils
 #endif // HK_SPU_DMA_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

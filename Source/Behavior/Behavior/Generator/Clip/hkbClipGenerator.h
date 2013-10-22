@@ -43,7 +43,12 @@ class hkbClipTrigger
 			/// pass in true for relativeToEndOfClip.  Typically, localTime should be negative
 			/// or zero in that case. To specify the trigger to be acyclic pass in true for
 			/// acyclic.
-		hkbClipTrigger( hkReal localTime, const hkbEventBase& event, bool relativeToEndOfClip, bool acyclic, bool isAnnotation );
+		hkbClipTrigger(
+			hkReal localTime,
+			const hkbEventBase& event,
+			bool relativeToEndOfClip,
+			bool acyclic,
+			bool isAnnotation );
 
 			/// Copy constructor.
 		hkbClipTrigger( const hkbClipTrigger& trigger );
@@ -145,10 +150,11 @@ class hkbClipGenerator : public hkbGenerator
 		///////////////////////////
 
 			// hkbGenerator interface implementation.
-		virtual void generate(	const hkbContext& context,
-								const hkbGeneratorOutput** activeChildrenOutput,
-								hkbGeneratorOutput& output,
-								hkReal timeOffset = 0.0f ) const HK_OVERRIDE;
+		virtual void generate(
+			const hkbContext& context,
+			const hkbGeneratorOutput** activeChildrenOutput,
+			hkbGeneratorOutput& output,
+			hkReal timeOffset = 0.0f ) const HK_OVERRIDE;
 
 			// hkbGenerator interface implementation.
 		virtual void updateSync( const hkbContext& context ) HK_OVERRIDE;
@@ -163,7 +169,9 @@ class hkbClipGenerator : public hkbGenerator
 		virtual void startEcho( hkReal echoDuration ) HK_OVERRIDE;
 
 			// hkbGenerator interface implementation
-		virtual void computePartitionInfo( const hkArray<hkbNodeChildInfo>& activeChildren, const hkbContext& context ) HK_OVERRIDE;
+		virtual void computePartitionInfo(
+			const hkArray<hkbNodeChildInfo>& activeChildren,
+			const hkbContext& context ) HK_OVERRIDE;
 
 	public:
 
@@ -200,11 +208,13 @@ class hkbClipGenerator : public hkbGenerator
 		hkReal getDurationLocalTime() const;
 
 			/// Add a trigger to the clip.
-		void addTrigger(	hkReal localTime,
-							const hkbEventBase& event,
-							bool relativeToEndOfClip=false,
-							bool acyclic=false,
-							bool isAnnotation=false );
+			/// If this is called on the template, you must ensure it is multithread safe.
+		void addTrigger(
+			hkReal localTime,
+			const hkbEventBase& event,
+			bool relativeToEndOfClip=false,
+			bool acyclic=false,
+			bool isAnnotation=false );
 
 			/// This returns true if the clip is running in pingpong mode backwards
 		bool isPingPongBackwards() const;
@@ -368,10 +378,23 @@ class hkbClipGenerator : public hkbGenerator
 
 	private:
 
-		void processCyclicTriggers( hkReal beginLocalTime, hkReal endLocalTime, int loops, hkbEventQueue& eventQueue, const hkbContext& context );
-		void processAcyclicTriggers( hkReal beginTime, hkReal endTime, hkbEventQueue& eventQueue, const hkbContext& context );
-
-		void processCyclicTriggersNoLoop( hkReal beginLocalTime, hkReal endLocalTime, bool endInclusive, hkbEventQueue& eventQueue, const hkbContext& context );
+		void processCyclicTriggers(
+			hkReal beginLocalTime,
+			hkReal endLocalTime,
+			int loops,
+			hkbEventQueue& eventQueue,
+			const hkbContext& context );
+		void processAcyclicTriggers(
+			hkReal beginTime,
+			hkReal endTime,
+			hkbEventQueue& eventQueue,
+			const hkbContext& context );
+		void processCyclicTriggersNoLoop(
+			hkReal beginLocalTime,
+			hkReal endLocalTime,
+			bool endInclusive,
+			hkbEventQueue& eventQueue,
+			const hkbContext& context );
 
 			// Compute our begin/end times
 			// Most of the time localTimes == animLocalTimes except in the case where we are stepping over our final frame of animation.
@@ -421,7 +444,12 @@ class hkbClipGenerator : public hkbGenerator
 		void checkAtEnd();
 
 			// used when budgeting SPU memory
-		void getNumTracksNumFloatTracksAndAnimation( const hkbContext& context, int numPoseLocal, int& numTracks, int& numFloatTracks, hkaAnimation*& animation );
+		void getNumTracksNumFloatTracksAndAnimation(
+			const hkbContext& context,
+			int numPoseLocal,
+			int& numTracks,
+			int& numFloatTracks,
+			hkaAnimation*& animation );
 
 			// adds triggers from the bindings set to m_triggers
 		void addTriggersFromBindingSet( const hkbContext& context, class hkbAnimationBindingWithTriggers* bwt );
@@ -494,7 +522,7 @@ class hkbClipGenerator : public hkbGenerator
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

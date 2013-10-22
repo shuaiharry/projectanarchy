@@ -16,6 +16,12 @@ inline void hkaiDirectedGraphInstance::setOriginalPointers( const hkaiDirectedGr
 	m_numOriginalEdges	= graph->m_edges.getSize();
 
 	m_originalPositions	= graph->m_positions.begin();
+
+	m_originalNodeData	= graph->m_nodeData.begin();
+	m_nodeDataStriding	= graph->m_nodeDataStriding;
+
+	m_originalEdgeData	= graph->m_edgeData.begin();
+	m_edgeDataStriding	= graph->m_edgeDataStriding;
 }
 
 inline hkaiSectionUid hkaiDirectedGraphInstance::getSectionUid() const
@@ -75,6 +81,11 @@ HK_FORCE_INLINE const hkaiDirectedGraphExplicitCost::Edge& hkaiDirectedGraphInst
 	}
 }
 
+inline  hkaiPackedKey hkaiDirectedGraphInstance::getOppositeNodeKeyForEdge( const hkaiDirectedGraphExplicitCost::EdgeIndex eIdx) const
+{
+	return getOppositeNodeKeyForEdge(getEdge(eIdx));
+}
+
 inline void hkaiDirectedGraphInstance::getInstancedNode( NodeIndex n, hkaiDirectedGraphExplicitCost::Node& nodeOut ) const
 {
 	int mappedIdx = m_nodeMap.getSize() ? m_nodeMap[n] : -1;
@@ -92,6 +103,21 @@ inline void hkaiDirectedGraphInstance::getInstancedNode( NodeIndex n, hkaiDirect
 }
 
 inline hkaiDirectedGraphExplicitCost::Node* hkaiDirectedGraphInstance::getInstancedNodePtr( NodeIndex n )
+{
+	int mappedIdx = m_nodeMap.getSize() ? m_nodeMap[n] : -1;
+
+	// Not instanced
+	if (mappedIdx == -1) 
+	{
+		return HK_NULL;
+	}
+	else
+	{
+		return &m_instancedNodes[mappedIdx];
+	}
+}
+
+inline const hkaiDirectedGraphExplicitCost::Node* hkaiDirectedGraphInstance::getInstancedNodePtr( NodeIndex n ) const
 {
 	int mappedIdx = m_nodeMap.getSize() ? m_nodeMap[n] : -1;
 
@@ -140,6 +166,28 @@ inline void hkaiDirectedGraphInstance::getLocalPosition( NodeIndex pid, hkVector
 inline int hkaiDirectedGraphInstance::getNumNodes() const
 {
 	return m_numOriginalNodes;
+}
+
+inline const hkaiDirectedGraphExplicitCost::NodeData* hkaiDirectedGraphAccessor::getNodeDataPtr( NodeIndex nIdx ) const
+{
+	return m_nodeDataStriding ? m_originalNodeData  + nIdx*m_nodeDataStriding : HK_NULL;
+}
+
+inline const hkaiDirectedGraphExplicitCost::NodeData* hkaiDirectedGraphAccessor::getEdgeDataPtr( EdgeIndex eIdx ) const
+{
+	if(m_edgeDataStriding == 0)
+		return HK_NULL;
+
+	if(eIdx >= m_numOriginalEdges)
+	{
+		EdgeIndex ownedIdx = eIdx - m_numOriginalEdges;
+		HK_ASSERT(0x4cf36ce1, ownedIdx < m_ownedEdges.getSize() );
+		return m_ownedEdgeData.begin() + (ownedIdx * m_edgeDataStriding);
+	}
+	else
+	{
+		return m_originalGraph->getEdgeDataPtr(eIdx);
+	}
 }
 
 #endif //!SPU
@@ -243,13 +291,14 @@ inline hkaiPackedKey hkaiDirectedGraphAccessor::getOppositeNodeKeyForEdge( const
 	return hkaiGetOppositePackedKey( (hkUint8) edge.m_flags.get(), getRuntimeId(), edge.getOppositeNodeKeyUnchecked() );
 }
 
+
 inline const hkTransform& hkaiDirectedGraphAccessor::getTransform() const
 {
 	return m_transform;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

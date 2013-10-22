@@ -276,9 +276,9 @@ END_VAR_TABLE
 // class VSimpleAnimationComponent
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-VSimpleAnimationComponent::VSimpleAnimationComponent(int iComponentFlags) : IVObjectComponent(0, iComponentFlags),
-UseMotionDelta(FALSE)
+VSimpleAnimationComponent::VSimpleAnimationComponent(int iComponentFlags) 
+  : IVObjectComponent(0, iComponentFlags)
+  , UseMotionDelta(FALSE)
 {
 }
 
@@ -286,8 +286,7 @@ VSimpleAnimationComponent::~VSimpleAnimationComponent()
 {
 }
 
-
-  // IVObjectComponent override
+// IVObjectComponent override
 void VSimpleAnimationComponent::SetOwner(VisTypedEngineObject_cl *pOwner)
 {
   IVObjectComponent::SetOwner(pOwner);
@@ -299,16 +298,8 @@ void VSimpleAnimationComponent::SetOwner(VisTypedEngineObject_cl *pOwner)
   else
     VSimpleAnimationComponentManager::GlobalManager().Instances().SafeRemove(this);
 
-  if (pOwner!=NULL && !AnimationName.IsEmpty())
-  {
-    VisBaseEntity_cl *pEntity = (VisBaseEntity_cl *)pOwner;
-    StartAnimation(pEntity, AnimationName);
-    
-    if (pEntity->GetAnimConfig() != NULL)
-    {
-      pEntity->GetAnimConfig()->SetFlags(pEntity->GetAnimConfig()->GetFlags() | MULTITHREADED_ANIMATION);
-    }
-  }
+  
+  StartAnimation();
 }
 
 BOOL VSimpleAnimationComponent::CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut)
@@ -327,16 +318,25 @@ BOOL VSimpleAnimationComponent::CanAttachToObject(VisTypedEngineObject_cl *pObje
 
 void VSimpleAnimationComponent::OnVariableValueChanged(VisVariable_cl *pVar, const char * value)
 {
-  VisBaseEntity_cl *pEntity = (VisBaseEntity_cl *)GetOwner();
-  if (pEntity != NULL && !AnimationName.IsEmpty())
-  {
-    StartAnimation(pEntity, AnimationName);
+  StartAnimation();
+}
 
-    if (pEntity->GetAnimConfig() != NULL)
+void VSimpleAnimationComponent::MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB)
+{
+  if (iID == VIS_MSG_ENTITY_MESHCHANGED)
+  {
+    VDynamicMesh* pMesh = reinterpret_cast<VDynamicMesh*>(iParamA);
+    VisAnimConfig_cl* pAnimConfig = reinterpret_cast<VisAnimConfig_cl*>(iParamB);
+
+    // Check if animation config has been set already.
+    if (pMesh != NULL && pAnimConfig == NULL)
     {
-      pEntity->GetAnimConfig()->SetFlags(pEntity->GetAnimConfig()->GetFlags() | MULTITHREADED_ANIMATION);
+      // Restart animation.
+      StartAnimation();
     }
   }
+
+  IVObjectComponent::MessageFunction(iID, iParamA, iParamB);
 }
 
 
@@ -352,11 +352,11 @@ void VSimpleAnimationComponent::PerFrameUpdate()
 
   VisBaseEntity_cl *pOwnerEntity = (VisBaseEntity_cl *)GetOwner();
 
-  //Physics component will take care of motion detla.
+  // Physics component will take care of motion delta.
   if(pOwnerEntity->GetPhysicsObject() != NULL)
     return;
 
-  // Rotation is not relevant for capsule so rotate just the entity
+  // Rotation is not relevant for capsule so just rotate the entity
   if (pOwnerEntity->HasRotationDelta())
   {
     hkvVec3 vOwnerRot = pOwnerEntity->GetRotationDelta();  
@@ -387,7 +387,8 @@ void VSimpleAnimationComponent::Serialize( VArchive &ar )
     ar >> AnimationName;
     if( iLocalVersion >= VERSION1)
       ar >> UseMotionDelta;
-  } else
+  } 
+  else
   {
     ar << static_cast<char>(VERSION_CURRENT);
     ar << AnimationName;
@@ -396,10 +397,58 @@ void VSimpleAnimationComponent::Serialize( VArchive &ar )
 }
 
 
-bool VSimpleAnimationComponent::StartAnimation(VisBaseEntity_cl *pEntity, const char *szAnimName)
+bool VSimpleAnimationComponent::StartAnimation()
 {
-  if (pEntity==NULL)
+  VisBaseEntity_cl *pOwnerEntity = vstatic_cast<VisBaseEntity_cl*>(GetOwner());
+  if (pOwnerEntity == NULL || AnimationName.IsEmpty())
     return false;
+
+  if (StartAnimation(pOwnerEntity, AnimationName))
+  {
+    VisAnimConfig_cl* pAnimConfig = pOwnerEntity->GetAnimConfig();
+    if (pAnimConfig != NULL)
+    {
+      pAnimConfig->SetFlags(pAnimConfig->GetFlags() | MULTITHREADED_ANIMATION);
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+void VSimpleAnimationComponent::SetPaused(bool bEnabled)
+{
+  VisBaseEntity_cl *pOwnerEntity = vstatic_cast<VisBaseEntity_cl*>(GetOwner());
+  if (pOwnerEntity == NULL)
+    return;
+
+  VisAnimConfig_cl* pAnimConfig = pOwnerEntity->GetAnimConfig();
+  if (pAnimConfig == NULL)
+    return;
+
+  // Pause skeletal animation
+  VisAnimFinalSkeletalResult_cl* pFinalSkeletalResult = pAnimConfig->GetFinalResult();
+  if (pFinalSkeletalResult != NULL && pFinalSkeletalResult->GetSkeletalAnimInput() != NULL)
+  {
+    VisSkeletalAnimControl_cl* pAnimControl = 
+      vdynamic_cast<VisSkeletalAnimControl_cl*>(pFinalSkeletalResult->GetSkeletalAnimInput());
+
+    if (pAnimControl != NULL)
+    {
+      if (bEnabled)
+        pAnimControl->Pause();
+      else
+        pAnimControl->Resume();
+    }
+  }
+}
+
+/*static*/ bool VSimpleAnimationComponent::StartAnimation(VisBaseEntity_cl *pEntity, const char *szAnimName)
+{
+  if (pEntity == NULL)
+    return false;
+
   VDynamicMesh *pMesh = pEntity->GetMesh();
   if (!pMesh || !pMesh->GetSequenceSetCollection() || !pMesh->GetSequenceSetCollection()->GetSequenceSetCount())
     return false;
@@ -409,89 +458,35 @@ bool VSimpleAnimationComponent::StartAnimation(VisBaseEntity_cl *pEntity, const 
   VisMorphingDeformer_cl* pMorphingDeformer = NULL;
 
   // get the sequence(s) for vertex and skeletal animation
-  VisSkeletalAnimSequence_cl* pAnimSequenceSkeletal = (VisSkeletalAnimSequence_cl*)pMesh->GetSequence(szAnimName, VIS_MODELANIM_SKELETAL);
-  VisVertexAnimSequence_cl* pAnimSequenceVertex = (VisVertexAnimSequence_cl*)pMesh->GetSequence(szAnimName, VIS_MODELANIM_VERTEX);
-
-  // if no sequence with the given name is present
-  if ((!pAnimSequenceSkeletal) && (!pAnimSequenceVertex))
-  {
-    // find the first skeletal or vertex animation and use it
-    for (int i=0; i<pMesh->GetSequenceSetCollection()->GetSequenceSet(0)->GetSequenceCount(); ++i)
-    {
-      VisAnimSequence_cl* pTempAnimSequence = pMesh->GetSequenceSetCollection()->GetSequenceSet(0)->GetSequence(i);
-      if (pTempAnimSequence->GetType() == VIS_MODELANIM_SKELETAL)
-      {
-        // if it is a skeletal animation, create a config for it
-        VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateSkeletalConfig(pMesh, &pFinalSkeletalResult);
-        if (pConfig == NULL)
-        {
-          continue;
-        }
-        // create its control
-        VisSkeletalAnimControl_cl* pSkeletalAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), (VisSkeletalAnimSequence_cl*)pTempAnimSequence, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
-        // and set the control as the input for the final skeletal result
-        pFinalSkeletalResult->SetSkeletalAnimInput(pSkeletalAnimControl);
-        // add the entity as an events listener
-        pSkeletalAnimControl->AddEventListener(pEntity);
-        // set the config 
-        pEntity->SetAnimConfig(pConfig);
-        // report success
-        return true;
-      }
-      else if (pTempAnimSequence->GetType() == VIS_MODELANIM_VERTEX)
-      {
-        if (pTempAnimSequence->GetLength() > 0.f)
-        {
-          // if it is a vertex animation, create a config for it
-          VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateVertexConfig(pMesh, &pVertexAnimDeformer);
-          // create its control
-          VisVertexAnimControl_cl* pVertexAnimControl = VisVertexAnimControl_cl::Create((VisVertexAnimSequence_cl*)pTempAnimSequence, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
-          // and add the control to the vertex anim deformer
-          pVertexAnimDeformer->AddVertexAnimControl(pVertexAnimControl, 1.0f);
-          // add the entity as an events listener
-          pVertexAnimControl->AddEventListener(pEntity);
-          // set the config 
-          pEntity->SetAnimConfig(pConfig);
-          // report success
-          return true;
-        }
-        else
-        {
-          // if it is a morph target, create a config for it
-          VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateMorphingConfig(pMesh, &pMorphingDeformer);
-          // add morph target
-          pMorphingDeformer->AddMorphTarget((VisVertexAnimSequence_cl*)pTempAnimSequence, 1.0f);
-          // set the config 
-          pEntity->SetAnimConfig(pConfig);
-          // report success
-          return true;
-        }
-      }
-    }
-    // if neither a skeletal nor a vertex animation has been found, report failure
-    return false;
-  }
+  VisSkeletalAnimSequence_cl* pAnimSequenceSkeletal = (VisSkeletalAnimSequence_cl*)pMesh->GetSequence(
+    szAnimName, VIS_MODELANIM_SKELETAL);
+  VisVertexAnimSequence_cl* pAnimSequenceVertex = (VisVertexAnimSequence_cl*)pMesh->GetSequence(
+    szAnimName, VIS_MODELANIM_VERTEX);
 
   VisAnimConfig_cl* pConfig = NULL;
-  if ((pAnimSequenceSkeletal) && (pAnimSequenceVertex))
-  {
-    // if both a vertex and a skeletal animation with the given name have been found,
-    // create a combined config for skeletal and vertex animation
-    pConfig = VisAnimConfig_cl::CreateSkeletalVertexConfig(pMesh, &pFinalSkeletalResult, &pVertexAnimDeformer);
-  }
 
   if (pAnimSequenceSkeletal)
   {
-    if (!pConfig)
+    if (pAnimSequenceVertex)
     {
-        // if it is just a skeletal animation, create a config for it
-        pConfig = VisAnimConfig_cl::CreateSkeletalConfig(pMesh, &pFinalSkeletalResult);
+      // if both a vertex and a skeletal animation with the given name have been found,
+      // create a combined config for skeletal and vertex animation
+      if (pAnimSequenceVertex->GetLength() > 0.f)
+        pConfig = VisAnimConfig_cl::CreateSkeletalVertexConfig(pMesh, &pFinalSkeletalResult, &pVertexAnimDeformer);
+      else
+        pConfig = VisAnimConfig_cl::CreateSkeletalMorphingConfig(pMesh, &pFinalSkeletalResult, &pMorphingDeformer);
+    }
+    else
+    {
+      // if it is just a skeletal animation, create a config for it
+      pConfig = VisAnimConfig_cl::CreateSkeletalConfig(pMesh, &pFinalSkeletalResult);
     }
 
     // if a skeletal animation has been found create a control for it
     if (pConfig)
     {
-      VisSkeletalAnimControl_cl* pSkeletalAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), pAnimSequenceSkeletal, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+      VisSkeletalAnimControl_cl* pSkeletalAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), 
+        pAnimSequenceSkeletal, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
       // set it as the input for the final skeletal result
       pFinalSkeletalResult->SetSkeletalAnimInput(pSkeletalAnimControl);
       // and add the entity as an events listener
@@ -510,7 +505,8 @@ bool VSimpleAnimationComponent::StartAnimation(VisBaseEntity_cl *pEntity, const 
       }
 
       // if a vertex animation has been found create a control for it
-      VisVertexAnimControl_cl* pVertexAnimControl = VisVertexAnimControl_cl::Create(pAnimSequenceVertex, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+      VisVertexAnimControl_cl* pVertexAnimControl = VisVertexAnimControl_cl::Create(pAnimSequenceVertex, 
+        VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
       // add it to the vertex anim deformer
       pVertexAnimDeformer->AddVertexAnimControl(pVertexAnimControl, 1.0f);
       // and add the entity as an events listener
@@ -537,11 +533,11 @@ bool VSimpleAnimationComponent::StartAnimation(VisBaseEntity_cl *pEntity, const 
 }
 
 /// =========================================================================== ///
-/// VSimpleAnimationComponentManager IVisCallbackHandler_cl Overrides                 ///
+/// VSimpleAnimationComponentManager IVisCallbackHandler_cl Overrides           ///
 /// =========================================================================== ///
+
 // One global instance of our manager
 VSimpleAnimationComponentManager VSimpleAnimationComponentManager::g_GlobalManager;
-
 
 void VSimpleAnimationComponentManager::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
@@ -549,19 +545,20 @@ void VSimpleAnimationComponentManager::OnHandleCallback(IVisCallbackDataObject_c
   {
     // call update function on every component
     const int iCount = m_Components.Count();
-    for (int i=0;i<iCount;i++)
+    for (int i = 0; i < iCount; i++)
+    {
       m_Components.GetAt(i)->PerFrameUpdate();
+    }
   }
 }
 
-
-START_VAR_TABLE(VSimpleAnimationComponent,IVObjectComponent,"Component for simple entity model animation playback",VVARIABLELIST_FLAGS_NONE, "Simple Animation" )
+START_VAR_TABLE(VSimpleAnimationComponent, IVObjectComponent, "Component for simple entity model animation playback", VVARIABLELIST_FLAGS_NONE, "Simple Animation" )
   DEFINE_VAR_VSTRING(VSimpleAnimationComponent, AnimationName, "Name of the animation to playback", "", 0, 0, "dropdownlist(Animation)");
   DEFINE_VAR_BOOL(VSimpleAnimationComponent, UseMotionDelta, "If the component should be using the motion delta of the animation or not", FALSE, 0, 0);
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

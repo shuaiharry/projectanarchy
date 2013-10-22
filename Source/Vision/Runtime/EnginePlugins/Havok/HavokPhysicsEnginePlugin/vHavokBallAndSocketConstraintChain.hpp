@@ -24,10 +24,10 @@ public:
   VHAVOK_IMPEXP vHavokBallAndSocketConstraintChainDesc();
 
 public:
-  VHAVOK_IMPEXP virtual void Reset();
+  VHAVOK_IMPEXP virtual void Reset() HKV_OVERRIDE;
 
   V_DECLARE_SERIAL_DLLEXP( vHavokBallAndSocketConstraintChainDesc, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 public:
   float m_fMaximumLastLinkGap; ///< The maximum gap (in fractions of the link length) allowed between the end of the last chain link and the anchor to which it is attached.
@@ -45,40 +45,53 @@ private:
 ///   Implementation of vHavok Ball-and-Socket constraint chains.
 class vHavokBallAndSocketConstraintChain : public vHavokConstraintChain
 {
+  ///
   /// @name Serialization and Type Management
-  //@{
+  /// @{
+  ///
+
 public:
   V_DECLARE_SERIAL_DLLEXP( vHavokBallAndSocketConstraintChain, VHAVOK_IMPEXP )
   VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
-  //@}
 
-  /// @name vHavokConstraintChain Overrides
-  //@{
+  ///
+  /// @}
+  ///
+
 protected:
+
+  ///
+  /// @name vHavokConstraintChain Overrides
+  /// @{
+  ///
+
   VHAVOK_IMPEXP virtual void AppendConstraintInfo( const hkvVec3& vPivotA, 
-    const hkvVec3& vPivotB, bool bIsAnchor = false);
-  VHAVOK_IMPEXP virtual hkvVec3 CalcLinkPivot(unsigned int iIndex);
-  VHAVOK_IMPEXP virtual hkpConstraintChainData* CreateConstraintChainData();
-  VHAVOK_IMPEXP virtual vHavokConstraintChainDesc *CreateConstraintChainDesc();
+    const hkvVec3& vPivotB, bool bIsAnchor = false) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual hkvVec3 CalcLinkPivot(unsigned int iIndex) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual hkpConstraintChainData* CreateConstraintChainData() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual vHavokConstraintChainDesc *CreateConstraintChainDesc() HKV_OVERRIDE;
   VHAVOK_IMPEXP virtual void FillRagdollConstraintInfo(
     vHavokRagdollConstraintInfo &ragdollInfo, 
-    unsigned int iConstraintIndex);
-  VHAVOK_IMPEXP virtual unsigned int GetConstraintInfoCount();
-  VHAVOK_IMPEXP virtual hkVector4 GetImpulseApplied() const;
-  VHAVOK_IMPEXP virtual float GetLastLinkAllowedGap() const;
-  VHAVOK_IMPEXP virtual unsigned int GetMaxNumLinks() const;
-  VHAVOK_IMPEXP virtual bool GetParametersFromDesc(vHavokConstraintChainDesc const& desc);
+    unsigned int iConstraintIndex) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual unsigned int GetConstraintInfoCount() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual hkVector4 GetImpulseApplied() const HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual float GetLastLinkAllowedGap() const HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual unsigned int GetMaxNumLinks() const HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual bool GetParametersFromDesc(vHavokConstraintChainDesc const& desc) HKV_OVERRIDE;
   VHAVOK_IMPEXP virtual void InitConstraintChainDataFromDesc(hkpConstraintChainData& data, 
-    vHavokConstraintChainDesc const& desc);
-  VHAVOK_IMPEXP virtual void RemoveConstraintInfo(unsigned int iIndex);
-  VHAVOK_IMPEXP virtual bool SupportsRagdollConstraints() const { return true; }
-  VHAVOK_IMPEXP virtual void UpdateChainPhysicsProperties();
+    vHavokConstraintChainDesc const& desc) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void RemoveConstraintInfo(unsigned int iIndex) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual bool SupportsRagdollConstraints() const HKV_OVERRIDE { return true; }
+  VHAVOK_IMPEXP virtual void UpdateChainPhysicsProperties() HKV_OVERRIDE;
   VHAVOK_IMPEXP virtual void UpdateConstraintInfo(unsigned int iIndex, 
-    const hkvVec3& vPivotA, const hkvVec3& vPivotB);
-  VHAVOK_IMPEXP virtual void UpdateRagdollConstraintState();
+    const hkvVec3& vPivotA, const hkvVec3& vPivotB) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void UpdateRagdollConstraintState() HKV_OVERRIDE;
 public:
-  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintChainDesc& desc);
-  //@}
+  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintChainDesc& desc) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
 
 private:
   float m_fMaximumLastLinkGap; ///< The maximum gap (in fractions of the link length) allowed between the end of the last chain link and the anchor to which it is attached.
@@ -89,7 +102,7 @@ private:
 #endif //V_HAVOK_BALL_AND_SOCKET_CONSTRAINT_CHAIN_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

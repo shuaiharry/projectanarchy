@@ -28,7 +28,7 @@
 ///     
 ///  \sa Vision::GetTimer
 ///  \sa Vision::SetTimer
-class IVTimer : public VRefCounter
+class IVTimer : public VTypedObject, public VRefCounter
 {
 public:
  
@@ -38,7 +38,7 @@ public:
 
   /// \brief
   /// Virtual destructor
-  VISION_APIFUNC VOVERRIDE ~IVTimer() {}
+  VISION_APIFUNC virtual ~IVTimer() {}
 
   ///
   /// @name Customizable Timer Functionality
@@ -67,17 +67,6 @@ public:
   /// \return
   ///   the raw time delta since the last frame.
   VISION_APIFUNC virtual float GetUnfilteredTimeDifference() const;
-  
-
-  /// \brief
-  ///   Serializes the current state of timer.
-  /// 
-  /// This function serializes/deserializes the current state (including the actual time values) of this timer 
-  /// instance. Upon deserialization, the timer continues in the state and with the time of the serialized timer. 
-  /// 
-  /// \param ar
-  ///   The archive to read from or write to
-  VISION_APIFUNC virtual void SerializeX( VArchive &ar );
 
   ///
   /// @}
@@ -369,6 +358,27 @@ public:
   /// @}
   ///
 
+  ///
+  /// @name Serialization
+  /// @{
+  ///
+
+  V_DECLARE_SERIAL_DLLEXP(IVTimer, VISION_APIDATA)
+
+  /// \brief
+  ///   Serializes the current state of timer.
+  /// 
+  /// This function serializes/deserializes the current state (including the actual time values) of this timer 
+  /// instance. Upon deserialization, the timer continues in the state and with the time of the serialized timer. 
+  /// 
+  /// \param ar
+  ///   The archive to read from or write to
+  VISION_APIFUNC virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
+
 protected:
   /// \brief
   ///   Returns the clock frequency of the timer in counts per second
@@ -393,11 +403,6 @@ protected:
 #include <Vision/Runtime/Engine/System/Timer/VisionTimer.inl>
 
 typedef VSmartPtr<IVTimer> IVTimerPtr;
-
-
-/// Serialization versions
-#define VDEFAULTTIMER_VERSION_1         1                        // Initial version
-#define VDEFAULTTIMER_VERSION_CURRENT   VDEFAULTTIMER_VERSION_1
 
 #define VDEFAULTTIMER_FILTER_FRAMECOUNT 11                       // Number of frames for filtering time steps (must be greater than 4)
 
@@ -451,7 +456,6 @@ public:
   VISION_APIFUNC virtual void Init() HKV_OVERRIDE;
   VISION_APIFUNC virtual void Update() HKV_OVERRIDE;
   VISION_APIFUNC virtual float GetUnfilteredTimeDifference() const HKV_OVERRIDE;
-  VISION_APIFUNC virtual void SerializeX( VArchive &ar ) HKV_OVERRIDE;
 
   /// \brief
   ///   Returns whether time steps are currently filtered/ smoothed.
@@ -478,6 +482,19 @@ public:
   ///   Sets the factor [0..1] for compensating for the time-drift between the real world
   ///   clock and the filtered game clock, that can occur during the time step filtering. 
   inline void SetTimeDebtFactor(float fTimeDebtFactor) { m_fTimeDebtFactor = fTimeDebtFactor; }
+
+  ///
+  /// @name Serialization
+  /// @{
+  ///
+
+  V_DECLARE_SERIAL_DLLEXP(VDefaultTimer, VISION_APIDATA)
+
+  VISION_APIFUNC virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
 
   bool m_bDeleteObject;
 
@@ -516,7 +533,19 @@ public:
   VISION_APIFUNC void SetSteps(int iTicksPerSecond);
 
   VISION_APIFUNC virtual void Update() HKV_OVERRIDE;
-  VISION_APIFUNC virtual void SerializeX( VArchive &ar ) HKV_OVERRIDE;
+
+  ///
+  /// @name Serialization
+  /// @{
+  ///
+
+  V_DECLARE_SERIAL_DLLEXP(VFixStepTimer, VISION_APIDATA)
+
+  VISION_APIFUNC virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
 
 protected:
   double m_dTimeStep;
@@ -525,7 +554,7 @@ protected:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

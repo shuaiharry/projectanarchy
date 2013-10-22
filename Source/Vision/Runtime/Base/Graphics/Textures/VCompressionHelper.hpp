@@ -23,6 +23,7 @@ namespace VCompressionHelper
   VBASE_IMPEXP void DecodeBGR565(VColorRef *pDest, const unsigned short *src, int w, int h);
   VBASE_IMPEXP void DecodeBGRA5551(VColorRef *pDest, const unsigned short *src, int w, int h);
   VBASE_IMPEXP void DecodeBGRA4444(VColorRef *pDest, const unsigned short *src, int w, int h);
+  VBASE_IMPEXP void DecodeABGR4444(VColorRef *pDest, const unsigned short *src, int w, int h);
 
   VBASE_IMPEXP void DecodeRLE(UBYTE *pDest, const UBYTE *pSrc, int iDestTexelCount, int iTexelStride);
   VBASE_IMPEXP void DecodeRLE(UBYTE *pDest, IVFileInStream *pSrcStream, int iDestTexelCount, int iTexelStride);
@@ -45,7 +46,7 @@ namespace VCompressionHelper
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

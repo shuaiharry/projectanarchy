@@ -15,6 +15,25 @@
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Terrain/Geometry/TerrainSector.hpp>
 #endif
 
+// -------------------------------------------------------------------------- //
+// hkvConvexVerticesShape                                                
+// -------------------------------------------------------------------------- //
+
+const hkClass* hkvConvexVerticesShape::getClassType() const
+{
+  return &hkvConvexVerticesShapeClass;
+}
+
+
+// -------------------------------------------------------------------------- //
+// hkvBvCompressedMeshShape                                                
+// -------------------------------------------------------------------------- //
+
+const hkClass* hkvBvCompressedMeshShape::getClassType() const
+{
+  return &hkvBvCompressedMeshShapeClass;
+}
+
 
 // -------------------------------------------------------------------------- //
 // hkvSampledHeightFieldShape                                                
@@ -58,6 +77,12 @@ hkReal hkvSampledHeightFieldShape::getHeightAtImpl(int x, int z) const
 #endif
 }
 
+const hkClass* hkvSampledHeightFieldShape::getClassType() const 
+{ 
+  return &hkvSampledHeightFieldShapeClass; 
+}
+
+
 // -------------------------------------------------------------------------- //
 // hkvTriSampledHeightFieldCollection                                                
 // -------------------------------------------------------------------------- //
@@ -72,7 +97,7 @@ static int GetLog2(int iValue)
 #endif
 
 hkvTriSampledHeightFieldCollection::hkvTriSampledHeightFieldCollection(const VTerrainSector *pSector, const hkpSampledHeightFieldShape *pShape) 
-  : hkpTriSampledHeightFieldCollection(pShape), m_tileHoleMask(16*16)
+  : hkpTriSampledHeightFieldCollection(pShape), m_tileHoleMask(16*16, hkBitFieldValue::UNINITIALIZED)
 {
 #ifdef SUPPORTS_TERRAIN
   // these are the two possible return values
@@ -82,7 +107,7 @@ hkvTriSampledHeightFieldCollection::hkvTriSampledHeightFieldCollection(const VTe
   // build a bitmask from all terrain tiles so we can perform a fast lookup in getCollisionFilterInfoImpl
   const VTerrainConfig &cfg(pSector->m_Config);
   m_iStrideX = cfg.m_iTilesPerSector[0];
-  m_tileHoleMask.setSize(cfg.m_iTilesPerSector[0]*cfg.m_iTilesPerSector[1]);
+  m_tileHoleMask.setSizeAndFill(0, cfg.m_iTilesPerSector[0]*cfg.m_iTilesPerSector[1], 0);
   int iBit = 0;
   for (int y=0;y<cfg.m_iTilesPerSector[1];y++)
     for (int x=0;x<cfg.m_iTilesPerSector[0];x++,iBit++)
@@ -106,6 +131,11 @@ hkUint32 hkvTriSampledHeightFieldCollection::getCollisionFilterInfo(hkpShapeKey 
   int y = getZFromShapeKey(key) >> m_iTileSamplesY;
   const bool bIsHole = m_tileHoleMask.get(x+y*m_iStrideX) > 0;
   return bIsHole ? m_iNonCollide : m_iCollide;
+}
+
+const hkClass* hkvTriSampledHeightFieldCollection::getClassType() const 
+{ 
+  return &hkvTriSampledHeightFieldCollectionClass; 
 }
 
 
@@ -154,8 +184,13 @@ void hkvTriSampledHeightFieldBvTreeShape::castRayWithCollector(const hkpShapeRay
 #endif
 }
 
+const hkClass* hkvTriSampledHeightFieldBvTreeShape::getClassType() const 
+{ 
+  return &hkvTriSampledHeightFieldBvTreeShapeClass; 
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

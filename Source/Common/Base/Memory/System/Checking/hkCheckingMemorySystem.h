@@ -91,13 +91,13 @@ class hkCheckingMemorySystem : public hkDebugMemorySystem
 			HK_DECLARE_PLACEMENT_ALLOCATOR();
 
 			AllocatorForwarder() : m_parent(HK_NULL) {}
-			virtual void* blockAlloc( int numBytes );
-			virtual void blockFree( void* p, int numBytes );
-			virtual void* bufAlloc( int& reqNumInOut );
-			virtual void bufFree( void* p, int num );
-			virtual void* bufRealloc( void* pold, int oldNum, int& reqNumInOut );
-			virtual void getMemoryStatistics( MemoryStatistics& u );
-			virtual int getAllocatedSize(const void* obj, int nbytes);
+			virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+			virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
+			virtual void* bufAlloc( int& reqNumInOut ) HK_OVERRIDE;
+			virtual void bufFree( void* p, int num ) HK_OVERRIDE;
+			virtual void* bufRealloc( void* pold, int oldNum, int& reqNumInOut ) HK_OVERRIDE;
+			virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+			virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 		
 			virtual void resetPeakMemoryStatistics();
 
@@ -122,7 +122,7 @@ class hkCheckingMemorySystem : public hkDebugMemorySystem
 		void* checkedAlloc( hkBool32 isBuf, const AllocationContext& context, int numBytes );
 		void checkedFree( hkBool32 isBuf, const AllocationContext& context, void* p, int numBytes );
 
-		virtual hkResult getMemorySnapshot(hkMemorySnapshot& snapshot) HK_OVERRIDE;
+		virtual hkResult getMemorySnapshot(hkMemorySnapshot& snapshot) const HK_OVERRIDE;
 		virtual hkResult getAllocationCallStack(const void* ptr, hkUlong* callStack, int& stackSize, hk_size_t& allocSize) HK_OVERRIDE;
 
 		virtual void setHeapScrubValues(hkUint32 allocValue, hkUint32 freeValue) HK_OVERRIDE;
@@ -184,10 +184,11 @@ class hkCheckingMemorySystem : public hkDebugMemorySystem
 		virtual void threadInit(hkMemoryRouter& r, const char* name, Flags f=FLAG_ALL) HK_OVERRIDE;
 		virtual void threadQuit(hkMemoryRouter& r, Flags f=FLAG_ALL) HK_OVERRIDE;
 		virtual void getMemoryStatistics(MemoryStatistics& stats);
-		virtual void printStatistics(hkOstream& ostr) HK_OVERRIDE;
+		virtual void printStatistics(hkOstream& ostr) const HK_OVERRIDE;
 		virtual void advanceFrame() HK_OVERRIDE;
 		virtual void garbageCollectShared() HK_OVERRIDE;
 		virtual hkMemoryAllocator* getUncachedLockedHeapAllocator() HK_OVERRIDE;
+		virtual void getHeapStatistics(hkMemoryAllocator::MemoryStatistics& stats) const;
 
 		/// Report active memory allocations, ordered by time.
 		void leakReportByTime();
@@ -255,7 +256,7 @@ class hkCheckingMemorySystem : public hkDebugMemorySystem
 #endif // HKBASE_hkCheckingMemorySystem_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

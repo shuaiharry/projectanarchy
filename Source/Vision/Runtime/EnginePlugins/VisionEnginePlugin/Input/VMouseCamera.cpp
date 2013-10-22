@@ -6,10 +6,6 @@
  *
  */
 
-//***********************************************************************
-// VisMouseCamera_cl Source
-//***********************************************************************
-
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/VisionEnginePluginPCH.h>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Input/VMouseCamera.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Input/VVirtualThumbStick.hpp>
@@ -20,17 +16,16 @@ VisMouseCamera_cl::VisMouseCamera_cl()
   : m_fSensitivity(200.0f)
   , m_fUpDownSpeed(1.5f)
   , m_fMoveSpeed(350.0f * Vision::World.GetGlobalUnitScaling())
-  , m_bSimulationIndependent(false) // use ThinkFunction
 #if defined(SUPPORTS_MULTITOUCH)
   , m_pVirtualThumbStick(NULL)
 #endif
 {
+  Vision::Callbacks.OnFrameUpdatePreRender += this;
 }
 
 VisMouseCamera_cl::~VisMouseCamera_cl()
 {
   V_SAFE_DELETE(m_pInputMap);
-  SetSimulationIndependentMovement(false); // make sure callbacks are de-registered
 
 #if defined(SUPPORTS_MULTITOUCH)
   if (m_pVirtualThumbStick != NULL)
@@ -40,10 +35,10 @@ VisMouseCamera_cl::~VisMouseCamera_cl()
     Vision::Callbacks.OnVideoChanged -= this;
   }
 #endif
+
+  Vision::Callbacks.OnFrameUpdatePreRender -= this;
 }
 
-// InitFunction: Will be called during the initialisation of each entity instance.
-// It is normally used to initialise the entity (e.g. collision setup) and the private variables.
 void VisMouseCamera_cl::InitFunction()
 {
   BaseInit();
@@ -52,15 +47,10 @@ void VisMouseCamera_cl::InitFunction()
   m_walkMode = NONE;
 }
 
-
 void VisMouseCamera_cl::SetWalkMode( VisMouseCamWalkMode_e mode )
 {
-  //if (m_walkMode == mode)
-  //  return;
-  //
   m_walkMode = mode;
 }
-
 
 void VisMouseCamera_cl::SetWalkMode( BOOL walk )
 {
@@ -70,12 +60,6 @@ void VisMouseCamera_cl::SetWalkMode( BOOL walk )
     SetWalkMode( NONE );
 }
 
-
-// ---------------------------------------------------------------------------------
-// Method: BaseInit
-// Author: Fabian Roeken, Patrick Harms
-// Notes: Base initialization code shared between InitFunction and Serialize
-// ---------------------------------------------------------------------------------
 void VisMouseCamera_cl::BaseInit()
 {
   m_pInputMap = new VInputMap(API_CAMERA_CONTROL_LAST_ELEMENT+1+API_CAMERA_CONTROL_USER_SPACE, API_CAMERA_CONTROL_ALTERNATIVES);
@@ -242,8 +226,6 @@ void VisMouseCamera_cl::BaseInit()
   Vision::Camera.AttachToEntity(this, hkvVec3::ZeroVector ());
 }
 
-
-
 void VisMouseCamera_cl::TickFunction(float fTimeDiff)
 {
   hkvVec3 vMove = hkvVec3::ZeroVector();
@@ -338,26 +320,10 @@ void VisMouseCamera_cl::TickFunction(float fTimeDiff)
   }
 }
 
-
-// ThinkFunction: Will be called by the engine once per tick/frame.
-// Useful for regular updates (e.g. keyboard, artificial intelligence).
-void VisMouseCamera_cl::ThinkFunction()
-{
-  if (m_bSimulationIndependent)
-    return;
-
-  float fTimeDiff = Vision::GetTimer()->GetTimeDifference();
-  TickFunction(fTimeDiff);
-}
-
-
-
 void VisMouseCamera_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
   if (pData->m_pSender == &Vision::Callbacks.OnFrameUpdatePreRender)
   {
-    VASSERT(m_bSimulationIndependent);
-
     // this function gets called once per frame, not once per simulation tick
 
     if (this->GetThinkFunctionStatus()) // take the same flag into account
@@ -376,23 +342,6 @@ void VisMouseCamera_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
   }
 }
 
-
-void VisMouseCamera_cl::SetSimulationIndependentMovement(bool bStatus)
-{
-  if (m_bSimulationIndependent==bStatus)
-    return;
-  m_bSimulationIndependent = bStatus;
-  if (m_bSimulationIndependent)
-    Vision::Callbacks.OnFrameUpdatePreRender += this;
-  else
-    Vision::Callbacks.OnFrameUpdatePreRender -= this;
-}
-
-
-// ---------------------------------------------------------------------------------
-// Method: Serialize
-// Author: Fabian Roeken, Patrick Harms
-// ---------------------------------------------------------------------------------
 void VisMouseCamera_cl::Serialize( VArchive& ar )
 {
   VisBaseEntity_cl::Serialize( ar );
@@ -419,7 +368,7 @@ START_VAR_TABLE(VisMouseCamera_cl, VisBaseEntity_cl, "VisMouseCamera_cl", VFORGE
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

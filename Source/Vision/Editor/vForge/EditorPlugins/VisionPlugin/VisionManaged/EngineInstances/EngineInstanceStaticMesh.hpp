@@ -64,32 +64,58 @@ namespace VisionManaged
   public ref class EngineInstanceStaticMesh : public IEngineShapeInstance
   {
   public:
-
+    // Constructor
     EngineInstanceStaticMesh();
-    VOVERRIDE void DisposeObject() override;
-    VOVERRIDE IntPtr GetNativeObject() override  {return System::IntPtr((void*)GetLOD0());}
+
+    virtual void DisposeObject() override;
+
+    virtual IntPtr GetNativeObject() override  
+    {
+      return System::IntPtr((void*)GetLOD0());
+    }
 
     // overridden IEngineShapeInstance functions
-    VOVERRIDE void SetParentZone(Zone ^zone) override;
-    VOVERRIDE void SetVisible(bool bStatus) override {_bVisible=bStatus;UpdateVisibleStatus();}
-    VOVERRIDE void SetOrientation(float yaw,float pitch,float roll) override {_yaw=yaw;_pitch=pitch;_roll=roll;UpdateTransformation();}
-    VOVERRIDE void SetPosition(float x,float y,float z) override {_x=x;_y=y;_z=z;UpdateTransformation();}
-    VOVERRIDE void SetScaling(float x,float y, float z) override {_sx=x;_sy=y;_sz=z;UpdateTransformation();}
-    VOVERRIDE void SetUniqueID(unsigned __int64 iID) override;
-    VOVERRIDE void SetObjectKey(String ^key) override;
-    VOVERRIDE void OnRecomputeVisibility() override;
-    VOVERRIDE void GetDependencies(ResourceSnapshotInfo ^info) override;
+    virtual void SetParentZone(Zone ^zone) override;
 
-    VOVERRIDE void TraceShape(Shape3D ^ownerShape, Vector3F rayStart,Vector3F rayEnd, ShapeTraceResult ^%result) override;
-    VOVERRIDE bool GetLocalBoundingBox(BoundingBox ^%bbox) override;
-    VOVERRIDE bool OnExport(SceneExportInfo ^info) override;
-    VOVERRIDE void OnPostEngineInstanceCreation() override {ConversionUtils::CallOnDeserializationFunction(GetLOD0());}
-    VOVERRIDE void OnBeforeExport(SceneExportInfo ^info) override;
-    VOVERRIDE void OnAfterExport(SceneExportInfo ^info) override;
-    VOVERRIDE void OnRenderHook(ShapeBase ^owner, int iConstant) override;
+    virtual void SetVisible(bool bStatus) override 
+    {
+      _bVisible=bStatus;
+      UpdateVisibleStatus();
+    }
+
+    virtual void SetOrientation(float yaw,float pitch,float roll) override 
+    {
+      _yaw = yaw;_pitch = pitch;_roll = roll;
+      UpdateTransformation();
+    }
+    
+    virtual void SetPosition(float x,float y,float z) override 
+    {
+      _x = x; _y = y; _z = z;
+      UpdateTransformation();
+    }
+
+    virtual void SetScaling(float x,float y, float z) override 
+    {
+      _sx = x; _sy = y; _sz = z;
+      UpdateTransformation();
+    }
+
+    virtual void SetUniqueID(unsigned __int64 iID) override;
+    virtual void SetObjectKey(String ^key) override;
+    virtual void OnRecomputeVisibility() override;
+    virtual void GetDependencies(ResourceSnapshotInfo ^info) override;
+
+    virtual void TraceShape(Shape3D ^ownerShape, Vector3F rayStart,Vector3F rayEnd, ShapeTraceResult ^%result) override;
+    virtual bool GetLocalBoundingBox(BoundingBox ^%bbox) override;
+    virtual bool OnExport(SceneExportInfo ^info) override;
+    virtual void OnPostEngineInstanceCreation() override {ConversionUtils::CallOnDeserializationFunction(GetLOD0());}
+    virtual void OnBeforeExport(SceneExportInfo ^info) override;
+    virtual void OnAfterExport(SceneExportInfo ^info) override;
+    virtual void OnRenderHook(ShapeBase ^owner, int iConstant) override;
 
     // components:
-    VOVERRIDE property bool SupportsComponents
+    virtual property bool SupportsComponents
     {
       bool get() override
       {
@@ -97,9 +123,9 @@ namespace VisionManaged
       }
     }
 
-    VOVERRIDE bool CanAttachComponent(ShapeComponent ^component, String ^%sError) override {return ConversionUtils::CanAttachComponent(GetLOD0(),component,sError);}
-    VOVERRIDE void OnAttachComponent(ShapeComponent ^component) override {ConversionUtils::OnAttachComponent(GetLOD0(),component);}
-    VOVERRIDE void OnRemoveComponent(ShapeComponent ^component) override {ConversionUtils::OnRemoveComponent(GetLOD0(),component);}
+    virtual bool CanAttachComponent(ShapeComponent ^component, String ^%sError) override {return ConversionUtils::CanAttachComponent(GetLOD0(),component,sError);}
+    virtual void OnAttachComponent(ShapeComponent ^component) override {ConversionUtils::OnAttachComponent(GetLOD0(),component);}
+    virtual void OnRemoveComponent(ShapeComponent ^component) override {ConversionUtils::OnRemoveComponent(GetLOD0(),component);}
 
     // special
     void RenderShape(VisionViewBase ^view, ShapeRenderMode mode);
@@ -166,7 +192,7 @@ namespace VisionManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

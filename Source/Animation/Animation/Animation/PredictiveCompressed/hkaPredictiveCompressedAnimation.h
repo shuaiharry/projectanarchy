@@ -162,8 +162,8 @@ class hkaPredictiveCompressedAnimation : public hkaAnimation
 								hkQsTransform* bonesOut, hkReal* floatsOut,
 								hkUint8* boneWeightsInOut, hkUint8* floatWeightsInOut ) const;
 
-			/// Gets the total size in bytes of the compressed animation.
-		int getSizeInBytes() const;
+			/// Return the memory required for this animation
+		virtual int getSizeInBytes() const HK_OVERRIDE;
 
 			/// Get a subset of the tracks a given time using data chunks. Sample is calculated using pose[frameIndex] * (1 - frameDelta) + pose[frameIndex+1] * frameDelta.
 		static void HK_CALL samplePartialWithDataChunks(	int frameIndex, hkReal frameDelta,
@@ -278,7 +278,7 @@ class hkaPredictiveCompressedAnimation : public hkaAnimation
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

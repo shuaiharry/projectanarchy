@@ -112,9 +112,19 @@ HK_FORCE_INLINE void hkVector4f::setAdd(hkVector4fParameter v0, hkVector4fParame
 	m_quad = _mm_add_ps(v0.m_quad, v1.m_quad);
 }
 
+HK_FORCE_INLINE void hkVector4f::setAdd(hkVector4fParameter v0, hkSimdFloat32Parameter v1)
+{
+	m_quad = _mm_add_ps(v0.m_quad, v1.m_real);
+}
+
 HK_FORCE_INLINE void hkVector4f::setSub(hkVector4fParameter v0, hkVector4fParameter v1)
 {
 	m_quad = _mm_sub_ps(v0.m_quad, v1.m_quad);
+}
+
+HK_FORCE_INLINE void hkVector4f::setSub(hkVector4fParameter v0, hkSimdFloat32Parameter v1)
+{
+	m_quad = _mm_sub_ps(v0.m_quad, v1.m_real);
 }
 
 HK_FORCE_INLINE void hkVector4f::setMul(hkVector4fParameter v0, hkVector4fParameter v1)
@@ -767,28 +777,28 @@ HK_FORCE_INLINE void hkVector4f::reduceToHalfPrecision()
 template <> 
 HK_FORCE_INLINE hkBool32 hkVector4f::isOk<1>() const
 {
-	const hkQuadFloat32 nanMask = _mm_cmpord_ps(m_quad, _mm_setzero_ps());
+	const hkQuadFloat32 nanMask = _mm_cmpord_ps(m_quad, m_quad);
 	return (_mm_movemask_ps(nanMask) & 0x1);
 }
 
 template <> 
 HK_FORCE_INLINE hkBool32 hkVector4f::isOk<2>() const
 {
-	const hkQuadFloat32 nanMask = _mm_cmpunord_ps(m_quad, _mm_setzero_ps());
+	const hkQuadFloat32 nanMask = _mm_cmpunord_ps(m_quad, m_quad);
 	return !(_mm_movemask_ps(nanMask) & 0x3);
 }
 
 template <> 
 HK_FORCE_INLINE hkBool32 hkVector4f::isOk<3>() const
 {
-	const hkQuadFloat32 nanMask = _mm_cmpunord_ps(m_quad, _mm_setzero_ps());
+	const hkQuadFloat32 nanMask = _mm_cmpunord_ps(m_quad, m_quad);
 	return !(_mm_movemask_ps(nanMask) & 0x7);
 }
 
 template <> 
 HK_FORCE_INLINE hkBool32 hkVector4f::isOk<4>() const
 {
-	const hkQuadFloat32 nanMask = _mm_cmpunord_ps(m_quad, _mm_setzero_ps());
+	const hkQuadFloat32 nanMask = _mm_cmpunord_ps(m_quad, m_quad);
 	return !_mm_movemask_ps(nanMask);
 }
 
@@ -2045,7 +2055,7 @@ HK_FORCE_INLINE void hkVector4f::store(hkFloat16* p) const
 #undef HK_VECTOR4f_COMBINE_XYZ_W
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

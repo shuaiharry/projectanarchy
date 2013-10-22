@@ -29,15 +29,17 @@ using Editor.Contexts;
 using CSharpFramework.Scene;
 using CSharpFramework.View;
 using CSharpFramework.Controls;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 
 namespace Editor
 {
-	/// <summary>
-	/// Panel for engine view.
-	/// </summary>
-	public class EnginePanel : DockableForm
-	{
+  /// <summary>
+  /// Panel for engine view.
+  /// </summary>
+  public class EnginePanel : DockableForm
+  {
     #region Members
 
     private ManagedFramework.VisionView visionView;
@@ -81,9 +83,17 @@ namespace Editor
     private ToolStripMenuItem shapeOriginToolStripMenuItem1;
     private ToolStripMenuItem createToolStripMenuItem;
     private ToolStripMenuItem insertHereToolStripMenuItem;
-    private ToolStripMenuItem enabledToolStripMenuItem;
+    private ToolStripMenuItem snapPositionToolStripMenuItem;
+    private ToolStripMenuItem snapRotationToolStripMenuItem;
     private ToolStripMenuItem showGridToolStripMenuItem;
+    private ToolStripMenuItem relativeGridToolStripMenuItem;
+    private ToolStripMenuItem gridLinesToolStripMenuItem;
+    private ToolStripMenuItem volumeGridToolStripMenuItem;
     private ToolStripSeparator toolStripMenuItem7;
+    private ToolStripMenuItem gridSize10ToolStripMenuItem;
+    private ToolStripMenuItem gridSize25ToolStripMenuItem;
+    private ToolStripMenuItem gridSize100ToolStripMenuItem;
+    private ToolStripSeparator toolStripMenuItem15;
     private ToolStripMenuItem units2ToolStripMenuItem;
     private ToolStripMenuItem units5ToolStripMenuItem;
     private ToolStripMenuItem units10ToolStripMenuItem;
@@ -97,7 +107,6 @@ namespace Editor
     private ToolStripMenuItem sceneOriginToolStripMenuItem;
     private ToolStripMenuItem cameraPositionToolStripMenuItem1;
     private ToolStripMenuItem selectInTreeViewToolStripMenuItem;
-    private ToolStripMenuItem enableSnapPointsToolStripMenuItem;
     private ToolStripMenuItem lockShapesToolStripMenuItem;
     private ToolStripMenuItem pickToolStripMenuItem;
     private ToolStripMenuItem Pick_UV0_ToolStripMenuItem;
@@ -221,17 +230,17 @@ namespace Editor
     /// get the view
     /// </summary>
     [BrowsableAttribute(false)]
-    public VisionView View {get {return visionView;}}
+    public VisionView View { get { return visionView; } }
 
     #region Constructor
 
     /// <summary>
     /// Constructor
     /// </summary>
-		public EnginePanel(DockingContainer container) : base(container)
-		{
-			// This call is required by the Windows.Forms Form Designer.
-			InitializeComponent();
+    public EnginePanel(DockingContainer container) : base(container)
+    {
+      // This call is required by the Windows.Forms Form Designer.
+      InitializeComponent();
 
       // I put this into a separate function because VS messed it up too often!
       this.visionView = new ManagedFramework.VisionView();
@@ -255,11 +264,12 @@ namespace Editor
       EditorManager.SceneChanged += new SceneChangedEventHandler(visionView.OnSceneChanged);
       EditorScene.ShapeChanged += new ShapeChangedEventHandler(visionView.OnShapeChanged);
       EditorScene.PropertyChanged += new CSharpFramework.PropertyChangedEventHandler(visionView.OnPropertyChanged);
-      EditorScene.LayerChanged +=new LayerChangedEventHandler(EditorScene_LayerChanged);
+      EditorScene.LayerChanged += new LayerChangedEventHandler(EditorScene_LayerChanged);
       EditorManager.EditorModeChanged += new EditorModeChangedEventHandler(EditorManager_EditorModeChanged);
       VisionViewBase.MouseContextChanged += new ContextChangedEventHandler(this.OnMouseContextChanged);
       GizmoBase.GizmoChanged += new ShapeDragModeEventHandler(this.OnGizmoChanged);
       EditorManager.SceneChanged += new SceneChangedEventHandler(EditorManager_SceneChanged);
+      EditorManager.SceneEvent += new SceneEventHandler(enginePanel_SceneEvent);
       ViewIconSettings.OnViewIconSettingsChanged += new EventHandler(ViewIconSettings_OnViewIconSettingsChanged);
       EditorApp.ActiveView = visionView;
 
@@ -287,21 +297,25 @@ namespace Editor
       // register some shortcuts
       ShortCutConfig shortcuts = EditorManager.ShortCuts;
       shortcuts.Add(new MenuItemShortCut(pasteAtCursorToolStripMenuItem, Keys.None));
-      shortcuts.Add(new MenuItemShortCut(enabledToolStripMenuItem, Keys.None));
-      shortcuts.Add(new MenuItemShortCut(showGridToolStripMenuItem, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(showGridToolStripMenuItem, Keys.G));
+      shortcuts.Add(new MenuItemShortCut(snapPositionToolStripMenuItem, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(snapRotationToolStripMenuItem, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(relativeGridToolStripMenuItem, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(gridLinesToolStripMenuItem, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(volumeGridToolStripMenuItem, Keys.None));
       shortcuts.Add(new MenuItemShortCut(setupGridToolStripMenuItem, Keys.None));
       shortcuts.Add(new MenuItemShortCut(solidToolStripMenuItem, Keys.None));
       shortcuts.Add(new MenuItemShortCut(wireframeToolStripMenuItem, Keys.None));
-      shortcuts.Add(new MenuItemShortCut(sceneOriginToolStripMenuItem,Keys.None));
-      shortcuts.Add(new MenuItemShortCut(cameraPositionToolStripMenuItem1,Keys.None));
-      shortcuts.Add(new MenuItemShortCut(traceHitToolStripMenuItem,Keys.None));
+      shortcuts.Add(new MenuItemShortCut(sceneOriginToolStripMenuItem, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(cameraPositionToolStripMenuItem1, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(traceHitToolStripMenuItem, Keys.None));
       shortcuts.Add(new MenuItemShortCut(ToolStripMenuItem_View_Properties, Keys.None));
       shortcuts.Add(new MenuItemShortCut(cameraPositionToolStripMenuItem, Keys.None));
-      shortcuts.Add(new MenuItemShortCut(shapeOriginToolStripMenuItem,Keys.None));
+      shortcuts.Add(new MenuItemShortCut(shapeOriginToolStripMenuItem, Keys.None));
       shortcuts.Add(new MenuItemShortCut(pivotToolStripMenuItem, Keys.None)); // drop to floor
       shortcuts.Add(new MenuItemShortCut(boundingBoxToolStripMenuItem, Keys.None)); // drop to floor
       shortcuts.Add(new MenuItemShortCut(bottomCenterToolStripMenuItem, Keys.None)); // drop to floor
-      shortcuts.Add(new MenuItemShortCut(selectInTreeViewToolStripMenuItem, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(selectInTreeViewToolStripMenuItem, Keys.Control | Keys.T));
       shortcuts.Add(new MenuItemShortCut(Profiling_Next, Keys.None));
       shortcuts.Add(new MenuItemShortCut(Profiling_Previous, Keys.None));
 
@@ -322,8 +336,10 @@ namespace Editor
       shortcuts.Add(new MenuItemShortCut(ToolStripMenuItem_Front, Keys.Alt | Keys.Control | Keys.F));
       shortcuts.Add(new MenuItemShortCut(ToolStripMenuItem_Right, Keys.Alt | Keys.Control | Keys.R));
       shortcuts.Add(new ToolStripItemShortCut(ToolStripButton_ZoomFit, Keys.F));
-      shortcuts.Add(new ToolStripItemShortCut(ToolStripButton_IsolateSelection, Keys.I)); 
-     
+      shortcuts.Add(new ToolStripItemShortCut(ToolStripButton_IsolateSelection, Keys.I));
+
+      shortcuts.Add(new ToolStripItemShortCut(ToolStripSplitButton_MoveSensitivity, Keys.Alt | Keys.Control | Keys.U));
+
       // Alignment shortcuts
       shortcuts.Add(new MenuItemShortCut(AlignToGridToolStripMenuItem, Keys.Alt | Keys.Control | Keys.G));
       shortcuts.Add(new MenuItemShortCut(AlignToObjectToolStripMenuItem, Keys.Alt | Keys.Control | Keys.O));
@@ -360,6 +376,7 @@ namespace Editor
       VisionViewBase.MouseContextChanged -= new ContextChangedEventHandler(this.OnMouseContextChanged);
       GizmoBase.GizmoChanged -= new ShapeDragModeEventHandler(this.OnGizmoChanged);
       EditorManager.SceneChanged -= new SceneChangedEventHandler(EditorManager_SceneChanged);
+      EditorManager.SceneEvent -= new SceneEventHandler(enginePanel_SceneEvent);
       ViewIconSettings.OnViewIconSettingsChanged -= new EventHandler(ViewIconSettings_OnViewIconSettingsChanged);
 
       EditorScene.ShapeChanged -= new ShapeChangedEventHandler(visionView.Gizmo.OnShapeChanged);
@@ -379,13 +396,13 @@ namespace Editor
 
     #endregion
 
-		#region Component Designer generated code
-		/// <summary> 
-		/// Required method for Designer support - do not modify 
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+    #region Component Designer generated code
+    /// <summary> 
+    /// Required method for Designer support - do not modify 
+    /// the contents of this method with the code editor.
+    /// </summary>
+    private void InitializeComponent()
+    {
       this.components = new System.ComponentModel.Container();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EnginePanel));
       this.Profiling = new System.Windows.Forms.MenuItem();
@@ -526,16 +543,23 @@ namespace Editor
       this.gridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.setupGridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripMenuItem10 = new System.Windows.Forms.ToolStripSeparator();
-      this.enabledToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.snapPositionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.snapRotationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.showGridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.relativeGridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.gridLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.volumeGridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
+      this.gridSize10ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.gridSize25ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.gridSize100ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripMenuItem15 = new System.Windows.Forms.ToolStripSeparator();
       this.units2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.units5ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.units10ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.units25ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.units50ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.units100ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.enableSnapPointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
       this.renderingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.solidToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -913,7 +937,7 @@ namespace Editor
       this.toolStripButton_MoveCameraWithKeys.Name = "toolStripButton_MoveCameraWithKeys";
       this.toolStripButton_MoveCameraWithKeys.Size = new System.Drawing.Size(262, 22);
       this.toolStripButton_MoveCameraWithKeys.Text = "Control Camera with WASD Keys";
-      this.toolStripButton_MoveCameraWithKeys.ToolTipText = "Camera Control with Arrow and [W,A,S,D] Keys (Disables Hotkeys)";
+      this.toolStripButton_MoveCameraWithKeys.ToolTipText = "Camera Control with [W,A,S,D] Keys (Disables Hotkeys)";
       this.toolStripButton_MoveCameraWithKeys.Click += new System.EventHandler(this.toolStripButton_MoveCameraWithKeys_Click);
       // 
       // ToolStripSplitButton_CameraSep1
@@ -1001,7 +1025,6 @@ namespace Editor
       // ToolStripSplitButton_MoveSensitivity
       // 
       this.ToolStripSplitButton_MoveSensitivity.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-      this.ToolStripSplitButton_MoveSensitivity.Image = global::Editor.Properties.Resources.toolbar_unit_scale;
       this.ToolStripSplitButton_MoveSensitivity.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
       this.ToolStripSplitButton_MoveSensitivity.ImageTransparentColor = System.Drawing.Color.Magenta;
       this.ToolStripSplitButton_MoveSensitivity.Name = "ToolStripSplitButton_MoveSensitivity";
@@ -1659,7 +1682,7 @@ namespace Editor
       this.AlignToHitPointNormalToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
       this.AlignToHitPointNormalToolStripMenuItem.Text = "Align to Hit Point Normal";
       this.AlignToHitPointNormalToolStripMenuItem.ToolTipText = "Aligns selected Shape(s) to the Hit Point traced in the Engine View (Takes Normal" +
-          " Vector into account)";
+    " Vector into account)";
       this.AlignToHitPointNormalToolStripMenuItem.Click += new System.EventHandler(this.AlignToHitPointNormalToolStripMenuItem_Click);
       // 
       // dropToFloorToolStripMenuItem
@@ -1862,7 +1885,6 @@ namespace Editor
             this.pasteAtCursorToolStripMenuItem,
             this.toolStripMenuItem4,
             this.gridToolStripMenuItem,
-            this.enableSnapPointsToolStripMenuItem,
             this.toolStripMenuItem5,
             this.renderingToolStripMenuItem,
             this.shadingToolStripMenuItem,
@@ -1895,9 +1917,17 @@ namespace Editor
       this.gridToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.setupGridToolStripMenuItem,
             this.toolStripMenuItem10,
-            this.enabledToolStripMenuItem,
             this.showGridToolStripMenuItem,
+            this.snapPositionToolStripMenuItem,
+            this.snapRotationToolStripMenuItem,
+            this.relativeGridToolStripMenuItem,
+            this.gridLinesToolStripMenuItem,
+            this.volumeGridToolStripMenuItem,
             this.toolStripMenuItem7,
+            this.gridSize10ToolStripMenuItem,
+            this.gridSize25ToolStripMenuItem,
+            this.gridSize100ToolStripMenuItem,
+            this.toolStripMenuItem15,
             this.units2ToolStripMenuItem,
             this.units5ToolStripMenuItem,
             this.units10ToolStripMenuItem,
@@ -1923,13 +1953,21 @@ namespace Editor
       this.toolStripMenuItem10.Name = "toolStripMenuItem10";
       this.toolStripMenuItem10.Size = new System.Drawing.Size(126, 6);
       // 
-      // enabledToolStripMenuItem
+      // snapPositionToolStripMenuItem
       // 
-      this.enabledToolStripMenuItem.Name = "enabledToolStripMenuItem";
-      this.enabledToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
-      this.enabledToolStripMenuItem.Text = "Enabled";
-      this.enabledToolStripMenuItem.ToolTipText = "Enables/disables grid snapping";
-      this.enabledToolStripMenuItem.Click += new System.EventHandler(this.enabledToolStripMenuItem_Click);
+      this.snapPositionToolStripMenuItem.Name = "snapPositionToolStripMenuItem";
+      this.snapPositionToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+      this.snapPositionToolStripMenuItem.Text = "Snap Position";
+      this.snapPositionToolStripMenuItem.ToolTipText = "Enables/disables position snapping";
+      this.snapPositionToolStripMenuItem.Click += new System.EventHandler(this.snapPositionToolStripMenuItem_Click);
+      // 
+      // snapRotationToolStripMenuItem
+      // 
+      this.snapRotationToolStripMenuItem.Name = "snapRotationToolStripMenuItem";
+      this.snapRotationToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+      this.snapRotationToolStripMenuItem.Text = "Snap Rotation";
+      this.snapRotationToolStripMenuItem.ToolTipText = "Enables/disables rotation snapping";
+      this.snapRotationToolStripMenuItem.Click += new System.EventHandler(this.snapRotationToolStripMenuItem_Click);
       // 
       // showGridToolStripMenuItem
       // 
@@ -1939,10 +1977,64 @@ namespace Editor
       this.showGridToolStripMenuItem.ToolTipText = "Display the grid around the selection";
       this.showGridToolStripMenuItem.Click += new System.EventHandler(this.showGridToolStripMenuItem_Click);
       // 
+      // relativeGridToolStripMenuItem
+      // 
+      this.relativeGridToolStripMenuItem.Name = "relativeGridToolStripMenuItem";
+      this.relativeGridToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+      this.relativeGridToolStripMenuItem.Text = "Relative Grid";
+      this.relativeGridToolStripMenuItem.ToolTipText = "Whether to draw the grid relative to the gizmo, or centered at the origin";
+      this.relativeGridToolStripMenuItem.Click += new System.EventHandler(this.relativeGridToolStripMenuItem_Click);
+      // 
+      // gridLinesToolStripMenuItem
+      // 
+      this.gridLinesToolStripMenuItem.Name = "gridLinesToolStripMenuItem";
+      this.gridLinesToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+      this.gridLinesToolStripMenuItem.Text = "Draw Lines";
+      this.gridLinesToolStripMenuItem.ToolTipText = "Whether to draw the grid as lines or points";
+      this.gridLinesToolStripMenuItem.Click += new System.EventHandler(this.gridLinesToolStripMenuItem_Click);
+      // 
+      // volumeGridToolStripMenuItem
+      // 
+      this.volumeGridToolStripMenuItem.Name = "volumeGridToolStripMenuItem";
+      this.volumeGridToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+      this.volumeGridToolStripMenuItem.Text = "Volume (3D) Grid";
+      this.volumeGridToolStripMenuItem.ToolTipText = "Whether to draw and snap against a volumetric or planar grid";
+      this.volumeGridToolStripMenuItem.Click += new System.EventHandler(this.volumeGridToolStripMenuItem_Click);
+      // 
       // toolStripMenuItem7
       // 
       this.toolStripMenuItem7.Name = "toolStripMenuItem7";
       this.toolStripMenuItem7.Size = new System.Drawing.Size(126, 6);
+
+      // 
+      // gridSize10ToolStripMenuItem
+      // 
+      this.gridSize10ToolStripMenuItem.Name = "units2ToolStripMenuItem";
+      this.gridSize10ToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+      this.gridSize10ToolStripMenuItem.Text = "Grid Size: 10 x 10";
+      this.gridSize10ToolStripMenuItem.ToolTipText = "Sets grid size to 10 x 10 cells";
+      this.gridSize10ToolStripMenuItem.Click += new System.EventHandler(this.gridSizeToolStripMenuItem_Click);
+      // 
+      // gridSize25ToolStripMenuItem
+      // 
+      this.gridSize25ToolStripMenuItem.Name = "units10ToolStripMenuItem";
+      this.gridSize25ToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+      this.gridSize25ToolStripMenuItem.Text = "Grid Size: 25 x 25";
+      this.gridSize25ToolStripMenuItem.ToolTipText = "Sets grid size to 25 x 25 cells";
+      this.gridSize25ToolStripMenuItem.Click += new System.EventHandler(this.gridSizeToolStripMenuItem1_Click);
+      // 
+      // gridSize100ToolStripMenuItem
+      // 
+      this.gridSize100ToolStripMenuItem.Name = "units10ToolStripMenuItem";
+      this.gridSize100ToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+      this.gridSize100ToolStripMenuItem.Text = "Grid Size: 100 x 100";
+      this.gridSize100ToolStripMenuItem.ToolTipText = "Sets grid size to 100 x 100 cells)";
+      this.gridSize100ToolStripMenuItem.Click += new System.EventHandler(this.gridSizeToolStripMenuItem2_Click);
+      // 
+      // toolStripMenuItem15
+      // 
+      this.toolStripMenuItem15.Name = "toolStripMenuItem15";
+      this.toolStripMenuItem15.Size = new System.Drawing.Size(126, 6);
       // 
       // units2ToolStripMenuItem
       // 
@@ -1992,15 +2084,6 @@ namespace Editor
       this.units100ToolStripMenuItem.ToolTipText = "Pre-defined grid of 100 units";
       this.units100ToolStripMenuItem.Click += new System.EventHandler(this.unitsToolStripMenuItem5_Click);
       // 
-      // enableSnapPointsToolStripMenuItem
-      // 
-      this.enableSnapPointsToolStripMenuItem.Image = global::Editor.Properties.Resources.magnet;
-      this.enableSnapPointsToolStripMenuItem.Name = "enableSnapPointsToolStripMenuItem";
-      this.enableSnapPointsToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-      this.enableSnapPointsToolStripMenuItem.Text = "Enable Snap Points";
-      this.enableSnapPointsToolStripMenuItem.ToolTipText = "If enabled, snap points are used to snap the selected shapes while moving";
-      this.enableSnapPointsToolStripMenuItem.Click += new System.EventHandler(this.enableSnapPointsToolStripMenuItem_Click);
-      // 
       // toolStripMenuItem5
       // 
       this.toolStripMenuItem5.Name = "toolStripMenuItem5";
@@ -2035,20 +2118,13 @@ namespace Editor
       // 
       // shadingToolStripMenuItem
       // 
-      this.shadingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dummyToolStripMenuItem1});
       this.shadingToolStripMenuItem.Image = global::Editor.Properties.Resources.view_solid;
       this.shadingToolStripMenuItem.Name = "shadingToolStripMenuItem";
       this.shadingToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
       this.shadingToolStripMenuItem.Text = "Shading";
       this.shadingToolStripMenuItem.ToolTipText = "Replaces the rendering with a renderloop that applies shading options to the rend" +
-          "ered geometry";
-      // 
-      // dummyToolStripMenuItem1
-      // 
-      this.dummyToolStripMenuItem1.Name = "dummyToolStripMenuItem1";
-      this.dummyToolStripMenuItem1.Size = new System.Drawing.Size(116, 22);
-      this.dummyToolStripMenuItem1.Text = "dummy";
+    "ered geometry";
+
       // 
       // debugFlagsToolStripMenuItem
       // 
@@ -2208,8 +2284,6 @@ namespace Editor
       this.TabText = "Engine View";
       this.Text = "Engine View";
       this.Load += new System.EventHandler(this.EnginePanel_Load);
-      this.ClientSizeChanged += new System.EventHandler(this.EnginePanel_ClientSizeChanged);
-      this.DockStateChanged += new System.EventHandler(this.EnginePanel_DockStateChanged);
       this.toolStrip_EnginePanel.ResumeLayout(false);
       this.toolStrip_EnginePanel.PerformLayout();
       this.contextMenuStrip_SelShapes.ResumeLayout(false);
@@ -2217,8 +2291,9 @@ namespace Editor
       this.ResumeLayout(false);
       this.PerformLayout();
 
+      this.SetMoveSensitivity(EditorManager.Settings.MoveSensitivity);
     }
-		#endregion
+    #endregion
 
     #region Selected Shapes Context Menu
 
@@ -2337,7 +2412,7 @@ namespace Editor
 
       context.AlignMode = CameraMoveContext.AlignMode_e.AlignToObject;
     }
-    
+
     private void AlignToHitPointToolStripMenuItem_Click(object sender, EventArgs e)
     {
       CameraMoveContext context = EditorManager.ActiveView.CurrentContext as CameraMoveContext;
@@ -2450,7 +2525,7 @@ namespace Editor
       Layer layer = oldColl[0].ParentLayer;
       EditorManager.Scene.ActiveLayer = layer;
 
-      gizmo.AddShapes(oldColl,false);
+      gizmo.AddShapes(oldColl, false);
     }
 
     private void lockShapesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2494,7 +2569,7 @@ namespace Editor
           // it must be enabled in the engine.
           if (!this.Checked && !EditorManager.VisibilityBuilder.UseInEngine)
           {
-            if (EditorManager.ShowMessageBox(EditorManager.MainForm, 
+            if (EditorManager.ShowMessageBox(EditorManager.MainForm,
               "\"Use Visibility\" must be enabled in order to display visibility information.\n" +
               "Do you want to enable it now?", "Use Visibility?", MessageBoxButtons.YesNo,
               MessageBoxIcon.Question, DialogResult.Yes) == DialogResult.No)
@@ -2510,12 +2585,12 @@ namespace Editor
           // If we're about to disable displaying visibility information, 
           // ask if it should be disabled in the engine too.
           // (Only if this is the last debug flag using visibility info)
-          else if (this.Checked && (result & NeedsVisibilityInfoFlags) == 0 && 
+          else if (this.Checked && (result & NeedsVisibilityInfoFlags) == 0 &&
             EditorManager.VisibilityBuilder.UseInEngine)
           {
-            if (EditorManager.ShowMessageBox(EditorManager.MainForm, 
+            if (EditorManager.ShowMessageBox(EditorManager.MainForm,
               "You're about to disable displaying visiblity information.\n" +
-              "Do you want to disable \"Use Visibility\" too?", "Use Visibility?",  MessageBoxButtons.YesNo,
+              "Do you want to disable \"Use Visibility\" too?", "Use Visibility?", MessageBoxButtons.YesNo,
               MessageBoxIcon.Question, DialogResult.Yes) == DialogResult.Yes)
             {
               EditorManager.VisibilityBuilder.UseInEngine = false;
@@ -2536,7 +2611,7 @@ namespace Editor
 
       public void EvaluateCheckedStatus()
       {
-        this.Checked = (EditorManager.EngineManager.DebugRenderFlags & _flag)!=0;
+        this.Checked = (EditorManager.EngineManager.DebugRenderFlags & _flag) != 0;
       }
 
       public void IVisibilityBuilder_OnVisibilityUseInEngineChanged(object sender, EventArgs e)
@@ -2605,8 +2680,18 @@ namespace Editor
       ContextMenuStrip menu = (ContextMenuStrip)sender;
 
       // grid
-      enabledToolStripMenuItem.Checked = EditorApp.ActiveView.Gizmo.MoveGrid.Enabled;
+      snapPositionToolStripMenuItem.Checked = EditorApp.ActiveView.Gizmo.MoveGrid.Enabled;
+      snapRotationToolStripMenuItem.Checked = EditorApp.ActiveView.Gizmo.RotateGrid.Enabled;
       showGridToolStripMenuItem.Checked = EditorApp.ActiveView.ShowGrid;
+      relativeGridToolStripMenuItem.Checked = EditorApp.ActiveView.RelativeGrid;
+      gridLinesToolStripMenuItem.Checked = EditorApp.ActiveView.GridLines;
+      volumeGridToolStripMenuItem.Checked = EditorApp.ActiveView.VolumeGrid;
+
+      // check grid size
+      Vector3I size = EditorApp.ActiveView.Gizmo.MoveGrid.Size;
+      gridSize10ToolStripMenuItem.Checked = (size.X == 10) && (size.Y == 10) && (size.Z == 1);
+	  gridSize25ToolStripMenuItem.Checked = (size.X == 25) && (size.Y == 25) && (size.Z == 1);
+	  gridSize100ToolStripMenuItem.Checked = (size.X == 100) && (size.Y == 100) && (size.Z == 1);
 
       // check spacing
       Vector3F v = EditorApp.ActiveView.Gizmo.MoveGrid.Spacing;
@@ -2617,12 +2702,10 @@ namespace Editor
       units50ToolStripMenuItem.Checked = (v.X == 50.0f) && (v.Y == 50.0f);
       units100ToolStripMenuItem.Checked = (v.X == 100.0f) && (v.Y == 100.0f);
 
-      enableSnapPointsToolStripMenuItem.Checked = EditorApp.ActiveView.Gizmo.SnapPointsEnabled;
-
       // render mode
       solidToolStripMenuItem.Checked = visionView.EngineManager.RenderMode == RenderMode_e.Solid;
       wireframeToolStripMenuItem.Checked = visionView.EngineManager.RenderMode == RenderMode_e.Wireframe;
-      
+
       // for some reason this has to be done, otherwise it does not pop up the second time
       EditorManager.BuildCreateMenu(createToolStripMenuItem);
 
@@ -2643,7 +2726,7 @@ namespace Editor
 
       foreach (ToolStripItem item in debugItems)
       {
-        if(item is DebugFlagMenuItem)
+        if (item is DebugFlagMenuItem)
           (item as DebugFlagMenuItem).EvaluateCheckedStatus();
       }
 
@@ -2654,23 +2737,9 @@ namespace Editor
         pasteAtCursorToolStripMenuItem.Enabled = false;
 
       // view effects
-      ToolStripItemCollection shadingItems = shadingToolStripMenuItem.DropDownItems;
-      if (shadingItems.Count <= 2) // first time? ("normal" and separator)
-      {
-        shadingItems.Clear();
-        shadingItems.Add(new ShadingEffectMenuItem("Normal", -1, shadingToolStripMenuItem));
-        shadingItems.Add(new ToolStripSeparator());
+      ToolStripItemCollection shadingItems = shadingModes_ensureToolStripItems(shadingToolStripMenuItem.DropDownItems);
+      shadingModes_evaluateCheckMark(shadingItems);
 
-        // add all rendering effects that are loaded by the engine manager for this purpose:
-        VisionEngineManager em = (VisionEngineManager)EditorManager.EngineManager;
-        StringCollection names = new StringCollection();
-        em.GetReplacementRenderLoopEffects(names);
-        for (int i = 0; i < names.Count; i++)
-          shadingItems.Add(new ShadingEffectMenuItem(names[i], i, shadingToolStripMenuItem));
-      }
-      foreach (ToolStripItem baseitem in shadingItems)
-        if (baseitem is ShadingEffectMenuItem)
-          ((ShadingEffectMenuItem)baseitem).EvaluateCheckedStatus();
 
       Pick_UV0_ToolStripMenuItem.Enabled = bHasScene;
       Pick_UV1_ToolStripMenuItem.Enabled = bHasScene;
@@ -2774,10 +2843,24 @@ namespace Editor
       EditorApp.ActiveView.UpdateView(false);
     }
 
-    private void enabledToolStripMenuItem_Click(object sender, EventArgs e)
+    // Set size of grid (number of cells in each dimension)
+    private void SetGridSize(int xSize, int ySize, int zSize)
     {
-      enabledToolStripMenuItem.Checked = !enabledToolStripMenuItem.Checked;
-      EditorApp.ActiveView.Gizmo.MoveGrid.Enabled = enabledToolStripMenuItem.Checked;
+      EditorApp.ActiveView.Gizmo.MoveGrid.SetSize(xSize, ySize, zSize);
+      EditorApp.ActiveView.UpdateView(false);
+    }
+
+    private void snapPositionToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      snapPositionToolStripMenuItem.Checked = !snapPositionToolStripMenuItem.Checked;
+      EditorApp.ActiveView.Gizmo.MoveGrid.Enabled = snapPositionToolStripMenuItem.Checked;
+      EditorApp.ActiveView.UpdateView(false);
+    }
+
+    private void snapRotationToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      snapRotationToolStripMenuItem.Checked = !snapRotationToolStripMenuItem.Checked;
+      EditorApp.ActiveView.Gizmo.RotateGrid.Enabled = snapRotationToolStripMenuItem.Checked;
       EditorApp.ActiveView.UpdateView(false);
     }
 
@@ -2786,6 +2869,42 @@ namespace Editor
       showGridToolStripMenuItem.Checked = !showGridToolStripMenuItem.Checked;
       EditorApp.ActiveView.ShowGrid = showGridToolStripMenuItem.Checked;
       EditorApp.ActiveView.UpdateView(false);
+    }
+
+    private void relativeGridToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      relativeGridToolStripMenuItem.Checked = !relativeGridToolStripMenuItem.Checked;
+      EditorApp.ActiveView.RelativeGrid = relativeGridToolStripMenuItem.Checked;
+      EditorApp.ActiveView.UpdateView(false);
+    }
+
+    private void gridLinesToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      gridLinesToolStripMenuItem.Checked = !gridLinesToolStripMenuItem.Checked;
+      EditorApp.ActiveView.GridLines = gridLinesToolStripMenuItem.Checked;
+      EditorApp.ActiveView.UpdateView(false);
+    }
+
+    private void volumeGridToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      volumeGridToolStripMenuItem.Checked = !volumeGridToolStripMenuItem.Checked;
+      EditorApp.ActiveView.VolumeGrid = volumeGridToolStripMenuItem.Checked;
+      EditorApp.ActiveView.UpdateView(false);
+    }
+
+    private void gridSizeToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      SetGridSize(10, 10, 1);
+    }
+
+    private void gridSizeToolStripMenuItem1_Click(object sender, EventArgs e)
+    {
+      SetGridSize(25, 25, 1);
+    }
+
+    private void gridSizeToolStripMenuItem2_Click(object sender, EventArgs e)
+    {
+      SetGridSize(100, 100, 1);
     }
 
     private void unitsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2835,11 +2954,6 @@ namespace Editor
       EditorApp.ActiveView.UpdateView(false);
     }
 
-    private void enableSnapPointsToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-      EditorApp.ActiveView.Gizmo.SnapPointsEnabled = !EditorApp.ActiveView.Gizmo.SnapPointsEnabled;
-    }
-
     private void toolStripButton_EnableMoveSnap_Click(object sender, EventArgs e)
     {
       EditorApp.ActiveView.Gizmo.MoveGrid.Enabled = toolStripButton_EnableMoveSnap.Checked;
@@ -2849,7 +2963,7 @@ namespace Editor
     {
       EditorApp.ActiveView.Gizmo.RotateGrid.Enabled = toolStripButton_EnableAngleSnap.Checked;
     }
-    
+
     private void toolStripButton_Move_DropDownOpening(object sender, EventArgs e)
     {
       toolStripButton_EnableMoveSnap.Checked = EditorApp.ActiveView.Gizmo.MoveGrid.Enabled;
@@ -2889,7 +3003,7 @@ namespace Editor
         return;
       visionView.EngineManager.RenderMode = RenderMode_e.Wireframe;
       EditorApp.ActiveView.UpdateView(false);
-      
+
       // If sender is menu item from toolbar leave dropdown open
       if (sender == ToolStrip_Rendering_Wireframe)
         ToolStripSplitButton_Rendering.ShowDropDown();
@@ -2924,7 +3038,7 @@ namespace Editor
       if (!visionView.EngineManager.IsInitialized())
         return;
 
-      EditorManager.EngineManager.ProfilingNext();    
+      EditorManager.EngineManager.ProfilingNext();
     }
 
     /// <summary>
@@ -2937,7 +3051,7 @@ namespace Editor
       if (!visionView.EngineManager.IsInitialized())
         return;
 
-      EditorManager.EngineManager.ProfilingPrevious();          
+      EditorManager.EngineManager.ProfilingPrevious();
     }
 
     #endregion
@@ -2954,11 +3068,11 @@ namespace Editor
     {
       if (!visionView.EngineManager.IsInitialized())
         return false;
-      Vector3F startRay,endRay;
+      Vector3F startRay, endRay;
       Vector3F hitAngles = new Vector3F();
       int x = EditorApp.ActiveView.CurrentContext.MouseX;
       int y = EditorApp.ActiveView.CurrentContext.MouseY;
-      EditorManager.EngineManager.GetRayAtScreenPos(out startRay, out endRay, x,y, EditorManager.Settings.MaxPickingDistance);
+      EditorManager.EngineManager.GetRayAtScreenPos(out startRay, out endRay, x, y, EditorManager.Settings.MaxPickingDistance);
       if (!EditorManager.EngineManager.GetTraceHitWithAngles(startRay, endRay, ref hitPoint, ref hitAngles))
         return false;
 
@@ -2995,22 +3109,68 @@ namespace Editor
 
     #region Nested Class : ShadingEffectMenuItem
 
+    /// <summary>
+    /// Event arguments when the shading mode gets changed
+    /// </summary>
+    class ShadingModeChangedEventArgs : EventArgs
+    {
+      public string NewShadingModeName;
+      public int NewShadingModeIndex;
+
+      public ShadingModeChangedEventArgs(string modeName, int modeIndex)
+        : base()
+      {
+        NewShadingModeName = modeName;
+        NewShadingModeIndex = modeIndex;
+      }
+    }
+
+    /// <summary>
+    /// Tool strip menu item for shading modes
+    /// </summary>
     class ShadingEffectMenuItem : ToolStripMenuItem
     {
+      //Normal shading name (e.g. no debug rendering like Lightmaps, MaterialIndex, etc...)
+      public static string NORMAL_SHADING_STRING = "Normal";
+
+      //Normal shading index, all other render options follow after this index
+      public static int NORMAL_SHADING_INDEX = -1;
+
+      /// <summary>
+      /// Invoked when the shading mode changes via one of the tool strip buttons
+      /// </summary>
+      public delegate void ShadingModeChanged(ShadingModeChangedEventArgs e);
+
+      /// <summary>
+      /// Event fired before the shading mode will be changed
+      /// </summary>
+      public event ShadingModeChanged BeforeChangingShadingMode;
+
+      /// <summary>
+      /// Event fired after the shading mode has been changed
+      /// </summary>
+      public event ShadingModeChanged AfterChangingShadingMode;
+
       public ShadingEffectMenuItem(string name, int iIndex, ToolStripDropDownItem owner)
       {
-        this._owner = owner;
-        this.Text = name;
-        this._iEffectIndex = iIndex;
-        this.Image = GetShadingModeIcon(name);
-        this.ImageScaling = ToolStripItemImageScaling.None;
-        this.Click += new EventHandler(ShadingEffectMenuItem_Click);
+        _owner = owner;
+        Text = name;
+        _iEffectIndex = iIndex;
+        Image = GetShadingModeIcon(name);
+        ImageScaling = ToolStripItemImageScaling.None;
+        Click += new EventHandler(ShadingEffectMenuItem_Click);
       }
 
       private void ShadingEffectMenuItem_Click(object sender, EventArgs e)
       {
-        VisionEngineManager em = (VisionEngineManager)EditorManager.EngineManager;
-        em.SetReplacementRenderLoopEffect(_iEffectIndex);
+        ShadingModeChangedEventArgs newMode = new ShadingModeChangedEventArgs(this.Text, _iEffectIndex);
+
+        //notify listeners
+        if (BeforeChangingShadingMode != null)
+          BeforeChangingShadingMode(newMode);
+
+        VisionEngineManager engineManager = (VisionEngineManager)EditorManager.EngineManager;
+        engineManager.SetReplacementRenderLoopEffect(_iEffectIndex);
 
         // If owner is toolbar button leave dropdown open
         if (_owner.GetType() == typeof(ToolStripSplitButton))
@@ -3018,12 +3178,16 @@ namespace Editor
           EditorManager.ActiveView.UpdateView(true);
           _owner.ShowDropDown();
         }
+
+        //notify listeners
+        if (AfterChangingShadingMode != null)
+          AfterChangingShadingMode(newMode);
       }
 
       public void EvaluateCheckedStatus()
       {
         VisionEngineManager em = (VisionEngineManager)EditorManager.EngineManager;
-        this.Checked = _iEffectIndex==em.GetCurrentReplacementRenderLoopEffect();
+        this.Checked = _iEffectIndex == em.GetCurrentReplacementRenderLoopEffect();
       }
 
       private Image GetShadingModeIcon(string name)
@@ -3051,7 +3215,7 @@ namespace Editor
           default: return Properties.Resources.view_plainwhite;
         }
       }
-      
+
       public int _iEffectIndex = -1;
       private ToolStripDropDownItem _owner;
     }
@@ -3145,9 +3309,7 @@ namespace Editor
       if (context != null)
       {
         toolStripButton_MoveCameraWithKeys.Checked = !toolStripButton_MoveCameraWithKeys.Checked;
-        context.MoveCameraWithKeys = toolStripButton_MoveCameraWithKeys.Checked;
-        //update appropriate settings
-        EditorManager.Settings.MoveCameraWithKeys = context.MoveCameraWithKeys;
+        EditorManager.Settings.MoveCameraWithKeys = toolStripButton_MoveCameraWithKeys.Checked;
       }
     }
 
@@ -3171,7 +3333,7 @@ namespace Editor
 
     private void ToolStripSplitButton_Camera_MoveSelection_Click(object sender, System.EventArgs e)
     {
-      if (EditorApp.Scene == null && !EditorApp.ActiveView.Gizmo.Visible) 
+      if (EditorApp.Scene == null && !EditorApp.ActiveView.Gizmo.Visible)
         return;
       Vector3F newPos = EditorApp.ActiveView.Gizmo.Position;
       Vector3F camDir = EditorApp.ActiveView.CameraDirection;
@@ -3320,19 +3482,113 @@ namespace Editor
       context.FocusPoint = View.CameraPosition + View.CameraDirection * distance;
     }
 
+    private void enginePanel_SceneEvent(object sender, SceneEventArgs e)
+    {
+      if (e.action == SceneEventArgs.Action.AfterRendererNodeChanged)
+      {
+        //the render node changed...
+        if (EditorManager.Scene!=null && EditorManager.Scene.RendererNodeClass == IRendererNodeManager.RENDERERNODECLASS_DEFERRED)
+        {
+          if( EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Top ||
+              EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Front ||
+              EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Right)
+          {
+            //switch back to perspective because we do not support deferred + orthogonal
+            EditorManager.ActiveView.ProjectionMode = VisionViewBase.ProjectionMode_e.Perspective;
+          }
+
+          //switch back to normal shading
+          VisionEngineManager engineManager = (VisionEngineManager)EditorManager.EngineManager;
+          engineManager.SetReplacementRenderLoopEffect(ShadingEffectMenuItem.NORMAL_SHADING_INDEX);
+          EditorManager.ActiveView.UpdateView(true);
+        }
+      }
+    }
+
     private void topToolStripMenuItem_Top_Click(object sender, EventArgs e)
     {
-      EditorManager.ActiveView.ProjectionMode = VisionViewBase.ProjectionMode_e.Top;
+      othogonalProjection_enable(VisionViewBase.ProjectionMode_e.Top);
+    }
+
+    private void othogonalProjection_enable(VisionViewBase.ProjectionMode_e mode)
+    {
+      // we do not need to perform any extra operations if we are already in orthogonal projection mode
+      if ( (EditorManager.Scene != null && EditorManager.Scene.RendererNodeClass != IRendererNodeManager.RENDERERNODECLASS_DEFERRED) ||
+           EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Top ||
+           EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Front ||
+           EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Right)
+      {
+        EditorManager.ActiveView.ProjectionMode = mode;
+        return;
+      }
+
+      VisionEngineManager engineManager = (VisionEngineManager)EditorManager.EngineManager;
+
+      //normal shading mode and deferred render does not work - inform user and ask what to do
+      if (ShadingEffectMenuItem.NORMAL_SHADING_INDEX == engineManager.GetCurrentReplacementRenderLoopEffect())
+      {
+        //deferred render node + switch to orthogonal projection
+        if (!EditorManager.Settings.ShadedLightingForDeferredOrthogonal)
+        {
+          DialogResult result = MessageBox.Show("Orthogonal Projection is not supported for the Deferred Renderer Node. " +
+              "You can however use a different 'Shading Mode' and then use the Orthogonal " +
+              "Projection. Do you want to automatically switch to 'Shaded Lighting' and " +
+              "then enable the Orthogonal Projection when using this menu option?",
+              "Orthogonal Projection", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+          if (result == DialogResult.Yes)
+            EditorManager.Settings.ShadedLightingForDeferredOrthogonal = true;
+        }
+      }
+
+      //switch to the desired mode (always needs to be performed - maybe the user alreadymade a permanent decision in the previous dialog
+      othogonalProjection_switchTo(mode);
+    }
+
+    private bool othogonalProjection_switchTo(VisionViewBase.ProjectionMode_e mode)
+    {
+      VisionEngineManager engineManager = (VisionEngineManager)EditorManager.EngineManager;
+
+      if (EditorManager.Settings.ShadedLightingForDeferredOrthogonal &&
+          ShadingEffectMenuItem.NORMAL_SHADING_INDEX == engineManager.GetCurrentReplacementRenderLoopEffect())
+      {
+        //only change if we are in the 'normal' shading mode
+
+        //get all shading modes
+        StringCollection shadingModes = new StringCollection();
+        engineManager.GetReplacementRenderLoopEffects(shadingModes);
+
+        //find the desired shading mode
+        for (int i = 0; i < shadingModes.Count; i++)
+        {
+          if (shadingModes[i] == "Shaded Lighting")
+          {
+            engineManager.SetReplacementRenderLoopEffect(i);
+            EditorManager.ActiveView.ProjectionMode = mode;
+            EditorManager.ActiveView.UpdateView(true);
+            return true;
+          }
+        }
+
+      }
+      else if (ShadingEffectMenuItem.NORMAL_SHADING_INDEX != engineManager.GetCurrentReplacementRenderLoopEffect())
+      {
+        //currently not using 'normal' shading therefore we can switch to orthogonal
+        EditorManager.ActiveView.ProjectionMode = mode;
+        return true;
+      }
+
+      return false;
     }
 
     private void frontToolStripMenuItem_Front_Click(object sender, EventArgs e)
     {
-      EditorManager.ActiveView.ProjectionMode = VisionViewBase.ProjectionMode_e.Front;
+      othogonalProjection_enable(VisionViewBase.ProjectionMode_e.Front);
     }
 
     private void rightToolStripMenuItem_Right_Click(object sender, EventArgs e)
     {
-      EditorManager.ActiveView.ProjectionMode = VisionViewBase.ProjectionMode_e.Right;
+      othogonalProjection_enable(VisionViewBase.ProjectionMode_e.Right);
     }
 
     private void toolStripButtonZoomIn_Click(object sender, EventArgs e)
@@ -3359,7 +3615,7 @@ namespace Editor
     {
       ToolStripButton_AutomaticZoomFit.Checked = EditorManager.Settings.FocusOnSelection;
     }
-    
+
     private void ToolStripButton_AutomaticZoomFit_Click(object sender, EventArgs e)
     {
       EditorManager.Settings.FocusOnSelection = ToolStripButton_AutomaticZoomFit.Checked;
@@ -3408,7 +3664,7 @@ namespace Editor
     {
       // Update view
       visionView.IsolateSelection(ToolStripButton_IsolateSelection.Checked, false);
-      
+
       // Update tooltip text
       if (ToolStripButton_IsolateSelection.Checked)
       {
@@ -3416,7 +3672,7 @@ namespace Editor
         ToolStripButton_IsolateSelection.Image = Properties.Resources.isolate_exit;
       }
       else
-      {  
+      {
         ToolStripButton_IsolateSelection.ToolTipText = "Isolate Selection";
         ToolStripButton_IsolateSelection.Image = Properties.Resources.isolate_selection;
       }
@@ -3442,7 +3698,7 @@ namespace Editor
       else
         EditorManager.EditorMode = EditorManager.Mode.EM_NONE;
     }
-    
+
     public void animateToolStripMenuItem_Animate_Click(object sender, EventArgs e)
     {
       if (EditorManager.EditorMode == EditorManager.Mode.EM_NONE)
@@ -3486,7 +3742,7 @@ namespace Editor
     private void toolStripButton_SelectViewBox_Click(object sender, EventArgs e)
     {
       V3DLayer layer = EditorApp.Scene.V3DLayer;
-      EditorManager.ActiveView.Gizmo.SetSingleShape(layer.OrthographicViewBox,false);
+      EditorManager.ActiveView.Gizmo.SetSingleShape(layer.OrthographicViewBox, false);
     }
 
     private void toolStripButton_MeasureTool_Click(object sender, EventArgs e)
@@ -3499,8 +3755,8 @@ namespace Editor
         EditorManager.ActiveView.CurrentContext = new MeasureToolCamera();
     }
 
-    
-    
+
+
     private void toolStripSplitButton_ViewIcons_DropDownOpening(object sender, EventArgs e)
     {
       ViewIconSettings settings = VisionViewBase.IconSettings;
@@ -3538,8 +3794,8 @@ namespace Editor
 
     void ViewIconSettings_OnViewIconSettingsChanged(object sender, EventArgs e)
     {
-//      if (sender == VisionViewBase.IconSettings)
-//        toolStripSplitButton_ViewIcons.Pressed = VisionViewBase.IconSettings.ShowIcons;
+      //      if (sender == VisionViewBase.IconSettings)
+      //        toolStripSplitButton_ViewIcons.Pressed = VisionViewBase.IconSettings.ShowIcons;
     }
 
     private void ToolStripMenuItem_IconAction_None_Click(object sender, EventArgs e)
@@ -3572,7 +3828,7 @@ namespace Editor
       if (RemoveShapeAction.iIconIndex >= 0)
         filename = EditorManager.GUI.ActionImages.FileNames[DropToFloorAction.iIconIndex];
       VisionViewBase.IconSettings.SetAction(ViewIconSettings.Action_e.CustomAction, filename, typeof(DropToFloorPivotAction),
-        new object[3] { null, CurrentDropToFloorAxis, true});
+        new object[3] { null, CurrentDropToFloorAxis, true });
     }
 
     private void ToolStripMenuItem_IconAction_Drop_BB_Click(object sender, EventArgs e)
@@ -3657,7 +3913,9 @@ namespace Editor
 
       visionView.UpdateView(true);
     }
-    
+
+    private static int NUM_OF_SHADING_MODES_MIN = 8;
+
     private void ToolStripSplitButton_Rendering_DropDownOpening(object sender, EventArgs e)
     {
       // Render mode
@@ -3667,35 +3925,63 @@ namespace Editor
       }
 
       // Add view effects to engine toolbar
+      ToolStripItemCollection shadingItemsToolbar = shadingModes_ensureToolStripItems(ToolStripSplitButton_Rendering.DropDownItems, NUM_OF_SHADING_MODES_MIN, 3);
+      shadingModes_evaluateCheckMark(shadingItemsToolbar);
+
+    }
+
+    private void shadingModes_evaluateCheckMark(ToolStripItemCollection items)
+    {
+      Debug.Assert(items != null);
+
+      // Check status
+      foreach (ToolStripItem i in items)
       {
-        ToolStripItemCollection shadingItemsToolbar = ToolStripSplitButton_Rendering.DropDownItems;
+        if (i is ShadingEffectMenuItem)
+          ((ShadingEffectMenuItem)i).EvaluateCheckedStatus();
+      }
+    }
 
-        // First time - Third Item is separator
-        if (shadingItemsToolbar.Count < 8)
+    private ToolStripItemCollection shadingModes_ensureToolStripItems(ToolStripItemCollection items, int minCount = 1, int toolStipInsertionIndex = 0)
+    {
+      Debug.Assert(items != null);
+
+      // First time - Third Item is separator
+      if (items.Count < minCount)
+      {
+        // Insert normal shading mode
+        ShadingEffectMenuItem item = new ShadingEffectMenuItem(
+          ShadingEffectMenuItem.NORMAL_SHADING_STRING, ShadingEffectMenuItem.NORMAL_SHADING_INDEX, ToolStripSplitButton_Rendering);
+
+        item.BeforeChangingShadingMode += normalShadingItem_BeforeChangingShadingMode;
+        items.Insert(toolStipInsertionIndex, item);
+
+        // Add all rendering effects that are loaded by the engine manager for this purpose:
+        VisionEngineManager em = (VisionEngineManager)EditorManager.EngineManager;
+        StringCollection names = new StringCollection();
+        em.GetReplacementRenderLoopEffects(names);
+
+        // Insert shading items
+        for (int i = 0; i < names.Count; i++)
         {
-          // Insert normal shading mode
-          ShadingEffectMenuItem item = new ShadingEffectMenuItem("Normal", -1, ToolStripSplitButton_Rendering);
-          shadingItemsToolbar.Insert(3, item);
-
-          // Add all rendering effects that are loaded by the engine manager for this purpose:
-          VisionEngineManager em = (VisionEngineManager)EditorManager.EngineManager;
-          StringCollection names = new StringCollection();
-          em.GetReplacementRenderLoopEffects(names);
-
-          // Insert shading items
-          for (int i = 0; i < names.Count; i++)
-          {
-            ShadingEffectMenuItem shadingMenuItem = new ShadingEffectMenuItem(names[i], i, ToolStripSplitButton_Rendering);
-            shadingItemsToolbar.Insert(i + 4, shadingMenuItem);
-          }
+          ShadingEffectMenuItem shadingMenuItem = new ShadingEffectMenuItem(
+            names[i], ShadingEffectMenuItem.NORMAL_SHADING_INDEX + 1 + i, ToolStripSplitButton_Rendering);
+          items.Insert(i + toolStipInsertionIndex + 1, shadingMenuItem);
         }
+      }
 
-        // Check status
-        foreach (ToolStripItem baseitem in shadingItemsToolbar)
-        {
-          if (baseitem is ShadingEffectMenuItem)
-            ((ShadingEffectMenuItem)baseitem).EvaluateCheckedStatus();
-        }
+      return items;
+    }
+
+    void normalShadingItem_BeforeChangingShadingMode(EnginePanel.ShadingModeChangedEventArgs e)
+    {
+      if ( (EditorManager.Scene != null &&  EditorManager.Scene.RendererNodeClass == IRendererNodeManager.RENDERERNODECLASS_DEFERRED) &&
+           (EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Top ||
+            EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Front ||
+            EditorManager.ActiveView.ProjectionMode == VisionViewBase.ProjectionMode_e.Right))
+      {
+        //switch back to perspective because we do not support deferred + orthogonal
+        EditorManager.ActiveView.ProjectionMode = VisionViewBase.ProjectionMode_e.Perspective;
       }
     }
 
@@ -3711,7 +3997,7 @@ namespace Editor
 
       // Get reset item
       DebugFlagResetMenuItem item = (DebugFlagResetMenuItem)ToolStripSplitButton_DebugFlags.DropDownItems[0];
-      
+
       // Nothing set, then enable all
       if (EditorManager.EngineManager.DebugRenderFlags == 0 && item.DebugFlags == 0)
       {
@@ -3740,7 +4026,7 @@ namespace Editor
         ToolStripItemCollection debugItemsToolbar = ToolStripSplitButton_DebugFlags.DropDownItems;
 
         // First time - generate the items
-        if (debugItemsToolbar.Count <= 1) 
+        if (debugItemsToolbar.Count <= 1)
         {
           // Add new entry to clear all debug flags
           debugItemsToolbar.Clear();
@@ -3769,10 +4055,6 @@ namespace Editor
 
     #region Engine View Toolbar - UI Unit Scale Mode
 
-    // UI Unit Scale dialog overlay panel
-    private UnitScaleDialog unitScaleDlg = null;
-    private DockStyle unitScaleDock = DockStyle.None;
-
     /// <summary>
     /// Custom menu item that stores the UI scale value
     /// </summary>
@@ -3785,42 +4067,65 @@ namespace Editor
     {
       // Fill UI unit scale menu
       BuildUIUnitScaleMenu();
-      
+
       // Fill Engine View size mode menu
       BuildEngineViewSizeMenu();
-      
+
       // File the Engine View safe mode menu
       BuildEngineViewSafeModeMenu();
-
-      // Register new event for locking positions of some custom dialogs
-      EditorManager.MainForm.LocationChanged += new EventHandler(MainForm_LocationChanged);
     }
 
-    private void EnginePanel_DockStateChanged(object sender, EventArgs e)
+    // Set camera movement rate to an arbitrary value, and set UI indicators to match
+    void SetMoveSensitivity(float sensitivty)
     {
-      // If dialog is active reposition it
-      if (this.unitScaleDlg == null)
-        return;
+      // Set the UI unit scale 
+      EditorManager.Settings.MoveSensitivity = sensitivty;
 
-      // Register event on new parent dock window
-      if (Parent != null && Parent.Parent != null)
+      // Mark item as checked
+      UIUnitScaleMenuItem bestScaleMenuItem = null;
+
+      // Find and add checkmark to the movement icon in the tool strip whose rate is 
+      // closest to the current movement scale
+      foreach (ToolStripItem i in ToolStripSplitButton_MoveSensitivity.DropDownItems)
       {
-        Parent.Parent.LocationChanged += new EventHandler(MainForm_LocationChanged);
+        UIUnitScaleMenuItem scaleItem = i as UIUnitScaleMenuItem;
+        if (scaleItem != null)
+        {
+          scaleItem.Checked = false;
 
-        // Assign dialog to new dock window
-        HideUnitScaleDialog();
-        ShowUnitScaleDialog();
+          if (bestScaleMenuItem == null
+           || (bestScaleMenuItem.UIScaleValue < scaleItem.UIScaleValue
+            && scaleItem.UIScaleValue <= sensitivty))
+          {
+            bestScaleMenuItem = scaleItem;
+          }
+        }
       }
-    }
 
-    void MainForm_LocationChanged(object sender, EventArgs e)
-    {
-      UpdateUnitScaleDialogPosition();
-    }
+      if (bestScaleMenuItem != null)
+        bestScaleMenuItem.Checked = true;
 
-    private void EnginePanel_ClientSizeChanged(object sender, EventArgs e)
-    {
-      UpdateUnitScaleDialogPosition();
+      // Select move sensitivity icon that most closely matches the new move sensititity
+      if (sensitivty <= 5.0f)
+      {
+        ToolStripSplitButton_MoveSensitivity.Image = global::Editor.Properties.Resources.toolbar_very_slow_camera;
+      }
+      else if (EditorManager.Settings.MoveSensitivity <= 50.0f)
+      {
+        ToolStripSplitButton_MoveSensitivity.Image = global::Editor.Properties.Resources.toolbar_slow_camera;
+      }
+      else if (EditorManager.Settings.MoveSensitivity <= 100.0f)
+      {
+        ToolStripSplitButton_MoveSensitivity.Image = global::Editor.Properties.Resources.toolbar_normal_camera;
+      }
+      else if (EditorManager.Settings.MoveSensitivity <= 1000.0f)
+      {
+        ToolStripSplitButton_MoveSensitivity.Image = global::Editor.Properties.Resources.toolbar_fast_camera;
+      }
+      else //if (EditorManager.Settings.MoveSensitivity > 1000.0f)
+      {
+        ToolStripSplitButton_MoveSensitivity.Image = global::Editor.Properties.Resources.toolbar_very_fast_camera;
+      }
     }
 
     void MoveSensitivityModeItem_Click(object sender, EventArgs e)
@@ -3829,18 +4134,7 @@ namespace Editor
       if (item == null)
         return;
 
-      // Set the UI unit scale 
-      EditorManager.Settings.MoveSensitivity = item.UIScaleValue;
-
-      // Mark item as checked
-      foreach (ToolStripItem i in ToolStripSplitButton_MoveSensitivity.DropDownItems)
-        if ((i is ToolStripMenuItem) && (i as ToolStripMenuItem).Text.Contains("Move"))
-          (i as ToolStripMenuItem).Checked = false;
-      item.Checked = true;
-
-      // Update UI unit scale slider
-      if (this.unitScaleDlg != null)
-        this.unitScaleDlg.UpdateSlider();
+      SetMoveSensitivity(item.UIScaleValue);
     }
 
     void RotateSensitivityModeItem_Click(object sender, EventArgs e)
@@ -3861,22 +4155,43 @@ namespace Editor
 
     private void ToolStripSplitButton_UIUnitScale_ButtonClick(object sender, EventArgs e)
     {
-      // check dock style
-      if (unitScaleDock == DockStyle.None)
-        unitScaleDock = DockStyle.Right;
-      else if (unitScaleDock == DockStyle.Right)
-        unitScaleDock = DockStyle.Top;
-      else if (unitScaleDock == DockStyle.Top)
-        unitScaleDock = DockStyle.Left;
-      else if (unitScaleDock == DockStyle.Left)
-        unitScaleDock = DockStyle.Bottom;
-      else if (unitScaleDock == DockStyle.Bottom)
-        unitScaleDock = DockStyle.None;
+      ToolStripSplitButton item = sender as ToolStripSplitButton;
+      if (item == null)
+        return;
 
-      if (unitScaleDock == DockStyle.None)
-        HideUnitScaleDialog();
-      else
-        ShowUnitScaleDialog();
+      // Increment/decrement move sensitivity (with looping)
+      float newSensitivity;
+      if (EditorManager.Settings.MoveSensitivity <= 5.0f)
+      {
+        if (ModifierKeys == Keys.Shift)
+          newSensitivity = 5000.0f;
+        else newSensitivity = 50.0f;
+      }
+      else if (EditorManager.Settings.MoveSensitivity <= 50.0f)
+      {
+        if (ModifierKeys == Keys.Shift)
+          newSensitivity = 5.0f;
+        else newSensitivity = 100.0f;
+      }
+      else if (EditorManager.Settings.MoveSensitivity <= 100.0f)
+      {
+        if (ModifierKeys == Keys.Shift)
+          newSensitivity = 50.0f;
+        else newSensitivity = 1000.0f;
+      }
+      else if (EditorManager.Settings.MoveSensitivity <= 1000.0f)
+      {
+        if (ModifierKeys == Keys.Shift)
+          newSensitivity = 100.0f;
+        else newSensitivity = 5000.0f;
+      }
+      else //if (EditorManager.Settings.MoveSensitivity > 1000.0f)
+      {
+        if (ModifierKeys == Keys.Shift)
+          newSensitivity = 1000.0f;
+        else newSensitivity = 5.0f;
+      }
+      SetMoveSensitivity(newSensitivity);
     }
 
     private void BuildUIUnitScaleMenu()
@@ -3910,58 +4225,7 @@ namespace Editor
         item.Click += new EventHandler(RotateSensitivityModeItem_Click);
         ToolStripSplitButton_MoveSensitivity.DropDownItems.Add(item);
       }
-    }
-
-    /// <summary>
-    /// Helper to update the UI Unit Scale panel position
-    /// </summary>
-    private void UpdateUnitScaleDialogPosition()
-    {
-      // If dialog is active reposition it
-      if (this.unitScaleDlg == null)
-        return;
-
-      // Cycle through dock positions
-      Point location = this.PointToScreen(new Point(Width - this.unitScaleDlg.Width - 20, 50));
-      if (unitScaleDock == DockStyle.Right)
-        location = this.PointToScreen(new Point(Width - this.unitScaleDlg.Width - 20, 50));
-      else if (unitScaleDock == DockStyle.Top)
-        location = this.PointToScreen(new Point(20, 50));
-      else if (unitScaleDock == DockStyle.Left)
-        location = this.PointToScreen(new Point(20, Height - this.unitScaleDlg.Height - 20));
-      else if (unitScaleDock == DockStyle.Bottom)
-        location = this.PointToScreen(new Point(Width - this.unitScaleDlg.Width - 20, Height - this.unitScaleDlg.Height - 20));
-
-      this.unitScaleDlg.Left = location.X;
-      this.unitScaleDlg.Top = location.Y;
-    }
-
-    /// <summary>
-    /// Helper to show the UI Unit Scale panel
-    /// </summary>
-    private void ShowUnitScaleDialog()
-    {
-      // Create panel dialog
-      if (unitScaleDlg == null)
-        this.unitScaleDlg = new CSharpFramework.Dialogs.UnitScaleDialog();
-      else
-        this.unitScaleDlg.Hide();
-
-      UpdateUnitScaleDialogPosition();
-      this.unitScaleDlg.Show(Parent.Parent);
-    }
-
-    /// <summary>
-    /// Helper to hide the UI Unit Scale panel
-    /// </summary>
-    private void HideUnitScaleDialog()
-    {
-      if (unitScaleDlg == null)
-        return;
-
-      this.unitScaleDlg.Close();
-      this.unitScaleDlg.Dispose();
-      this.unitScaleDlg = null;
+      SetMoveSensitivity(EditorManager.Settings.MoveSensitivity);
     }
 
     #endregion
@@ -4090,7 +4354,7 @@ namespace Editor
 
     private void ToolStripSplitButton_Camera_DropDownOpening(object sender, EventArgs e)
     {
-     ToolStripSplitButton_CameraStyle_Pan.Checked = false;
+      ToolStripSplitButton_CameraStyle_Pan.Checked = false;
       ToolStripSplitButton_CameraStyle_PanHoriz.Checked = false;
       ToolStripSplitButton_CameraStyle_Orbit.Checked = false;
       ToolStripSplitButton_CameraStyle_Max.Checked = false;
@@ -4353,14 +4617,14 @@ namespace Editor
 
       EditorManager.ActiveView.UpdateView(false);
     }
-    
+
     #endregion
 
   }
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

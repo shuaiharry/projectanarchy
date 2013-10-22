@@ -107,7 +107,7 @@ class hkMemorySystem
 
 
 			/// Print memory usage statistics to the given ostream.
-		virtual void printStatistics(hkOstream& ostr) = 0;
+		virtual void printStatistics(hkOstream& ostr) const = 0;
 
 			/// Collects the memory statistics from underlying allocators.
 		virtual void getMemoryStatistics(MemoryStatistics& stats) = 0;
@@ -147,7 +147,7 @@ class hkMemorySystem
 		virtual hkDebugMemorySystem* getDebugInterface() { return HK_NULL; }
 
 			/// Optional interface to retrieve a snapshot of all allocations.
-		virtual hkResult getMemorySnapshot(hkMemorySnapshot& snapshot) { return HK_FAILURE; }
+		virtual hkResult getMemorySnapshot(hkMemorySnapshot& snapshot) const { return HK_FAILURE; }
 
 			/// Returns HK_FAILURE if not implemented, or the address wasn't allocated by this system.
 			/// callStack should point to a buffer that will receive the call stack. stackSize is the size of the buffer
@@ -184,7 +184,7 @@ class hkMemorySystem
 #endif // HKBASE_hkMemorySystem_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

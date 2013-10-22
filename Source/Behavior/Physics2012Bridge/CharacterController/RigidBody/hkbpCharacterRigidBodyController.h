@@ -30,6 +30,15 @@ class hkbpCharacterRigidBodyController : public hkbpCharacterController
 	//////////////////////////////////////////////////////////////////////////
 
 			// hkbCharacterController interface
+		virtual void applyVelocityModifiers(
+			const hkbContext& context,
+			const hkbGeneratorOutput& currentOutput,
+			hkVector4Parameter desiredVelocity,
+			hkBinaryReal gravityBlendFactor,
+			hkReal timestep,
+			hkVector4& newVelocityOut ) HK_OVERRIDE;
+
+			// hkbCharacterController interface
 		virtual void integrate( hkVector4Parameter newVelocity, hkReal timestep ) HK_OVERRIDE;
 
 			// hkbCharacterController interface
@@ -56,17 +65,17 @@ class hkbpCharacterRigidBodyController : public hkbpCharacterController
 
 	protected:
 
-			// The rigid body is in the world
+			/// The rigid body is in the world
 		bool isInWorld() const;
 
-			// The character rigid body being simulated
+			/// The character rigid body being simulated
 		hkRefPtr<hkpCharacterRigidBody> m_characterRigidBody;
 };
 
 #endif // HKB_CHARACTER_RIGID_BODY_CONTROLLER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

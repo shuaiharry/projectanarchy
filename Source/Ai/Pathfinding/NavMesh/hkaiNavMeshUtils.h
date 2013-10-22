@@ -109,6 +109,15 @@ public:
 		/// Compute the point on the face loop that is closest to the specified position.
 	static void HK_CALL getClosestPointOnFace( const FaceVertices& facePoints, hkVector4Parameter position, hkVector4& closestPointOut );
 
+		/// Computes the nearest boundary edge on the face. Returns the edge index of the closest edge. The distance is stored in the w component of closestPointOut.
+	static hkaiNavMesh::EdgeIndex HK_CALL getClosestBoundaryOnFace(const hkaiNavMesh& mesh, hkVector4Parameter point, const hkaiNavMesh::FaceIndex fIdx, hkVector4Parameter up, hkVector4& closestPointOut);
+		/// Computes the nearest boundary edge on the face. Returns the edge index of the closest edge. The distance is stored in the w component of closestPointOut.
+	static hkaiNavMesh::EdgeIndex HK_CALL getClosestBoundaryOnFace(const hkaiNavMeshInstance& mesh, hkVector4Parameter point, const hkaiNavMesh::FaceIndex fIdx, hkVector4Parameter up, hkVector4& closestPointOut);
+		/// Computes the nearest boundary edge on the face. Returns the edge index of the closest edge. The distance is stored in the w component of closestPointOut.
+		/// Calculations are done in local space.
+	static hkaiNavMesh::EdgeIndex HK_CALL getClosestBoundaryOnFaceLocal(const hkaiNavMeshInstance& mesh, hkVector4Parameter point, const hkaiNavMesh::FaceIndex fIdx, hkVector4Parameter up, hkVector4& closestPointOut);
+
+
 
 		/// Returns true if the ray specified by from,to hits the given face.
 		/// \param hitFractionOut contains the fraction (between 0 and 1 where the intersection occurs)
@@ -142,9 +151,13 @@ public:
 		/// Removes a set of faces from a nav mesh. Other faces connected to faces being removed have their opposite edges invalidated if invalidateOppositeEdges is true.
 	static hkResult HK_CALL removeFaces( hkaiNavMesh& mesh, hkArray<int>::Temp& facesToRemove, bool invalidateOppositeEdges = true );
 
+		/// Controls the behavior of hkaiNavMeshUtils::removeOwnedFaces()
 	enum RemoveOwnedFacesMode
 	{
+			/// Always compact the edge array, even if facesToRemove is empty.
 		ALWAYS_COMPACT,
+		
+			/// Don't do anything if facesToRemove is empty.
 		EXIT_IF_NO_FACES_TO_REMOVE
 	};
 
@@ -167,8 +180,10 @@ public:
 	static void HK_CALL compactClearanceCache( hkaiNavMeshInstance& meshInstance ); 
 
 		/// Compute the connected region for each face. Returns the number of regions, or -1 if any memory allocations failed
-	template<typename MeshType>
-	static int HK_CALL computeRegions( const MeshType& mesh, bool sortRegionsByArea, hkArrayBase<int>& regionsOut, hkArray<hkReal>* areasOut = HK_NULL);
+	static int HK_CALL computeRegions( const hkaiNavMesh& mesh, bool sortRegionsByArea, hkArrayBase<int>& regionsOut, hkArray<hkReal>* areasOut = HK_NULL);
+
+		/// Compute the connected region for each face. Returns the number of regions, or -1 if any memory allocations failed
+	static int HK_CALL computeRegions( const hkaiNavMeshInstance& meshInstance, bool sortRegionsByArea, hkArrayBase<int>& regionsOut, hkArray<hkReal>* areasOut = HK_NULL);
 
 		/// Computes a random point inside the AABB and projects it onto the nav mesh.
 		/// The point is guaranteed to be at least radius away from the nearest edge.
@@ -182,13 +197,13 @@ public:
 
 		/// Get uncrossable edges for the given faces and its neighboring faces.
 		/// If an edge filter is provided, it will be used to check traversability.
-	static void HK_CALL getNearbyBoundaries(const hkaiStreamingCollection::InstanceInfo* sectionInfo, hkaiPackedKey currentFaceKey, const hkAabb& aabb, const hkaiAgentTraversalInfo& traversalInfo, const class hkaiAstarEdgeFilter* filter, bool doFloodFill, hkVector4Parameter position, hkArrayBase<hkVector4>& boundariesOut);
+	static void HK_CALL getNearbyBoundaries(const hkaiStreamingCollection::InstanceInfo* sectionInfo, hkaiPackedKey currentFaceKey, const hkAabb& aabb, const hkaiAgentTraversalInfo& traversalInfo, const class hkaiAstarEdgeFilter* filter, bool doFloodFill, hkVector4Parameter position, hkVector4Parameter up, hkArrayBase<hkVector4>& boundariesOut);
 	
 		/// getNearbyBoundaries using only the neighboring faces. This is fast but may miss some edges inside the AABB.
 	static void HK_CALL _getNearbyBoundariesNeighbors(const hkaiStreamingCollection::InstanceInfo* sectionInfo, hkaiPackedKey currentFaceKey, const hkAabb& aabb, const hkaiAgentTraversalInfo& traversalInfo, const class hkaiAstarEdgeFilter* filter, hkVector4Parameter position, hkArrayBase<hkVector4>& boundariesOut);
 	
 		/// getNearbyBoundaries using a floodfill to get all boundaries in the sensor AABB.
-	static void HK_CALL _getNearbyBoundariesFlood(const hkaiStreamingCollection::InstanceInfo* sectionInfo, hkaiPackedKey currentFaceKey, const hkAabb& aabb, const hkaiAgentTraversalInfo& traversalInfo, const class hkaiAstarEdgeFilter* filter, hkVector4Parameter position, hkArrayBase<hkVector4>& boundariesOut);
+	static void HK_CALL _getNearbyBoundariesFlood(const hkaiStreamingCollection::InstanceInfo* sectionInfo, hkaiPackedKey currentFaceKey, const hkAabb& aabb, const hkaiAgentTraversalInfo& traversalInfo, const class hkaiAstarEdgeFilter* filter, hkVector4Parameter position, hkVector4Parameter up, hkArrayBase<hkVector4>& boundariesOut);
 
 		/// Input for hkaiNavMeshUtils::getDistanceToClosestBoundary().
 	struct ClosestBoundaryInput
@@ -243,7 +258,7 @@ public:
 		/// Attempts to reposition the point within its face so that it avoids constrained edges with in a radius
 	static void HK_CALL resolveEdgePenetrations( const hkaiStreamingCollection*, const hkaiNavMeshQueryMediator* mediator, hkVector4Parameter point, hkSimdRealParameter radius, hkVector4& pointOut);
 	
-
+		/// Mediator types that can be create by hkaiNavMeshUtils::setupQueryMediator().
 	enum MediatorType
 	{
 			/// hkcdStaticAabbTree-based mediator. This is currently the only supported type.
@@ -273,7 +288,7 @@ public:
 #endif // HKAI_NAVIGATION_MESH_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

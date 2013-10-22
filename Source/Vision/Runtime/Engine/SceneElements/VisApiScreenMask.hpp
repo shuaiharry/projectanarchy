@@ -42,14 +42,15 @@ class VisScreenMaskCollection_cl;
 /// 
 /// \example
 ///   \code
-///   // m_pScreenMask is a class variable which is deleted in DeInitFunction
-///   m_pScreenMask = new VisScreenMask_cl(); // create screen mask object
-///   m_pScreenMask->SetTransparency(VIS_TRANSP_ALPHA); // set alpha transparency
-///   m_pScreenMask->LoadFromFile("console3-color"); // load texture
-///   m_pScreenMask->SetPos(0,0); // upper left corner
-///   m_pScreenMask->SetTargetSize(Vision::Video.GetXRes(),Vision::Video.GetYRes()); // size of the screen
-///   m_pScreenMask->SetZVal(1000.0f); // not in the front - nice effect because the screen mask is clipped 
+///     // m_pScreenMask is a class variable which is deleted in DeInitFunction
+///     m_pScreenMask = new VisScreenMask_cl(); // create screen mask object
+///     m_pScreenMask->SetTransparency(VIS_TRANSP_ALPHA); // set alpha transparency
+///     m_pScreenMask->LoadFromFile("console3-color"); // load texture
+///     m_pScreenMask->SetPos(0,0); // upper left corner
+///     m_pScreenMask->SetTargetSize(Vision::Video.GetXRes(),Vision::Video.GetYRes()); // size of the screen
+///     m_pScreenMask->SetZVal(1000.0f); // not in the front - nice effect because the screen mask is clipped 
 ///   \endcode
+///
 class VisScreenMask_cl : public VisElementManager_cl<class VisScreenMask_cl *>, public VRefCounter, public VUserDataObj
 {
 public:
@@ -84,7 +85,7 @@ public:
   /// \brief
   ///   Constructor of the screen mask class. Creates a texture from system memory raw data.
   /// 
-  /// The data will be uploaded to the graphics card. The user is responible for free'ing the
+  /// The data will be uploaded to the graphics card. The user is responsible for freeing the
   /// memory again.
   /// 
   /// \param maskPtr
@@ -153,9 +154,6 @@ public:
   ///   This function unloads the mask (i.e. releases the texture reference) and resets the screen
   ///   mask settings.
   VISION_APIFUNC void Unload();
-  
- 
-
 
   ///
   /// @}
@@ -186,8 +184,8 @@ public:
   /// \param bpp
   ///   bits per pixel of the mask data in memory. Must be 24 or 32 (for RGBA).
   /// 
-  /// \param flags
-  ///   ignored, should be 0
+  /// \param iflags
+  ///   flags used for the screen mask texture
   /// 
   /// \return
   ///   BOOL result: TRUE if successful
@@ -201,8 +199,7 @@ public:
   /// 
   /// \sa VisScreenMask_cl::UpdateMask
   /// \sa VisScreenMask_cl::VisScreenMask_cl(int xpos, int ypos, int xsize, int ysize, int bpp)
-  VISION_APIFUNC BOOL LoadFromFrontBuffer(int xpos, int ypos, int xsize, int ysize, int bpp, int flags=0);
-
+  VISION_APIFUNC BOOL LoadFromFrontBuffer(int xpos, int ypos, int xsize, int ysize, int bpp, int iflags=0);
 
   /// \brief
   ///   Uploads system memory raw data to the current texture object.
@@ -242,7 +239,10 @@ public:
   /// 
   /// \return
   ///   BOOL result: TRUE if successful.
-  VISION_APIFUNC BOOL LoadFromFile(const char *pszFileName);
+  VISION_APIFUNC inline BOOL LoadFromFile(const char *pszFileName)
+  {
+    return LoadFromFile(pszFileName, 0);
+  }
 
   /// \brief
   ///   Loads a texture from the file
@@ -1049,7 +1049,7 @@ private:
   friend class VisShaders_cl;
   
   /// \brief
-  ///   Initialises the empty mask
+  ///   Initializes the empty mask
   BOOL Init();
   
   friend void DrawMasks(unsigned int iVisibleMask);
@@ -1061,14 +1061,13 @@ private:
   friend class VisRenderStates_cl;
   friend void HandleLostDevice();
 
-//  int internalFormat;             // internal format (for framebuffer mask)
   VString m_szKey;                ///< screen mask key
 
   char  *ptr;                   ///< pointer to image data
   int   size[2];                ///< image width/height
   VColorRef m_iColor;           ///< modulation color (usually 255,255,255 = white)
   char  colordepth;             ///< color depth (8 or 24)
-  char  wrapU,wrapV;            ///< wrapping for texture
+  char  wrapU, wrapV;           ///< wrapping for texture
   char  useS3TC;                ///< use texture compression (if available!)
   char  filtering;              ///< flag for bil.filtering
   char  masktype;               ///< constant: file/memory/frontbuffer frontbuffer mask
@@ -1090,8 +1089,8 @@ private:
   VisTextureAnimInstancePtr texanim_id;
   VCompiledTechniquePtr m_spTechnique;
   
-  float fRotation;            ///< rotation angle of screenmask in degrees
-  hkvVec2 m_vRotOfs;   ///< rotation offset
+  float fRotation;              ///< rotation angle of screenmask in degrees
+  hkvVec2 m_vRotOfs;            ///< rotation offset
 };
 
 
@@ -1100,7 +1099,7 @@ VISION_ELEMENTMANAGER_TEMPLATE_DECL(VisScreenMask_cl)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

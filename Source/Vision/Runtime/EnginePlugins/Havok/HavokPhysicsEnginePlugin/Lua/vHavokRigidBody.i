@@ -96,13 +96,13 @@ public:
   	  self->SetMotionType((hkpMotion::MotionType)iType);
   	}
 
-    hkReal PerformSweep(const hkvVec3& vDir, float fDistance)
+    float PerformSweep(const hkvVec3& vDir, float fDistance)
     {
       vHavokSweepResult result;
       int iNumHits = ((vHavokPhysicsModule*)Vision::GetApplication()->GetPhysicsModule())->PerformSweep(&result, 1, self, vDir, fDistance);
       if(iNumHits > 0)
-        return result.m_fDistance; // return distance of first hit 
-      return hkReal(-1);
+        return (float)result.m_fDistance; // return distance of first hit 
+      return -1.0f;
     }
 
     bool DropToFloor(float fDistance=10000.0f)
@@ -388,7 +388,7 @@ public:
   /// \brief
   ///   Apply a force to this rigid body for a given time interval.
   ///
-  /// \param value
+  /// \param force
   ///   Force vector.
   ///
   /// \param deltaT

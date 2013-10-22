@@ -30,13 +30,15 @@ protected:
   int m_iNextPageID;
   int m_iResetMaxID;
   int m_iReloadResourcesID;
+  int m_iNextShading;
+  int m_iToggleTouchAreas;
   int m_iHideID;
 };
 
 #endif // MENU_SYSTEM_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

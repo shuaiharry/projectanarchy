@@ -13,14 +13,11 @@
 #include <Animation/Animation/Animation/Interleaved/hkaInterleavedUncompressedAnimation.h>
 #include <Animation/Internal/Compression/hkaCompression.h>
 #include <Animation/Internal/Compression/SignedQuaternion/hkaSignedQuaternion.h>
+#include <Animation/Animation/Animation/SplineCompressed/hkaSplineCompressedAnimation_templateMacros.h>
 
 extern const class hkClass hkaSplineCompressedAnimationAnimationCompressionParamsClass;
-
 extern const class hkClass hkaSplineCompressedAnimationTrackCompressionParamsClass;
-
-/// hkaSplineCompressedAnimation meta information
 extern const class hkClass hkaSplineCompressedAnimationClass;
-
 
 /// Compresses animation data using a spline approximation.
 /// See Animation Compression section of the Userguide for details.
@@ -177,12 +174,12 @@ class hkaSplineCompressedAnimation : public hkaAnimation
 	public:
 
 		/// Gets the total size in bytes of the spline compressed animation.
-		int getSizeInBytes() const;
+		virtual int getSizeInBytes() const HK_OVERRIDE;
 			
 
 	public:
 		
-		// Constructor for initialisation of vtable fixup
+		// Constructor for initialization of vtable fixup
 		HK_FORCE_INLINE hkaSplineCompressedAnimation( hkFinishLoadedObjectFlag flag ) :
 			hkaAnimation( flag ),
 			m_blockOffsets( flag ),
@@ -199,12 +196,12 @@ class hkaSplineCompressedAnimation : public hkaAnimation
 	private:
 
 		// Sampling
-
-		void sampleRotation( hkReal time, hkUint8 quantizedTime, hkUint8 mask, TrackCompressionParams::RotationQuantization type, const hkUint8*& dataInOut, hkQuaternion& out ) const;
-		void sampleTranslation( hkReal time, hkUint8 quantizedTime, hkUint8 mask, TrackCompressionParams::ScalarQuantization type, const hkUint8*& dataInOut, hkVector4& out ) const;
-		void sampleScale( hkReal time, hkUint8 quantizedTime, hkUint8 mask, TrackCompressionParams::ScalarQuantization type, const hkUint8*& dataInOut, hkVector4& out ) const;
-		void sampleFloat( hkReal time, hkUint8 quantizedTime, hkUint8 mask, TrackCompressionParams::ScalarQuantization type, const hkUint8*& dataInOut, hkReal& out ) const;
-
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P5(void, sampleFloat, hkaSplineCompressedAnimation::TrackCompressionParams::ScalarQuantization Q, hkReal time, hkUint8 quantizedTime, hkUint8 mask, const hkUint8* HK_RESTRICT & dataInOut, hkReal& out ) const;
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P5(void, sampleScale, hkaSplineCompressedAnimation::TrackCompressionParams::ScalarQuantization Q, hkReal time, hkUint8 quantizedTime, hkUint8 mask, const hkUint8* HK_RESTRICT & dataInOut, hkVector4& out ) const;
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P5(void, sampleTranslation, hkaSplineCompressedAnimation::TrackCompressionParams::ScalarQuantization Q, hkReal time, hkUint8 quantizedTime, hkUint8 mask, const hkUint8* HK_RESTRICT & dataInOut, hkVector4& out ) const;
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P5(void, sampleRotation, hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q, hkReal time, hkUint8 quantizedTime, hkUint8 mask, const hkUint8* HK_RESTRICT & dataInOut, hkQuaternion &out ) const;
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P6(void, readNURBSQuaternion, hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q, const hkUint8* HK_RESTRICT & dataInOut, hkUint8 quantizedTime, hkReal frameDuration, hkReal u, hkUint8 mask, hkQuaternion& out ) const;
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P7(void, readNURBSCurve, hkaSplineCompressedAnimation::TrackCompressionParams::ScalarQuantization Q, const hkUint8* HK_RESTRICT & dataInOut, hkUint8 quantizedTime, hkReal frameDuration, hkReal u, hkUint8 mask, hkVector4Parameter I, hkVector4& out ) const;
 
 		// Generic data I/O
 
@@ -215,14 +212,21 @@ class hkaSplineCompressedAnimation : public hkaAnimation
 		static void writeAlign( int, hkArray< hkUint8 > & );
 		static void writeAlignQuaternion( TrackCompressionParams::RotationQuantization type, hkArray< hkUint8 > & );
 
-		inline static hkUint8 read8( const hkUint8*& dataInOut );
-		inline static hkUint16 read16( const hkUint8*& dataInOut );
-		inline static hkReal readReal( const hkUint8*& dataInOut );
-		inline static void readAlign( int, const hkUint8*& dataInOut );
-		inline static void readAlignQuaternion( TrackCompressionParams::RotationQuantization type, const hkUint8*& dataInOut );
+		HK_FORCE_INLINE static hkUint8 read8( const hkUint8* HK_RESTRICT & dataInOut );
+		HK_FORCE_INLINE static hkUint16 read16( const hkUint8* HK_RESTRICT & dataInOut );
+		HK_FORCE_INLINE static hkReal readReal( const hkUint8* HK_RESTRICT & dataInOut );
 
-		inline static int bytesPerComponent( TrackCompressionParams::ScalarQuantization type );
-		inline static int bytesPerQuaternion( TrackCompressionParams::RotationQuantization type );
+		template <int align>
+		HK_FORCE_INLINE static void readAlign( const hkUint8* HK_RESTRICT & dataInOut );
+		HK_FORCE_INLINE static void readAlignQuaternion( TrackCompressionParams::RotationQuantization type, const hkUint8* HK_RESTRICT & dataInOut );
+		template <hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q>
+		HK_FORCE_INLINE void readAlignQuaternion( const hkUint8* HK_RESTRICT & dataInOut ) const;
+
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P0( HK_FORCE_INLINE int, bytesPerComponent, hkaSplineCompressedAnimation::TrackCompressionParams::ScalarQuantization Q ) const;
+
+		HK_FORCE_INLINE static int bytesPerQuaternion( TrackCompressionParams::RotationQuantization type );
+		template <hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q>
+		HK_FORCE_INLINE int bytesPerQuaternion() const;
 
 		// NURBS Specific I/O
 
@@ -230,23 +234,20 @@ class hkaSplineCompressedAnimation : public hkaAnimation
 		void writeRotation( hkUint8 mask, TrackCompressionParams::RotationQuantization type, const hkVector4& mean, int n, const hkArray< hkVector4 >& P );
 		void writePoints( hkUint8 mask, TrackCompressionParams::ScalarQuantization type, const hkVector4& mean, const hkVector4& minp, const hkVector4& maxp, int n, hkArray< hkVector4 >& P );
 
-		static void readNURBSCurve( const hkUint8*& dataInOut, hkUint8 quantizedTime, hkReal frameDuration, hkReal u, hkUint8 mask, TrackCompressionParams::ScalarQuantization scalarQuantizationType, hkVector4& I, hkVector4& out );
-		static void readNURBSQuaternion( const hkUint8*& dataInOut, hkUint8 quantizedTime, hkReal frameDuration, hkReal u, hkUint8 mask, TrackCompressionParams::RotationQuantization type, hkQuaternion& out );
-		static int readKnots( const hkUint8*& dataInOut, int* HK_RESTRICT n, int* HK_RESTRICT p, hkUint8 quantizedTime, hkReal frameDuration, hkReal U[ MAX_DEGREE * 2 ] );
-		static void readPackedQuaternions( const hkUint8*& dataInOut, TrackCompressionParams::RotationQuantization type, int n, int p, int span, hkVector4 P[ MAX_ORDER ] );
-
+		static int readKnots( const hkUint8* HK_RESTRICT & dataInOut, int* HK_RESTRICT n, int* HK_RESTRICT p, hkUint8 quantizedTime, hkReal frameDuration, hkReal* HK_RESTRICT U );
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P5( void, readPackedQuaternions, hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q, const hkUint8* HK_RESTRICT & dataInOut, int n, int p, int span, hkQuaternion* HK_RESTRICT P ) const;
 		
 		// NURBS Evaluation
 
-		inline static int findSpan( int n, int p, hkUint8 u, const hkUint8* U );
-		inline static void evaluate( hkReal time, int p, hkReal U[ MAX_DEGREE * 2 ], hkVector4 P[ MAX_ORDER ], hkVector4 & );
+		HK_FORCE_INLINE static int findSpan( int n, int p, hkUint8 u, const hkUint8* U );
+		HK_FORCE_INLINE static void evaluate( hkReal time, int p, const hkReal* HK_RESTRICT U, const hkVector4* HK_RESTRICT P, hkVector4 & );
 
-		static void evaluateSimple( hkReal time, int p, hkReal U[ MAX_DEGREE * 2 ], hkVector4 P[ MAX_ORDER ], hkVector4 & );
-		static void evaluateSimple1( hkReal time, int p, hkReal U[ MAX_DEGREE * 2 ], hkVector4 P[ MAX_ORDER ], hkVector4 & );
-		static void evaluateSimple2( hkReal time, int p, hkReal U[ MAX_DEGREE * 2 ], hkVector4 P[ MAX_ORDER ], hkVector4 & );
-		static void evaluateSimple3( hkReal time, int p, hkReal U[ MAX_DEGREE * 2 ], hkVector4 P[ MAX_ORDER ], hkVector4 & );
+		static void evaluateSimple( hkReal time, int p, const hkReal* HK_RESTRICT U, const hkVector4* HK_RESTRICT P, hkVector4 & );
+		static void evaluateSimple1( hkReal time, int p, const hkReal* HK_RESTRICT U, const hkVector4* HK_RESTRICT P, hkVector4 & );
+		static void evaluateSimple2( hkReal time, int p, const hkReal* HK_RESTRICT U, const hkVector4* HK_RESTRICT P, hkVector4 & );
+		static void evaluateSimple3( hkReal time, int p, const hkReal* HK_RESTRICT U, const hkVector4* HK_RESTRICT P, hkVector4 & );
 
-		inline void getBlockAndTime( hkUint32 frame, hkReal delta, int& blockOut, hkReal& blockTimeOut, hkUint8& quantizedTimeOut ) const;
+		HK_FORCE_INLINE void getBlockAndTime( hkUint32 frame, hkReal delta, int& blockOut, hkReal& blockTimeOut, hkUint8& quantizedTimeOut ) const;
 
 
 		// Initialization
@@ -260,26 +261,29 @@ class hkaSplineCompressedAnimation : public hkaAnimation
 		// Packing, quantization and endian handling
 
 		static hkUint8 packQuantizationTypes( TrackCompressionParams::ScalarQuantization position, TrackCompressionParams::RotationQuantization rotation, TrackCompressionParams::ScalarQuantization scale );
-		inline static void unpackQuantizationTypes( hkUint8 packedQuatizationTypes, TrackCompressionParams::ScalarQuantization& translationQuantization, TrackCompressionParams::RotationQuantization& rotationQuantization, TrackCompressionParams::ScalarQuantization& scaleQuantization );
+		HK_FORCE_INLINE static void unpackQuantizationTypes( hkUint8 packedQuatizationTypes, TrackCompressionParams::ScalarQuantization& translationQuantization, TrackCompressionParams::RotationQuantization& rotationQuantization, TrackCompressionParams::ScalarQuantization& scaleQuantization );
 		
 		static hkUint8 packMaskAndQuantizationType( hkUint8 mask, TrackCompressionParams::ScalarQuantization floatQuatization );
-		inline static void unpackMaskAndQuantizationType( hkUint8 packedMaskAndQuatizationType, hkUint8& mask, TrackCompressionParams::ScalarQuantization& floatQuantization );
+		HK_FORCE_INLINE static void unpackMaskAndQuantizationType( hkUint8 packedMaskAndQuatizationType, hkUint8& mask, TrackCompressionParams::ScalarQuantization& floatQuantization );
 		
 		static hkUint8 pack8( hkReal minp, hkReal maxp, hkReal val );
-		inline static hkReal unpack8( hkReal minp, hkReal maxp, hkUint8 val );
+		HK_FORCE_INLINE static hkSimdReal unpack8( hkSimdRealParameter minp, hkSimdRealParameter maxp, hkUint8 val );
+		HK_FORCE_INLINE static void unpack8vec( hkVector4Parameter minp, hkVector4Parameter maxp, const hkUint8* HK_RESTRICT vals, hkVector4& out );
 
 		static hkUint16 pack16( hkReal minp, hkReal maxp, hkReal val );
-		inline static hkReal unpack16( hkReal minp, hkReal maxp, hkUint16 val );
+		HK_FORCE_INLINE static hkSimdReal unpack16( hkSimdRealParameter minp, hkSimdRealParameter maxp, hkUint16 val );
+		HK_FORCE_INLINE static void unpack16vec( hkVector4Parameter minp, hkVector4Parameter maxp, const hkUint16* HK_RESTRICT vals, hkVector4& out );
 
 		static void packQuaternion( TrackCompressionParams::RotationQuantization type, const hkQuaternion* in, hkUint8* out );
-		inline static void unpackQuaternion( TrackCompressionParams::RotationQuantization type, const hkUint8* in, hkQuaternion* out );
+		HKA_DECLARE_TEMPLATE_FUNC_T1_P2( HK_FORCE_INLINE void, unpackQuaternion, hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q, const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const;
+
 		static void handleEndianQuaternion( TrackCompressionParams::RotationQuantization type, hkUint8* dataInOut );
 
 		static hkUint8 isStatic( const hkVector4& mean, const hkVector4& minp, const hkVector4& maxp, hkReal tol, const hkVector4& I );
 		static hkVector4 getMean( const hkArray< hkVector4 >& P );
 		static hkVector4 getMin( const hkArray< hkVector4 >& P );
 		static hkVector4 getMax( const hkArray< hkVector4 >& P );
-		inline static void recompose( hkUint8 mask, const hkVector4& S, const hkVector4& I, hkVector4& out );
+		HK_FORCE_INLINE static void recompose( hkVector4ComparisonParameter statmask, hkVector4ComparisonParameter dynmask, hkVector4Parameter S, hkVector4Parameter I, hkVector4& out );
 
 		void handleEndian();
 		static void reverseEndian( int bytes, hkUint8*& dataInOut );
@@ -321,7 +325,7 @@ class hkaSplineCompressedAnimation : public hkaAnimation
 #endif // HKANIMATION_ANIMATION_SPLINE_HKSPLINEANIMATION_XML_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

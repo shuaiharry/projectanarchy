@@ -669,7 +669,7 @@ void VTerrain::OnHandleCallback(IVisCallbackDataObject_cl *pData)
         INSERT_PERF_MARKER_SCOPE("Terrain Vegetation IR Rendering PrePass (VTerrain::OnHandleCallback)");
         RenderTerrain(pData, IVTerrainDecorationModel::RENDER_MODE_IR_PREPASS);
       }
-      else if (iEntryConst == VRH_PRE_TRANSPARENT_PASS_GEOMETRY)
+      else if (iEntryConst ==  VRH_PRE_PRIMARY_OPAQUE_PASS_ENTITIES)
       {
         INSERT_PERF_MARKER_SCOPE("Terrain Vegetation IR Rendering MainPass (VTerrain::OnHandleCallback)");
         RenderTerrain(pData, IVTerrainDecorationModel::RENDER_MODE_IR_MAINPASS);
@@ -677,11 +677,11 @@ void VTerrain::OnHandleCallback(IVisCallbackDataObject_cl *pData)
     }
     else
     {
-    if (iEntryConst==m_iDecorationRenderHookConstant)
-    {
-      INSERT_PERF_MARKER_SCOPE("Terrain Vegetation Rendering (VTerrain::OnHandleCallback)");
-      RenderTerrain(pData);
-    }
+      if (iEntryConst==m_iDecorationRenderHookConstant)
+      {
+        INSERT_PERF_MARKER_SCOPE("Terrain Vegetation Rendering (VTerrain::OnHandleCallback)");
+        RenderTerrain(pData);
+      }
     }
 
     return;
@@ -879,7 +879,7 @@ void VTerrain::RemoveDecorationInstances(const VLargeBoundingBox &bbox)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

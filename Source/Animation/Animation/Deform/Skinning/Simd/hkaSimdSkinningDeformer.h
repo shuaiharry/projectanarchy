@@ -12,107 +12,29 @@
 /// The class for a SIMD based implementation of weighted vertex deformation.
 /// Applies to both indexed and non indexed skinning.
 /// This deformer requires that the input buffers' deformable
-/// members (pos, normals) be aligned as a hkVector4 (16byte aligned as it is 128bit)
+/// members (pos, normals) be aligned for SIMD processing
 /// and for faster operation make sure that the outputs are aligned as well.
-///
+/// Note this deformer only processes 3-component vectors.
 /// N.B. It is important to note that these deformers are here to be used by Havok's demos but are not production quality.
 /// It is assumed that deforming will be done most commonly by your graphics engine, usually in hardware on GPUs or VUs.
 /// That hardware deformation is usually performed at the same time as per vertex lighting operations, so Havok cannot
 /// provide optimized deformers for all such game specific usage.
-class hkxVertexBuffer;
-
-struct hkaSimdBinding
-{
-	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_ANIM_RUNTIME, hkaSimdBinding );
-
-	// Input buffer
-	const hkVector4* m_iPosBase;
-	const hkVector4* m_iNormBase;
-	const hkVector4* m_iBinormBase;
-	const hkVector4* m_iTangentBase;
-	const hkUint8*   m_iWeightBase;
-	const hkUint8*   m_iIndexBase;
-	hkUint8 m_iPosVectorStride; // STRIDE IN VECTOR4s
-	hkUint8 m_iNormVectorStride; // STRIDE IN VECTOR4s
-	hkUint8 m_iBinormVectorStride; // STRIDE IN VECTOR4s
-	hkUint8 m_iTangentVectorStride; // STRIDE IN VECTOR4s
-	hkUint8 m_iIndexStride; // STRIDE IN hkUint8's
-	hkUint8 m_iWeightByteStride; // STRIDE IN BYTES
-	hkUint8 m_bonesPerVertex;
-
-	// Output buffer
-	hkReal* m_oPosBase;
-	hkReal* m_oNormBase;
-	hkReal* m_oBinormBase;
-	hkReal* m_oTangentBase;
-	hkUint8 m_oPosFloatStride;
-	hkUint8 m_oNormFloatStride;
-	hkUint8 m_oBinormFloatStride;
-	hkUint8 m_oTangentFloatStride;
-
-	hkUint32 m_numVerts;
-	hkBool m_outputAligned;
-
-	void setBoneIndicesDataPtr(const hkxVertexBuffer& vb);
-	hkUint16 getVertexBoneIndex(hkUint32 vertexIdx, hkUint32 influenceIdx);
-};
-
-struct hkaSimdLargeBinding
-{
-	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_ANIM_RUNTIME, hkaSimdLargeBinding );
-
-	// Input buffer
-	const hkVector4* m_iPosBase;
-	const hkVector4* m_iNormBase;
-	const hkVector4* m_iBinormBase;
-	const hkVector4* m_iTangentBase;
-	const hkUint8*   m_iWeightBase;
-	const hkUint16*   m_iIndexBase;
-	hkUint8 m_iPosVectorStride; // STRIDE IN VECTOR4s
-	hkUint8 m_iNormVectorStride; // STRIDE IN VECTOR4s
-	hkUint8 m_iBinormVectorStride; // STRIDE IN VECTOR4s
-	hkUint8 m_iTangentVectorStride; // STRIDE IN VECTOR4s
-	hkUint8 m_iIndexStride; // STRIDE IN hkUint16's
-	hkUint8 m_iWeightByteStride; // STRIDE IN BYTES
-	hkUint8 m_bonesPerVertex;
-
-	// Output buffer
-	hkReal* m_oPosBase;
-	hkReal* m_oNormBase;
-	hkReal* m_oBinormBase;
-	hkReal* m_oTangentBase;
-	hkUint8 m_oPosFloatStride;
-	hkUint8 m_oNormFloatStride;
-	hkUint8 m_oBinormFloatStride;
-	hkUint8 m_oTangentFloatStride;
-
-	hkUint32 m_numVerts;
-	hkBool m_outputAligned;
-
-	void setBoneIndicesDataPtr(const hkxVertexBuffer& vb);
-	hkUint16 getVertexBoneIndex(hkUint32 vertexIdx, hkUint32 influenceIdx);
-};
-
 class hkaSimdSkinningDeformer
 {
 	public:
-			/// Will call either one of the aligned static funcs, depending on m_outputAligned in binding.
+			/// Will call either one of the aligned static funcs, depending on m_outputBufferIsAligned in binding.
 		template <class SimdSkinBinding>
-		static void HK_CALL deform( const hkTransform* m_worldCompositeMatrices, SimdSkinBinding& binding  );
+		static void HK_CALL deform( const hkTransform* worldCompositeMatrices, int numWorldCompositeMatrices, SimdSkinBinding& binding  );
 
-			/// Input and Output are both 16 byte aligned
-		template <class SimdSkinBinding>
-		static void HK_CALL deformAligned( const hkTransform* m_worldCompositeMatrices, SimdSkinBinding& binding  );
-
-			/// Only Input is 16 byte aligned, requires internal loop copy to unaligned float output buffers so slower
-		template <class SimdSkinBinding>
-		static void HK_CALL deformAlignedInput( const hkTransform* m_worldCompositeMatrices, SimdSkinBinding& binding );
+			/// Input must be SIMD aligned, if Output is aligned set OUTPUTMODE to HK_IO_SIMD_ALIGNED
+		template <class SimdSkinBinding, hkMathIoMode OUTPUTMODE>
+		static void HK_CALL deformAlignedInput( const hkTransform* worldCompositeMatrices, int numWorldCompositeMatrices, SimdSkinBinding& binding );
 };
 
 #endif // HKA_SIMD_SKINNING_DEFORMER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

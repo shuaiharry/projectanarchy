@@ -115,23 +115,34 @@ class hkbHandIkModifier : public hkbModifier
 				hkReal m_minElbowAngleDegrees;	//+default(0.0f)+hk.RangeReal(absmin=0,absmax=180)+hk.Description("The minimum elbow angle allowed.")
 
 					/// Index of the shoulder bone.  If this is not -1, it overrides the character boneInfo.
-				hkInt16 m_shoulderIndex; //+default(-1)+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")+hk.Description("The shoulder bone.")
+				hkInt16 m_shoulderIndex;	//+default(-1)
+											//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+											//+hk.Description("The shoulder bone.")
+											//+hk.Ui(group="Hand Ik Bones")
 
-					/// Index of the sibling of the shoulder bone. The same rotation that is applied to the shoulder bone is also applied to this bone. This is useful if your character has additional skinning bones.
+					/// Index of the sibling of the shoulder bone. If the bone is specified then the hand IK modifier applies the same rotation to the sibling bone as it does to the shoulder bone.
 				hkInt16 m_shoulderSiblingIndex; //+default(-1)
 												//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
-												//+hk.Description("The same rotation that is applied to the shoulder bone is also applied to this bone. This is useful if your character has additional skinning bones.")
+												//+hk.Description("The sibling of the shoulder bone. If the bone is specified then the hand IK modifier applies the same rotation to the sibling bone as it does to the shoulder bone.")
+												//+hk.Ui(group="Hand Ik Sibling Bones")
 
 					/// Index of the elbow bone.  If this is not -1, it overrides the character boneInfo.
-				hkInt16 m_elbowIndex; //+default(-1)+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")+hk.Description("The elbow bone.")
+				hkInt16 m_elbowIndex;	//+default(-1)
+										//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+										//+hk.Description("The elbow bone.")
+										//+hk.Ui(group="Hand Ik Bones")
 
-					/// Index of the sibling of the elbow bone. The same rotation that is applied to the elbow bone is also applied to this bone. This is useful if your character has additional skinning bones.
+					/// Index of the sibling of the elbow bone. If the bone is specified then the hand IK modifier applies the same rotation to the sibling bone as it does to the elbow bone.
 				hkInt16 m_elbowSiblingIndex;	//+default(-1)
 												//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
-												//+hk.Description("The same rotation that is applied to the elbow bone is also applied to this bone. This is useful if your character has additional skinning bones.")
+												//+hk.Description("The sibling of the elbow bone. If the bone is specified then the hand IK modifier applies the same rotation to the sibling bone as it does to the elbow bone.")
+												//+hk.Ui(group="Hand Ik Sibling Bones")
 
 					/// Index of the wrist bone.  If this is not -1, it overrides the character boneInfo.
-				hkInt16 m_wristIndex; //+default(-1)+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")+hk.Description("The wrist bone.")
+				hkInt16 m_wristIndex;	//+default(-1)
+										//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+										//+hk.Description("The wrist bone.")
+										//+hk.Ui(group="Hand Ik Bones")
 
 					/// Set to true if the position of the end effector is to be solved for
 				hkBool m_enforceEndPosition;	//+default(true)
@@ -209,7 +220,7 @@ class hkbHandIkModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

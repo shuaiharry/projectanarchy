@@ -89,7 +89,7 @@ class hkpSimpleContactConstraintDataInfoInternal
 
 		// the radius of the contactArea, this gets updated every time a contact point is added or removed
 
-		hkHalf m_rollingFrictionMultiplier;
+		hkHalf m_rollingFrictionMultiplier; // don't change the order of these, solver export writes them as vector
 		hkHalf m_rollingImpulseSqr;
 		hkHalf m_rhsRolling[2];
 
@@ -121,7 +121,7 @@ extern "C"
 #endif // HKP_SIMPLE_CONTACT_CONSTRAINT_INFO_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -64,13 +64,14 @@ hkpProcessCollisionData::hkpProcessCollisionData( hkCollisionConstraintOwner* ow
 
 void hkpProcessCollisionData::ToiInfo::flip()
 {
-	hkVector4& norm = m_contactPoint.getSeparatingNormal();
+	hkVector4 norm = m_contactPoint.getSeparatingNormal();
 	norm.setNeg<3>( norm );
+	m_contactPoint.setSeparatingNormal(norm);
 	m_gskCache.flip();
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

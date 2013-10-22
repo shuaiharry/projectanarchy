@@ -12,6 +12,7 @@
 #include <Ai/Pathfinding/Utilities/hkaiPathfindingUtil.h>
 
 #if !defined (HK_PLATFORM_SPU) 
+struct hkaiAgentTraversalInfo;
 
 	/// Utilities to validate inputs of various nav mesh search queries
 class hkaiNavMeshSearchValidationUtils
@@ -35,6 +36,7 @@ public:
 		int numGoalFaceKeys,
 		const hkaiPackedKey* goalFaceKeys,
 		const hkaiNavMeshPathSearchParameters& searchParameters,
+		const hkaiAgentTraversalInfo& agentInfo,
 		hkUint32& validGoalsMask );
 
 };
@@ -44,7 +46,7 @@ public:
 #endif	// HKAI_NAVMESH_SEARCH_VALIDATION_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

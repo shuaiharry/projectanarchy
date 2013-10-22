@@ -49,7 +49,7 @@
     #define SET_RESOURCE_DEBUG_NAME(pRes, szName) if (pRes){const char* s=szName; (pRes)->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen(s), s ); }
   #endif
 
-  #define Direct3D     void
+  #define hkvDirect3D     void
   
 #ifndef _VISION_WINRT
   #define D3DDevice ID3D11Device
@@ -255,7 +255,7 @@
 #endif // HKVPLATFORMDEFINESDX11_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -30,8 +30,8 @@ float cameraInitY = 0;                    //
 float cameraInitZ = 170;                  // Set our camera above the ground so that we can see 
                                           // the ground.
 
-//use the following line if you link statically. e.g. for mobile. 
-//You can remove this line when developing for windows only
+// Use the following line to initialize a plugin that is statically linked. 
+// Note that only Windows platform links plugins dynamically (on Windows you can comment out this line).
 VIMPORT IVisPlugin_cl* GetEnginePlugin_GamePlugin();
          
 VisSampleAppPtr spApp;
@@ -52,7 +52,7 @@ VISION_INIT
   spApp->m_appConfig.m_videoConfig.m_szWindowTitle = name;
 #endif
 
-  // Set the exe directory the current directory
+  // Set the executable directory the current directory
   VisionAppHelpers::MakeEXEDirCurrent();
 
   // Set the paths to our stand alone version to override the VisSAampleApp paths.
@@ -68,6 +68,11 @@ VISION_INIT
   Vision::File.AddDataDirectory( szRoot + "\\Assets" );
   // "/Data/Vision/Base" is always added by the sample app
   
+#elif defined(_VISION_TIZEN)
+  VString szRoot = VisSampleApp::GetDataRootDirectory();
+  Vision::File.AddDataDirectory( szRoot + "\\Assets" );
+  // "/Data/Vision/Base" is always added by the sample app
+
 #elif defined(_VISION_IOS)
   // setup directories, does nothing on platforms other than iOS,
   // pass true if you want load from the documents directory
@@ -88,12 +93,13 @@ VISION_INIT
 
   spApp->LoadVisionEnginePlugin();
 
-  // use the following line if you link statically. e.g. for mobile. 
-  // You can remove this line when developing for windows only
+  // Use the following line to load a plugin. Remember that, except on Windows platform, in addition
+  // you still need to statically link your plugin library (e.g. on mobile platforms) through project
+  // Properties, Linker, Additional Dependencies.
   VISION_PLUGIN_ENSURE_LOADED(GamePlugin);
 
   // Init the application and point it to the start up scene.
-  if (!spApp->InitSample( "", StartUpScene, VSAMPLE_INIT_DEFAULTS|VSAMPLE_CUSTOMDATADIRECTORIES,windowSizeX,windowSizeY))
+  if (!spApp->InitSample( "", StartUpScene, VSampleFlags::VSAMPLE_INIT_DEFAULTS|VSampleFlags::VSAMPLE_CUSTOMDATADIRECTORIES,windowSizeX,windowSizeY))
     return false;
 
   return true;
@@ -140,7 +146,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

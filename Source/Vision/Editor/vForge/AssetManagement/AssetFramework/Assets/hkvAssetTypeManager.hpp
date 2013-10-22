@@ -39,12 +39,10 @@ class hkvAssetTypeManager
 {
 public:
   ASSETFRAMEWORK_IMPEXP static hkvAssetTypeManager* getGlobalInstance();
-  ASSETFRAMEWORK_IMPEXP static void deInitTypeManager();
 
 public:
   ASSETFRAMEWORK_IMPEXP hkvAssetTypeManager();
   ASSETFRAMEWORK_IMPEXP ~hkvAssetTypeManager();
-  ASSETFRAMEWORK_IMPEXP void clearTypeInfos();
 
   // Asset Type Handling
   ASSETFRAMEWORK_IMPEXP hkUint32 getTypeCount() const;
@@ -58,9 +56,6 @@ public:
   ASSETFRAMEWORK_IMPEXP const hkArray<hkUint32>* getExtensionTypeList(const char* extension) const;
   ASSETFRAMEWORK_IMPEXP hkvCreateAssetFunc findCreateAssetFunction(const char* fileName) const;
 
-  ASSETFRAMEWORK_IMPEXP void loadAssetPlugins(const char* dir = NULL);
-  ASSETFRAMEWORK_IMPEXP void unloadAssetPlugins(const char* dir);
-  
 public: // Data
   /// \brief
   ///   Changes to the TypeData will result in all libraries being invalidated. The asset manager
@@ -70,10 +65,6 @@ public: // Data
   hkvCallback OnTypeDataChanged;
 
 private:
-
-  typedef void (*hkvInitAssetPluginFunction)();
-  typedef void (*hkvDeInitAssetPluginFunction)();
-  
   void clearExtensionLookup();
   void addToExtensionLookup (const hkvAssetTypeInfo& ti, hkUint32 assetTypeIndex);
   void callOnBeforeTypeDataChanged();
@@ -89,25 +80,12 @@ private: // Data
   hkQueue<hkUint32> m_freelist;
 
   hkStorageStringMap<TypeList*> m_extensionLookup;
-
-  struct TypePlugin
-  {
-    hkStringPtr m_directory;
-    hkBool m_unloadWithAssetLibrary;
-    HMODULE m_moduleHandle;
-    hkvDeInitAssetPluginFunction m_deinitFunction;
-  };
-
-  hkArray<TypePlugin> m_plugins;
-
-private: // static members
-  static hkvAssetTypeManager* s_globalInstance;
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

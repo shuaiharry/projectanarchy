@@ -23,14 +23,14 @@ class hkaParametricAnimationExtrapolationUtil
 		static int HK_CALL calculateExtrapolationParams( const hkVector4* inArrVtxPosInMotionSpace, hkVector4Parameter inExtrapolatedPosition, hkVector4* outArrSamplePoints, hkReal& outExtrapolationDistance );
 
 			/// The method extrapolates a transform located outside the specified triangle. 
-		static void HK_CALL extrapolateTransform( const hkQsTransform& inStartVtxTransform, const hkQsTransform& inEndVtxTransform, hkReal dist, hkQsTransform& outTransform );
+		static void HK_CALL extrapolateTransform( const hkQsTransform& inStartVtxTransform, const hkQsTransform& inEndVtxTransform, hkSimdRealParameter dist, hkQsTransform& outTransform );
 
 	private:
 			/// Extrapolates two vectors
-		static void HK_CALL extrapolateVector( hkVector4Parameter inStartVec, hkVector4Parameter inEndVec, hkReal dist, hkVector4& outVector );
+		static void HK_CALL extrapolateVector( hkVector4Parameter inStartVec, hkVector4Parameter inEndVec, hkSimdRealParameter dist, hkVector4& outVector );
 
 			/// Extrapolates two quaternions
-		static void HK_CALL extrapolateQuaternion( const hkQuaternion& inStartQuat, const hkQuaternion& inEndQuat, hkReal dist, hkQuaternion& outQuaternion );
+		static void HK_CALL extrapolateQuaternion( hkQuaternionParameter inStartQuat, hkQuaternionParameter inEndQuat, hkSimdRealParameter dist, hkQuaternion& outQuaternion );
 
 			/// Calculates the intersection point of 2 rays in 2 dimensions (we're assuming they are coplanar and that their first 2 coordinates
 			/// express the position on the plane they both share).
@@ -40,7 +40,7 @@ class hkaParametricAnimationExtrapolationUtil
 #endif // HKA_PARAMETRIC_ANIMATION_EXTRAPOLATION_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -39,7 +39,6 @@
 #define EVALUATELIGHTINGFLAG_TRACELINES                   0x000f0000
 
 
-#define V_MAX_RENDERER_NODES            16
 
 
 class IVTimeOfDay;
@@ -148,6 +147,7 @@ struct VFogParameters
     , fHeightFogEnd(10000)
     , bHeightFogAddScattering(false)
     , bMaskSky(true)
+    , fVirtualSkyDepth(-1)
   {
   }
 
@@ -157,7 +157,7 @@ struct VFogParameters
       && heightFogMode == other.heightFogMode && fHeightFogDensity == other.fHeightFogDensity && iHeightFogColor == other.iHeightFogColor
       && iHeightFogColorOffset == other.iHeightFogColorOffset && fHeightFogHalfDensityHeight == other.fHeightFogHalfDensityHeight
       && fHeightFogOffset == other.fHeightFogOffset && fHeightFogStart == other.fHeightFogStart && fHeightFogEnd == other.fHeightFogEnd
-      && bHeightFogAddScattering == other.bHeightFogAddScattering && bMaskSky == other.bMaskSky;
+      && bHeightFogAddScattering == other.bHeightFogAddScattering && bMaskSky == other.bMaskSky && fVirtualSkyDepth == other.fVirtualSkyDepth;
   }
 
   inline bool operator != (const VFogParameters& other)
@@ -187,6 +187,7 @@ struct VFogParameters
   float fHeightFogEnd;                ///< Far z value for ground fog
   bool bHeightFogAddScattering;       ///< If true, ground fog will receive contribution from atmospheric scattering
   bool bMaskSky;                      ///< If true, sky is masked out for fog rendering 
+  float fVirtualSkyDepth;             ///< Virtual depth of the sky when bMaskSky is not set; when -1 the sky is at the far plane
 };
 
 extern VFogParameters g_fogParameters;
@@ -240,7 +241,7 @@ public:
   /// \brief
   ///   Registers/unregisters a new renderer node.
   ///
-  /// The Vision engine supports up to V_MAX_RENDERER_NODES different renderer nodes to be registered at the same time.
+  /// The Vision engine supports any number of different renderer nodes that can be registered at the same time.
   /// Each renderer node can, for instance, represent a separate view in a split-screen application.
   /// Every renderer node that has been registered using the SetRendererNode function will be processed by the VisionApp_cl::Run()
   /// function, meaning that all renderer contexts which are registered with these renderer nodes will have their
@@ -257,7 +258,7 @@ public:
   /// will be handled by the VisionApp_cl::Run function.
   ///
   /// \param iNodeIndex
-  ///   Index at which to set the renderer node. Must be between 0 and V_MAX_RENDERER_NODES.
+  ///   Index at which to set the renderer node. Must be between 0 and GetRendererNodeCount() inclusively.
   ///
   /// \param pRendererNode
   ///   New renderer node. Can be NULL to deregister a renderer node.
@@ -270,22 +271,29 @@ public:
   ///   Returns the current render node that has been set via SetRendererNode.
   inline IVRendererNode* GetRendererNode(int iNodeIndex) const 
   {
-    VASSERT(iNodeIndex>=0 && iNodeIndex < V_MAX_RENDERER_NODES);
-    return m_spRendererNode[iNodeIndex];
+    VASSERT(iNodeIndex>=0);
+	
+    return (iNodeIndex >= GetRendererNodeCount()) ? NULL : m_spRendererNode.GetAt(iNodeIndex);
   }
 
   /// \brief Returns the index at which a renderer node is registered, or -1.
   inline int GetRendererNodeIndex(IVRendererNode* pRendererNode) const 
   {
-    for(int iNodeIdx = 0; iNodeIdx < V_MAX_RENDERER_NODES; iNodeIdx++)
+    int iNodeCount = GetRendererNodeCount();
+    for(int iNodeIdx = 0; iNodeIdx < iNodeCount; iNodeIdx++)
     {
-      if(m_spRendererNode[iNodeIdx] == pRendererNode)
+      if(m_spRendererNode.GetAt(iNodeIdx) == pRendererNode)
       {
         return iNodeIdx;
       }
     }
 
-    return -1;
+    return (pRendererNode == NULL) ? iNodeCount : -1;
+  }
+  
+  inline int GetRendererNodeCount() const
+  {
+    return m_spRendererNode.Count();
   }
 
   /// \brief
@@ -307,8 +315,8 @@ public:
   ///   Helper function to determine whether the first installed renderer node is not NULL and derived from the passed class type
   inline BOOL IsRendererNodeOfType(VType *pType, int iNodeIndex=0) const 
   {
-    VASSERT(iNodeIndex>=0 && iNodeIndex < V_MAX_RENDERER_NODES);
-    return (m_spRendererNode[iNodeIndex]!=NULL) && m_spRendererNode[iNodeIndex]->IsOfType(pType);
+    VASSERT(iNodeIndex>=0 && iNodeIndex < GetRendererNodeCount());
+    return (m_spRendererNode.GetAt(iNodeIndex)!=NULL) && m_spRendererNode.GetAt(iNodeIndex)->IsOfType(pType);
   }
 
   /// \brief
@@ -385,6 +393,20 @@ public:
   /// \brief
   ///   Used by the editor to create a time of day instance via the installed factory (using GetTimeOfDayFactory)
   VISION_APIFUNC IVTimeOfDay* CreateTimeOfDayInstance();
+
+  /// \brief
+  ///   Sets the default global ambient color, which is used if there is no time of day handler.
+  inline void SetDefaultGlobalAmbientColor(const hkvVec4& color)
+  {
+    m_vDefaultGlobalAmbient = color;
+  }
+
+  /// \brief
+  ///   Returns the default global ambient color.
+  inline const hkvVec4& GetDefaultGlobalAmbientColor() const
+  {
+    return m_vDefaultGlobalAmbient;
+  }
 
   ///
   /// @}
@@ -1613,10 +1635,10 @@ private:
   bool m_bUseTypedRenderTargets;
 #endif
 
-  hkvVec4 m_vGlobalAmbient;
+  hkvVec4 m_vGlobalAmbient, m_vDefaultGlobalAmbient;
   VColorRef m_iDefaultClearColor;
 
-  IVRendererNodePtr m_spRendererNode[V_MAX_RENDERER_NODES];
+  VRefCountedCollection<IVRendererNode> m_spRendererNode;
   IVRendererNodePtr m_spCurrentRendererNode;
   IVTimeOfDayPtr m_spTimeOfDay;
   IVObjectInstanceFactory *m_pTimeOfDayFactory;
@@ -1644,7 +1666,7 @@ VISION_APIFUNC VRenderHook_e UpdateRenderHook(unsigned int uiOldValue);
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

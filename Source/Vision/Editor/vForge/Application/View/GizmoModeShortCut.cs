@@ -27,10 +27,12 @@ namespace Editor.View
     /// </summary>
     /// <param name="defaultKey"></param>
     /// <param name="dragMode"></param>
-		public GizmoModeShortCut(Keys defaultKey, ShapeDragMode dragMode) : base(defaultKey)
-		{
+    /// <param name="alternativeBinding">Assigns an alternative keybinding (enforced by returning a diffent value from ActionName)</param>
+    public GizmoModeShortCut(Keys defaultKey, ShapeDragMode dragMode, bool alternativeBinding) : base(defaultKey)
+    {
       _newMode = dragMode;
-		}
+      _alternativeBinding = alternativeBinding;
+    }
 
     /// <summary>
     /// Overridden function
@@ -39,7 +41,7 @@ namespace Editor.View
     {
       get
       {
-        return EditorManager.Scene!=null;
+        return EditorManager.Scene != null;
       }
     }
 
@@ -51,6 +53,26 @@ namespace Editor.View
     {
       if (EditorManager.ActiveView==null || EditorManager.ActiveView.Gizmo==null)
         return false;
+
+      // When the gizmo's mode already matches the pressed gizmo mode hotkey, toggle between local and global transform space
+      if (_newMode == EditorManager.ActiveView.Gizmo.DragMode)
+      {
+        switch (_newMode)
+        {
+          case ShapeDragMode.MOVE:
+            EditorManager.ActiveView.Gizmo.LocalTranslation = !EditorManager.ActiveView.Gizmo.LocalTranslation;
+            break;
+          case ShapeDragMode.ROTATE:
+            EditorManager.ActiveView.Gizmo.LocalOrientation = !EditorManager.ActiveView.Gizmo.LocalOrientation;
+            break;
+          case ShapeDragMode.SCALE:
+          case ShapeDragMode.UNIFORMSCALE:
+            EditorManager.ActiveView.Gizmo.LocalScaling = !EditorManager.ActiveView.Gizmo.LocalScaling;
+            break;
+          default:
+            break;
+        }
+      }
 
       if (_newMode == ShapeDragMode.SCALE || _newMode == ShapeDragMode.UNIFORMSCALE)
       {
@@ -73,7 +95,14 @@ namespace Editor.View
     {
       get
       {
-        return "Gizmo Mode: "+_newMode.ToString();
+        if (_alternativeBinding)
+        {
+          return "Gizmo Mode (Alternate): " + _newMode.ToString();
+        }
+        else
+        {
+          return "Gizmo Mode: " + _newMode.ToString();
+        }
       }
     }
 
@@ -89,21 +118,27 @@ namespace Editor.View
     }
 
     ShapeDragMode _newMode;
-	}
+    bool _alternativeBinding;
+  }
 
   /// <summary>
-	/// Implements ShortCutAction to switch the Gizmo mode (rotate, move,..)
-	/// </summary>
+  /// Implements ShortCutAction to switch the Gizmo mode (rotate, move,..)
+  /// </summary>
   public class GizmoSwitchShortCut : ShortCutAction
   {
-   /// <summary>
+    /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="defaultKey"></param>
     /// <param name="dragMode"></param>
-    public GizmoSwitchShortCut(Keys defaultKey) : base(defaultKey)
-		{
-		}
+    /// <param name="cycleForward">Specifices whether this particular shortcut cycles forward or backward through gizmo modes</param>
+    /// <param name="alternativeBinding">Assigns an alternative keybinding (enforced by returning a diffent value from ActionName)</param>
+    public GizmoSwitchShortCut(Keys defaultKey, bool cycleForward, bool alternateBinding)
+      : base(defaultKey)
+    {
+      _cycleForward = cycleForward;
+      _alternateBinding = alternateBinding;
+    }
 
     /// <summary>
     /// Overridden function
@@ -125,13 +160,31 @@ namespace Editor.View
       if (EditorManager.ActiveView == null || EditorManager.ActiveView.Gizmo == null)
         return false;
 
-      if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.MOVE)
-        EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.ROTATE;
-      else if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.ROTATE)
-        EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.SCALE;
-      else if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.SCALE) 
-        EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.MOVE;
-  
+      // Cycle forward through gizmo modes (with wrapping)
+      if (_cycleForward)
+      {
+        if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.MOVE)
+          EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.ROTATE;
+        else if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.ROTATE)
+          EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.UNIFORMSCALE;
+        else if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.UNIFORMSCALE)
+          EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.SCALE;
+        else if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.SCALE)
+          EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.MOVE;
+      }
+	  // Cycle backward through gizmo modes (with wrapping)
+      else
+      {
+        if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.SCALE)
+          EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.UNIFORMSCALE;
+        else if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.UNIFORMSCALE)
+          EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.ROTATE;
+        else if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.ROTATE)
+          EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.MOVE;
+        else if (EditorManager.ActiveView.Gizmo.DragMode == ShapeDragMode.MOVE)
+          EditorManager.ActiveView.Gizmo.DragMode = ShapeDragMode.SCALE;
+      }
+
       return true;
     }
 
@@ -142,7 +195,29 @@ namespace Editor.View
     {
       get
       {
-        return "Gizmo Mode: SWITCH MODE";
+        // Provide unique ActionNames for each GizmoSwitchShortCut permutation
+        if (_alternateBinding)
+        {
+          if (_cycleForward)
+          {
+            return "Gizmo Mode (Alternate): CYCLE MODE";
+          }
+          else
+          {
+            return "Gizmo Mode (Alternate): REVERSE-CYCLE MODE";
+          }
+        }
+        else
+        {
+          if (_cycleForward)
+          {
+            return "Gizmo Mode: CYCLE MODE";
+          }
+          else
+          {
+            return "Gizmo Mode: REVERSE-CYCLE MODE";
+          }
+        }
       }
     }
 
@@ -153,9 +228,19 @@ namespace Editor.View
     {
       get
       {
-        return "Switches the Gizmo Mode: Move, Rotate, Scale";
+        if (_cycleForward)
+        {
+          return "Cycles the Gizmo Mode: Move > Rotate > Uniform Scale > Scale > Move ";
+        }
+        else
+        {
+          return "Reverse-cycles the Gizmo Mode: Move > Scale > Uniform Scale > Rotate > Move ";
+        }
       }
     }
+
+    bool _cycleForward;
+    bool _alternateBinding;
   }
 
   #endregion
@@ -338,7 +423,7 @@ namespace Editor.View
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

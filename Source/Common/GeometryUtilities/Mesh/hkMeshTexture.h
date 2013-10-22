@@ -15,8 +15,49 @@ extern const class hkClass hkMeshTextureClass;
 class hkMeshTexture: public hkReferencedObject
 {
 	public:
-	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
+		
+		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
+
+	public:
+
+		/// Texture sampler
+		class Sampler : public hkReferencedObject
+		{
+			public:
+
+				HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
+
+				/// Samples the texture at the given texel
+				virtual void sample(hkVector4Parameter uvIn, hkVector4& texelOut) const = 0;
+
+			protected:
+
+				/// Constructor
+				Sampler();
+		};
+
+		/// Header for RAW buffer formats. A RAW buffer must start with this descriptor
+		struct RawBufferDescriptor
+		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, hkMeshTexture::RawBufferDescriptor);
+			HK_DECLARE_REFLECTION();
+			HK_DECLARE_POD_TYPE();
+
+			/// Constructor
+			HK_FORCE_INLINE RawBufferDescriptor()
+			{}
+
+			/// Serialization constructor
+			HK_FORCE_INLINE RawBufferDescriptor(hkFinishLoadedObjectFlag flag)
+			{}
+
+			hkInt64 m_offset;		///< Offset from the start of the buffer where the payload is stored
+			hkUint32 m_stride;		///< The stride between components in the buffer
+			hkUint32 m_numElements;	///< The number of elements in the buffer
+		};
+
+	public:
 
 			/// Default Ctor
 		hkMeshTexture() {}
@@ -30,7 +71,8 @@ class hkMeshTexture: public hkReferencedObject
 			PNG,
 			TGA,
 			BMP,
-			DDS
+			DDS,
+			RAW,
 		};	
 
 			/// Filtering mode used by the texture
@@ -41,6 +83,7 @@ class hkMeshTexture: public hkReferencedObject
 			ANISOTROPIC
 		};
 
+		// Has to match 1:1 with HKG_TEXTURE_TYPE_*
 		enum TextureUsageType
 		{
 			UNKNOWN,			
@@ -49,12 +92,13 @@ class hkMeshTexture: public hkReferencedObject
 			BUMP,		
 			NORMAL,			
 			DISPLACEMENT,			
-			SPECULAR, // Specular Level map			
-			SPECULARANDGLOSS, // Specular Level map with the Gloss (power) in the Alpha channel			
-			OPACITY, // Opacity (transparency) map. Normally not used, just use the alpha channel in one of the diffuse maps instead.			
-			EMISSIVE, // Emissive (self illumination) map			
+			SPECULAR,			// Specular Level map			
+			SPECULARANDGLOSS,	// Specular Level map with the Gloss (power) in the Alpha channel			
+			OPACITY,			// Opacity (transparency) map. Normally not used, just use the alpha channel in one of the diffuse maps instead.			
+			EMISSIVE,			// Emissive (self illumination) map			
 			REFRACTION,			
-			GLOSS, // Specular Power map, normally not used (alpha in specmap quicker)			
+			GLOSS,				// Specular Power map, normally not used (alpha in specmap quicker)	
+			DOMINANTS,			// Dominant data for displacement mapping
 			NOTEXPORTED
 		};
 
@@ -62,6 +106,12 @@ class hkMeshTexture: public hkReferencedObject
 		virtual void getData(hkUint8*& data, int& size, Format& format) = 0;
 			/// Sets the raw data of the texture
 		virtual void setData(hkUint8* data, int size, Format format) = 0;
+
+		/// Creates a sampler for this texture
+		virtual Sampler* createSampler() const = 0;
+
+			/// Gets the raw data format
+		virtual Format getFormat() const = 0;
 			
 			/// Gets the filename of the texture
 		virtual const char* getFilename() const = 0;
@@ -90,12 +140,15 @@ class hkMeshTexture: public hkReferencedObject
 
 			/// Returns whether or not the texture can be modified.
 		virtual bool isReadOnly() const = 0;
+
+			/// Tests whether two textures are equal
+		virtual bool equals(const hkMeshTexture* other) const = 0;
 };
 
 #endif	//HK_MESH_TEXTURE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

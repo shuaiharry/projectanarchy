@@ -141,6 +141,10 @@ public:
   VBASE_IMPEXP VOVERRIDE const char* GetHardwareId() {return "";}
 
   /// \brief
+  ///   Returns the XInport port number of this device (that is used for all XInput queries internally)
+  VBASE_IMPEXP inline int GetXInputPortNumber() const { return m_iIndex; }
+
+  /// \brief
   ///   Currently not supported.
   VBASE_IMPEXP VOVERRIDE const char* GetProductName() {return "";}
 
@@ -323,7 +327,7 @@ private:
 #endif //VINPUTXI_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

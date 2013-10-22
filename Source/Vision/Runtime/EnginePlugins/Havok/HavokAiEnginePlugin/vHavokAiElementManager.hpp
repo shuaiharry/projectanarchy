@@ -91,7 +91,9 @@ public:
   /// \brief
   ///   Returns a certain element in the element table by index.
   /// 
-  /// In this version the index can be larger than the maximum valid index given by ElementManagerGetSize()
+  /// In this version the index can be larger than the maximum valid index given by ElementManagerGetSize().
+  /// If the index is larger than the maximum, this will cause the internal array to get resized and
+  /// return a NULL pointer.
   /// 
   /// \param index
   ///   index of the element table entry to return
@@ -104,8 +106,8 @@ public:
   /// \brief
   ///   Returns the overall size of the static element table.
   /// 
-  /// A size of 8 means that the highest entry in the element table is 7, but it doesn't mean that all of the
-  /// entries from 0 to 7 are actually defined (there might be entries which are undefined and therefore
+  /// A size of 8 means that the highest index in the element table is 7, but it doesn't mean that all of the
+  /// entries from 0 to 7 are actually valid (there might be entries which are undefined and therefore
   /// set to NULL).
   /// 
   /// \return
@@ -118,9 +120,9 @@ public:
   /// \brief
   ///   Returns the number of used elements in the element table.
   /// 
-  /// The function iterates through all elements and counts the elements which are != NULL. 
+  /// The function iterates through all elements and counts the elements which are not NULL. 
   /// 
-  /// Thus, the count returned by this method may be smaller than the value returned by
+  /// The count returned by this method may thus be smaller than the value returned by
   /// ElementManagerGetSize.
   /// 
   /// \return
@@ -137,7 +139,7 @@ public:
   /// which means that it sets this entry to NULL.
   /// 
   /// \param index
-  ///   index of the element which shall be removed. You get this index from the Add/Set functions
+  ///   index of the element which shall be removed. You can get the index from the Add/Set functions
   /// 
   /// \note
   ///   This function does not delete the object. If you, for instance, store a sound sample in the
@@ -150,7 +152,7 @@ public:
   /// \brief
   ///   Deletes all the elements in the element table
   /// 
-  /// ElementManagerDeleteAll takes all the currently registered elements in the element table and
+  /// ElementManagerDeleteAll takes all the registered elements in the element table and
   /// deletes them (actually calling the destructor). Use this function only if the elements in the
   /// tables are pointers to deletable objects.
   /// 
@@ -164,7 +166,8 @@ public:
   /// \brief
   ///   Deletes all unreferenced resources in the list
   /// 
-  /// , i.e. all resources that have a reference count of 0.
+  /// , i.e. all resources that have a reference count of 1. The element manager itself holds
+  /// the last reference.
   /// 
   /// Assumes the elements are of type VRefCounter or derived from it. 
   /// 
@@ -180,7 +183,7 @@ public:
   ///   Adjusts the number of elements (returned by ElementManagerGetSize) by eliminating NULL
   ///   entries from the end of the table.
   /// 
-  /// It will be adjusted so that there are no NULL elements at the end.
+  /// The internal array will be adjusted so that there are no NULL elements at the end.
   /// 
   /// if the bResize flag is set, the array will additionally be resized to the new upper limit.
   /// 
@@ -207,11 +210,9 @@ public:
   inline int GetNumber() const            {return m_iListIndex;}
 
   /// \brief
-  ///   Finds instance(s) with the specified key. Classes must implement the HasObjectKey function
-  ///   (e.g. VisObject3D_cl)
+  ///   Finds instance(s) with the specified key.
   /// 
-  /// This function is used by Vision::Game.SearchEntity, SearchPath, SearchLightSource for
-  /// instance
+  ///  Classes must implement the HasObjectKey function (e.g. VisObject3D_cl)
   /// 
   /// \param szObjectKey
   ///   The key to search for
@@ -224,10 +225,13 @@ public:
   /// 
   /// \return
   ///   ELEMTYPE : The first hit, or NULL in case there is no object in the list with specified key
-  static inline ELEMTYPE FindByKey(const char *szObjectKey, DynArray_cl<ELEMTYPE> *storageArray = NULL, BOOL bIgnoreCase=TRUE);
+  static inline ELEMTYPE FindByKey(const char *szObjectKey, DynArray_cl<ELEMTYPE> *storageArray = NULL, 
+    BOOL bIgnoreCase=TRUE);
 
   /// \brief
-  ///   Finds the instance with the specified unique ID. The template class must implement the GetUniqueID function
+  ///   Finds the instance with the specified unique ID. 
+  ///
+  /// The template class must implement the GetUniqueID function
   static inline ELEMTYPE FindByUniqueID(__int64 iUniqueID);
 
   /// \brief
@@ -239,8 +243,10 @@ public:
   static inline int ElementManagerIndexOf(ELEMTYPE elem)
   {
     for (unsigned int i=0;i<g_iElementCount;i++)
+    {
       if (elementTable.GetDataPtr()[i]==elem)
         return i;
+    }
     return -1;
   }
 
@@ -250,11 +256,21 @@ public:
 
   /// \brief
   ///   Internal function, ensures that the element table has at least the passed size.
-  static inline void ElementManagerEnsureSize(int iSize) { if ((int)elementTable.GetSize() < iSize) { elementTable.Resize(iSize); } }
+  static inline void ElementManagerEnsureSize(int iSize) 
+  { 
+    if ((int)elementTable.GetSize() < iSize) 
+    { 
+      elementTable.Resize(iSize); 
+    } 
+  }
 
   /// \brief
   ///   Internal function, invalidates the free element cache.
-  static inline void ElementManagerInvalidateCache() { g_iCurrentElementCacheIndex = 0; g_iNumElementsInCache = 0; }
+  static inline void ElementManagerInvalidateCache() 
+  { 
+    g_iCurrentElementCacheIndex = 0; 
+    g_iNumElementsInCache = 0; 
+  }
 
 private:
   VHAVOKAI_IMPEXP static DynArray_cl<ELEMTYPE> elementTable;           ///< static element table, used to store the elements
@@ -286,7 +302,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

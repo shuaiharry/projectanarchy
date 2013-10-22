@@ -31,10 +31,10 @@ class hkpPointToPathConstraintData : public hkpConstraintData
 			CONSTRAIN_ORIENTATION_MAX_ID
 		};
 
-		enum 
+		enum
 		{
 			SOLVER_RESULT_FRICTION			= 0,	// the friction.
-			SOLVER_RESULT_FRICTION_INTERNAL	= 1,	
+			SOLVER_RESULT_FRICTION_INTERNAL	= 1,
 			SOLVER_RESULT_1					= 2,	// constraint 0, depends on the type.
 			SOLVER_RESULT_2					= 3,	// constraint 0, depends on the type.
 			SOLVER_RESULT_3					= 4,	// constraint 0, depends on the type.
@@ -53,15 +53,19 @@ class hkpPointToPathConstraintData : public hkpConstraintData
 		};
 
 	public:
-		
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_CONSTRAINT);
 		HK_DECLARE_REFLECTION();
-		
+
 		/// Constructor.
 		hkpPointToPathConstraintData();
 
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		hkpPointToPathConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
+
+#endif
 
 		/// Destructor.
 		 ~hkpPointToPathConstraintData();
@@ -72,7 +76,7 @@ class hkpPointToPathConstraintData : public hkpConstraintData
 
 		/// Sets the pivot and path with body space information.
 		void setInBodySpace( const hkVector4& pivotA, const hkVector4& pivotB, hkpParametricCurve* path);
-		
+
 		/// Set the path.
 		void setPath(hkpParametricCurve* path);
 
@@ -146,7 +150,7 @@ class hkpPointToPathConstraintData : public hkpConstraintData
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
 
 		virtual void buildJacobian( const hkpConstraintQueryIn &in, hkpConstraintQueryOut &out );
-		
+
 	public:
 
 		///
@@ -156,12 +160,12 @@ class hkpPointToPathConstraintData : public hkpConstraintData
 
 		/// The parametric path followed by bodyA.
 		hkpParametricCurve* m_path;
-		
+
 	public:
 
 		/// Max linear friction impulse.
 		hkReal m_maxFrictionForce;
-		
+
 		/// Angular constraining options.
 		hkEnum<OrientationConstraintType, hkInt8> m_angularConstrainedDOF;
 
@@ -175,7 +179,7 @@ class hkpPointToPathConstraintData : public hkpConstraintData
 #endif	// HKP_POINT_TO_PATH_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

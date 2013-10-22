@@ -484,6 +484,81 @@ public:
   ///   The resource manager name to check. NULL to test all currently registered resource
   ///   managers.
   /// 
+  /// \param eOptions
+  ///   The type of reloading that should be performed
+  /// 
+  /// \return
+  ///   the number of modified resources found.
+  /// 
+  /// \note
+  ///   The following combinations of the bUnload,bReload flags actually make sense:
+  ///   \li FALSE,FALSE : Nothing happens to the resources, useful for counting the modified
+  ///     resources.
+  ///   \li TRUE,FALSE :  Modified resources are unloaded but not reloaded. Reloading will happen
+  ///     the next time the resource is used.
+  ///   \li TRUE,TRUE :  Modified resources are unloaded and reloaded. The resource is guaranteed
+  ///     to be up-to-date afterwards.
+  ///
+  /// \note
+  ///   Not all resources can be reloaded at runtime. Textures, static meshes and dynamic meshes
+  ///   for example can be reloaded; animations cannot be reloaded dynamically.
+  VISION_APIFUNC int ReloadModifiedResourceFiles(const char *szManagerName, 
+                                                 VUnloadReloadOptions_e eOptions = VURO_COLD_RELOAD);
+
+  /// \brief
+  ///   Reloads a specific modified resource of a registered resource manager.
+  ///
+  /// See VisResourceSystem_cl::ReloadModifiedResourceFiles() for more details about resource reloading.
+  ///
+  /// \param szResourceId
+  ///   The ID of the resource to reload.
+  ///
+  /// \param szManagerName
+  ///   The resource manager name to check. NULL to check all currently registered resource
+  ///   managers for the given resource ID.
+  /// 
+  /// \param eOptions
+  ///   The type of reloading which should be performed
+  /// 
+  /// \return
+  ///   \c TRUE if the specified resource was found and modified.
+  VISION_APIFUNC BOOL ReloadModifiedResourceFile(const char *szResourceId, const char *szManagerName, 
+                                                 VUnloadReloadOptions_e eOptions = VURO_COLD_RELOAD);
+
+  /// \brief
+  ///   Reloads a specific resource of a registered resource manager. The resource is reloaded
+  ///   regardless of whether the file has actually been modified or not.
+  /// 
+  /// See VisResourceSystem_cl::ReloadModifiedResourceFiles() for more details about resource reloading.
+  ///
+  /// \param szManagerName
+  ///   The resource manager name to check. NULL to test all currently registered resource
+  ///   managers.
+  /// 
+  /// \param szResourceId
+  ///   The ID of the resource to reload.
+  /// 
+  /// \param eOptions
+  ///   The type of reloading that should be performed
+  ///
+  /// \return
+  ///   TRUE if the resource has been found and was reloaded; false if either the specified resource
+  ///   manager was not found or the resource was not found within the resource manager.
+  VISION_APIFUNC BOOL ReloadSpecificResourceFile(const char *szManagerName, const char *szResourceId, 
+                                                 VUnloadReloadOptions_e eOptions = VURO_COLD_RELOAD);
+
+  /// \brief
+  ///   Reloads all modified resources of a registered resource manager.
+  /// 
+  /// Modified resources are identified by either a changed file time stamp, or, if asset management
+  /// is used, by a changed entry for this resource in the asset lookup table.
+  /// 
+  /// This feature is very useful to dynamically update changed textures etc.
+  /// 
+  /// \param szManagerName
+  ///   The resource manager name to check. NULL to test all currently registered resource
+  ///   managers.
+  /// 
   /// \param bUnload
   ///   If TRUE, a resource will be unloaded in case it has been modified (calls EnsureUnloaded for
   ///   the resource).
@@ -507,7 +582,10 @@ public:
   /// \note
   ///   Not all resources can be reloaded at runtime. Textures, static meshes and dynamic meshes
   ///   for example can be reloaded; animations cannot be reloaded dynamically.
-  VISION_APIFUNC int ReloadModifiedResourceFiles(const char *szManagerName, BOOL bUnload=TRUE, BOOL bReload=TRUE);
+  inline HKV_DEPRECATED_2013_2 int ReloadModifiedResourceFiles(const char *szManagerName, BOOL bUnload, BOOL bReload)
+  {
+    return ReloadModifiedResourceFiles(szManagerName, bReload ? VURO_COLD_RELOAD : VURO_ONLY_UNLOAD);
+  }
 
   /// \brief
   ///   Reloads a specific modified resource of a registered resource manager.
@@ -531,7 +609,10 @@ public:
   /// 
   /// \return
   ///   \c TRUE if the specified resource was found and modified.
-  VISION_APIFUNC BOOL ReloadModifiedResourceFile(const char *szResourceId, const char *szManagerName, BOOL bUnload=TRUE, BOOL bReload=TRUE);
+  inline HKV_DEPRECATED_2013_2 BOOL ReloadModifiedResourceFile(const char *szResourceId, const char *szManagerName, BOOL bUnload, BOOL bReload)
+  {
+    return ReloadModifiedResourceFile(szResourceId, szManagerName, bReload ? VURO_COLD_RELOAD : VURO_ONLY_UNLOAD);
+  }
 
   /// \brief
   ///   Reloads a specific resource of a registered resource manager. The resource is reloaded
@@ -555,8 +636,10 @@ public:
   /// \return
   ///   TRUE if the resource has been found and was reloaded; false if either the specified resource
   ///   manager was not found or the resource was not found within the resource manager.
-  VISION_APIFUNC BOOL ReloadSpecificResourceFile(const char *szManagerName, const char *szResourceId,
-    BOOL bUnload=TRUE, BOOL bReload=TRUE);
+  inline HKV_DEPRECATED_2013_2 BOOL ReloadSpecificResourceFile(const char *szManagerName, const char *szResourceId, BOOL bUnload, BOOL bReload)
+  {
+    return ReloadSpecificResourceFile(szManagerName, szResourceId, bReload ? VURO_COLD_RELOAD : VURO_ONLY_UNLOAD);
+  }
 
   /// \brief
   ///   Calls the per-frame tick function for all resource managers. This function is called by the default VisionApp_cl class.
@@ -693,7 +776,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -22,7 +22,7 @@ extern const class hkClass hkpVehicleDataClass;
 class hkpVehicleData : public hkReferencedObject
 {
 	public:
-		//+version(1)
+		//+version(2)
 
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_VEHICLE);
 		HK_DECLARE_REFLECTION();
@@ -157,9 +157,6 @@ class hkpVehicleData : public hkReferencedObject
 			/// The number of wheels on each axle.
 		hkArray<hkInt8> m_numWheelsPerAxle;
 
-			/// For the friction: const data
-		struct hkpVehicleFrictionDescription m_frictionDescription;
-
 			/// The inertia used for friction calculation.
 		hkVector4 m_chassisFrictionInertiaInvDiag;
 
@@ -174,7 +171,7 @@ class hkpVehicleData : public hkReferencedObject
 #endif // HKVEHICLE_HKVEHICLEDATA_XML_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

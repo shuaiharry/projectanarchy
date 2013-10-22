@@ -10,7 +10,7 @@
 inline void hkpStiffSpringConstraintData::setInWorldSpace(const hkTransform& bodyATransform,
 														  const hkTransform& bodyBTransform,
 														  const hkVector4& pivotAW,
-														  const hkVector4& pivotBW) 
+														  const hkVector4& pivotBW)
 {
 	m_atoms.m_pivots.m_translationA.setTransformedInversePos(bodyATransform,pivotAW);
 	m_atoms.m_pivots.m_translationB.setTransformedInversePos(bodyBTransform,pivotBW);
@@ -25,7 +25,7 @@ inline void hkpStiffSpringConstraintData::setInWorldSpace(const hkTransform& bod
 inline void hkpStiffSpringConstraintData::setInBodySpace( const hkVector4& pivotA,const hkVector4& pivotB, hkReal restLength )
 {
 	m_atoms.m_pivots.m_translationA = pivotA;
-	m_atoms.m_pivots.m_translationB = pivotB;	
+	m_atoms.m_pivots.m_translationB = pivotB;
 	m_atoms.m_spring.m_length = restLength;
 	m_atoms.m_spring.m_maxLength = restLength;
 }
@@ -54,7 +54,7 @@ inline void hkpStiffSpringConstraintData::setSpringLength(hkReal length)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

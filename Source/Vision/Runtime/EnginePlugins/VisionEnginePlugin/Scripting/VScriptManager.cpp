@@ -110,34 +110,32 @@ void VScriptResourceManager::SetScriptInstance( VisTypedEngineObject_cl *pObj, I
 }
 
 
-
-
-
-
-
-
 bool VScriptResourceManager::LuaErrorCheck(lua_State *L, int status, IVLog *pLog) 
 {
   if ( status==0 || status==LUA_YIELD )
     return true;
 
+  char *szError = NULL;
   const char *szErrorLatin1 = lua_tostring(L, -1);
 
-  // LUA does not natively support unicode (utf8). Assume LATIN-1 encoding.
-  VMemoryTempBuffer<1024> tmpBuffer;
-  const int iErrorStrSize = VString::ConvertLatin1ToUTF8(szErrorLatin1, 
-    static_cast<int>(strlen(szErrorLatin1)), NULL, 0);
-  tmpBuffer.EnsureCapacity(iErrorStrSize+1);
-  char *szError = reinterpret_cast<char*>(tmpBuffer.GetBuffer());
+  if(szErrorLatin1 != NULL) 
+  {
+     // LUA does not natively support unicode (utf8). Assume LATIN-1 encoding.
+     VMemoryTempBuffer<1024> tmpBuffer;
+     const int iErrorStrSize = VString::ConvertLatin1ToUTF8(szErrorLatin1, static_cast<int>(strlen(szErrorLatin1)), NULL, 0);
+     tmpBuffer.EnsureCapacity(iErrorStrSize+1);
+     szError = reinterpret_cast<char*>(tmpBuffer.GetBuffer());
 
-  VString::ConvertLatin1ToUTF8(szErrorLatin1, static_cast<int>(strlen(szErrorLatin1)), 
-    szError, iErrorStrSize);
-  szError[iErrorStrSize] = '\0';
+     VString::ConvertLatin1ToUTF8(szErrorLatin1, static_cast<int>(strlen(szErrorLatin1)), szError, iErrorStrSize);
+     szError[iErrorStrSize] = '\0';
 
-  if (pLog) 
-    pLog->Error(szError);
+     if (pLog) 
+       pLog->Error(szError);
+     else
+       Vision::Error.Warning("Lua Error : %s",szError);
+  }
   else
-    Vision::Error.Warning("Lua Error : %s",szError);
+    szError = "unknown error"; // happens (at least) if you call "error();" in the script
 
   lua_pop(L, 1); // remove error message
 
@@ -622,8 +620,13 @@ void VScriptResourceManager::OnHandleCallback(IVisCallbackDataObject_cl *pData)
     if (pModeObj->m_eNewMode==VisEditorManager_cl::EDITORMODE_PLAYING_IN_EDITOR
      || pModeObj->m_eNewMode==VisEditorManager_cl::EDITORMODE_PLAYING_IN_GAME)
     {
-      ReloadModifiedResourceFiles(Vision::File.GetManager(), TRUE, TRUE);
-
+      for (int i=0; i<GetResourceCount(); i++)
+      {
+        VManagedResource *pRes = GetResourceByIndex(i);
+        if(pRes != NULL)
+          pRes->UnloadAndReload(VURO_COLD_RELOAD);
+      }
+      
       //dump globals of all resources
       int iResourceCount = GetResourceCount();
       int iActualResourceCount = 0;
@@ -880,7 +883,7 @@ bool VScriptResourceManager::Require(const char* pFileName)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

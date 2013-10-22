@@ -20,8 +20,8 @@ public:
   VType* GetControllerComponentType() HKV_OVERRIDE;
 
   void PostInitialize() HKV_OVERRIDE;
-  virtual void ServerTick(float const deltaTime) HKV_OVERRIDE;
-  virtual void Die() HKV_OVERRIDE;
+
+  void ServerTick(float deltaTime) HKV_OVERRIDE;
 
 protected:
   virtual void InitializeCharacterEffects() HKV_OVERRIDE;
@@ -36,7 +36,7 @@ private:
 #endif // RPG_PLUGIN_PLAYER_CHARACTER_H__
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -6,127 +6,74 @@
  *
  */
 
-
 /// Copies dynamic and static values into their respective components, based on a mask
-/// \param mask Mask describing the dynamic and static components of the data
+/// \param statmask Mask describing the static components of the data
+/// \param dynmask Mask describing the dynamic components of the data
 /// \param S Static values
-/// \param I Identity values
+/// \param I identity values
 /// \param inOut Output with static/identity values overwritten
-void hkaSplineCompressedAnimation::recompose( hkUint8 mask, const hkVector4& S, const hkVector4& I, hkVector4& inOut )
+HK_FORCE_INLINE /*static*/ void hkaSplineCompressedAnimation::recompose( hkVector4ComparisonParameter statmask, hkVector4ComparisonParameter dynmask, hkVector4Parameter S, hkVector4Parameter I, hkVector4& inOut )
 {
-#if defined( HK_PLATFORM_XBOX360 ) || defined( HK_PLATFORM_PS3_PPU )
-
-	hkVector4Comparison stat; stat.set( static_cast< hkVector4Comparison::Mask >( mask & 0x0F) );
-	hkVector4Comparison iden; iden.set( static_cast< hkVector4Comparison::Mask >( ~mask & ( ~mask >> 4 ) & 0x0F ) );
-
-	inOut.select32( inOut, S, stat );
-	inOut.select32( inOut, I, iden );
-
-#else
-
-	int stat = mask & 0x0F;
-	int iden = ~mask & ( ~mask >> 4 ) & 0x0F;
-
-	int shift = 0x01;
-
-	for ( int i = 0; i < 4; i++ )
-	{
-		if ( stat & shift )
-		{
-			inOut( i ) = S( i );
-		}
-		else if ( iden & shift )
-		{
-			inOut( i ) = I( i );
-		}
-
-		shift <<= 1;
-	}
-
-#endif
+	inOut.setSelect( statmask, S, inOut );
+	inOut.setSelect( dynmask, I, inOut );
 }
-
 
 /// Reads 8 bits from an internal buffer
 /// \param dataInOut Buffer which is incremented
-hkUint8 hkaSplineCompressedAnimation::read8( const hkUint8*& dataInOut )
+HK_FORCE_INLINE hkUint8 hkaSplineCompressedAnimation::read8( const hkUint8* HK_RESTRICT & dataInOut )
 {
 	return *dataInOut++;
 }
 
-
 /// Reads 16 bits from an internal buffer
 /// \param dataInOut Buffer which is incremented
-hkUint16 hkaSplineCompressedAnimation::read16( const hkUint8*& dataInOut )
+HK_FORCE_INLINE hkUint16 hkaSplineCompressedAnimation::read16( const hkUint8* HK_RESTRICT & dataInOut )
 {
-	return *reinterpret_cast< const hkUint16*&  >( dataInOut )++;
+	return *reinterpret_cast< const hkUint16* HK_RESTRICT &  >( dataInOut )++;
 }
-
 
 /// Reads a real value from an internal buffer
 /// \param dataInOut Buffer which is incremented
-hkReal hkaSplineCompressedAnimation::readReal( const hkUint8*& dataInOut )
+HK_FORCE_INLINE hkReal hkaSplineCompressedAnimation::readReal( const hkUint8* HK_RESTRICT & dataInOut )
 {
-	return *reinterpret_cast< const hkReal*&  >( dataInOut )++;
+	hkFloat32 f = *reinterpret_cast< const hkFloat32* HK_RESTRICT &  >( dataInOut )++;
+	return hkReal(f);
 }
 
-
-/// Update a pointer to be aligned
-/// \param align Number of bytes to align (must be a multiple of 2)
-void hkaSplineCompressedAnimation::readAlign( int align, const hkUint8*& dataInOut )
+template <int align>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlign( const hkUint8* HK_RESTRICT & dataInOut )
 {
-	dataInOut = reinterpret_cast< const hkUint8 * > ( HK_NEXT_MULTIPLE_OF( align, reinterpret_cast< hk_size_t >( dataInOut ) ) );
+	dataInOut = reinterpret_cast< const hkUint8 * HK_RESTRICT > ( HK_NEXT_MULTIPLE_OF( align, reinterpret_cast< hk_size_t >( dataInOut ) ) );
 }
-
-
-/// Align a point for quaternions (varies based on the number of bytes per quaternion)
-/// \param type The type of quaternion compression to use
-/// \param dataInOut Pointer to byte buffer (updated)
-void hkaSplineCompressedAnimation::readAlignQuaternion( TrackCompressionParams::RotationQuantization type, const hkUint8*& dataInOut )
-{
-	HK_ASSERT2( 0x3aa3eb74, TrackCompressionParams::validQuantization( type ), "Spline data corrupt." );
-
-	// Bit mask for byte alignment
-	// Each type has it's own unique byte alignment
-	static const int align[6] = { 4, 1, 2, 1, 2, 4 };
-
-	readAlign( align[ type ], dataInOut );
-}
-
-
-/// \return The number of bytes required for the current quaternion packing scheme
-/// \param type The type of quaternion compression to use
-int hkaSplineCompressedAnimation::bytesPerQuaternion( TrackCompressionParams::RotationQuantization type )
-{
-	HK_ASSERT2( 0x3aa3eb74, TrackCompressionParams::validQuantization( type ), "Spline data corrupt." );
-
-	static const int size[6] = { 4, 5, 6, 3, 2, 16 };
-
-	return size[ type ];
-}
-
-
-/// \return The number of bytes required per component for the current packing scheme
-/// \param type The type of quaternion compression to use
-int hkaSplineCompressedAnimation::bytesPerComponent( TrackCompressionParams::ScalarQuantization type )
-{
-	HK_ASSERT2( 0x3aa3eb74, TrackCompressionParams::validQuantization( type ), "Spline data corrupt." );
-
-	static const int size[2] = { 1, 2 };
-
-	return size[ type ];
-}
-
 
 /// \return A packed floating point value expanded
 /// \param minp Minimum expected value
 /// \param maxp Maximum expected value
 /// \param Packed value to expand
-hkReal hkaSplineCompressedAnimation::unpack16( hkReal minp, hkReal maxp, hkUint16 val )
+HK_FORCE_INLINE hkSimdReal hkaSplineCompressedAnimation::unpack16( hkSimdRealParameter minp, hkSimdRealParameter maxp, hkUint16 val )
 {
-	const hkReal span = 65535.0f;
+	const hkSimdReal v  = hkSimdReal::fromUint16(val);
 
-	return ( static_cast< hkReal >( val ) / span ) * ( maxp - minp ) + minp;
+	hkSimdReal d = ( v * hkSimdReal::fromFloat(hkReal(1)/hkReal(65535)) ) * ( maxp - minp ) + minp;
+
+	return d;
+}
+
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpack16vec( hkVector4Parameter minp, hkVector4Parameter maxp, const hkUint16* HK_RESTRICT vals, hkVector4& out )
+{
+	hkIntVector ivals; 
+	ivals.load<2>((const hkUint32*)vals);
+	ivals.setConvertLowerU16ToU32(ivals);
+
+	hkVector4 v;
+	ivals.convertS32ToF32(v);
+
+	const hkSimdReal scale = hkSimdReal::fromFloat(hkReal(1)/hkReal(65535));
+	v.mul(scale);
+	hkVector4 span;
+	span.setSub(maxp, minp);
+
+	out.setAddMul(minp, span, v);
 }
 
 
@@ -135,7 +82,7 @@ hkReal hkaSplineCompressedAnimation::unpack16( hkReal minp, hkReal maxp, hkUint1
 /// \param translation The type of translation quantization given
 /// \param rotation The type of rotation quantization given
 /// \param scale The type of scale quantization given
-void hkaSplineCompressedAnimation::unpackQuantizationTypes( hkUint8 packedQuatizationTypes, TrackCompressionParams::ScalarQuantization& translation, TrackCompressionParams::RotationQuantization& rotation, TrackCompressionParams::ScalarQuantization& scale )
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuantizationTypes( hkUint8 packedQuatizationTypes, TrackCompressionParams::ScalarQuantization& translation, TrackCompressionParams::RotationQuantization& rotation, TrackCompressionParams::ScalarQuantization& scale )
 {
 	translation = static_cast< TrackCompressionParams::ScalarQuantization >( ( packedQuatizationTypes >> 0 ) & 0x03 );
 	rotation = static_cast< TrackCompressionParams::RotationQuantization >( ( packedQuatizationTypes >> 2 ) & 0x0F );
@@ -147,7 +94,7 @@ void hkaSplineCompressedAnimation::unpackQuantizationTypes( hkUint8 packedQuatiz
 }
 
 
-void hkaSplineCompressedAnimation::unpackMaskAndQuantizationType( hkUint8 packedMaskAndQuatizationType, hkUint8& mask, TrackCompressionParams::ScalarQuantization& floatQuantization )
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackMaskAndQuantizationType( hkUint8 packedMaskAndQuatizationType, hkUint8& mask, TrackCompressionParams::ScalarQuantization& floatQuantization )
 {
 	// Read in the floatQuantization from the 1st (not 0th) bit
 	floatQuantization = static_cast< TrackCompressionParams::ScalarQuantization >( ( packedMaskAndQuatizationType >> 1 ) & 0x03 );
@@ -162,35 +109,30 @@ void hkaSplineCompressedAnimation::unpackMaskAndQuantizationType( hkUint8 packed
 /// \param minp Minimum expected value
 /// \param maxp Maximum expected value
 /// \param Packed value to expand
-hkReal hkaSplineCompressedAnimation::unpack8( hkReal minp, hkReal maxp, hkUint8 val )
+HK_FORCE_INLINE hkSimdReal hkaSplineCompressedAnimation::unpack8( hkSimdRealParameter minp, hkSimdRealParameter maxp, hkUint8 val )
 {
-	const hkReal span = 255.0f;
+	const hkSimdReal v  = hkSimdReal::fromUint8(val);
 
-	return ( static_cast< hkReal >( val ) / span ) * ( maxp - minp ) + minp;
+	hkSimdReal d = ( v * hkSimdReal_Inv_255 ) * ( maxp - minp ) + minp;
+
+	return d;
 }
 
-
-/// Expands a quantized quaternion
-/// \param type The type of quaternion compression to use
-/// \param in Input buffer to read from
-/// \param out Quaternion to store the result
-void hkaSplineCompressedAnimation::unpackQuaternion( TrackCompressionParams::RotationQuantization type, const hkUint8* in, hkQuaternion* out )
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpack8vec( hkVector4Parameter minp, hkVector4Parameter maxp, const hkUint8* HK_RESTRICT vals, hkVector4& out )
 {
-	static void ( HK_CALL * unpackfunc[6] )( const hkUint8* in, hkQuaternion* out ) = 
-	{ 
-		hkaSignedQuaternion::unpackSignedQuaternion32, 
-		hkaSignedQuaternion::unpackSignedQuaternion40, 
-		hkaSignedQuaternion::unpackSignedQuaternion48, 
-		hkaSignedQuaternion::unpackSignedQuaternion24, 
-		hkaSignedQuaternion::unpackSignedQuaternion16, 
-		hkaSignedQuaternion::unpackSignedQuaternion128
-	};
+	hkIntVector ivals; 
+	ivals.load<1>((const hkUint32*)vals);
+	ivals.setSplit8To32(ivals);
 
-	HK_ASSERT2( 0x3aa3eb74, TrackCompressionParams::validQuantization( type ), "Spline data corrupt." );
+	hkVector4 v;
+	ivals.convertS32ToF32(v);
 
-	(* unpackfunc[ type ] )( in, out );
+	v.mul(hkSimdReal_Inv_255);
+	hkVector4 span;
+	span.setSub(maxp, minp);
+
+	out.setAddMul(minp, span, v);
 }
-
 
 /// Evaluate the spline at a given time.  Chooses from several optimized function implementations
 /// \param u Time to evaluate at
@@ -198,14 +140,17 @@ void hkaSplineCompressedAnimation::unpackQuaternion( TrackCompressionParams::Rot
 /// \param U Array of knot values for the given time
 /// \param P Array of control point values for the given time
 /// \param out Output value
-void hkaSplineCompressedAnimation::evaluate( hkReal u, int p, hkReal U[ MAX_DEGREE * 2 ], hkVector4 P[ MAX_ORDER ], hkVector4& out )
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::evaluate( hkReal u, int p, const hkReal* HK_RESTRICT U, const hkVector4* HK_RESTRICT P, hkVector4& out )
 {
-	static void (* evaluateFunction[4] )( hkReal u, int p, hkReal U[ MAX_DEGREE * 2 ], hkVector4 P[ MAX_ORDER ], hkVector4& out ) =
-		{ HK_NULL, evaluateSimple1, evaluateSimple2, evaluateSimple3 };
-
 	HK_ASSERT2( 0x3aa3eb74,  p >= 1 && p <= 3, "Spline data corrupt." );
 
-	return evaluateFunction[ p ]( u, p, U, P, out );
+	switch (p)
+	{
+	case 1: evaluateSimple1( u, p, U, P, out ); break;
+	case 2: evaluateSimple2( u, p, U, P, out ); break;
+	case 3: evaluateSimple3( u, p, U, P, out ); break;
+	default: HK_ASSERT2(0x3aa3eb74,false,"unknown compression type");
+	}
 }
 
 
@@ -215,7 +160,7 @@ void hkaSplineCompressedAnimation::evaluate( hkReal u, int p, hkReal U[ MAX_DEGR
 /// \param p Degree
 /// \param u Knot value to find span for as byte
 /// \param U Array of knots as bytes
-int hkaSplineCompressedAnimation::findSpan( int n, int p, hkUint8 u, const hkUint8* U )
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::findSpan( int n, int p, hkUint8 u, const hkUint8* U )
 {
 	// Bounds protect
 	// Splines can extrapolate, so times (slightly) outside the range are OK.
@@ -239,13 +184,13 @@ int hkaSplineCompressedAnimation::findSpan( int n, int p, hkUint8 u, const hkUin
 /// Provides an unambiguous result for the blockOut when
 /// multithreading on processors with different numeric precision.
 /// The blockTimeOut may be subject to differences in precision.
-/// This avoids discrepencies in boundary cases where the block
+/// This avoids discrepancies in boundary cases where the block
 /// index is computed differently on different processors.
 /// \param time Time to query the animation
 /// \param blockOut Which block the local time lies within
 /// \param blockTimeOut Local time within the block
 /// \param quantizedTimeOut Time expressed as integer within the block
-void hkaSplineCompressedAnimation::getBlockAndTime( hkUint32 frame, hkReal delta, int& blockOut, hkReal& blockTimeOut, hkUint8& quantizedTimeOut ) const
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::getBlockAndTime( hkUint32 frame, hkReal delta, int& blockOut, hkReal& blockTimeOut, hkUint8& quantizedTimeOut ) const
 {
 	// Find the appropriate block
 	blockOut = frame / ( m_maxFramesPerBlock - 1 );
@@ -256,15 +201,209 @@ void hkaSplineCompressedAnimation::getBlockAndTime( hkUint32 frame, hkReal delta
 
 	// Find the local time
 	const hkUint32 firstFrameOfBlock = blockOut * ( m_maxFramesPerBlock - 1 );
-	const hkReal realFrame = static_cast< hkReal >( frame - firstFrameOfBlock ) + delta;
+	const hkReal realFrame = hkReal( frame - firstFrameOfBlock ) + delta;
 	blockTimeOut = realFrame * m_frameDuration;
 
 	// Find the truncated time
 	quantizedTimeOut = static_cast< hkUint8 >( ( blockTimeOut * m_blockInverseDuration ) * ( m_maxFramesPerBlock - 1 ) );
 }
 
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlignQuaternion( hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q, const hkUint8* HK_RESTRICT & dataInOut )
+{
+	HK_ASSERT2( 0x3aa3eb74, TrackCompressionParams::validQuantization( Q ), "Spline data corrupt." );
+
+	// Bit mask for byte alignment
+	// Each type has it's own unique byte alignment
+
+	switch (Q)
+	{
+	case TrackCompressionParams::POLAR32:		readAlign<4>( dataInOut ); break;
+	case TrackCompressionParams::THREECOMP40:	readAlign<1>( dataInOut ); break;
+	case TrackCompressionParams::THREECOMP48:	readAlign<2>( dataInOut ); break;
+	case TrackCompressionParams::THREECOMP24:	readAlign<1>( dataInOut ); break;
+	case TrackCompressionParams::STRAIGHT16:	readAlign<2>( dataInOut ); break;
+	case TrackCompressionParams::UNCOMPRESSED:	readAlign<4>( dataInOut ); break;
+	default: HK_ASSERT2(0x3aa3eb74,false,"unknown compression type");
+	}
+}
+
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerQuaternion( hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q )
+{
+	HK_ASSERT2( 0x3aa3eb74, TrackCompressionParams::validQuantization( Q ), "Spline data corrupt." );
+
+	switch (Q)
+	{
+	case TrackCompressionParams::POLAR32:		return 4;
+	case TrackCompressionParams::THREECOMP40:	return 5;
+	case TrackCompressionParams::THREECOMP48:	return 6;
+	case TrackCompressionParams::THREECOMP24:	return 3;
+	case TrackCompressionParams::STRAIGHT16:	return 2;
+	case TrackCompressionParams::UNCOMPRESSED:	return 16;
+	default: HK_ASSERT2(0x3aa3eb74,false,"unknown compression type"); return 0;
+	}
+}
+
+#if defined(HKA_USE_TEMPLATES)
+
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlignQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::POLAR32>( const hkUint8* HK_RESTRICT & dataInOut ) const
+{
+	readAlign<4>( dataInOut );
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlignQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP40>( const hkUint8* HK_RESTRICT & dataInOut ) const
+{
+	readAlign<1>( dataInOut );
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlignQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP48>( const hkUint8* HK_RESTRICT & dataInOut ) const
+{
+	readAlign<2>( dataInOut );
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlignQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP24>( const hkUint8* HK_RESTRICT & dataInOut ) const
+{
+	readAlign<1>( dataInOut );
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlignQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::STRAIGHT16>( const hkUint8* HK_RESTRICT & dataInOut ) const
+{
+	readAlign<2>( dataInOut );
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlignQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::UNCOMPRESSED>( const hkUint8* HK_RESTRICT & dataInOut ) const
+{
+	readAlign<4>( dataInOut );
+}
+template <hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::readAlignQuaternion( const hkUint8* HK_RESTRICT & dataInOut ) const
+{
+	HK_ASSERT2(0x3aa3eb74,false,"unknown compression type");
+}
+
+
+template <>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::POLAR32>() const
+{
+	return 4;
+}
+template <>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP40>() const
+{
+	return 5;
+}
+template <>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP48>() const
+{
+	return 6;
+}
+template <>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP24>() const
+{
+	return 3;
+}
+template <>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::STRAIGHT16>() const
+{
+	return 2;
+}
+template <>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::UNCOMPRESSED>() const
+{
+	return 16;
+}
+template <hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerQuaternion() const
+{
+	HK_ASSERT2(0x3aa3eb74,false,"unknown compression type"); return 0;
+}
+
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::POLAR32>( const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const
+{
+	hkaSignedQuaternion::unpackSignedQuaternion32(in,out);
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP40>( const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const
+{
+	hkaSignedQuaternion::unpackSignedQuaternion40(in,out);
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP48>( const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const
+{
+	hkaSignedQuaternion::unpackSignedQuaternion48(in,out);
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP24>( const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const
+{
+	hkaSignedQuaternion::unpackSignedQuaternion24(in,out);
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::STRAIGHT16>( const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const
+{
+	hkaSignedQuaternion::unpackSignedQuaternion16(in,out);
+}
+template <>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuaternion<hkaSplineCompressedAnimation::TrackCompressionParams::UNCOMPRESSED>( const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const
+{
+	hkaSignedQuaternion::unpackSignedQuaternion128(in,out);
+}
+template <hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q>
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuaternion( const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const
+{
+	HK_ASSERT2(0x3aa3eb74,false,"unknown compression type");
+}
+
+template <>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerComponent<hkaSplineCompressedAnimation::TrackCompressionParams::BITS8>() const
+{
+	return 1;
+}
+template <>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerComponent<hkaSplineCompressedAnimation::TrackCompressionParams::BITS16>() const
+{
+	return 2;
+}
+template <hkaSplineCompressedAnimation::TrackCompressionParams::ScalarQuantization Q>
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerComponent() const
+{
+	HK_ASSERT2(0x3aa3eb74,false,"unknown compression type"); return 0;
+}
+
+#else
+
+HK_FORCE_INLINE void hkaSplineCompressedAnimation::unpackQuaternion( hkaSplineCompressedAnimation::TrackCompressionParams::RotationQuantization Q, const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out ) const
+{
+	HK_ASSERT2( 0x3aa3eb74, TrackCompressionParams::validQuantization(Q), "Spline data corrupt." );
+
+	switch (Q)
+	{
+	case TrackCompressionParams::POLAR32:		hkaSignedQuaternion::unpackSignedQuaternion32(in,out); break;
+	case TrackCompressionParams::THREECOMP40:	hkaSignedQuaternion::unpackSignedQuaternion40(in,out); break;
+	case TrackCompressionParams::THREECOMP48:	hkaSignedQuaternion::unpackSignedQuaternion48(in,out); break;
+	case TrackCompressionParams::THREECOMP24:	hkaSignedQuaternion::unpackSignedQuaternion24(in,out); break;
+	case TrackCompressionParams::STRAIGHT16:	hkaSignedQuaternion::unpackSignedQuaternion16(in,out); break;
+	case TrackCompressionParams::UNCOMPRESSED:	hkaSignedQuaternion::unpackSignedQuaternion128(in,out); break;
+	default: HK_ASSERT2(0x3aa3eb74,false,"unknown compression type");
+	}
+}
+
+HK_FORCE_INLINE int hkaSplineCompressedAnimation::bytesPerComponent( hkaSplineCompressedAnimation::TrackCompressionParams::ScalarQuantization Q ) const
+{
+	HK_ASSERT2( 0x3aa3eb74, TrackCompressionParams::validQuantization(Q), "Spline data corrupt." );
+
+	switch (Q)
+	{
+	case TrackCompressionParams::BITS8:  return 1;
+	case TrackCompressionParams::BITS16: return 2;
+	default: HK_ASSERT2(0x3aa3eb74,false,"unknown compression type"); return 0;
+	}
+}
+
+#endif
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

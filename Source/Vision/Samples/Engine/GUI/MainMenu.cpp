@@ -38,7 +38,7 @@ void SubDialog::OnItemClicked(VMenuEventDataObject *pEvent)
 // Override this function to prompt a message box before actually closing the dialog
 void MyMainMenu::SetDialogResult(int iResult)
 {
-#if !defined(_VISION_ANDROID)
+#if !defined(_VISION_ANDROID) && !defined(_VISION_TIZEN)
   // When the main dialog wants to quit, prompt a modal message box
   if (iResult==VGUIManager::ID_CANCEL)
   {
@@ -353,7 +353,7 @@ public:
 V_IMPLEMENT_SERIAL( MaskedPictureItem, VImageControl, 0, &GUIModule );
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

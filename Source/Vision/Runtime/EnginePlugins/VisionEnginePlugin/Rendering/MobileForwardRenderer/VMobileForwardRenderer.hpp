@@ -14,7 +14,6 @@
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Effects/EffectsModule.hpp>
 
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/RendererNode/VRendererNodeCommon.hpp>
-#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Sky/Sky.hpp>
 
 class VMobileForwardRenderingSystem;
 typedef VSmartPtr<VMobileForwardRenderingSystem> VMobileForwardRenderingSystemPtr;
@@ -161,47 +160,6 @@ public:
   EFFECTS_IMPEXP virtual void DeInitializeRenderer() HKV_OVERRIDE;
 
   /// \brief
-  ///   Creates the sky for the mobile forward rendering system.
-  ///
-  /// Creates the sky for the Mobile Forward Rendering System. In the integrated Time of Day system, the Mobile Forward
-  /// Rendering System blends between three different cube map skies depending on the daytime. 
-  /// 
-  /// \param szPrefixNoon
-  ///   Filename prefix for the set of sky textures at noon. The suffixes "_right", "_left", "_top", "_bottom",
-  ///   "_front", and "_back" will be added to the prefix to construct the final file names.
-  /// 
-  /// \param szPrefixDawn
-  ///   Filename prefix for the set of sky textures at dawn. The suffixes "_right", "_left", "_top", "_bottom",
-  ///   "_front", and "_back" will be added to the prefix to construct the final file names.
-  /// 
-  /// \param szPrefixDusk
-  ///   Filename prefix for the set of sky textures at dusk. The suffixes "_right", "_left", "_top", "_bottom",
-  ///   "_front", and "_back" will be added to the prefix to construct the final file names.
-  /// 
-  /// \param szPrefixNight
-  ///   Filename prefix for the set of sky textures at night. The suffixes "_right", "_left", "_top", "_bottom",
-  ///   "_front", and "_back" will be added to the prefix to construct the final file names.
-  /// 
-  /// \param szExtension
-  ///   Extension of the sky texture filenames (e.g. "dds" or "bmp").
-  /// 
-  /// \param bUseBottom
-  ///   true if the bottom part of the sky texture should be loaded, otherwise false.
-  EFFECTS_IMPEXP void CreateSky(const char *szPrefixNoon, const char *szPrefixDawn, const char *szPrefixDusk, const char *szPrefixNight, const char *szExtension, bool bUseBottom = true);
-
-  /// \brief
-  ///   Destroys the sky along with all associated texture resources.
-  EFFECTS_IMPEXP void DestroySky();
-
-  /// \brief
-  ///   If time of day is enabled, this method will update the sun properties (and all associated settings).
-  ///
-  /// This method should be called periodically (i.e. once per frame) if the sun or time of day settings are
-  /// changed.
-  EFFECTS_IMPEXP void UpdateTimeOfDay();
-
-
-  /// \brief
   ///   Sets the resolution mode, target rendering density, and filtering mode.
   ///
   /// Sometimes, it is desired to render the scene at a resolution that differs from the actual display resolution. For instance, high-resolution display
@@ -250,7 +208,7 @@ public:
 #ifndef _VISION_DOC
   // INTERNAL:
   EFFECTS_IMPEXP void GetTargetSizeFromDeviceDPI(const int *pOriginalSize, int *pTargetSize) const;
-  EFFECTS_IMPEXP bool DetermineRenderResolution(int *iTargetSize);
+  EFFECTS_IMPEXP void DetermineRenderResolution();
   EFFECTS_IMPEXP void SetUpscaling(bool bStatus, int iWidth, int iHeight);
   inline bool IsUsingUpscaling() const { return m_spUpscaleTargetContext != NULL; }
 
@@ -292,7 +250,6 @@ protected:
   VisRenderContextPtr m_spUpscaleTargetContext;
   VisRenderContextPtr m_spOriginalSizeTargetContext;
   VisRenderContextPtr m_spStoreFinalTargetContext;
-  VSkyPtr m_spSky;
 
   IVisShaderProviderPtr oldShaderProvider;
   IVisShaderProviderPtr mobileShaderProvider;
@@ -302,7 +259,7 @@ protected:
 #endif  // VMOBILE_FORWARDRENDERER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -301,13 +301,16 @@ public:
   /// \brief
   ///   Normalizes this vector under all circumstances and returns its previous length.
   ///
-  /// If the vector can not be normalized, its x component will be set to 1 and all other components to 0.
+  /// If the vector can not be normalized, the vector is set to vFallback.
   /// In this case the function will return 0, as the vectors previous length was 0 (or invalid).
   /// If the vector can be normalized, the previous length is returned.
   ///
+  /// \param fEpsilon If all values are in range [-fEpsilon; +fEpsilon] the vector is considered to be 'zero'.
+  /// \param vFallback The fall back is used if the vector cannot be normalized.
+  ///
   /// \sa hkvVec3::normalize
   /// \sa hkvVec3::normalizeIfNotZero
-  HKV_FORCE_INLINE float normalizedEnsureUnitLength ();
+  HKV_FORCE_INLINE float normalizedEnsureUnitLength (float fEpsilon = HKVMATH_EPSILON, const hkvVec3& vFallback = hkvVec3(1.0f, 0.0f, 0.0f));
 
   /// \brief
   ///   Returns the distance between this vector and rhs.
@@ -822,7 +825,7 @@ HKV_FORCE_INLINE const hkvVec3 operator/ (const hkvVec3& lhs, float f);
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

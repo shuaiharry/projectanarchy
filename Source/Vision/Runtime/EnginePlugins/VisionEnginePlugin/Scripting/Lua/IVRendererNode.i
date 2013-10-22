@@ -200,7 +200,7 @@ public:
   /// @{
   
   /// \brief Returns the multisampling mode used by the renderer node.
-  /// \returns 0: disabled 1: multisample 1x
+  /// \return 0: disabled 1: multisample 1x
   number GetMultisampleMode();
 
   /// \brief Requested gamma correction mode (available if implemented in this node).
@@ -208,7 +208,7 @@ public:
   void SetGammaCorrection(number gammaCorrection);
 
   /// \brief Returns the gamma correction mode.
-  /// \retrn 0 if the gamma correction is disabled, -1 if it is applied before the transformation, +1 if it is applied after the transformation.
+  /// \return 0 if the gamma correction is disabled, -1 if it is applied before the transformation, +1 if it is applied after the transformation.
   number GetGammaCorrection();
  
   /// \brief Use this method to set whether the renderer node should use HDR rendering. Implementations may choose to ignore this.
@@ -235,7 +235,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

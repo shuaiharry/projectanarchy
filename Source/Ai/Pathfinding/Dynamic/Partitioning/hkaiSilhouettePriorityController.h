@@ -40,6 +40,7 @@ class hkaiSilhouettePriorityController : public hkReferencedObject
 		virtual void sortSilhouetteGenerators( hkArrayBase<const hkaiSilhouetteGeneratorSectionContext*>& contexts ) const = 0;
 };
 
+	/// Default implementation of the hkaiSilhouettePriorityController inteface.
 class hkaiDefaultSilhouettePriorityController : public hkaiSilhouettePriorityController
 {
 	public:
@@ -60,7 +61,7 @@ class hkaiDefaultSilhouettePriorityController : public hkaiSilhouettePriorityCon
 #endif // HK_AI_OVERLAP_MANAGER
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

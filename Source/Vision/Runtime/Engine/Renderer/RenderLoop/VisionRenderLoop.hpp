@@ -17,23 +17,20 @@ class IVisRenderLoop_cl;
 #include <Vision/Runtime/Engine/System/VisApiCallbacks.hpp>
 #include <Vision/Runtime/Engine/Renderer/Shader/VisApiShaderProvider.hpp>
 
-// TODO: Maybe get rid of these at some time :).
 #define RLP_MAX_ENTITY_SURFACESHADERS 1024
 #define RLP_MAX_ENTITY_SURFACES       1024
 
 typedef VSmartPtr<IVisRenderLoop_cl> IVisRenderLoopPtr; 
 
+class VisMeshBufferObjectCollection_cl;
 class VisRenderCollection_cl;
 class VisStaticGeometryInstanceCollection_cl;
 class VLightGrid_cl;
-class VisMeshBufferObjectCollection_cl;
-
-
 
 /// \brief
-///   This class implements the engine's default shader provider.
-/// 
-/// The class is used by the renderloop to manage the various lighting shaders.
+///   This class implements the engine's default IVisShaderProvider_cl.
+///
+/// This shader provider implementation selects the shaders used by the VForwardRenderingSystem and the VSimpleRendererNode.
 class VisionShaderProvider_cl : public IVisShaderProvider_cl, public IVisCallbackHandler_cl
 {
 public:
@@ -51,43 +48,43 @@ public:
 
   /// \brief
   ///   Overridden function. See base class.
-  VISION_APIFUNC VOVERRIDE VCompiledEffect* CreateMaterialEffect(VisSurface_cl *pSurface, int iFlags=0);
+  VISION_APIFUNC virtual VCompiledEffect* CreateMaterialEffect(VisSurface_cl *pSurface, int iFlags=0) HKV_OVERRIDE;
   
 
   /// \brief
   ///   Overridden function. This implementation loops through all models in the scene and calls
   ///   CreateLightingShaderForModel.
-  VISION_APIFUNC VOVERRIDE void CreateLightingShaderForAllModels(bool bIncludeManualAssignments);
+  VISION_APIFUNC virtual void CreateLightingShaderForAllModels(bool bIncludeManualAssignments) HKV_OVERRIDE;
 
 
   /// \brief
   ///   Overridden function. This implementation creates a shader set and gathers the default
   ///   effect for each surface (using CreateMaterialEffect).
-  VISION_APIFUNC VOVERRIDE void CreateLightingShaderForModel(VDynamicMesh *pModel, bool bIncludeManualAssignments);
+  VISION_APIFUNC virtual void CreateLightingShaderForModel(VDynamicMesh *pModel, bool bIncludeManualAssignments) HKV_OVERRIDE;
 
 
   /// \brief
   ///   Overridden function. This implementation loops through all world surfaces and gathers the
   ///   default effect for each surface (using CreateMaterialEffect)
-  VISION_APIFUNC VOVERRIDE void CreateLightingShaderForWorld(bool bIncludeManualAssignments);
+  VISION_APIFUNC virtual void CreateLightingShaderForWorld(bool bIncludeManualAssignments) HKV_OVERRIDE;
 
 
   /// \brief
   ///   Returns the dynamic light shader that matches the parameters passed to this method.
   ///   Additionally sets various parameters in the respective shader according to the provided
   ///   parameters.
-  VISION_APIFUNC VOVERRIDE VCompiledTechnique *GetDynamicLightShader(const VisLightSource_cl *pLight, 
-    const VisSurface_cl *pSurface, bool bForEntity);
+  VISION_APIFUNC virtual VCompiledTechnique *GetDynamicLightShader(const VisLightSource_cl *pLight, 
+    const VisSurface_cl *pSurface, bool bForEntity) HKV_OVERRIDE;
 
 
   /// \brief
   ///   Initializes a new frame. Currently just clears a few values.
-  VISION_APIFUNC VOVERRIDE void ResetCache();
+  VISION_APIFUNC virtual void ResetCache() HKV_OVERRIDE;
 
 
   /// \brief
   ///   Sets the default lighting color.
-  VISION_APIFUNC VOVERRIDE void SetDefaultLightingColor(VColorRef iColor);
+  VISION_APIFUNC virtual void SetDefaultLightingColor(VColorRef iColor) HKV_OVERRIDE;
 
 
   ///
@@ -102,33 +99,27 @@ public:
   
 
   /// \brief
-  ///   Implements IVisRenderLoop_cl
-  VISION_APIFUNC VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData);
-  
-    
-  /// \brief
-  ///   Currently nothing is loaded here, instead all textures are created on demand
-  ///   (GetDefaultAttenuationTexture/GetDefaultSpotlightTexture)
-  VISION_APIFUNC void LoadDefaultTextures();
+  ///   Implements IVisCallbackHandler_cl.
+  VISION_APIFUNC virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE;
 
 
   /// \brief
-  ///   Releases the texture smart pointers
+  ///   Releases the texture smart pointers.
   VISION_APIFUNC void ReleaseDefaultTextures();
 
 
   /// \brief
-  ///   Returns the default smooth attenuation curve texture 
+  ///   Returns the default smooth attenuation curve texture.
   VISION_APIFUNC VTextureObject* GetDefaultAttenuationTexture();
 
 
   /// \brief
-  ///   Returns the default projected texture
+  ///   Returns the default spot light projection texture.
   VISION_APIFUNC VTextureObject* GetDefaultSpotlightTexture();
 
 
   /// \brief
-  ///   Returns the technique that simply tints with a default color
+  ///   Returns a technique that simply tints with a default color.
   VISION_APIFUNC VCompiledEffect* GetDefaultLightingColorEffect(bool bUseAlphaTest = false, 
     float fAlphaThreshold = 0.0f, bool bIsDoubleSided = false, bool bUsesDepthWrite = true);
   
@@ -153,14 +144,17 @@ public:
 
 
 /// \brief
-///   Interface for handling the engine's render loop callback
+///   Interface for executing the draw calls inside a VisRenderContext_cl.
+///
+/// Each VisRenderContext_cl holds a pointer to an instance of this interface which is called
+/// after the context's render target etc. have been set up.
 class IVisRenderLoop_cl : public VRefCounter, public VisTypedEngineObject_cl
 {
 public:
   V_DECLARE_DYNAMIC_DLLEXP(IVisRenderLoop_cl, VISION_APIDATA);
 
   /// \brief
-  ///   Execute the render loop
+  ///   Execute the render loop.
   /// 
   /// \param pUserData
   ///   The user data of the render context that calls the rendering. See
@@ -173,23 +167,23 @@ public:
 };
 
 /// \brief
-///   Helper class to collect all visible visibility objects. E.g. particles and mesh buffers
+///   Helper class to collect all visible particle groups and mesh buffer objects.
 class VVisibilityObjectCollector
 {
 public:
-  /// \brief default constructor
+  /// \brief Default constructor.
   VISION_APIFUNC VVisibilityObjectCollector();
 
-  /// \brief default destructor
+  /// \brief Destructor.
   VISION_APIFUNC ~VVisibilityObjectCollector();
 
-  /// \brief Fills the internal collections with new data from the visibility collector
+  /// \brief Fills the internal collections with new data from the visibility collector.
   VISION_APIFUNC void HandleVisibleVisibilityObjects();
 
-  /// \brief returns a collection of all particle groups
+  /// \brief Returns a collection of all visible particle groups.
   inline VisParticleGroupCollection_cl& GetParticleGroupCollection() { return m_ParticleGroupCollection; }
 
-  /// \brief returns a collection of all mesh buffer objects
+  /// \brief Returns a collection of all visible mesh buffer objects.
   inline VisMeshBufferObjectCollection_cl& GetMeshBufferObjectCollection() { return m_MeshBufferObjectCollection; }
 
 private:
@@ -199,11 +193,8 @@ private:
 
 
 /// \brief
-///   This class implements the engine's default render loop. It also serves as a base class for
-///   custom render loop implementations.
-/// 
-/// The protected member functions of the VisionRenderLoop_cl class additionally provide some
-/// useful (though not required) helper functionality.
+///   This class implements the engine's legacy forward render loop. It renders the scene geometry and debug output
+///   directly into the target context.
 /// 
 /// Custom Render Loop implementations can easily be derived from this class (or IVisRenderLoop_cl)
 /// and assigned to render contexts using the VisRenderContext_cl::SetRenderLoop method.
@@ -212,21 +203,21 @@ class VisionRenderLoop_cl : public IVisRenderLoop_cl, public IVisCallbackHandler
 public:
 
   /// \brief
-  ///   Render Loop constructor
+  ///   Render Loop constructor.
   /// 
   /// Constructor of the render loop class. 
   VISION_APIFUNC VisionRenderLoop_cl();
 
 
   /// \brief
-  ///   Render Loop destructor
+  ///   Render Loop destructor.
   /// 
   /// Destructor of the render loop class. 
   VISION_APIFUNC ~VisionRenderLoop_cl();
 
 
   /// \brief
-  ///   Initializes the render loop
+  ///   Initializes the render loop.
   /// 
   /// Initialization method for the render loop (in case you're writing a custom render loop, take
   /// the base class implementation as a sample).
@@ -237,7 +228,7 @@ public:
 
 
   /// \brief
-  ///   De-initializes the render loop
+  ///   De-initializes the render loop.
   /// 
   /// De-initialization method for the render loop (in case you're writing a custom render loop,
   /// take the base class implementation as a sample).
@@ -245,7 +236,7 @@ public:
 
 
   /// \brief
-  ///   Main render loop callback function
+  ///   Main render loop callback function.
   /// 
   /// This is the actual render loop implementation. It serves as a callback function which will be
   /// executed by the engine.
@@ -263,41 +254,55 @@ public:
   VISION_APIFUNC virtual void OnDoRenderLoop(void *pUserData) HKV_OVERRIDE;
 
   /// \brief
-  ///   Returns the default smooth attenuation curve texture 
+  ///   Returns the default smooth attenuation curve texture .
   VISION_APIFUNC VTextureObject* GetDefaultAttenuationTexture();
 
 
   /// \brief
-  ///   Returns the default projected texture
+  ///   Returns the default projected texture.
   VISION_APIFUNC VTextureObject* GetDefaultSpotlightTexture();
 
   /// \brief
-  ///   Helper function to trigger a render hook and render all particle groups and mesh buffers associated with it
+  ///   Helper function to customize the order of the mesh buffer objects' and particles' render call within a render hook.
+  /// The default behaviour is that mesh buffer objects are rendered first.
   ///
-  /// \param visibleMeshBuffer
-  ///   a collection of all mesh buffers that are visible
-  ///
-  /// \param visibleParticleGroups
-  ///   a collection of all visible particle groups
+  /// \note
+  ///   Only the render hooks in between VRH_PRE_RENDERING and VRH_CORONAS_AND_FLARES will be taken into account, see VRenderHook_e.
   ///
   /// \param eRenderHook
-  ///   the render hook to trigger
+  ///   The render hook order to customize.
+  ///
+  /// \param bRenderMeshBufferObjectsFirst
+  ///   Whether mesh buffer objects (true) or particles (false) should be rendered first.
+  static VISION_APIFUNC void SetRenderHookOrder(VRenderHook_e eRenderHook, bool bRenderMeshBufferObjectsFirst);
+
+  /// \brief
+  ///   Helper function to trigger a render hook and render all particle groups and mesh buffers associated with it.
+  ///
+  /// \param visibleMeshBuffer
+  ///   A collection of all mesh buffers that are visible.
+  ///
+  /// \param visibleParticleGroups
+  ///   A collection of all visible particle groups.
+  ///
+  /// \param eRenderHook
+  ///   The render hook to trigger.
   ///
   /// \param bTriggerCallbacks
-  ///   true if the render hook should be triggered, false if only particle systems and mesh buffers should be rendered
+  ///   True if the render hook should be triggered, false if only particle systems and mesh buffers should be rendered.
   static VISION_APIFUNC void RenderHook(const VisMeshBufferObjectCollection_cl &visibleMeshBuffer, const VisParticleGroupCollection_cl *visibleParticleGroups, VRenderHook_e eRenderHook, bool bTriggerCallbacks);
 
   /// \brief
-  ///   Helper function to trigger a renderhook and render all particle groups and mesh buffers associated with it
+  ///   Helper function to trigger a render hook and render all particle groups and mesh buffers associated with it.
   ///
   /// \param visibleMeshBuffer
-  ///   a collection of all mesh buffers that are visible
+  ///   A collection of all mesh buffers that are visible.
   ///
   /// \param visibleParticleGroups
-  ///   a collection of all visible particle groups
+  ///   A collection of all visible particle groups.
   ///
   /// \param eRenderHook
-  ///   the render hook to trigger
+  ///   The render hook to trigger.
   inline void RenderHook(const VisMeshBufferObjectCollection_cl &visibleMeshBuffer, const VisParticleGroupCollection_cl *visibleParticleGroups, VRenderHook_e eRenderHook)
   {
     RenderHook(visibleMeshBuffer, visibleParticleGroups, eRenderHook, m_bTriggerCallbacks);
@@ -306,7 +311,7 @@ public:
 protected:
 
   /// \brief
-  ///   Draws all visible entity-specific shaders
+  ///   Draws all visible entity-specific shaders.
   /// 
   /// This method is responsible for rendering entity-specific shaders on all visible entities.
   /// 
@@ -316,7 +321,7 @@ protected:
   ///   Reference to a collection of entities to be rendered.
   /// 
   /// \param ePassType
-  ///   The Pass type of the shaders that should be drawn
+  ///   The Pass type of the shaders that should be drawn.
   /// 
   /// \param iTagFilter
   ///   If iTagFilter==VTF_IGNORE_TAGGED_ENTRIES, tagged entries inside the specified collection will not be rendered.
@@ -324,7 +329,7 @@ protected:
 
 
   /// \brief
-  ///   Draws entities which are flagged as always in foreground
+  ///   Draws entities which are flagged as always in foreground.
   /// 
   /// This method is responsible for rendering all visible foreground entities (i.e. entities which
   /// are always in the foreground due to VisBaseEntity_cl::SetAlwaysInForeground having been
@@ -337,7 +342,7 @@ protected:
   VISION_APIFUNC void DrawForegroundEntities(const VisEntityCollection_cl &EntityCollection);
 
   /// \brief
-  ///   Masks out entities which are flagged as always in foreground
+  ///   Masks out entities which are flagged as always in foreground.
   /// 
   /// This method is responsible for masking out all visible foreground entities (i.e. entities which
   /// are always in the foreground due to VisBaseEntity_cl::SetAlwaysInForeground having been
@@ -350,7 +355,7 @@ protected:
   VISION_APIFUNC void MaskOutForegroundEntities(const VisEntityCollection_cl &EntityCollection);
 
   /// \brief
-  ///   Draws dynamic lighting on entities and static geometry
+  ///   Draws dynamic lighting on entities and static geometry.
   /// 
   /// Draws dynamic lighting and shadows for all entities and static geometry instances,
   /// taking the global engine settings into account.
@@ -359,8 +364,8 @@ protected:
 
   /// \brief
   ///   Overridden IVisCallbackHandler_cl function to listen to some global events such as
-  ///   UnloadWorld
-  VISION_APIFUNC VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData);
+  ///   UnloadWorld.
+  VISION_APIFUNC virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE;
 
 
   /// \brief
@@ -382,10 +387,6 @@ protected:
 
   VISION_APIFUNC void CreateMemexportSkinningShaders();
   VISION_APIFUNC void ReleaseMemexportSkinningShaders();
-  
-  //////////////////////////////////////////////////////////////////////////////////
-  // lightgrid/lightmapping initialisation code and helper functions
-  //////////////////////////////////////////////////////////////////////////////////  
 
   VCompiledTechniquePtr m_spStaticLightShadowTechnique;
   VCompiledTechniquePtr m_spForegroundFillPassTechnique;
@@ -403,6 +404,8 @@ protected:
 
   VISION_APIDATA static VisStaticGeometryInstanceCollection_cl s_RenderGeoInstanceCollection;
 
+  VISION_APIDATA static unsigned int s_iRenderOrderBitfield;
+
   VVisibilityObjectCollector m_VisibilityObjectCollector;
 
   IVisShaderProvider_cl *m_pShaderProvider;                             ///< Only valid during OnDoRenderLoop
@@ -412,7 +415,6 @@ public:
   const VisFrustum_cl *m_pCameraFrustum;
   VisStaticGeometryInstanceCollection_cl m_TempGeoInstanceCollection;
   unsigned int m_iFrameCounter;                                         ///< just for arbitrary custom purposes
-  VisFrustum_cl m_TempFrustum;                                          ///< can be used for custom purposes; avoids re-allocations
 
   VTextureObjectPtr m_spAttenSmoothTex;                                 ///< The default smooth attenuation curve texture.
   VTextureObjectPtr m_spSpotlightTexture;                               ///< The default projected texture.
@@ -425,7 +427,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

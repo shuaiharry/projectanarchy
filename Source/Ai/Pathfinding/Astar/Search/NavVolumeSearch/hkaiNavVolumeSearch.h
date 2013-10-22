@@ -19,6 +19,7 @@
 #include <Ai/Pathfinding/Astar/SearchState/hkaiHashSearchState.h>
 
 #include <Ai/Pathfinding/Astar/OpenSet/hkaiHeapOpenSet.h>
+struct hkaiSearchMemoryInfo;
 
 	/// Utility for performing A* searches on a nav mesh.
 	/// This is used by hkaiPathfindingUtility and the multithreaded jobs; it is recommended that you use those instead of
@@ -31,7 +32,7 @@ struct hkaiNavVolumeSearch
 	//typedef hkaiDirectedGraphVisitor ClusterGraph;
 
 	typedef hkaiGraphMultiDistanceHeuristic<hkaiNavVolumeGraph> Heuristic;
-	typedef hkaiHashSearchState<Heuristic> SearchState;
+	typedef hkaiHashSearchState SearchState;
 
 	typedef hkaiHeapOpenSet OpenSet;
 
@@ -41,22 +42,6 @@ struct hkaiNavVolumeSearch
 		STATE_INFO_PREFETCH,
 		CHARACTER_INFO_PREFETCH,
 		GOAL_PREFETCH
-	};
-
-		/// Memory initialization information
-	struct MemInfo
-	{
-		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiNavVolumeSearch::MemInfo);
-		char* m_openSetStorage;
-		char* m_searchStateStorage;
-		int   m_openSetSize; // size in bytes
-		int   m_searchStateSize; // size in bytes
-
-		inline void setEmpty();
-		inline void init( hkArray<char>& openSetArray, hkArray<char>& searchStateArray );
-#ifndef HK_PLATFORM_SPU
-		inline void init( hkArray<char>::Temp& openSetArray, hkArray<char>::Temp& searchStateArray );
-#endif
 	};
 
 		/// Start point and goal information
@@ -71,16 +56,15 @@ struct hkaiNavVolumeSearch
 	};
 	
 
-	hkaiNavVolumeSearch( const MemInfo& memInfo /*const MemInfo& hierarchyMemInfo*/ )
-	:	m_openset(memInfo.m_openSetStorage, memInfo.m_openSetSize)
-	{
-	}
+	hkaiNavVolumeSearch( const hkaiSearchMemoryInfo& memInfo );
 
 		/// Initialize the search
-	void init(Graph* graph, const MemInfo& memInfo, const hkaiAgentTraversalInfo& agentInfo, const StartGoalInfo& goalInfo );
-
-		/// Initialize the search state
-	void initState();
+	void init(Graph* graph, const hkaiAgentTraversalInfo& agentInfo, const StartGoalInfo& goalInfo );
+	inline hkReal getCost(int nid)
+	{
+		m_state.nextNode( nid );
+		return m_state.getCost(nid);
+	}
 
 protected:
 		/// Set start and end cells.
@@ -121,7 +105,7 @@ public:
 #endif // HK_AI_NAV_VOLUME_SEARCH_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

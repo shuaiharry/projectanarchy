@@ -232,6 +232,17 @@ enum VRenderHook_e {
   VRH_CUSTOM                                                               = 0x00040000,
 };
 
+/// \brief
+///   Priority that defines whether the render hook callback is triggered before, in between or after the mesh buffer object and particle rendering
+///
+/// \sa VCallback::TriggerCallbacks
+/// \sa IVisCallbackHandler_cl::GetCallbackSortingKey
+enum VRenderHookPriority_e {
+  VRHP_PRE_MESHBUFFEROBJECTS_AND_PARTICLES    = -200000,
+  VRHP_BETWEEN_MESHBUFFEROBJECTS_AND_PARTICLES = -100000,
+  VRHP_POST_MESHBUFFEROBJECTS_AND_PARTICLES   = INT_MAX
+};
+
 // internal flags passed to the VisMeshBufferObject_cl::OnRender function
 #define VIS_MBONRENDERFLAG_NONE           0x00000000
 #define VIS_MBONRENDERFLAG_NOSTATESETUP   0x00010000
@@ -241,13 +252,14 @@ enum VRenderHook_e {
 #define VIS_LOD_TEST_NONE                 0
 #define VIS_LOD_TEST_CLIPPOSITION         32
 #define VIS_LOD_TEST_BOUNDINGBOX          64
-#define VIS_LOD_TEST_APPLYLODSCALING      128
+//#define VIS_LOD_TEST_APPLYLODSCALING      128
+#define VIS_LOD_TEST_UNUSED               128 // don't re-use this bit for backward compatibility reasons; LOD scale is now always applied (no reason to not apply it)
 
 #define VIS_HAS_NO_MODEL                  1
 #define VIS_EXCLUDED_FROM_VISTEST         2
 #define VIS_IS_INACTIVE                   4
 #define VIS_PERFORM_LODTEST_DEPRECATED    8
-#define VIS_PERFORM_LODTEST               (VIS_LOD_TEST_CLIPPOSITION|VIS_LOD_TEST_BOUNDINGBOX|VIS_LOD_TEST_APPLYLODSCALING)
+#define VIS_PERFORM_LODTEST               (VIS_LOD_TEST_CLIPPOSITION|VIS_LOD_TEST_BOUNDINGBOX)
 #define VIS_EXCLUDED_FROM_OCCLUSIONQUERY  16
 
 
@@ -352,7 +364,7 @@ enum VRenderHook_e {
   #define VISION_APIFUNC __declspec()
   #define VISION_APIDATA __declspec()
 
-#elif defined(_VISION_PS3) || defined(_VISION_IOS) || defined(_VISION_ANDROID) ||  defined(_VISION_PSP2) || defined(_VISION_WIIU) || defined(_VISION_WINRT)
+#elif defined(_VISION_PS3) || defined(_VISION_IOS) || defined(_VISION_ANDROID) ||  defined(_VISION_PSP2) || defined(_VISION_WIIU) || defined(_VISION_WINRT) || defined(_VISION_TIZEN)
   #define VISION_APIFUNC
   #define VISION_APIDATA
 
@@ -371,6 +383,7 @@ const unsigned int VIS_MSG_INTERNAL = 0xFFFF,                             ///< i
                    VIS_MSG_RESOURCE_AFTER_FILEMODIFIED = VIS_MSG_INTERNAL + 11,   ///< Sent after a resource has been reloaded because its file time stamp has been modified. The resource pointer is passed as iParamA and the manager passed as iParamB. Called by VisResourceSystem_cl::ReloadModifiedResourceFiles
                    VIS_MSG_REQUEST_IR_PARAMS = VIS_MSG_INTERNAL + 12,     ///< Used by external renderers to retrieve material params from IR renderer (internal use)
                    VIS_MSG_REPLAY_EVENT = VIS_MSG_INTERNAL + 13,          ///< Event used by record and replay implementations. iParamA and iParamB are implementation specific
+                   VIS_MSG_ENTITY_MESHCHANGED = VIS_MSG_INTERNAL + 14,    ///< Event sent to all components of an entity when the mesh changes. paramA = pointer to new mesh; paramB = pointer to the anim config, if set explicitly in course of setting the new mesh.
                    VIS_MSG_USER = 0,                                      ///< user messages have the range 0 - 9999
                    VIS_MSG_LASTUSER = 9999,                               ///< last user message
                    VIS_MSG_PHYSICS = 10000,                               ///< physics module messages have the range 10000 - 10999
@@ -1258,7 +1271,7 @@ bool CheckVersion(const char *pszDescr, int iVersion, int iMaxVersion);
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

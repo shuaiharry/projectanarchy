@@ -17,6 +17,7 @@ class hkbGenerator;
 
 class hkbLayer : public hkbBindable
 {
+	//+version(1)
 	public:
 
 		HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BEHAVIOR );
@@ -83,6 +84,11 @@ class hkbLayer : public hkbBindable
 		hkBool m_useMotion;	//+default(true)
 							//+hk.Description("Set this to true if you want to include the world from model from this layer, false otherwise.")
 
+			/// When enabled, forces the entire duration of the fade to play even when interrupting a currently active fade.  Otherwise, the fade
+			/// will have its duration set to the active fade's elapsed time.
+		hkBool m_forceFullFadeDurations;	//+default(false)
+											//+hk.Description("When enabled, forces the entire duration of the fade to play even when interrupting a currently active fade.  Otherwise, the fade will have its duration set to the active fade's elapsed time.")
+
 	public:
 
 		hkbLayer( hkFinishLoadedObjectFlag flag );
@@ -95,7 +101,7 @@ class hkbLayer : public hkbBindable
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

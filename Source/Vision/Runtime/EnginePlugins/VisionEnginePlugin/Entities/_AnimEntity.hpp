@@ -93,13 +93,17 @@ public:
   EFFECTS_IMPEXP VSimpleAnimationComponent(int iComponentFlags = VIS_OBJECTCOMPONENTFLAG_NONE);
   EFFECTS_IMPEXP virtual ~VSimpleAnimationComponent();
 
+  /// \brief Pauses / Resumes the animation (if running).
+  EFFECTS_IMPEXP void SetPaused(bool bEnabled);
+
   // IVObjectComponent overrides
   EFFECTS_IMPEXP virtual void SetOwner(VisTypedEngineObject_cl *pOwner) HKV_OVERRIDE;
   EFFECTS_IMPEXP virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut) HKV_OVERRIDE;
   EFFECTS_IMPEXP virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value) HKV_OVERRIDE;
   EFFECTS_IMPEXP virtual bool IsRelevantForSerialization() const HKV_OVERRIDE;
+  EFFECTS_IMPEXP virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB) HKV_OVERRIDE;
 
-  //serialization
+  // Serialization
   V_DECLARE_SERIAL_DLLEXP( VSimpleAnimationComponent, EFFECTS_IMPEXP)
   V_DECLARE_VARTABLE(VSimpleAnimationComponent, EFFECTS_IMPEXP)
   EFFECTS_IMPEXP virtual void Serialize( VArchive &ar ) HKV_OVERRIDE;
@@ -126,9 +130,12 @@ private:
   };
 
   /// \brief
-  ///   Static helper function to start the animation of an entity.
-  static EFFECTS_IMPEXP bool StartAnimation(VisBaseEntity_cl* pEntity, const char* szAnimName);
+  ///   Helper function accessing the member data.
+  bool StartAnimation();
 
+  /// \brief
+  ///   Static helper function to start the animation of an entity.
+  static bool StartAnimation(VisBaseEntity_cl* pEntity, const char* szAnimName);
 };
 
 
@@ -194,7 +201,7 @@ protected:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

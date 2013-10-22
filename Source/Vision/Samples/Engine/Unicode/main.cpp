@@ -33,10 +33,10 @@ VISION_INIT
 
 #if defined(_VISION_PSP2)
   if (!g_spApp->InitSample("Unicode" /*DataDir*/, "worldmap" /*SampleScene*/, 
-    (VSAMPLE_INIT_DEFAULTS & ~VSAMPLE_HAVOKLOGO), 960, 544 ))
+    (VSampleFlags::VSAMPLE_INIT_DEFAULTS & ~VSampleFlags::VSAMPLE_HAVOKLOGO), 960, 544 ))
 #else
   if (!g_spApp->InitSample("Unicode" /*DataDir*/, "worldmap" /*SampleScene*/, 
-    (VSAMPLE_INIT_DEFAULTS & ~VSAMPLE_HAVOKLOGO) ))
+    (VSampleFlags::VSAMPLE_INIT_DEFAULTS & ~VSampleFlags::VSAMPLE_HAVOKLOGO) ))
 #endif
     return false;
 
@@ -105,7 +105,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

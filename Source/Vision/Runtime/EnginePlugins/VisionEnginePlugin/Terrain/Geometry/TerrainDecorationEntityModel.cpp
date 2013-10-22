@@ -466,6 +466,7 @@ void VTerrainDecorationEntityModel::RenderBatchOTW(VTerrainVisibilityCollectorCo
     int iVertexCount = m_spModelMesh->GetVertexCount();
     int iMaxInstanceCount, iInstanceStreamMask;
     VisMeshBuffer_cl *pInstanceMesh = ((VTerrainDecorationModelManager *)GetParentManager())->GetInstanceBuffer(iMaxInstanceCount,iInstanceStreamMask);
+    iInstanceStreamMask &= pShader->GetStreamMask();
 
     // lightmap version
     if (m_iLightmapSampler>=0 && pInfoComp!=NULL)
@@ -674,6 +675,7 @@ void VTerrainDecorationEntityModel::RenderBatchIR(VTerrainVisibilityCollectorCom
     
     const int iStreamMask = m_spModelMesh->GetStreamMask() & (pShader->GetStreamMask() | VERTEX_STREAM_INDEXBUFFER);
     VisMeshBuffer_cl* pInstanceMesh = pManager->GetInstanceBuffer(iMaxInstanceCount, iInstanceStreamMask);
+    iInstanceStreamMask &= pShader->GetStreamMask();
 
     // perform the rendering
     Vision::RenderLoopHelper.BeginMeshRendering();
@@ -786,6 +788,7 @@ void VTerrainDecorationEntityModel::RecreateIRShaders(VisSurface_cl* pSurface, V
     }
 
     VASSERT(pTechnique != NULL && pTechnique->GetShaderCount() == 1);
+    pTechnique->GetShader(0)->m_bModified = true;
 
     m_spInstancingTechIRMainPass = pTechnique;
   }
@@ -820,6 +823,7 @@ void VTerrainDecorationEntityModel::RecreateIRShaders(VisSurface_cl* pSurface, V
     }
 
     VASSERT(pTechnique != NULL && pTechnique->GetShaderCount() == 1);
+    pTechnique->GetShader(0)->m_bModified = true;
 
     m_spInstancingTechIRPrePass = pTechnique;
   }
@@ -856,7 +860,7 @@ char* VTerrainDecorationEntityModel::GetParamStringForIRSurface(VisSurface_cl* p
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

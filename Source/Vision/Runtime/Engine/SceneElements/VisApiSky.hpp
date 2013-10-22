@@ -17,7 +17,10 @@
 class IVSky;
 typedef VSmartPtr<IVSky> IVSkyPtr;
 
-#define MAX_SKY_LAYERS    8
+/// \brief Defines how many sky layers are supported.
+/// Attention: You cannot just increase this value and think it will work. The sky shaders also need to support that many layers (which means more shader permutations).
+/// Currently all sky shaders are compiled to support up to 4 sky layers.
+#define MAX_SKY_LAYERS    4
 
 /// \brief
 ///  Sky class interface.
@@ -85,7 +88,7 @@ VISION_ELEMENTMANAGER_TEMPLATE_DECL(IVSky)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

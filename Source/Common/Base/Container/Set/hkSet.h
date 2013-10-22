@@ -74,6 +74,10 @@ public:
 	/// Get the element at iterator i.
 	T getElement( Iterator i ) const;
 
+	/// Update the element at the iterator. The hash values of the updated element MUST be the same, so this can
+	/// generally only be used if you've specialized hkMapOperations<T>, e.g. hkMapOperations<hkIntRealPair> below.
+	void updateElement( Iterator i, const T& elem );
+
 	/// Get the next iterator after i.
 	Iterator getNext( Iterator i ) const;
 
@@ -157,7 +161,7 @@ public:
 #endif // HKBASE_HKPOINTERMAP_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

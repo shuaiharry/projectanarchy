@@ -437,7 +437,7 @@ protected:
   AttachedTorch_cl *m_pTorch;
 
   // animation system members
-  VSmartPtr<VisAnimConfig_cl> m_spAnimConfig; // keep reference on anim config
+  VisAnimConfigPtr m_spAnimConfig;
   VisSkeletalAnimSequencePtr m_spSkeletalSequenceList[MAX_ANIMID];
   
   int m_iPrimaryUpperBodyControlIndex;
@@ -461,21 +461,21 @@ protected:
 
   // full body animation ID sets
   FullBodyAnimIDLookup *m_pFullBodyAnimIDLookup[2];
+
 public:
-  VisAnimLayerMixerNode_cl* m_pLayerMixer;
+  VSmartPtr<VisAnimLayerMixerNode_cl> m_spLayerMixer;
   VisAnimNormalizeMixerNode_cl* m_pNormalizeMixer;
 
-  V_DECLARE_SERIAL( AnimatedWarrior_cl, )
+  V_DECLARE_SERIAL(AnimatedWarrior_cl, )
   IMPLEMENT_OBJ_CLASS(AnimatedWarrior_cl);
 };
 
-#endif // _VISION_DOC
+#endif // !_VISION_DOC
 
-
-#endif //ANIMATED_CHARACTER_HPP_INCLUDED
+#endif // ANIMATED_CHARACTER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

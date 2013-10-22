@@ -53,12 +53,8 @@ class hkpConvexRadiusBuilder: public hkDisplayGeometryBuilder
 			/// Creates an array of display geometries from a given shape and a transform.
 		void buildShapeDisplay(				const hkpShape* shape, 
 											const hkTransform& transform, 
-											hkArray<hkDisplayGeometry*>& displayGeometries);
-
-			/// Creates an array of display geometries from a given shape and a transform.
-		void buildShapeDisplay(				const hkpShape* shape, 
-											const hkQsTransform& transform, 
-											hkArray<hkDisplayGeometry*>& displayGeometries);
+											hkArray<hkDisplayGeometry*>& displayGeometries,
+											const hkVector4* scale = HK_NULL );
 
 			/// Clears the current raw geometry. A temporary geometry is used to
 			/// create display geometries triangle by triangle from a MOPP for example.
@@ -75,10 +71,10 @@ class hkpConvexRadiusBuilder: public hkDisplayGeometryBuilder
 
 	public:
 		// Convex shapes
-		void buildShapeDisplay_Cylinder( const hkpCylinderShape* s, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries );
-		void buildShapeDisplay_Box( const hkpBoxShape* boxShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries );
-		void buildShapeDisplay_Triangle( const hkpTriangleShape* triangleShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries );
-		void buildShapeDisplay_ConvexVertices( const hkpConvexVerticesShape* convexVerticesShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries );		
+		void buildShapeDisplay_Cylinder( const hkpCylinderShape* s, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries, const hkVector4* scale );
+		void buildShapeDisplay_Box( const hkpBoxShape* boxShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries, const hkVector4* scale );
+		void buildShapeDisplay_Triangle( const hkpTriangleShape* triangleShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries, const hkVector4* scale );
+		void buildShapeDisplay_ConvexVertices( const hkpConvexVerticesShape* convexVerticesShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries);		
 
 		// Transform shapes
 		void buildShapeDisplay_ConvexTransform( const hkpConvexTransformShape* convexTransformShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries );
@@ -101,8 +97,9 @@ class hkpConvexRadiusBuilder: public hkDisplayGeometryBuilder
 		// Partial building:
 		//
 
-		hkBool buildPartialShapeDisplay( const hkpShape* shape, const hkTransform& transform, int branchDepth, int& numSimpleShapes, hkpShapeContinueData* continueData, hkArray<hkDisplayGeometry*>& displayGeometries );
-		hkBool buildPartialShapeDisplay_ShapeContainer( const hkpShapeContainer* shapeContainer, const hkTransform& transform, int branchDepth, int& numSimpleShapes, hkpShapeContinueData* continueData, hkArray<hkDisplayGeometry*>& displayGeometries );
+		hkBool buildPartialShapeDisplay( const hkpShape* shape, const hkTransform& transform, int branchDepth, int& numSimpleShapes, hkpShapeContinueData* continueData, hkArray<hkDisplayGeometry*>& displayGeometries, const hkVector4* scale = HK_NULL );
+		hkBool buildPartialShapeDisplay_ShapeContainer( const hkpShapeContainer* shapeContainer, const hkTransform& transform, int branchDepth, int& numSimpleShapes, hkpShapeContinueData* continueData, hkArray<hkDisplayGeometry*>& displayGeometries, const hkVector4* scale = HK_NULL );
+		void buildPartialShapeDisplay_ConvexTransform( const hkpConvexTransformShape* convexTransformShape, const hkTransform& transform, int branchDepth, int& numSimpleShapes, hkpShapeContinueData* continueData, hkArray<hkDisplayGeometry*>& displayGeometries );
 
 	protected:
 
@@ -152,7 +149,7 @@ HK_SINGLETON_SPECIALIZATION_DECL(hkpUserConvexRadiusBuilder);
 #endif // HK_COLLIDE2_SHAPE_DISPLAY_BUILDER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

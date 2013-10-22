@@ -32,6 +32,7 @@ class hkaiNavVolumeMediator;
 class hkaiCharacter;
 struct hkaiLocalSteeringInput;
 struct hkaiAvoidancePairProperties;
+class hkBitField;
 
 // Multithreading
 class hkJobQueue;
@@ -159,7 +160,7 @@ protected:
 /// This is a container for characters and objects added to the AI world.
 class hkaiWorld : public hkReferencedObject
 {
-	// +version(31)
+	// +version(32)
 	public:
 
 		HK_DECLARE_REFLECTION();
@@ -241,6 +242,21 @@ class hkaiWorld : public hkReferencedObject
 				/// See hkaiNavMeshAstarCommand::m_maxPathSizeOut
 			int m_maxPathSearchPointsOut; // +default(32)
 
+				/// Do not use the new dynamic face cutting algorithm. This is a
+				/// transitional field, and will be removed in a future release. You
+				/// should not change this field without first consulting Havok 
+				/// support.
+			hkBool m_fallbackToOldCutter; // +default(false)
+
+				/// Whether to compute the clearance values on loading and after cutting, or on the fly during A*.
+				/// Computing after cutting is faster if there are lots of pathfinding queries each frame, but may waste time
+				/// if there are no queries to perform.
+				/// Computing during A* means that only the clearance values that are needed are computed.
+				/// You can also manually compute the global clearances at a convenient time by calling
+				/// hkaiNavMeshCutter::recomputeDirtyGlobalClearances().
+				/// WARNING: Computing during A* may lead to non-deterministic behavior, although this has not been observed in practice.
+			hkBool m_precomputeNavMeshClearance; //+default(false)
+
 				/// Pathfinding input options to use when generating requests.
 			hkaiPathfindingUtil::FindPathInput m_pathfindingInput;
 
@@ -262,6 +278,7 @@ class hkaiWorld : public hkReferencedObject
 		// Callback context
 		//
 
+			/// How the world was stepped in the callback.
 		enum StepThreading
 		{
 			STEP_SINGLE_THREADED,
@@ -278,7 +295,8 @@ class hkaiWorld : public hkReferencedObject
 			const hkArrayBase<hkaiPackedKey>& m_cutFaceKeys;
 			const hkArrayBase<hkaiPackedKey>& m_uncutFaceKeys;
 		};
-
+		
+			/// Chararcter callback type.
 		enum CharacterCallbackType
 		{
 			CALLBACK_PRECHARACTER_STEP,
@@ -345,7 +363,7 @@ class hkaiWorld : public hkReferencedObject
 				virtual void postStepCallback(class hkaiWorld* world, const hkArrayBase<class hkaiBehavior*>& behaviors) {}
 
 					/// raised before silhouettes are stepped and cut
-				virtual void preSilhouetteStepCallback( const class hkaiWorld* world, StepThreading threading, const class hkBitField* sectionsToStep ) {}
+				virtual void preSilhouetteStepCallback( const class hkaiWorld* world, StepThreading threading, const hkBitField* sectionsToStep ) {}
 
 					/// raised when the dynamic nav mesh is changed.
 				virtual void dynamicNavMeshModifiedCallback( NavMeshModifiedCallbackContext& context ) {}
@@ -626,7 +644,7 @@ class hkaiWorld : public hkReferencedObject
 		//
 
 			/// Update the nav mesh based on the silhouettes.
-		void stepSilhouettes( const class hkBitField* sectionsToStep = HK_NULL );
+		void stepSilhouettes( const hkBitField* sectionsToStep = HK_NULL );
 
 			/// Update path requests.
 		void stepPathSearches();
@@ -636,7 +654,7 @@ class hkaiWorld : public hkReferencedObject
 
 
 			/// Update the nav mesh based on the silhouettes, using multithreaded jobs.
-		void stepSilhouettesMT( const class hkBitField* sectionsToStep, hkJobQueue* jobQueue, hkJobThreadPool* threadPool );
+		void stepSilhouettesMT( const hkBitField* sectionsToStep, hkJobQueue* jobQueue, hkJobThreadPool* threadPool );
 
 			/// Update path requests, using multithreaded jobs.
 		void stepPathSearchesMT(hkJobQueue* jobQueue, hkJobThreadPool* threadPool );
@@ -657,6 +675,7 @@ class hkaiWorld : public hkReferencedObject
 			/// Any points stored in world space that are not owned by the world (e.g. hkaiUserEdgeUtils::UserEdgePair) are not affected.
 		void shiftWorldSpace( hkVector4Parameter shift );
 
+			/// Path request type.
 		enum PathType
 		{
 			/// Nav mesh
@@ -766,6 +785,10 @@ protected:
 			/// Maximum number of path points that can be output during character searches.
 		int m_maxPathSearchPointsOut; 
 
+			/// Whether to compute the clearance values on loading and after cutting, or on the fly during A*.
+			/// See hkaiWorld::Cinfo::m_precomputeNavMeshClearance for a description of the tradeoffs.
+		hkBool m_precomputeNavMeshClearance;
+
 			/// Pathfinding input options to use when generating requests.
 		hkaiPathfindingUtil::FindPathInput m_defaultPathfindingInput;
 
@@ -781,7 +804,7 @@ protected:
 #endif // HK_AI_WORLD_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

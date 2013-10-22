@@ -1524,8 +1524,8 @@ SWIG_Lua_dostring(lua_State *L, const char* str) {
 /* ------------------------------ end luarun.swg  ------------------------------ */
 
 
-swig_type_info *swig_types[64];
-swig_module_info swig_module = {swig_types, 63, 0, 0, 0, 0};
+swig_type_info *swig_types[65];
+swig_module_info swig_module = {swig_types, 64, 0, 0, 0, 0};
 
 #define SWIG_name      "Vision"
 #define SWIG_init      luaopen_Vision
@@ -1706,7 +1706,7 @@ SWIGINTERN void SWIG_write_ptr_array(lua_State* L,void **array,int size,swig_typ
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Animation/Transition/VTransitionStateMachine.hpp>
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Animation/Transition/VTransitionManager.hpp>
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Components/VAnimationComponent.hpp>
-//  #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Components/VTimedValueComponent.hpp>
+  #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Components/VTimedValueComponent.hpp>
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Lua/VScriptConstants.hpp>
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Lua/VScriptDraw_wrapper.hpp>
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Lua/VScriptInput_wrapper.hpp>
@@ -1721,6 +1721,8 @@ SWIGINTERN void SWIG_write_ptr_array(lua_State* L,void **array,int size,swig_typ
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Postprocessing/PostProcessBase.hpp>  
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Effects/CubeMapHandle.hpp>
   #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Entities/PathCameraEntity.hpp>
+  #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Entities/VCustomVolumeManager.hpp>
+  #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Entities/VCustomVolumeObject.hpp>
 
 SWIGINTERN bool hkvVec3_normalizeIfNotZero(hkvVec3 *self){
       return self->normalizeIfNotZero()==HKV_SUCCESS;
@@ -2850,6 +2852,17 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
   }
 
 
+  SWIGINTERN int VisTypedEngineObject_cl_AddTimedValue(lua_State *L)
+  {
+    
+    //insert the class name of the component as parameter #2
+    lua_pushstring(L, "VTimedValueComponent");
+    lua_insert(L, 2);
+    
+    return VisTypedEngineObject_cl_AddComponentOfType(L);
+  }
+
+
   SWIGINTERN int VisTypedEngineObject_cl_AddTransitionStateMachine(lua_State *L)
   {
     
@@ -2867,7 +2880,7 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
     SWIG_CONVERT_POINTER(L, 1, VisTypedEngineObject_cl, pSelf)
 
     //param #2: type name of the component
-    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_AddComponentOfType");
+    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_GetComponentOfType");
     const char * szComponentType = lua_tostring(L, 2);       
     
     //param #3: optional name of the component
@@ -2897,7 +2910,7 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
     SWIG_CONVERT_POINTER(L, 1, VisTypedEngineObject_cl, pSelf)
 
     //param #2: type name of the component
-    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_AddComponentOfType");
+    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_GetComponentOfBaseType");
     const char * szBaseTypeName = lua_tostring(L, 2);       
     
     //param #3: optional name of the component
@@ -5121,7 +5134,7 @@ SWIGINTERN bool VTransitionStateMachine_LoadFromFile(VTransitionStateMachine *se
       //prevent double initialization
       self->DeInit();
       self->SetInitialAnimation(szInitialAnimation);
-      self->Init(pOwner, pTable, true);
+      self->Init(pTable, true);
       
       //get the scripting component...
       VScriptComponent *pComponent = (VScriptComponent *)pOwner->Components().GetComponentOfBaseType(V_RUNTIME_CLASS(VScriptComponent));
@@ -5349,6 +5362,83 @@ SWIGINTERN VAnimationComponent *VAnimationComponent_Cast(VTypedObject *pObject){
     }
     
     return 1; //the table is always on the stack (even if empty)
+  }
+
+SWIGINTERN VTimedValueComponent *VTimedValueComponent_Cast(VTypedObject *pObject){
+    if(pObject && pObject->IsOfType(VTimedValueComponent::GetClassTypeId()))
+      return (VTimedValueComponent *) pObject;
+    Vision::Error.Warning("[Lua] Cannot cast to %s!","VTimedValueComponent");
+    return NULL;
+  }
+
+  SWIGINTERN int VTimedValueComponent_Concat(lua_State *L)
+  {
+    //this will move this function to the method table of the specified class
+    
+    bool ARGS_OK = true;
+    
+    const char *pszString = NULL;
+    int iIndex = -1;
+    
+    //The concat operator allows "foo"..self and self.."bar" so that
+    //we have to consider self as first and as second stack element.
+    
+    //handle string as first (top) element
+    if(lua_isstring(L,iIndex))
+    {
+      pszString = lua_tostring(L,iIndex);
+      iIndex--;
+    }
+    
+    SWIG_CONVERT_POINTER(L, iIndex, VTimedValueComponent, self)
+    iIndex--;
+    
+    //handle string as second element
+    if(iIndex==-2)
+    {
+      pszString = lua_tostring(L,iIndex);
+    }
+        
+    unsigned int uiLen = (unsigned int) strlen(pszString);
+    char *pszBuffer = new char[uiLen+256];
+   
+    sprintf(pszBuffer, "%s [%f - %f: %f sec %s]",self->GetComponentName()==NULL?self->GetClassTypeId()->m_lpszClassName:self->GetComponentName(),self->GetFromValue(),self->GetToValue(),self->GetDuration(),self->IsPaused()?"paused":"running"); //format as requested
+    
+    //the new buffer should have the size of the old string and the new format string
+    VASSERT_MSG(256>(strlen(pszBuffer)+uiLen), "Please increase your temp buffer size!");
+    
+    //append or prepend old buffer buffer (depending on the position inside the lua stack)
+    if(iIndex==-3) //append old string
+    {
+      memcpy(pszBuffer+strlen(pszBuffer),pszString,uiLen+1); //also copy the terminator at the end
+    }
+    else //prepend old string
+    {
+      memmove(pszBuffer+uiLen,pszBuffer, strlen(pszBuffer)+1); //also move the terminator at the end
+      memcpy(pszBuffer,pszString,uiLen); //insert the old string
+    }
+
+    lua_pushstring(L, pszBuffer);
+  
+    V_SAFE_DELETE_ARRAY(pszBuffer);
+
+    return 1;
+  }
+
+
+  SWIGINTERN int VTimedValueComponent_ToString(lua_State *L)
+  {
+    //this will move this function to the method table of the specified class
+    
+    SWIG_CONVERT_POINTER(L, -1, VTimedValueComponent, self)
+    
+    char pszBuffer[1024];
+    
+    sprintf(pszBuffer, "%s: %s [%f - %f: %f sec %s]",self->GetClassTypeId()->m_lpszClassName,self->GetComponentName(),self->GetFromValue(),self->GetToValue(),self->GetDuration(),self->IsPaused()?"paused":"running"); //format as requested
+      
+    lua_pushstring(L, pszBuffer);
+    
+    return 1;
   }
 
 SWIGINTERN VDialog *VGUIManager_ShowDialog__SWIG_0(VGUIManager *self,char const *szXmlFile){
@@ -6247,6 +6337,7 @@ SWIGINTERN bool VisGame_cl_ExecuteAction(VisGame_cl *self,char const *szAction){
     if (!pObj) pObj = Vision::Game.SearchPath(pszKey);
     if (!pObj) pObj = VisContextCamera_cl::FindByKey(pszKey);
     if (!pObj) pObj = VisStaticMeshInstance_cl::FindByKey(pszKey);
+    if (!pObj) pObj = VCustomVolumeManager::GlobalManager().SearchInstance(pszKey);
     if (!pObj)
     {
       //since VisScreenMask_cl is not a typed engine object we cannot use LUA_PushObjectProxy
@@ -6435,7 +6526,7 @@ SWIGINTERN IVTimeOfDay *VScriptRenderer_wrapper_GetTimeOfDayHandler(VScriptRende
       return Vision::Renderer.GetTimeOfDayHandler();
     }
 SWIGINTERN IVRendererNode *VScriptRenderer_wrapper_GetRendererNode__SWIG_0(VScriptRenderer_wrapper *self,int iIndex=1){
-      return (iIndex>0 && iIndex <= V_MAX_RENDERER_NODES) ? Vision::Renderer.GetRendererNode(iIndex-1) : 0;
+      return (iIndex>0 && iIndex <= Vision::Renderer.GetRendererNodeCount()) ? Vision::Renderer.GetRendererNode(iIndex-1) : 0;
     }
 SWIGINTERN void VScriptRenderer_wrapper_SetGlobalAmbientColor(VScriptRenderer_wrapper *self,VColorRef ambientColor){
       Vision::Renderer.SetGlobalAmbientColor(hkvVec4((float)ambientColor.r/255.f, (float)ambientColor.g/255.f, (float)ambientColor.b/255.f, (float)ambientColor.a/255.f));
@@ -16075,6 +16166,7 @@ static swig_lua_method swig_VisTypedEngineObject_cl_methods[] = {
     { "AddTriggerTarget",VisTypedEngineObject_cl_AddTriggerTarget},
     { "AddTriggerSource",VisTypedEngineObject_cl_AddTriggerSource},
     { "AddTransitionStateMachine",VisTypedEngineObject_cl_AddTransitionStateMachine},
+    { "AddTimedValue",VisTypedEngineObject_cl_AddTimedValue},
     { "AddComponentOfType",VisTypedEngineObject_cl_AddComponentOfType},
     { "AddAnimation",VisTypedEngineObject_cl_AddAnimation},
     {"GetComponentCount", _wrap_VisTypedEngineObject_cl_GetComponentCount}, 
@@ -33356,6 +33448,587 @@ static swig_lua_class *swig_VAnimationComponent_bases[] = {0,0};
 static const char *swig_VAnimationComponent_base_names[] = {"IVObjectComponent *",0};
 static swig_lua_class _wrap_class_VAnimationComponent = { "VAnimationComponent", &SWIGTYPE_p_VAnimationComponent,0,0, swig_VAnimationComponent_methods, swig_VAnimationComponent_attributes, swig_VAnimationComponent_bases, swig_VAnimationComponent_base_names };
 
+static int _wrap_VTimedValueComponent_Resume(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  
+  SWIG_check_num_args("Resume",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("Resume",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_Resume",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  (arg1)->Resume();
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_Stop(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  
+  SWIG_check_num_args("Stop",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("Stop",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_Stop",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  (arg1)->Stop();
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_Reset(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  
+  SWIG_check_num_args("Reset",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("Reset",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_Reset",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  (arg1)->Reset();
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_IsPaused(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IsPaused",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IsPaused",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_IsPaused",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  result = (bool)(arg1)->IsPaused();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_SetRange__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  bool arg4 ;
+  
+  SWIG_check_num_args("SetRange",4,4)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("SetRange",1,"VTimedValueComponent *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("SetRange",2,"float");
+  if(!lua_isnumber(L,3)) SWIG_fail_arg("SetRange",3,"float");
+  if(!lua_isboolean(L,4)) SWIG_fail_arg("SetRange",4,"bool");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_SetRange",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  arg2 = (float)lua_tonumber(L, 2);
+  arg3 = (float)lua_tonumber(L, 3);
+  arg4 = (lua_toboolean(L, 4)!=0);
+  (arg1)->SetRange(arg2,arg3,arg4);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_SetRange__SWIG_1(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  
+  SWIG_check_num_args("SetRange",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("SetRange",1,"VTimedValueComponent *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("SetRange",2,"float");
+  if(!lua_isnumber(L,3)) SWIG_fail_arg("SetRange",3,"float");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_SetRange",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  arg2 = (float)lua_tonumber(L, 2);
+  arg3 = (float)lua_tonumber(L, 3);
+  (arg1)->SetRange(arg2,arg3);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_SetRange(lua_State* L) {
+  int argc;
+  int argv[5]={
+    1,2,3,4,5
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 3) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_VTimedValueComponent, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          _v = lua_isnumber(L,argv[2]);
+        }
+        if (_v) {
+          return _wrap_VTimedValueComponent_SetRange__SWIG_1(L);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_VTimedValueComponent, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          _v = lua_isnumber(L,argv[2]);
+        }
+        if (_v) {
+          {
+            _v = lua_isboolean(L,argv[3]);
+          }
+          if (_v) {
+            return _wrap_VTimedValueComponent_SetRange__SWIG_0(L);
+          }
+        }
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'VTimedValueComponent_SetRange'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    SetRange(VTimedValueComponent *,float,float,bool)\n"
+    "    SetRange(VTimedValueComponent *,float,float)\n");
+  lua_error(L);return 0;
+}
+
+
+static int _wrap_VTimedValueComponent_SetDuration(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  float arg2 ;
+  
+  SWIG_check_num_args("SetDuration",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("SetDuration",1,"VTimedValueComponent *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("SetDuration",2,"float");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_SetDuration",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  arg2 = (float)lua_tonumber(L, 2);
+  (arg1)->SetDuration(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_GetValue(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("GetValue",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("GetValue",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_GetValue",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  result = (float)(arg1)->GetValue();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_GetTime(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("GetTime",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("GetTime",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_GetTime",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  result = (float)(arg1)->GetTime();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_GetFromValue(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("GetFromValue",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("GetFromValue",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_GetFromValue",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  result = (float)(arg1)->GetFromValue();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_GetToValue(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("GetToValue",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("GetToValue",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_GetToValue",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  result = (float)(arg1)->GetToValue();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_GetDuration(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("GetDuration",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("GetDuration",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_GetDuration",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  result = (float)(arg1)->GetDuration();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_GetNumCallbacks(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  unsigned int result;
+  
+  SWIG_check_num_args("GetNumCallbacks",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("GetNumCallbacks",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_GetNumCallbacks",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  result = (unsigned int)(arg1)->GetNumCallbacks();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_EvaluateAttachedScripts(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("EvaluateAttachedScripts",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("EvaluateAttachedScripts",1,"VTimedValueComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_EvaluateAttachedScripts",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  result = (bool)(arg1)->EvaluateAttachedScripts();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_AddCallback__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  char *arg2 = (char *) 0 ;
+  float arg3 ;
+  
+  SWIG_check_num_args("AddCallback",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("AddCallback",1,"VTimedValueComponent *");
+  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("AddCallback",2,"char const *");
+  if(!lua_isnumber(L,3)) SWIG_fail_arg("AddCallback",3,"float");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_AddCallback",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  arg2 = (char *)lua_tostring(L, 2);
+  arg3 = (float)lua_tonumber(L, 3);
+  (arg1)->AddCallback((char const *)arg2,arg3);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_AddCallback__SWIG_1(lua_State* L) {
+  int SWIG_arg = 0;
+  VTimedValueComponent *arg1 = (VTimedValueComponent *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  SWIG_check_num_args("AddCallback",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("AddCallback",1,"VTimedValueComponent *");
+  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("AddCallback",2,"char const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTimedValueComponent,0))){
+    SWIG_fail_ptr("VTimedValueComponent_AddCallback",1,SWIGTYPE_p_VTimedValueComponent);
+  }
+  
+  arg2 = (char *)lua_tostring(L, 2);
+  (arg1)->AddCallback((char const *)arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_VTimedValueComponent_AddCallback(lua_State* L) {
+  int argc;
+  int argv[4]={
+    1,2,3,4
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 2) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_VTimedValueComponent, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = SWIG_lua_isnilstring(L,argv[1]);
+      }
+      if (_v) {
+        return _wrap_VTimedValueComponent_AddCallback__SWIG_1(L);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_VTimedValueComponent, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = SWIG_lua_isnilstring(L,argv[1]);
+      }
+      if (_v) {
+        {
+          _v = lua_isnumber(L,argv[2]);
+        }
+        if (_v) {
+          return _wrap_VTimedValueComponent_AddCallback__SWIG_0(L);
+        }
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'VTimedValueComponent_AddCallback'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    AddCallback(VTimedValueComponent *,char const *,float)\n"
+    "    AddCallback(VTimedValueComponent *,char const *)\n");
+  lua_error(L);return 0;
+}
+
+
+static int _wrap_VTimedValueComponent_Cast(lua_State* L) {
+  int SWIG_arg = 0;
+  VTypedObject *arg1 = (VTypedObject *) 0 ;
+  VTimedValueComponent *result = 0 ;
+  
+  SWIG_check_num_args("VTimedValueComponent_Cast",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("VTimedValueComponent_Cast",1,"VTypedObject *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_VTypedObject,0))){
+    SWIG_fail_ptr("VTimedValueComponent_Cast",1,SWIGTYPE_p_VTypedObject);
+  }
+  
+  result = (VTimedValueComponent *)VTimedValueComponent_Cast(arg1);
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_VTimedValueComponent,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static swig_lua_method swig_VTimedValueComponent_methods[] = {
+    { "__tostring",VTimedValueComponent_ToString},
+    { "__concat",VTimedValueComponent_Concat},
+    {"Resume", _wrap_VTimedValueComponent_Resume}, 
+    {"Stop", _wrap_VTimedValueComponent_Stop}, 
+    {"Reset", _wrap_VTimedValueComponent_Reset}, 
+    {"IsPaused", _wrap_VTimedValueComponent_IsPaused}, 
+    {"SetRange", _wrap_VTimedValueComponent_SetRange}, 
+    {"SetDuration", _wrap_VTimedValueComponent_SetDuration}, 
+    {"GetValue", _wrap_VTimedValueComponent_GetValue}, 
+    {"GetTime", _wrap_VTimedValueComponent_GetTime}, 
+    {"GetFromValue", _wrap_VTimedValueComponent_GetFromValue}, 
+    {"GetToValue", _wrap_VTimedValueComponent_GetToValue}, 
+    {"GetDuration", _wrap_VTimedValueComponent_GetDuration}, 
+    {"GetNumCallbacks", _wrap_VTimedValueComponent_GetNumCallbacks}, 
+    {"EvaluateAttachedScripts", _wrap_VTimedValueComponent_EvaluateAttachedScripts}, 
+    {"AddCallback", _wrap_VTimedValueComponent_AddCallback}, 
+    {0,0}
+};
+static swig_lua_attribute swig_VTimedValueComponent_attributes[] = {
+    {0,0,0}
+};
+static swig_lua_class *swig_VTimedValueComponent_bases[] = {0,0};
+static const char *swig_VTimedValueComponent_base_names[] = {"IVObjectComponent *",0};
+static swig_lua_class _wrap_class_VTimedValueComponent = { "VTimedValueComponent", &SWIGTYPE_p_VTimedValueComponent,0,0, swig_VTimedValueComponent_methods, swig_VTimedValueComponent_attributes, swig_VTimedValueComponent_bases, swig_VTimedValueComponent_base_names };
+
 static int _wrap_VGUIManager_GetID(lua_State* L) {
   int SWIG_arg = 0;
   VGUIManager *arg1 = (VGUIManager *) 0 ;
@@ -46049,6 +46722,7 @@ static const struct luaL_reg swig_commands[] = {
     { "VisTriggerTargetComponent_cl_Cast", _wrap_VisTriggerTargetComponent_cl_Cast},
     { "VTransitionStateMachine_Cast", _wrap_VTransitionStateMachine_Cast},
     { "VAnimationComponent_Cast", _wrap_VAnimationComponent_Cast},
+    { "VTimedValueComponent_Cast", _wrap_VTimedValueComponent_Cast},
     { "Assert",Vision_Assert},
     {0,0}
 };
@@ -46292,6 +46966,9 @@ static void *_p_IVObjectComponentTo_p_VisTypedEngineObject_cl(void *x, int *SWIG
 static void *_p_VAnimationComponentTo_p_VisTypedEngineObject_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((VisTypedEngineObject_cl *) (IVObjectComponent *) ((VAnimationComponent *) x));
 }
+static void *_p_VTimedValueComponentTo_p_VisTypedEngineObject_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisTypedEngineObject_cl *) (IVObjectComponent *) ((VTimedValueComponent *) x));
+}
 static void *_p_VisContextCamera_clTo_p_VisTypedEngineObject_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((VisTypedEngineObject_cl *) (VisObject3D_cl *) ((VisContextCamera_cl *) x));
 }
@@ -46324,126 +47001,6 @@ static void *_p_VWindowBaseTo_p_VisTypedEngineObject_cl(void *x, int *SWIGUNUSED
 }
 static void *_p_VisLightSource_clTo_p_VisTypedEngineObject_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((VisTypedEngineObject_cl *) (VisObject3D_cl *) ((VisLightSource_cl *) x));
-}
-static void *_p_VDialogTo_p_VWindowBase(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VWindowBase *)  ((VDialog *) x));
-}
-static void *_p_VisLightSource_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisObject3D_cl *)  ((VisLightSource_cl *) x));
-}
-static void *_p_VisBaseEntity_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisObject3D_cl *)  ((VisBaseEntity_cl *) x));
-}
-static void *_p_TriggerBoxEntity_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisObject3D_cl *) (VisBaseEntity_cl *) ((TriggerBoxEntity_cl *) x));
-}
-static void *_p_VisContextCamera_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisObject3D_cl *)  ((VisContextCamera_cl *) x));
-}
-static void *_p_CubeMapHandle_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisObject3D_cl *) (VisBaseEntity_cl *) ((CubeMapHandle_cl *) x));
-}
-static void *_p_PathCameraEntityTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisObject3D_cl *) (VisBaseEntity_cl *) ((PathCameraEntity *) x));
-}
-static void *_p_VisPath_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisObject3D_cl *)  ((VisPath_cl *) x));
-}
-static void *_p_VisParticleEffect_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisObject3D_cl *)  ((VisParticleEffect_cl *) x));
-}
-static void *_p_VisParticleEffect_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisParticleEffect_cl *) x));
-}
-static void *_p_VisTypedEngineObject_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *)  ((VisTypedEngineObject_cl *) x));
-}
-static void *_p_VTransitionStateMachineTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((VTransitionStateMachine *) x));
-}
-static void *_p_VDialogTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VWindowBase *) ((VDialog *) x));
-}
-static void *_p_TriggerBoxEntity_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *)(VisBaseEntity_cl *) ((TriggerBoxEntity_cl *) x));
-}
-static void *_p_VisBaseEntity_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisBaseEntity_cl *) x));
-}
-static void *_p_VisPath_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisPath_cl *) x));
-}
-static void *_p_IVRendererNodeTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((IVRendererNode *) x));
-}
-static void *_p_VPostProcessingBaseComponentTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((VPostProcessingBaseComponent *) x));
-}
-static void *_p_IVObjectComponentTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((IVObjectComponent *) x));
-}
-static void *_p_VAnimationComponentTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((VAnimationComponent *) x));
-}
-static void *_p_VisContextCamera_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisContextCamera_cl *) x));
-}
-static void *_p_VisStaticMeshInstance_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((VisStaticMeshInstance_cl *) x));
-}
-static void *_p_IVisTriggerBaseComponent_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((IVisTriggerBaseComponent_cl *) x));
-}
-static void *_p_VisTriggerSourceComponent_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *)(IVisTriggerBaseComponent_cl *) ((VisTriggerSourceComponent_cl *) x));
-}
-static void *_p_VisTriggerTargetComponent_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *)(IVisTriggerBaseComponent_cl *) ((VisTriggerTargetComponent_cl *) x));
-}
-static void *_p_VisObject3D_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((VisObject3D_cl *) x));
-}
-static void *_p_CubeMapHandle_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *)(VisBaseEntity_cl *) ((CubeMapHandle_cl *) x));
-}
-static void *_p_PathCameraEntityTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *)(VisBaseEntity_cl *) ((PathCameraEntity *) x));
-}
-static void *_p_IVTimeOfDayTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((IVTimeOfDay *) x));
-}
-static void *_p_VWindowBaseTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((VWindowBase *) x));
-}
-static void *_p_VisLightSource_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisLightSource_cl *) x));
-}
-static void *_p_VPostProcessingBaseComponentTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((IVObjectComponent *)  ((VPostProcessingBaseComponent *) x));
-}
-static void *_p_VTransitionStateMachineTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((IVObjectComponent *)  ((VTransitionStateMachine *) x));
-}
-static void *_p_VAnimationComponentTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((IVObjectComponent *)  ((VAnimationComponent *) x));
-}
-static void *_p_IVisTriggerBaseComponent_clTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((IVObjectComponent *)  ((IVisTriggerBaseComponent_cl *) x));
-}
-static void *_p_VisTriggerSourceComponent_clTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((IVObjectComponent *) (IVisTriggerBaseComponent_cl *) ((VisTriggerSourceComponent_cl *) x));
-}
-static void *_p_VisTriggerTargetComponent_clTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((IVObjectComponent *) (IVisTriggerBaseComponent_cl *) ((VisTriggerTargetComponent_cl *) x));
-}
-static void *_p_TriggerBoxEntity_clTo_p_VisBaseEntity_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisBaseEntity_cl *)  ((TriggerBoxEntity_cl *) x));
-}
-static void *_p_CubeMapHandle_clTo_p_VisBaseEntity_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisBaseEntity_cl *)  ((CubeMapHandle_cl *) x));
-}
-static void *_p_PathCameraEntityTo_p_VisBaseEntity_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((VisBaseEntity_cl *)  ((PathCameraEntity *) x));
 }
 static void *_p_VisTriggerSourceComponent_clTo_p_IVisTriggerBaseComponent_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((IVisTriggerBaseComponent_cl *)  ((VisTriggerSourceComponent_cl *) x));
@@ -46484,6 +47041,132 @@ static void *_p_VisPath_clTo_p_VisObjectKey_cl(void *x, int *SWIGUNUSEDPARM(newm
 static void *_p_VisParticleEffect_clTo_p_VisObjectKey_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((VisObjectKey_cl *) (VisObject3D_cl *) ((VisParticleEffect_cl *) x));
 }
+static void *_p_VPostProcessingBaseComponentTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((IVObjectComponent *)  ((VPostProcessingBaseComponent *) x));
+}
+static void *_p_VTransitionStateMachineTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((IVObjectComponent *)  ((VTransitionStateMachine *) x));
+}
+static void *_p_VAnimationComponentTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((IVObjectComponent *)  ((VAnimationComponent *) x));
+}
+static void *_p_VTimedValueComponentTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((IVObjectComponent *)  ((VTimedValueComponent *) x));
+}
+static void *_p_IVisTriggerBaseComponent_clTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((IVObjectComponent *)  ((IVisTriggerBaseComponent_cl *) x));
+}
+static void *_p_VisTriggerSourceComponent_clTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((IVObjectComponent *) (IVisTriggerBaseComponent_cl *) ((VisTriggerSourceComponent_cl *) x));
+}
+static void *_p_VisTriggerTargetComponent_clTo_p_IVObjectComponent(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((IVObjectComponent *) (IVisTriggerBaseComponent_cl *) ((VisTriggerTargetComponent_cl *) x));
+}
+static void *_p_TriggerBoxEntity_clTo_p_VisBaseEntity_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisBaseEntity_cl *)  ((TriggerBoxEntity_cl *) x));
+}
+static void *_p_CubeMapHandle_clTo_p_VisBaseEntity_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisBaseEntity_cl *)  ((CubeMapHandle_cl *) x));
+}
+static void *_p_PathCameraEntityTo_p_VisBaseEntity_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisBaseEntity_cl *)  ((PathCameraEntity *) x));
+}
+static void *_p_VisParticleEffect_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisParticleEffect_cl *) x));
+}
+static void *_p_VisTypedEngineObject_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *)  ((VisTypedEngineObject_cl *) x));
+}
+static void *_p_VTransitionStateMachineTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((VTransitionStateMachine *) x));
+}
+static void *_p_VDialogTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VWindowBase *) ((VDialog *) x));
+}
+static void *_p_TriggerBoxEntity_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *)(VisBaseEntity_cl *) ((TriggerBoxEntity_cl *) x));
+}
+static void *_p_VisBaseEntity_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisBaseEntity_cl *) x));
+}
+static void *_p_VisPath_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisPath_cl *) x));
+}
+static void *_p_IVRendererNodeTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((IVRendererNode *) x));
+}
+static void *_p_VPostProcessingBaseComponentTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((VPostProcessingBaseComponent *) x));
+}
+static void *_p_IVObjectComponentTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((IVObjectComponent *) x));
+}
+static void *_p_VAnimationComponentTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((VAnimationComponent *) x));
+}
+static void *_p_VTimedValueComponentTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((VTimedValueComponent *) x));
+}
+static void *_p_VisContextCamera_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisContextCamera_cl *) x));
+}
+static void *_p_VisStaticMeshInstance_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((VisStaticMeshInstance_cl *) x));
+}
+static void *_p_IVisTriggerBaseComponent_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *) ((IVisTriggerBaseComponent_cl *) x));
+}
+static void *_p_VisTriggerSourceComponent_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *)(IVisTriggerBaseComponent_cl *) ((VisTriggerSourceComponent_cl *) x));
+}
+static void *_p_VisTriggerTargetComponent_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(IVObjectComponent *)(IVisTriggerBaseComponent_cl *) ((VisTriggerTargetComponent_cl *) x));
+}
+static void *_p_VisObject3D_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((VisObject3D_cl *) x));
+}
+static void *_p_CubeMapHandle_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *)(VisBaseEntity_cl *) ((CubeMapHandle_cl *) x));
+}
+static void *_p_PathCameraEntityTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *)(VisBaseEntity_cl *) ((PathCameraEntity *) x));
+}
+static void *_p_IVTimeOfDayTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((IVTimeOfDay *) x));
+}
+static void *_p_VWindowBaseTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *) ((VWindowBase *) x));
+}
+static void *_p_VisLightSource_clTo_p_VTypedObject(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VTypedObject *) (VisTypedEngineObject_cl *)(VisObject3D_cl *) ((VisLightSource_cl *) x));
+}
+static void *_p_VDialogTo_p_VWindowBase(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VWindowBase *)  ((VDialog *) x));
+}
+static void *_p_VisLightSource_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisObject3D_cl *)  ((VisLightSource_cl *) x));
+}
+static void *_p_VisBaseEntity_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisObject3D_cl *)  ((VisBaseEntity_cl *) x));
+}
+static void *_p_TriggerBoxEntity_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisObject3D_cl *) (VisBaseEntity_cl *) ((TriggerBoxEntity_cl *) x));
+}
+static void *_p_VisContextCamera_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisObject3D_cl *)  ((VisContextCamera_cl *) x));
+}
+static void *_p_CubeMapHandle_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisObject3D_cl *) (VisBaseEntity_cl *) ((CubeMapHandle_cl *) x));
+}
+static void *_p_PathCameraEntityTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisObject3D_cl *) (VisBaseEntity_cl *) ((PathCameraEntity *) x));
+}
+static void *_p_VisPath_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisObject3D_cl *)  ((VisPath_cl *) x));
+}
+static void *_p_VisParticleEffect_clTo_p_VisObject3D_cl(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((VisObject3D_cl *)  ((VisParticleEffect_cl *) x));
+}
 static swig_type_info _swigt__p_CubeMapHandle_cl = {"_p_CubeMapHandle_cl", "CubeMapHandle_cl *", 0, 0, (void*)&_wrap_class_CubeMapHandle_cl, 0};
 static swig_type_info _swigt__p_IVConsoleManager = {"_p_IVConsoleManager", "IVConsoleManager *", 0, 0, (void*)&_wrap_class_IVConsoleManager, 0};
 static swig_type_info _swigt__p_IVObjectComponent = {"_p_IVObjectComponent", "IVObjectComponent *", 0, 0, (void*)&_wrap_class_IVObjectComponent, 0};
@@ -46510,6 +47193,7 @@ static swig_type_info _swigt__p_VScriptScreen_wrapper = {"_p_VScriptScreen_wrapp
 static swig_type_info _swigt__p_VScriptUtil_wrapper = {"_p_VScriptUtil_wrapper", "VScriptUtil_wrapper *", 0, 0, (void*)&_wrap_class_VScriptUtil_wrapper, 0};
 static swig_type_info _swigt__p_VStringInputMap = {"_p_VStringInputMap", "VStringInputMap *", 0, 0, (void*)&_wrap_class_VStringInputMap, 0};
 static swig_type_info _swigt__p_VTextureObject = {"_p_VTextureObject", "VTextureObject *", 0, 0, (void*)&_wrap_class_VTextureObject, 0};
+static swig_type_info _swigt__p_VTimedValueComponent = {"_p_VTimedValueComponent", "VTimedValueComponent *", 0, 0, (void*)&_wrap_class_VTimedValueComponent, 0};
 static swig_type_info _swigt__p_VTransitionStateMachine = {"_p_VTransitionStateMachine", "VTransitionStateMachine *", 0, 0, (void*)&_wrap_class_VTransitionStateMachine, 0};
 static swig_type_info _swigt__p_VTypedObject = {"_p_VTypedObject", "VTypedObject *", 0, 0, (void*)&_wrap_class_VTypedObject, 0};
 static swig_type_info _swigt__p_VWindowBase = {"_p_VWindowBase", "VWindowBase *", 0, 0, (void*)&_wrap_class_VWindowBase, 0};
@@ -46575,6 +47259,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_VScriptUtil_wrapper,
   &_swigt__p_VStringInputMap,
   &_swigt__p_VTextureObject,
+  &_swigt__p_VTimedValueComponent,
   &_swigt__p_VTransitionStateMachine,
   &_swigt__p_VTypedObject,
   &_swigt__p_VWindowBase,
@@ -46616,7 +47301,7 @@ static swig_type_info *swig_type_initial[] = {
 
 static swig_cast_info _swigc__p_CubeMapHandle_cl[] = {  {&_swigt__p_CubeMapHandle_cl, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IVConsoleManager[] = {  {&_swigt__p_IVConsoleManager, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_IVObjectComponent[] = {  {&_swigt__p_IVObjectComponent, 0, 0, 0},  {&_swigt__p_VPostProcessingBaseComponent, _p_VPostProcessingBaseComponentTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VTransitionStateMachine, _p_VTransitionStateMachineTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VAnimationComponent, _p_VAnimationComponentTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_IVisTriggerBaseComponent_cl, _p_IVisTriggerBaseComponent_clTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VisTriggerSourceComponent_cl, _p_VisTriggerSourceComponent_clTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VisTriggerTargetComponent_cl, _p_VisTriggerTargetComponent_clTo_p_IVObjectComponent, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_IVObjectComponent[] = {  {&_swigt__p_IVObjectComponent, 0, 0, 0},  {&_swigt__p_VPostProcessingBaseComponent, _p_VPostProcessingBaseComponentTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VTransitionStateMachine, _p_VTransitionStateMachineTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VAnimationComponent, _p_VAnimationComponentTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VTimedValueComponent, _p_VTimedValueComponentTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_IVisTriggerBaseComponent_cl, _p_IVisTriggerBaseComponent_clTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VisTriggerSourceComponent_cl, _p_VisTriggerSourceComponent_clTo_p_IVObjectComponent, 0, 0},  {&_swigt__p_VisTriggerTargetComponent_cl, _p_VisTriggerTargetComponent_clTo_p_IVObjectComponent, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IVRendererNode[] = {  {&_swigt__p_IVRendererNode, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IVTimeOfDay[] = {  {&_swigt__p_IVTimeOfDay, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IVTimer[] = {  {&_swigt__p_IVTimer, 0, 0, 0},{0, 0, 0, 0}};
@@ -46640,8 +47325,9 @@ static swig_cast_info _swigc__p_VScriptScreen_wrapper[] = {  {&_swigt__p_VScript
 static swig_cast_info _swigc__p_VScriptUtil_wrapper[] = {  {&_swigt__p_VScriptUtil_wrapper, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VStringInputMap[] = {  {&_swigt__p_VStringInputMap, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VTextureObject[] = {  {&_swigt__p_VTextureObject, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_VTimedValueComponent[] = {  {&_swigt__p_VTimedValueComponent, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VTransitionStateMachine[] = {  {&_swigt__p_VTransitionStateMachine, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_VTypedObject[] = {  {&_swigt__p_VisParticleEffect_cl, _p_VisParticleEffect_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisTypedEngineObject_cl, _p_VisTypedEngineObject_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VTypedObject, 0, 0, 0},  {&_swigt__p_VTransitionStateMachine, _p_VTransitionStateMachineTo_p_VTypedObject, 0, 0},  {&_swigt__p_VDialog, _p_VDialogTo_p_VTypedObject, 0, 0},  {&_swigt__p_TriggerBoxEntity_cl, _p_TriggerBoxEntity_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisBaseEntity_cl, _p_VisBaseEntity_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisPath_cl, _p_VisPath_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_IVRendererNode, _p_IVRendererNodeTo_p_VTypedObject, 0, 0},  {&_swigt__p_VPostProcessingBaseComponent, _p_VPostProcessingBaseComponentTo_p_VTypedObject, 0, 0},  {&_swigt__p_IVObjectComponent, _p_IVObjectComponentTo_p_VTypedObject, 0, 0},  {&_swigt__p_VAnimationComponent, _p_VAnimationComponentTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisContextCamera_cl, _p_VisContextCamera_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_IVisTriggerBaseComponent_cl, _p_IVisTriggerBaseComponent_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisTriggerSourceComponent_cl, _p_VisTriggerSourceComponent_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisTriggerTargetComponent_cl, _p_VisTriggerTargetComponent_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisStaticMeshInstance_cl, _p_VisStaticMeshInstance_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_CubeMapHandle_cl, _p_CubeMapHandle_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisObject3D_cl, _p_VisObject3D_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_PathCameraEntity, _p_PathCameraEntityTo_p_VTypedObject, 0, 0},  {&_swigt__p_IVTimeOfDay, _p_IVTimeOfDayTo_p_VTypedObject, 0, 0},  {&_swigt__p_VWindowBase, _p_VWindowBaseTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisLightSource_cl, _p_VisLightSource_clTo_p_VTypedObject, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_VTypedObject[] = {  {&_swigt__p_VisParticleEffect_cl, _p_VisParticleEffect_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisTypedEngineObject_cl, _p_VisTypedEngineObject_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VTypedObject, 0, 0, 0},  {&_swigt__p_VTransitionStateMachine, _p_VTransitionStateMachineTo_p_VTypedObject, 0, 0},  {&_swigt__p_VDialog, _p_VDialogTo_p_VTypedObject, 0, 0},  {&_swigt__p_TriggerBoxEntity_cl, _p_TriggerBoxEntity_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisBaseEntity_cl, _p_VisBaseEntity_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisPath_cl, _p_VisPath_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_IVRendererNode, _p_IVRendererNodeTo_p_VTypedObject, 0, 0},  {&_swigt__p_IVObjectComponent, _p_IVObjectComponentTo_p_VTypedObject, 0, 0},  {&_swigt__p_VAnimationComponent, _p_VAnimationComponentTo_p_VTypedObject, 0, 0},  {&_swigt__p_VTimedValueComponent, _p_VTimedValueComponentTo_p_VTypedObject, 0, 0},  {&_swigt__p_VPostProcessingBaseComponent, _p_VPostProcessingBaseComponentTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisContextCamera_cl, _p_VisContextCamera_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_IVisTriggerBaseComponent_cl, _p_IVisTriggerBaseComponent_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisTriggerSourceComponent_cl, _p_VisTriggerSourceComponent_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisTriggerTargetComponent_cl, _p_VisTriggerTargetComponent_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisStaticMeshInstance_cl, _p_VisStaticMeshInstance_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_CubeMapHandle_cl, _p_CubeMapHandle_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisObject3D_cl, _p_VisObject3D_clTo_p_VTypedObject, 0, 0},  {&_swigt__p_PathCameraEntity, _p_PathCameraEntityTo_p_VTypedObject, 0, 0},  {&_swigt__p_IVTimeOfDay, _p_IVTimeOfDayTo_p_VTypedObject, 0, 0},  {&_swigt__p_VWindowBase, _p_VWindowBaseTo_p_VTypedObject, 0, 0},  {&_swigt__p_VisLightSource_cl, _p_VisLightSource_clTo_p_VTypedObject, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VWindowBase[] = {  {&_swigt__p_VDialog, _p_VDialogTo_p_VWindowBase, 0, 0},  {&_swigt__p_VWindowBase, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VisBaseEntity_cl[] = {  {&_swigt__p_VisBaseEntity_cl, 0, 0, 0},  {&_swigt__p_TriggerBoxEntity_cl, _p_TriggerBoxEntity_clTo_p_VisBaseEntity_cl, 0, 0},  {&_swigt__p_CubeMapHandle_cl, _p_CubeMapHandle_clTo_p_VisBaseEntity_cl, 0, 0},  {&_swigt__p_PathCameraEntity, _p_PathCameraEntityTo_p_VisBaseEntity_cl, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VisContextCamera_cl[] = {  {&_swigt__p_VisContextCamera_cl, 0, 0, 0},{0, 0, 0, 0}};
@@ -46657,7 +47343,7 @@ static swig_cast_info _swigc__p_VisStaticMeshInstance_cl[] = {  {&_swigt__p_VisS
 static swig_cast_info _swigc__p_VisSurface_cl[] = {  {&_swigt__p_VisSurface_cl, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VisTriggerSourceComponent_cl[] = {  {&_swigt__p_VisTriggerSourceComponent_cl, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VisTriggerTargetComponent_cl[] = {  {&_swigt__p_VisTriggerTargetComponent_cl, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_VisTypedEngineObject_cl[] = {  {&_swigt__p_VisParticleEffect_cl, _p_VisParticleEffect_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisTypedEngineObject_cl, 0, 0, 0},  {&_swigt__p_VTransitionStateMachine, _p_VTransitionStateMachineTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VDialog, _p_VDialogTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_TriggerBoxEntity_cl, _p_TriggerBoxEntity_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisBaseEntity_cl, _p_VisBaseEntity_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisPath_cl, _p_VisPath_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_IVRendererNode, _p_IVRendererNodeTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VPostProcessingBaseComponent, _p_VPostProcessingBaseComponentTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_IVObjectComponent, _p_IVObjectComponentTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VAnimationComponent, _p_VAnimationComponentTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisContextCamera_cl, _p_VisContextCamera_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_IVisTriggerBaseComponent_cl, _p_IVisTriggerBaseComponent_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisTriggerSourceComponent_cl, _p_VisTriggerSourceComponent_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisTriggerTargetComponent_cl, _p_VisTriggerTargetComponent_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisStaticMeshInstance_cl, _p_VisStaticMeshInstance_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_CubeMapHandle_cl, _p_CubeMapHandle_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisObject3D_cl, _p_VisObject3D_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_PathCameraEntity, _p_PathCameraEntityTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_IVTimeOfDay, _p_IVTimeOfDayTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VWindowBase, _p_VWindowBaseTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisLightSource_cl, _p_VisLightSource_clTo_p_VisTypedEngineObject_cl, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_VisTypedEngineObject_cl[] = {  {&_swigt__p_VisParticleEffect_cl, _p_VisParticleEffect_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisTypedEngineObject_cl, 0, 0, 0},  {&_swigt__p_VTransitionStateMachine, _p_VTransitionStateMachineTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VDialog, _p_VDialogTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_TriggerBoxEntity_cl, _p_TriggerBoxEntity_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisBaseEntity_cl, _p_VisBaseEntity_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisPath_cl, _p_VisPath_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_IVRendererNode, _p_IVRendererNodeTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VPostProcessingBaseComponent, _p_VPostProcessingBaseComponentTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_IVObjectComponent, _p_IVObjectComponentTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VAnimationComponent, _p_VAnimationComponentTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VTimedValueComponent, _p_VTimedValueComponentTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisContextCamera_cl, _p_VisContextCamera_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_IVisTriggerBaseComponent_cl, _p_IVisTriggerBaseComponent_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisTriggerSourceComponent_cl, _p_VisTriggerSourceComponent_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisTriggerTargetComponent_cl, _p_VisTriggerTargetComponent_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisStaticMeshInstance_cl, _p_VisStaticMeshInstance_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_CubeMapHandle_cl, _p_CubeMapHandle_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisObject3D_cl, _p_VisObject3D_clTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_PathCameraEntity, _p_PathCameraEntityTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_IVTimeOfDay, _p_IVTimeOfDayTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VWindowBase, _p_VWindowBaseTo_p_VisTypedEngineObject_cl, 0, 0},  {&_swigt__p_VisLightSource_cl, _p_VisLightSource_clTo_p_VisTypedEngineObject_cl, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p___int64[] = {  {&_swigt__p___int64, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_float[] = {  {&_swigt__p_float, 0, 0, 0},{0, 0, 0, 0}};
@@ -46705,6 +47391,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_VScriptUtil_wrapper,
   _swigc__p_VStringInputMap,
   _swigc__p_VTextureObject,
+  _swigc__p_VTimedValueComponent,
   _swigc__p_VTransitionStateMachine,
   _swigc__p_VTypedObject,
   _swigc__p_VWindowBase,

@@ -72,7 +72,6 @@ VMobileForwardRenderingSystem::VMobileForwardRenderingSystem()
   m_spOriginalSizeTargetContext = NULL;
   m_spStoreFinalTargetContext = NULL;
 
-  Vision::Callbacks.OnUpdateSceneFinished += this;
   Vision::Callbacks.OnEnterForeground += this;
 }
 
@@ -85,7 +84,6 @@ VMobileForwardRenderingSystem::VMobileForwardRenderingSystem(VisRenderContext_cl
   ResolutionTolerance = 30.f;
   m_bIsInitialized = false;
 
-  Vision::Callbacks.OnUpdateSceneFinished += this;
   Vision::Callbacks.OnEnterForeground += this;
 }
 
@@ -94,7 +92,6 @@ VMobileForwardRenderingSystem::~VMobileForwardRenderingSystem()
   DeInitializeRenderer();
   ScratchTexturePool_cl::GlobalManager().PurgeUnusedTextures();
 
-  Vision::Callbacks.OnUpdateSceneFinished -= this;
   Vision::Callbacks.OnEnterForeground -= this;
 }
 
@@ -118,74 +115,102 @@ void VMobileForwardRenderingSystem::GetTargetSizeFromDeviceDPI(const int *pOrigi
 {
   float fDisplayDpi = Vision::Video.GetDeviceDpi();
 
-  // Platforms without support for returning dpi will return 0, so we simply assume 72dpi here.
-  if (fDisplayDpi == 0.0f)
-    fDisplayDpi = 72;
+  // Platforms without support for retrieving the DPI will return 0, so we simply assume 72dpi here.
+  if (fDisplayDpi <= 0.0f)
+    fDisplayDpi = 72.0f;
 
-  int iTargetDpi = hkvMath::Max(1, (int)DesiredRenderingDpi);
+  const float fTargetDpi = hkvMath::Max(1.0f, DesiredRenderingDpi);
 
-  float fDpiDeviation = (fabsf(fDisplayDpi - (float)iTargetDpi) * 100.f) / fDisplayDpi;
+  // Compute deviation of target DPI relative to display DPI.
+  const float fDpiDeviation = (1.0f - hkvMath::saturate(fTargetDpi / fDisplayDpi)) * 100.0f;
+
+  // Use original resolution
   if (fDpiDeviation < ResolutionTolerance)
   {
     for (int i=0; i<2; i++)
+    {
       pTargetSize[i] = pOriginalSize[i];
+    }
   }
+  // Use downscaled resolution.
   else
   {
     for (int i=0; i<2; i++)
-      pTargetSize[i] = (iTargetDpi * pOriginalSize[i]) / (int)fDisplayDpi;
+    {
+      pTargetSize[i] = static_cast<int>(
+        (fTargetDpi / fDisplayDpi) * static_cast<float>(pOriginalSize[i]));
+
+      // Round resolution, so that it is a multiple of 4.
+      const int iMinStep = 4;
+      pTargetSize[i] = ((pTargetSize[i] + iMinStep/2) / iMinStep) * iMinStep;
+
+      // Size of the render target should never exceed the size of the original target buffer.
+      pTargetSize[i] = hkvMath::Min(pOriginalSize[i], pTargetSize[i]);
+    }
   }
 
-  #ifdef HK_DEBUG_SLOW
-    Vision::Error.SystemMessage("Adaptive resolution - display density: %.1f, target density: %.1f, render resolution; %i/%i", fDisplayDpi, DesiredRenderingDpi, pTargetSize[0], pTargetSize[1]);
+  #if defined(HK_DEBUG)
+    Vision::Error.SystemMessage(
+      "Adaptive resolution - display density: %.1f, target density: %.1f, render resolution: %ix%i", 
+      fDisplayDpi, DesiredRenderingDpi, pTargetSize[0], pTargetSize[1]);
   #endif
 }
 
-bool VMobileForwardRenderingSystem::DetermineRenderResolution(int *pTargetSize)
+void VMobileForwardRenderingSystem::DetermineRenderResolution()
 {
-  int iOriginalSize[2] = {-1, -1};
+  // Retrieve original final target size.
+  int iOriginalSize[2] = { -1, -1 };
+
   if (m_spUpscaleTargetContext != NULL)
+  {
     m_spUpscaleTargetContext->GetSize(iOriginalSize[0], iOriginalSize[1]);
+  }
   else if (GetFinalTargetContext() != NULL)
+  {
     GetFinalTargetContext()->GetSize(iOriginalSize[0], iOriginalSize[1]);
+  }
 
   VASSERT_MSG(iOriginalSize[0] >= 0 && iOriginalSize[1] >= 0, "Invalid original size!");
+
+  // Determine target size
+  int iTargetSize[2] = { -1, -1 };
 
   switch (RenderingResolutionMode)
   {
   case VRSM_FULL_RESOLUTION:
-    pTargetSize[0] = iOriginalSize[0]; pTargetSize[1] = iOriginalSize[1];
+    iTargetSize[0] = iOriginalSize[0]; iTargetSize[1] = iOriginalSize[1];
     break;
   case VRSM_QUARTER_RESOLUTION:
-    pTargetSize[0] = iOriginalSize[0] >> 1; pTargetSize[1] = iOriginalSize[1] >> 1;
+    iTargetSize[0] = iOriginalSize[0] >> 1; iTargetSize[1] = iOriginalSize[1] >> 1;
     break;
   case VRSM_USE_TARGET_DPI:
-    GetTargetSizeFromDeviceDPI(iOriginalSize, pTargetSize);
+    GetTargetSizeFromDeviceDPI(iOriginalSize, iTargetSize);
     break;
   default:
     VASSERT_MSG(false, "Invalid rendering resolution mode!");
     break;
   };
    
-  VSetResolutionCallbackObject resolutionCallbackObject(&OnSetResolution, pTargetSize, this);
+  VSetResolutionCallbackObject resolutionCallbackObject(&OnSetResolution, iTargetSize, this);
   OnSetResolution.TriggerCallbacks(&resolutionCallbackObject);
 
+  // Make sure resolution is still valid after callback handler may have modified it.
   // Size of the render target should never exceed the size of the original target buffer
-  pTargetSize[0] = resolutionCallbackObject.m_iTargetSize[0] > iOriginalSize[0] ? iOriginalSize[0] : resolutionCallbackObject.m_iTargetSize[0];
-  pTargetSize[1] = resolutionCallbackObject.m_iTargetSize[1] > iOriginalSize[1] ? iOriginalSize[1] : resolutionCallbackObject.m_iTargetSize[1];
+  iTargetSize[0] = hkvMath::Min(iOriginalSize[0], resolutionCallbackObject.m_iTargetSize[0]);
+  iTargetSize[1] = hkvMath::Min(iOriginalSize[1], resolutionCallbackObject.m_iTargetSize[1]);
 
-  return (pTargetSize[0] != iOriginalSize[0]) || (pTargetSize[1] != iOriginalSize[1]);
+  // Finally set up upscaling.
+  const bool bUseUpscaling = (iTargetSize[0] != iOriginalSize[0]) || (iTargetSize[1] != iOriginalSize[1]);
+  SetUpscaling(bUseUpscaling, iTargetSize[0], iTargetSize[1]);
 }
-
 
 void VMobileForwardRenderingSystem::InitializeRenderer()
 {
   if (m_bIsInitialized)
     return;
 
-  int iSize[2];
-  bool bUseUpscaling = DetermineRenderResolution(iSize);
-  SetUpscaling(bUseUpscaling, iSize[0], iSize[1]);
+  // Decide which render resolution to use and set up upscaling if needed.
+  DetermineRenderResolution();
 
   VRendererNodeCommon::InitializeRenderer();
 
@@ -200,7 +225,7 @@ void VMobileForwardRenderingSystem::InitializeRenderer()
 
 #if defined(_VISION_MOBILE) || defined(WIN32)
   // Only create offscreen context if we have PPs other than the Screen Mask PP
-  m_bUsesDirectRenderToFinalTargetContext = (m_Components.Count() <= 1) && (!bUseUpscaling);
+  m_bUsesDirectRenderToFinalTargetContext = (m_Components.Count() <= 1) && (!IsUsingUpscaling());
 #else
   // Direct rendering to final target context isn't implemented/tested on consoles
   m_bUsesDirectRenderToFinalTargetContext = false;
@@ -230,8 +255,6 @@ void VMobileForwardRenderingSystem::DeInitializeRenderer()
   {
     VisRenderContext_cl::ResetMainRenderContext();
   }
-
-  Vision::Renderer.SetGlobalAmbientColor(hkvVec4::ZeroVector());
 
   m_bIsInitialized = false;
 
@@ -281,58 +304,6 @@ void VMobileForwardRenderingSystem::ResetShaderProvider()
 VType *VMobileForwardRenderingSystem::GetSupportedTimeOfDaySystem()
 {
   return V_RUNTIME_CLASS(VTimeOfDay);
-}
-
-void VMobileForwardRenderingSystem::UpdateTimeOfDay()
-{
-  IVSky *pSky = m_spSky;
-  if (!pSky)
-  {
-    pSky = Vision::World.GetActiveSky();
-  }
-  if (pSky)
-  {
-    pSky->Tick(0);
-  }
-
-  IVTimeOfDay *pTimeOfDayInterface = Vision::Renderer.GetTimeOfDayHandler();
-  if (pTimeOfDayInterface == NULL)
-    return;
-
-  VASSERT(pTimeOfDayInterface->IsOfType(V_RUNTIME_CLASS(VTimeOfDay)) && "Incompatible time of day handler installed - has to be VTimeOfDay or a subclass of it!");
-  VTimeOfDay *pTimeOfDay = (VTimeOfDay *)pTimeOfDayInterface;
-
-  // Make sure to disable height fog in the forward renderer
-  VFogParameters fog = Vision::World.GetFogParameters();
-  fog.heightFogMode = VFogParameters::Off;
-  Vision::World.SetFogParameters(fog);
-
-  pTimeOfDay->UpdateFogParameters();
-
-  VColorRef vAmbientColor(false);
-  float fDawnWeight, fDuskWeight, fNightWeight;
-  pTimeOfDay->EvaluateColorValue(0.1f, vAmbientColor, fDawnWeight, fDuskWeight, fNightWeight);
-  Vision::Renderer.SetGlobalAmbientColor(vAmbientColor.ToFloat().getAsVec4 (1.0f));
-}
-
-void VMobileForwardRenderingSystem::DestroySky()
-{
-  if (m_spSky == NULL)
-    return;
-
-  m_spSky->SetEffect(NULL);
-  m_spSky = NULL;
-}
-
-void VMobileForwardRenderingSystem::CreateSky(const char *szPrefixNoon, const char *szPrefixDawn, const char *szPrefixDusk, const char *szPrefixNight, const char *szExtension, bool bUseBottom)
-{
-  DestroySky();
-
-  BOOL bResult = Vision::Shaders.LoadShaderLibrary("\\Shaders\\DefaultSky.ShaderLib", SHADERLIBFLAG_HIDDEN) != NULL;
-  VASSERT(bResult);
-
-  VCompiledEffect *pFX = Vision::Shaders.CreateEffect("DefaultSky", NULL, EFFECTCREATEFLAG_NOCONSTANTBUFFER);
-  m_spSky = new VSky(szPrefixNoon, szPrefixDawn, szPrefixDusk, szPrefixNight, szExtension, bUseBottom, pFX);
 }
 
 void VMobileForwardRenderingSystem::SetUpscaling(bool bStatus, int iWidth, int iHeight)
@@ -507,9 +478,12 @@ void VMobileForwardRenderingSystem::GetDepthStencilConfig(VisRenderableTextureCo
 
 void VMobileForwardRenderingSystem::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
-  if (pData->m_pSender==&Vision::Callbacks.OnUpdateSceneFinished)
+  if (pData->m_pSender == &Vision::Callbacks.OnUpdateSceneFinished)
   {
-    UpdateTimeOfDay();
+    // Make sure to disable height fog in the forward renderer
+    VFogParameters fog = Vision::World.GetFogParameters();
+    fog.heightFogMode = VFogParameters::Off;
+    Vision::World.SetFogParameters(fog);
   }
   else if (pData->m_pSender==&Vision::Callbacks.OnWorldDeInit)
   {
@@ -668,7 +642,7 @@ START_VAR_TABLE(VMobileForwardRenderingSystem, VRendererNodeCommon, "VMobileForw
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

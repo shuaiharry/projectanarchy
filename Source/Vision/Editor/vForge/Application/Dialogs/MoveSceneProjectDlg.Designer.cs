@@ -143,6 +143,7 @@ namespace Editor.Dialogs
       this.Controls.Add(this.button_OK);
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.ShowInTaskbar = false;
       this.Name = "MoveSceneProjectDlg";
       this.Text = "Move Scene Project";
       this.ResumeLayout(false);

@@ -16,32 +16,32 @@ struct hkTimerData;
 /// on a generic work load and waited on to finish.
 class hkThreadPool : public hkReferencedObject
 {
-public:	
+public:
 
-	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
+	HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BASE );
 
 	virtual ~hkThreadPool() {}
 
 	/// Begin processing the given work load using the thread pool and return immediately (non-blocking call).
-	virtual void processWorkLoad(void * workLoad) = 0;
+	virtual void processWorkLoad( void* workLoad ) = 0;
 
-	/// Waits for the work load being processed by the thread pool to be completed before returning.			
+	/// Waits for the work load being processed by the thread pool to be completed before returning.
 	virtual void waitForCompletion() = 0;
 
-	/// Returns true if processWorkLoad has been called but waitForCompletion has not been
-	virtual bool isProcessing() = 0;
+	/// Returns true if processWorkLoad() has been called but waitForCompletion() has not been.
+	virtual bool isProcessing() const = 0;
 
 	/// Get number of threads currently running
-	virtual int getNumThreads() = 0;
+	virtual int getNumThreads() const = 0;
 
 	/// Set the number of threads currently running. Returns the number of threads actually set.
 	virtual void setNumThreads( int numThreads ) = 0;
 
-	/// Get the timer data collected during processWorkLoad
+	/// Get the timer data collected during processWorkLoad().
 	virtual void appendTimerData( hkArrayBase<hkTimerData>& timerDataOut, hkMemoryAllocator& alloc ) = 0;
 
-	/// Clear the timer data. This must be done every frame or the timers will overrun
-	virtual void clearTimerData() = 0;	
+	/// Clear the timer data. This must be done every frame or the timers will overrun.
+	virtual void clearTimerData() = 0;
 
 	/// Cause threads to garbage collect their memory immediately before signaling completion.
 	/// Call this method before processWorkLoad(). Note this only applies to the next completion, it is reset to 
@@ -55,7 +55,7 @@ public:
 #endif // HK_THREAD_POOL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

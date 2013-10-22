@@ -10,9 +10,9 @@
 #define HK_VERTEX_BUFFER_UTIL_H
 
 #include <Common/GeometryUtilities/Mesh/hkMeshVertexBuffer.h>
-#include <Common/Base/Container/BitField/hkBitField.h>
 
 class hkMeshSystem;
+class hkBitField;
 
 /// A utility to help in the processing of vertices and vertex buffers
 class hkMeshVertexBufferUtil
@@ -56,18 +56,18 @@ class hkMeshVertexBufferUtil
 
             /// Get components and store in a 4xfloat32 array (helper function - calls getElementVectorArray with the appropriate buffer)
         static hkResult HK_CALL getElementVectorArray(const LockedVertices& lockedVertices, int bufferIndex, hkFloat32* dst);
-static hkResult HK_CALL getElementVectorArray(const LockedVertices& lockedVertices, int bufferIndex, const hkBitField& verticesToRetrieve, hkFloat32* dst);
+		static hkResult HK_CALL getElementVectorArray(const LockedVertices& lockedVertices, int bufferIndex, const hkBitField& verticesToRetrieve, hkFloat32* dst);
 
             /// Set components held in buffer from an array of 4xhkFloat32s
         static hkResult HK_CALL setElementVectorArray(const LockedVertices::Buffer& buffer, const hkFloat32* src, int numVertices);
 
             /// Set components from a hkVector4 array (helper function - calls setElementVectorArray with the appropriate buffer)
         static hkResult HK_CALL setElementVectorArray(const LockedVertices& lockedVertices, int bufferIndex, const hkFloat32* src);
-static hkResult HK_CALL setElementVectorArray(const LockedVertices& lockedVertices, int bufferIndex, int dstStartVertex, const hkFloat32* src, int numVertices);
+		static hkResult HK_CALL setElementVectorArray(const LockedVertices& lockedVertices, int bufferIndex, int dstStartVertex, const hkFloat32* src, int numVertices);
 
 			/// The elements being extracted must have been previously been locked with lock/partialLock.
 		static hkResult HK_CALL getElementIntArray(const LockedVertices& lockedVertices, int elementIndex, int* dst);
-		static hkResult HK_CALL getElementIntArray(const LockedVertices& lockedVertices, int elementIndex, const hkBitField& verticesToRetrieve, int* dst);
+		static hkResult HK_CALL getElementIntArray(const LockedVertices& lockedVertices, int elementIndex, const hkBitField& verticesToRetrieve, int* dst, int dstMaxSize = -1);
 
 			/// Sets the elements of an array doing conversions from ints as needed. Converts only integral types.
 			/// The elements being set must have previously have been locked with lock/partialLock.
@@ -143,7 +143,7 @@ static hkResult HK_CALL setElementVectorArray(const LockedVertices& lockedVertic
 #endif // HK_VERTEX_BUFFER_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

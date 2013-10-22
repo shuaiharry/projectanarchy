@@ -15,66 +15,79 @@
 #include <Common/Base/Container/StringMap/hkStorageStringMap.h>
 
 class hkvProfileManager;
-class hkvTransformRuleTemplate;
 
-
-
-
+/// \brief
+///   This class stores for each profile a transformation rule for a specific asset type.
+///
+/// Each template is uniquely identified by the asset type it represents and its name.
+/// An asset of matching type can set its transformation template to this instance in order to reuse
+/// the transformation rules defined within.
+/// There is always a 'Default' template that cannot be deleted. Templates are managed by the hkvProfileManager and can only be created by it.
+///
+/// \sa hkvProfileManager
 class hkvTransformRuleTemplate : public hkvIProperties
 {
   friend class hkvProfileManager;
-
 public:
-  class ProfileTemplate : public hkvIProperties
-  {
-    friend class hkvTransformRuleTemplate;
-  public:
-    ASSETFRAMEWORK_IMPEXP ProfileTemplate (const char* profileName, hkvTargetPlatform platform);
-    ASSETFRAMEWORK_IMPEXP ~ProfileTemplate();
-    ASSETFRAMEWORK_IMPEXP ProfileTemplate* clone() const;
+  /// \brief
+  ///   Returns the unique name of the template. This name is used to map an asset to a template.
+  ASSETFRAMEWORK_IMPEXP const char* getName() const;
 
-    ASSETFRAMEWORK_IMPEXP hkvTransformationRule* getTransformRule(const char* assetType) const;
+  /// \brief
+  ///   Returns the unique string identifier of the asset type for which this template provides transformation rules.
+  ASSETFRAMEWORK_IMPEXP const char* getAssetType() const;
 
-    ASSETFRAMEWORK_IMPEXP VOVERRIDE const char* getTypeName() const;
-    ASSETFRAMEWORK_IMPEXP VOVERRIDE void getProperties(hkvPropertyList& properties, hkvProperty::Purpose purpose) const HKV_OVERRIDE;
-    ASSETFRAMEWORK_IMPEXP VOVERRIDE void setProperty(const hkvProperty& prop, const hkArray<hkStringPtr>& path, hkUint32 stackIndex, hkvProperty::Purpose purpose) HKV_OVERRIDE;
+  /// \brief
+  ///   Returns the transformation rule for the given profile name. If the profile does not exist, NULL is returned.
+  ASSETFRAMEWORK_IMPEXP hkvTransformationRule* getTransformRule(const char* profileName) const;
 
-  private:
-    ASSETFRAMEWORK_IMPEXP ProfileTemplate(const ProfileTemplate& profileTemplate);
-    ASSETFRAMEWORK_IMPEXP void operator=(const ProfileTemplate& rhs);
+public: // hkvIProperties interface
+  ASSETFRAMEWORK_IMPEXP virtual const char* getTypeName() const HKV_OVERRIDE;
+  ASSETFRAMEWORK_IMPEXP virtual void getProperties(hkvPropertyList& properties, hkvProperty::Purpose purpose) const HKV_OVERRIDE;
+  ASSETFRAMEWORK_IMPEXP virtual void setProperty(const hkvProperty& prop, const hkArray<hkStringPtr>& path, hkUint32 stackIndex, hkvProperty::Purpose purpose) HKV_OVERRIDE;
 
-  private:
-    hkStringPtr m_profileName;
-    hkvTargetPlatform m_platform;
-    mutable hkStorageStringMap<hkvTransformationRule*> m_assetRules;
-  };
+private:
+  /// \brief
+  ///   Constructor for the template.
+  ///
+  /// \param assetType
+  ///   The unique string identifier of the asset type for which this template should provide transformation rules.
+  ///
+  /// \param templateName
+  ///   The unique string identifier of this template.
+  ASSETFRAMEWORK_IMPEXP hkvTransformRuleTemplate(const char* assetType, const char* templateName);
 
-public:
-  ASSETFRAMEWORK_IMPEXP hkvTransformRuleTemplate(const char* name);
+  /// \brief
+  ///   Destructor.
   ASSETFRAMEWORK_IMPEXP ~hkvTransformRuleTemplate();
+
+  /// \brief
+  ///   Creates a clone of this template with the given name. This function cannot fail.
   ASSETFRAMEWORK_IMPEXP hkvTransformRuleTemplate* clone(const char* cloneName) const;
 
-  ASSETFRAMEWORK_IMPEXP const char* getName() const;
-  ASSETFRAMEWORK_IMPEXP ProfileTemplate* getTransformRuleProfileTemplate(const char* profileName) const;
-  ASSETFRAMEWORK_IMPEXP hkvTransformationRule* getTransformRule(const char* profileName, const char* assetType) const;
-
-  ASSETFRAMEWORK_IMPEXP VOVERRIDE const char* getTypeName() const;
-  ASSETFRAMEWORK_IMPEXP VOVERRIDE void getProperties(hkvPropertyList& properties, hkvProperty::Purpose purpose) const HKV_OVERRIDE;
-  ASSETFRAMEWORK_IMPEXP VOVERRIDE void setProperty(const hkvProperty& prop, const hkArray<hkStringPtr>& path, hkUint32 stackIndex, hkvProperty::Purpose purpose) HKV_OVERRIDE;
+  /// \brief
+  ///   Returns the transformation rule for the given profile name.
+  ///
+  /// \param profileName
+  ///   The unique string identifier of the profile for which the transformation rule is requested.
+  ///
+  /// \param transformRuleType
+  ///   The unique string identifier of the transformation rule type which should be created if no entry exists yet for the given profile.
+  ///
+  /// \return
+  ///   A pointer to the hkvTransformationRule matching the requested profile. If the profile does not exist, NULL is returned.
+  ASSETFRAMEWORK_IMPEXP hkvTransformationRule* getTransformRule(const char* profileName, const char* transformRuleType) const;
 
 private:
-  ASSETFRAMEWORK_IMPEXP hkvTransformRuleTemplate(const hkvTransformRuleTemplate& ruleTemplate);
-  ASSETFRAMEWORK_IMPEXP void operator=(const hkvTransformRuleTemplate& rhs);
-
-private:
-  hkStringPtr m_name;
-  mutable hkStorageStringMap<ProfileTemplate*> m_profileTemplates;
+  hkStringPtr m_templateName;
+  hkStringPtr m_assetType;
+  mutable hkStorageStringMap<hkvTransformationRule*> m_profileRules; // Maps profiles to hkvTransformationRule
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

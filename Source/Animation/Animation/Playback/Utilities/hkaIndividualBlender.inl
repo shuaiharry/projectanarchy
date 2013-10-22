@@ -7,7 +7,7 @@
  */
 
 // Interpolates n hkReal pairs with a single alpha
-void hkaBlender::blend( hkReal* HK_RESTRICT dst, const hkReal* HK_RESTRICT srcL, const hkReal* HK_RESTRICT srcR, const hkSimdReal& alpha_, int n, BLEND_MODE blendMode )
+void hkaBlender::blend( hkReal* HK_RESTRICT dst, const hkReal* HK_RESTRICT srcL, const hkReal* HK_RESTRICT srcR, const hkSimdReal& alpha, int n, BLEND_MODE blendMode )
 {
 	HK_ASSERT2( 0x1230c277, blendMode == NORMAL || blendMode == ADDITIVE || blendMode == SUBTRACTIVE, "Invalid blend mode" );
 	if(n <= 0)
@@ -15,58 +15,57 @@ void hkaBlender::blend( hkReal* HK_RESTRICT dst, const hkReal* HK_RESTRICT srcL,
 		return;
 	}
 
-	const hkReal alpha = static_cast< hkReal >( alpha_ );
-	const hkReal beta = 1.0f - static_cast< hkReal >( alpha );
+	const hkSimdReal beta = hkSimdReal_1 - alpha;
 
 	switch ( blendMode )
 	{
 	case NORMAL:
 		{
 			{
-				hkReal srcLi = srcL[0];
-				hkReal srcRi = srcR[0];
+				hkSimdReal srcLi; srcLi.load<1>(&srcL[0]);
+				hkSimdReal srcRi; srcRi.load<1>(&srcR[0]);
 
 				for( int i = 0; i < n-1; ++i )
 				{
-					hkReal dsti = srcLi * beta + srcRi * alpha;
-					srcLi = srcL[i+1];
-					srcRi = srcR[i+1];
-					dst[i] = dsti;
+					hkSimdReal dsti = srcLi * beta + srcRi * alpha;
+					srcLi.load<1>(&srcL[i+1]);
+					srcRi.load<1>(&srcR[i+1]);
+					dsti.store<1>(&dst[i]);
 				}
-				dst[n-1] = srcLi * beta + srcRi * alpha;
+				(srcLi * beta + srcRi * alpha).store<1>(&dst[n-1]);
 			}
 			break;
 		}
 	case ADDITIVE:
 		{
-			hkReal srcLi = srcL[0];
-			hkReal srcRi = srcR[0];
+			hkSimdReal srcLi; srcLi.load<1>(&srcL[0]);
+			hkSimdReal srcRi; srcRi.load<1>(&srcR[0]);
 
 			for( int i = 0; i < n-1; ++i )
 			{
-				hkReal dsti = srcLi + srcRi * alpha;
-				srcLi = srcL[i+1];
-				srcRi = srcR[i+1];
-				dst[i] = dsti;
+				hkSimdReal dsti = srcLi + srcRi * alpha;
+				srcLi.load<1>(&srcL[i+1]);
+				srcRi.load<1>(&srcR[i+1]);
+				dsti.store<1>(&dst[i]);
 			}
-			dst[n-1] = srcLi + srcRi * alpha;
+			(srcLi + srcRi * alpha).store<1>(&dst[n-1]);
 		}
 
 		break;
 
 	case SUBTRACTIVE:
 		{
-			hkReal srcLi = srcL[0];
-			hkReal srcRi = srcR[0];
+			hkSimdReal srcLi; srcLi.load<1>(&srcL[0]);
+			hkSimdReal srcRi; srcRi.load<1>(&srcR[0]);
 
 			for( int i = 0; i < n-1; ++i )
 			{
-				hkReal dsti = srcLi - srcRi * alpha;
-				srcLi = srcL[i+1];
-				srcRi = srcR[i+1];
-				dst[i] = dsti;
+				hkSimdReal dsti = srcLi - srcRi * alpha;
+				srcLi.load<1>(&srcL[i+1]);
+				srcRi.load<1>(&srcR[i+1]);
+				dsti.store<1>(&dst[i]);
 			}
-			dst[n-1] = srcLi - srcRi * alpha;
+			(srcLi - srcRi * alpha).store<1>(&dst[n-1]);
 		}
 
 		break;
@@ -78,28 +77,26 @@ void hkaBlender::blend( hkVector4* HK_RESTRICT dst, const hkVector4* HK_RESTRICT
 {
 	HK_ASSERT2( 0x1c0d4a7b, blendMode == NORMAL || blendMode == ADDITIVE || blendMode == SUBTRACTIVE, "Invalid blend mode" );
 
-	const hkSimdReal negAlpha = -alpha;
-
 	switch ( blendMode )
 	{
 	case NORMAL:
 		for ( int i = 0; i < n; i++ )
 		{
-			dst[ i ].setInterpolate4( srcL[ i ], srcR[ i ], alpha );
+			dst[ i ].setInterpolate( srcL[ i ], srcR[ i ], alpha );
 		}
 		break;
 
 	case ADDITIVE:
 		for ( int i = 0; i < n; i++ )
 		{
-			dst[ i ].setAddMul4( srcL[ i ], srcR[ i ], alpha );
+			dst[ i ].setAddMul( srcL[ i ], srcR[ i ], alpha );
 		}
 		break;
 
 	case SUBTRACTIVE:
 		for ( int i = 0; i < n; i++ )
 		{
-			dst[ i ].setAddMul4( srcL[ i ], srcR[ i ], negAlpha );
+			dst[ i ].setSubMul( srcL[ i ], srcR[ i ], alpha );
 		}
 		break;
 	}
@@ -151,7 +148,7 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, const hkQuaternion* HK_RE
 		case NORMAL:
 			for ( int i = 0; i < n; i++ )
 			{
-				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], srcR[ i ], alpha );
+				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], srcR[ i ], alpha.getReal() );
 			}
 			break;
 
@@ -160,7 +157,7 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, const hkQuaternion* HK_RE
 			{
 				hkQuaternion comp;
 				comp.setMul( srcL[ i ], srcR[ i ] );
-				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], comp, alpha );
+				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], comp, alpha.getReal() );
 			}
 			break;
 
@@ -169,7 +166,7 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, const hkQuaternion* HK_RE
 			{
 				hkQuaternion comp;
 				comp.setMulInverse( srcL[ i ], srcR[ i ] );
-				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], comp, alpha );
+				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], comp, alpha.getReal() );
 			}
 			break;
 		}
@@ -194,9 +191,9 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_
 		case NORMAL:
 			for ( int i = 0; i < n; i++, srcLPtr++, srcRPtr++, dstPtr++ )
 			{
-				dstPtr->m_translation.setInterpolate4( srcLPtr->m_translation, srcRPtr->m_translation, alpha );
+				dstPtr->m_translation.setInterpolate( srcLPtr->m_translation, srcRPtr->m_translation, alpha );
 				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, srcRPtr->m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, srcRPtr->m_scale, alpha );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, srcRPtr->m_scale, alpha );
 			}
 			break;
 
@@ -205,9 +202,9 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_
 			{
 				hkQsTransform comp;
 				comp.setMul( srcL[ i ], srcR[ i ] );
-				dstPtr->m_translation.setInterpolate4( srcLPtr->m_translation, comp.m_translation, alpha );
+				dstPtr->m_translation.setInterpolate( srcLPtr->m_translation, comp.m_translation, alpha );
 				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, comp.m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, comp.m_scale, alpha );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, comp.m_scale, alpha );
 			}
 			break;
 
@@ -216,9 +213,9 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_
 			{
 				hkQsTransform comp;
 				comp.setMulMulInverse( srcL[ i ], srcR[ i ] );
-				dstPtr->m_translation.setInterpolate4( srcLPtr->m_translation, comp.m_translation, alpha );
+				dstPtr->m_translation.setInterpolate( srcLPtr->m_translation, comp.m_translation, alpha );
 				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, comp.m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, comp.m_scale, alpha );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, comp.m_scale, alpha );
 			}
 			break;
 		}
@@ -232,9 +229,9 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_
 			{
 				for ( int i = 0; i < n; i++, srcLPtr++, srcRPtr++, dstPtr++ )
 				{
-					dstPtr->m_translation.setInterpolate4( srcLPtr->m_translation, srcRPtr->m_translation, alpha );
-					hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, srcRPtr->m_rotation, alpha );
-					dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, srcRPtr->m_scale, alpha );
+					dstPtr->m_translation.setInterpolate( srcLPtr->m_translation, srcRPtr->m_translation, alpha );
+					hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, srcRPtr->m_rotation, alpha.getReal() );
+					dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, srcRPtr->m_scale, alpha );
 				}
 			}
 			break;
@@ -246,9 +243,9 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_
 					hkQsTransform comp;
 					comp.setMul( *srcLPtr, *srcRPtr );
 
-					dstPtr->m_translation.setInterpolate4( srcLPtr->m_translation, comp.m_translation, alpha );
-					hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, comp.m_rotation, alpha );
-					dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, comp.m_scale, alpha );
+					dstPtr->m_translation.setInterpolate( srcLPtr->m_translation, comp.m_translation, alpha );
+					hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, comp.m_rotation, alpha.getReal() );
+					dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, comp.m_scale, alpha );
 				}
 			}
 			break;
@@ -260,9 +257,9 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_
 					hkQsTransform comp;
 					comp.setMulMulInverse( *srcLPtr, *srcRPtr );
 
-					dstPtr->m_translation.setInterpolate4( srcLPtr->m_translation, comp.m_translation, alpha );
-					hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, comp.m_rotation, alpha );
-					dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, comp.m_scale, alpha );
+					dstPtr->m_translation.setInterpolate( srcLPtr->m_translation, comp.m_translation, alpha );
+					hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, comp.m_rotation, alpha.getReal() );
+					dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, comp.m_scale, alpha );
 				}
 			}
 			break;
@@ -283,24 +280,36 @@ void hkaBlender::blend( hkReal* HK_RESTRICT dst, hkReal* HK_RESTRICT weightsOut,
 	case NORMAL:
 		for ( int i = 0; i < n; i++ )
 		{
-			hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-			dst[ i ] = srcL[ i ] * ( 1.0f - alpha ) + srcR[ i ] * alpha;
+			hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+			hkSimdReal srcLi; srcLi.load<1>(&srcL[i]);
+			hkSimdReal srcRi; srcRi.load<1>(&srcR[i]);
+			hkSimdReal a; a.setFromFloat(alpha);
+			hkSimdReal dsti; dsti.setInterpolate(srcLi, srcRi, a);
+			dsti.store<1>(&dst[ i ]);
 		}
 		break;
 
 	case ADDITIVE:
 		for ( int i = 0; i < n; i++ )
 		{
-			hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-			dst[ i ] = srcL[ i ] + srcR[ i ] * alpha;
+			hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+			hkSimdReal srcLi; srcLi.load<1>(&srcL[i]);
+			hkSimdReal srcRi; srcRi.load<1>(&srcR[i]);
+			hkSimdReal a; a.setFromFloat(alpha);
+			hkSimdReal dsti = srcLi + srcRi * a;
+			dsti.store<1>(&dst[ i ]);
 		}
 		break;
 
 	case SUBTRACTIVE:
 		for ( int i = 0; i < n; i++ )
 		{
-			hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-			dst[ i ] = srcL[ i ] - srcR[ i ] * alpha;
+			hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+			hkSimdReal srcLi; srcLi.load<1>(&srcL[i]);
+			hkSimdReal srcRi; srcRi.load<1>(&srcR[i]);
+			hkSimdReal a; a.setFromFloat(alpha);
+			hkSimdReal dsti = srcLi - srcRi * a;
+			dsti.store<1>(&dst[ i ]);
 		}
 		break;
 	}
@@ -318,24 +327,27 @@ void hkaBlender::blend( hkVector4* HK_RESTRICT dst, hkReal* weightsOut,const hkV
 	case NORMAL:
 		for ( int i = 0; i < n; i++ )
 		{
-			hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-			dst[ i ].setInterpolate4( srcL[ i ], srcR[ i ], alpha );
+			hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+			hkSimdReal a; a.setFromFloat(alpha);
+			dst[ i ].setInterpolate( srcL[ i ], srcR[ i ], a );
 		}
 		break;
 
 	case ADDITIVE:
 		for ( int i = 0; i < n; i++ )
 		{
-			hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-			dst[ i ].setAddMul4( srcL[ i ], srcR[ i ], alpha );
+			hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+			hkSimdReal a; a.setFromFloat(alpha);
+			dst[ i ].setAddMul( srcL[ i ], srcR[ i ], a );
 		}
 		break;
 
 	case SUBTRACTIVE:
 		for ( int i = 0; i < n; i++ )
 		{
-			hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-			dst[ i ].setAddMul4( srcL[ i ], srcR[ i ], -alpha );
+			hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+			hkSimdReal a; a.setFromFloat(alpha);
+			dst[ i ].setSubMul( srcL[ i ], srcR[ i ], a );
 		}
 		break;
 	}
@@ -357,8 +369,9 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, hkReal* weightsOut,const 
 		case NORMAL:
 			for ( int i = 0; i < n; i++ )
 			{
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-				dst[ i ].setSlerp( srcL[ i ], srcR[ i ], alpha );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dst[ i ].setSlerp( srcL[ i ], srcR[ i ], a );
 			}
 			break;
 
@@ -367,8 +380,9 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, hkReal* weightsOut,const 
 			{
 				hkQuaternion comp;
 				comp.setMul( srcL[ i ], srcR[ i ] );
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-				dst[ i ].setSlerp( srcL[ i ], comp, alpha );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dst[ i ].setSlerp( srcL[ i ], comp, a );
 			}
 			break;
 		
@@ -377,8 +391,9 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, hkReal* weightsOut,const 
 			{
 				hkQuaternion comp;
 				comp.setMulInverse( srcL[ i ], srcR[ i ] );
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
-				dst[ i ].setSlerp( srcL[ i ], comp, alpha );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dst[ i ].setSlerp( srcL[ i ], comp, a );
 			}
 			break;
 		}
@@ -391,7 +406,7 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, hkReal* weightsOut,const 
 		case NORMAL:
 			for ( int i = 0; i < n; i++ )
 			{
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
 				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], srcR[ i ], alpha );
 			}
 			break;
@@ -401,7 +416,7 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, hkReal* weightsOut,const 
 			{
 				hkQuaternion comp;
 				comp.setMul( srcL[ i ], srcR[ i ] );
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
 				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], comp, alpha );
 			}
 			break;
@@ -410,7 +425,7 @@ void hkaBlender::blend( hkQuaternion* HK_RESTRICT dst, hkReal* weightsOut,const 
 			for ( int i = 0; i < n; i++ )
 			{
 				hkQuaternion comp;
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn, weightsL[ i ], weightsR[ i ] );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, weightsOut[ i ], alphaIn.getReal(), weightsL[ i ], weightsR[ i ] );
 				comp.setMulInverse( srcL[ i ], srcR[ i ] );
 				hkaIndividualBlenderUtilities::qlerp( dst[ i ], srcL[ i ], comp, alpha );
 			}
@@ -441,10 +456,11 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, hkReal* weightsOut,const
 		case NORMAL:
 			for( int i = 0; i < n; i++, srcLPtr++, srcRPtr++, dstPtr++, weightsLPtr++, weightsRPtr++, weightsOutPtr++ )
 			{
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, *weightsOutPtr, alphaIn, *weightsLPtr, *weightsRPtr );
-				dstPtr->m_translation.setInterpolate4(srcLPtr->m_translation, srcRPtr->m_translation, alpha);
-				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, srcRPtr->m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, srcRPtr->m_scale, alpha );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, *weightsOutPtr, alphaIn.getReal(), *weightsLPtr, *weightsRPtr );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dstPtr->m_translation.setInterpolate(srcLPtr->m_translation, srcRPtr->m_translation, a);
+				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, srcRPtr->m_rotation, a );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, srcRPtr->m_scale, a );
 			}
 			break;
 
@@ -453,10 +469,11 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, hkReal* weightsOut,const
 			{
 				hkQsTransform comp;
 				comp.setMul( *srcLPtr, *srcRPtr );
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, *weightsOutPtr, alphaIn, *weightsLPtr, *weightsRPtr );
-				dstPtr->m_translation.setInterpolate4(srcLPtr->m_translation, comp.m_translation, alpha);
-				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, comp.m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, comp.m_scale, alpha );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, *weightsOutPtr, alphaIn.getReal(), *weightsLPtr, *weightsRPtr );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dstPtr->m_translation.setInterpolate(srcLPtr->m_translation, comp.m_translation, a);
+				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, comp.m_rotation, a );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, comp.m_scale, a );
 			}
 			break;
 
@@ -465,10 +482,11 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, hkReal* weightsOut,const
 			{
 				hkQsTransform comp;
 				comp.setMulMulInverse( *srcLPtr, *srcRPtr );
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, *weightsOutPtr, alphaIn, *weightsLPtr, *weightsRPtr );
-				dstPtr->m_translation.setInterpolate4(srcLPtr->m_translation, comp.m_translation, alpha);
-				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, comp.m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, comp.m_scale, alpha );
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, *weightsOutPtr, alphaIn.getReal(), *weightsLPtr, *weightsRPtr );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dstPtr->m_translation.setInterpolate(srcLPtr->m_translation, comp.m_translation, a);
+				dstPtr->m_rotation.setSlerp( srcLPtr->m_rotation, comp.m_rotation, a );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, comp.m_scale, a );
 			}
 			break;
 		}
@@ -481,10 +499,11 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, hkReal* weightsOut,const
 		case NORMAL:
 			for( int i = 0; i < n; i++, srcLPtr++, srcRPtr++, dstPtr++, weightsLPtr++, weightsRPtr++, weightsOutPtr++ )
 			{
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, *weightsOutPtr, alphaIn, *weightsLPtr, *weightsRPtr );
-				dstPtr->m_translation.setInterpolate4(srcLPtr->m_translation, srcRPtr->m_translation, alpha);
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeights1( alpha, *weightsOutPtr, alphaIn.getReal(), *weightsLPtr, *weightsRPtr );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dstPtr->m_translation.setInterpolate(srcLPtr->m_translation, srcRPtr->m_translation, a);
 				hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, srcRPtr->m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, srcRPtr->m_scale, alpha );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, srcRPtr->m_scale, a );
 			}
 			break;
 
@@ -493,10 +512,11 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, hkReal* weightsOut,const
 			{
 				hkQsTransform comp;
 				comp.setMul( *srcLPtr, *srcRPtr );
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, *weightsOutPtr, alphaIn, *weightsLPtr, *weightsRPtr );
-				dstPtr->m_translation.setInterpolate4(srcLPtr->m_translation, comp.m_translation, alpha);
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, *weightsOutPtr, alphaIn.getReal(), *weightsLPtr, *weightsRPtr );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dstPtr->m_translation.setInterpolate(srcLPtr->m_translation, comp.m_translation, a);
 				hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, comp.m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, comp.m_scale, alpha );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, comp.m_scale, a );
 			}
 			break;
 
@@ -505,10 +525,11 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, hkReal* weightsOut,const
 			{
 				hkQsTransform comp;
 				comp.setMulMulInverse( *srcLPtr, *srcRPtr );
-				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, *weightsOutPtr, alphaIn, *weightsLPtr, *weightsRPtr );
-				dstPtr->m_translation.setInterpolate4(srcLPtr->m_translation, comp.m_translation, alpha);
+				hkaIndividualBlenderUtilities::computeBlendFactorAndWeightsAdditive1( alpha, *weightsOutPtr, alphaIn.getReal(), *weightsLPtr, *weightsRPtr );
+				hkSimdReal a; a.setFromFloat(alpha);
+				dstPtr->m_translation.setInterpolate(srcLPtr->m_translation, comp.m_translation, a);
 				hkaIndividualBlenderUtilities::qlerp( dstPtr->m_rotation, srcLPtr->m_rotation, comp.m_rotation, alpha );
-				dstPtr->m_scale.setInterpolate4( srcLPtr->m_scale, comp.m_scale, alpha );
+				dstPtr->m_scale.setInterpolate( srcLPtr->m_scale, comp.m_scale, a );
 			}
 			break;
 		}
@@ -528,7 +549,7 @@ void hkaBlender::mul( hkVector4* HK_RESTRICT dst, const hkVector4* HK_RESTRICT s
 {
 	for ( int i = 0; i < n; i++ )
 	{
-		dst[ i ].setMul4( srcL[ i ], srcR[ i ] );
+		dst[ i ].setMul( srcL[ i ], srcR[ i ] );
 	}
 }
 
@@ -586,7 +607,7 @@ void hkaBlender::rotate( hkVector4* HK_RESTRICT dst, const hkQuaternion* HK_REST
 {
 	for ( int i = 0; i < n; i++ )
 	{
-		dst[ i ].setRotatedDir( srcL[ i ], srcR[ i ] );
+		dst[ i ]._setRotatedDir( srcL[ i ], srcR[ i ] );
 	}
 }
 
@@ -594,7 +615,7 @@ void hkaBlender::rotateInv( hkVector4* HK_RESTRICT dst, const hkQuaternion* HK_R
 {
 	for ( int i = 0; i < n; i++ )
 	{
-		dst[ i ].setRotatedInverseDir( srcL[ i ], srcR[ i ] );
+		dst[ i ]._setRotatedInverseDir( srcL[ i ], srcR[ i ] );
 	}
 }
 
@@ -602,7 +623,7 @@ void hkaBlender::transform( hkVector4* HK_RESTRICT dst, const hkQsTransform* HK_
 {
 	for ( int i = 0; i < n; i++ )
 	{
-		dst[ i ].setTransformedPos( srcL[ i ], srcR[ i ] );
+		dst[ i ]._setTransformedPos( srcL[ i ], srcR[ i ] );
 	}
 }
 
@@ -610,7 +631,7 @@ void hkaBlender::transformInv( hkVector4* HK_RESTRICT dst, const hkQsTransform* 
 {
 	for ( int i = 0; i < n; i++ )
 	{
-		dst[ i ].setTransformedInversePos( srcL[ i ], srcR[ i ] );
+		dst[ i ]._setTransformedInversePos( srcL[ i ], srcR[ i ] );
 	}
 }
 
@@ -641,7 +662,7 @@ void HK_CALL hkaBlender::modelFromLocal( hkQsTransform* poseModelOut, hkQsTransf
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -32,7 +32,14 @@ class hkxVertexBuffer : public hkReferencedObject
 		hkxVertexBuffer( hkFinishLoadedObjectFlag f );
 
 		inline int getNumVertices() const;
+		inline int getVectorStride() const;
+		inline int getFloatStride() const;
+		inline int getUint32Stride() const;
+		inline int getUint16Stride() const;
+		inline int getUint8Stride() const;
+
 		void setNumVertices(int n, const hkxVertexDescription& format);
+		void expandNumVertices(int n);
 
 		const void* getVertexDataPtr(const hkxVertexDescription::ElementDecl& elem) const;
 		void* getVertexDataPtr(const hkxVertexDescription::ElementDecl& elem);
@@ -58,6 +65,7 @@ class hkxVertexBuffer : public hkReferencedObject
 
 			void clear();
 			void setSize(int numVerts); // make sure strides are set first
+			void expandBy(int numVerts);
 
 			hkArray<hkFloat32> m_vectorData; // just aligned floats, so could be in m_floatData. Vector data though is normally mutable data at runtime for skinning etc so handy to keep separate too if runtime supports loading as is.
 			hkArray<hkFloat32> m_floatData; //32 bit, like hkUint32, but handy to keep as float for read-ability in XML dumps etc
@@ -73,6 +81,9 @@ class hkxVertexBuffer : public hkReferencedObject
 			hkUint32 m_uint8Stride;
 		};
 
+		VertexData& getVertexData() { return m_data; }
+		const VertexData& getVertexData() const { return m_data; }
+
 	protected:
 		
 		struct hkxVertexBuffer::VertexData m_data;
@@ -84,7 +95,7 @@ class hkxVertexBuffer : public hkReferencedObject
 #endif // HKSCENEDATA_MESH_HKXVERTEXBUFFER_HKCLASS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

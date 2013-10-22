@@ -579,7 +579,7 @@ void vHavokCharacterPushableProxy::processConstraintsCallback( const hkpCharacte
       void *pObject = vHavokUserDataPointerPair_t::ExtractTypeAndPointer((void *)otherPhantom->getUserData(), eType);
       if (pObject && eType==V_USERDATA_OBJECT)
       {
-        vHavokCharacterPushableProxy* otherCharacter = ((vHavokCharacterController*)pObject)->GetCharacterProxy();
+        const vHavokCharacterPushableProxy* otherCharacter = ((vHavokCharacterController*)pObject)->GetCharacterProxy();
 			  if(otherCharacter)
 			  {
 				  const hkSimdReal strength = hkSimdReal::fromFloat(m_strength);
@@ -608,10 +608,13 @@ vHavokCharacterController::vHavokCharacterController()
   , Character_Strength(5000.f)
   , Gravity_Scale(1.f)
   , Jump_Height(1.5f)
-  , Step_Height(30.f) // in cm
+  , Step_Height(30.f) // in centimeters
   , Step_Threshold(60.f) // in degrees
+  , Max_Velocity(1500.0f) // in centimeters / seconds
+  , Max_Acceleration(4000.0f) // in centimeters / seconds^2
+  , PenetrationRecoverySpeed(0.5f)
   , m_pCharacterProxy(NULL)
-  , m_characterContext(NULL)
+  , m_pCharacterContext(NULL)
   , m_currentVelocity(0.f)
   , m_wantJump(false)
   , m_characterInput()
@@ -626,11 +629,6 @@ vHavokCharacterController::vHavokCharacterController()
 
 vHavokCharacterController::~vHavokCharacterController()
 {
-}
-
-vHavokCharacterPushableProxy* vHavokCharacterController::GetCharacterProxy()
-{
-	return m_pCharacterProxy;
 }
 
 void vHavokCharacterController::SetEnabled(BOOL bEnabled)
@@ -715,7 +713,8 @@ void vHavokCharacterController::OnVariableValueChanged(VisVariable_cl *pVar, con
 	if (m_pCharacterProxy == NULL)
 		return;
 
-	if (!strcmp(pVar->name,"Gravity_Scale")) // this value is used directly and does not require the controller to be reinitialized
+  // this value is used directly and does not require the controller to be reinitialized
+	if (!strcmp(pVar->name,"Gravity_Scale")) 
   {
 		return;
   }
@@ -774,7 +773,18 @@ void vHavokCharacterController::MessageFunction( int iID, INT_PTR iParamA, INT_P
 // -------------------------------------------------------------------------- //
 
 // Register the class in the engine module so it is available for RTTI
-V_IMPLEMENT_SERIAL(vHavokCharacterController,IVObjectComponent,0,&g_vHavokModule);
+V_IMPLEMENT_SERIAL(vHavokCharacterController, IVObjectComponent, 0, &g_vHavokModule);
+
+/// Serialization versions
+#define VHAVOKCHARACTERCONTROLLER_VERSION_0           0     // Initial version
+#define VHAVOKCHARACTERCONTROLLER_VERSION_1           1     // More exposed properties
+#define VHAVOKCHARACTERCONTROLLER_VERSION_2           2     // Switchable motion delta Z behavior
+#define VHAVOKCHARACTERCONTROLLER_VERSION_3           3     // Gravity_Scale
+#define VHAVOKCHARACTERCONTROLLER_VERSION_4           4     // Jump_Height
+#define VHAVOKCHARACTERCONTROLLER_VERSION_5           5     // Step_Height, Step_Threshold
+#define VHAVOKCHARACTERCONTROLLER_VERSION_6           6     // Enabled state
+#define VHAVOKCHARACTERCONTROLLER_VERSION_7           7     // Max Velocity / Acceleration / Penetration Speed
+#define VHAVOKCHARACTERCONTROLLER_VERSION_CURRENT     VHAVOKCHARACTERCONTROLLER_VERSION_7
 
 void vHavokCharacterController::Serialize(VArchive &ar)
 {
@@ -785,7 +795,9 @@ void vHavokCharacterController::Serialize(VArchive &ar)
 	{
 		char iFileVersion = 0;
 		ar >> iFileVersion;
-		VASSERT_MSG(iFileVersion <= iLocalVersion, "Invalid file version. Please re-export");
+		VASSERT_MSG(iFileVersion >= VHAVOKCHARACTERCONTROLLER_VERSION_0 && 
+      iFileVersion <= VHAVOKCHARACTERCONTROLLER_VERSION_CURRENT, 
+      "Invalid file version. Please re-export");
 
 		// VHAVOKCHARACTERCONTROLLER_VERSION_0
 		Character_Top.SerializeAsVec3 (ar);
@@ -832,6 +844,14 @@ void vHavokCharacterController::Serialize(VArchive &ar)
     {
       ar >> m_bEnabled;
     }
+
+    // VHAVOKCHARACTERCONTROLLER_VERSION_7
+    if (iFileVersion >= VHAVOKCHARACTERCONTROLLER_VERSION_7)
+    {
+      ar >> Max_Velocity;
+      ar >> Max_Acceleration;
+      ar >> PenetrationRecoverySpeed;
+    }
 	}
 	else
 	{
@@ -864,6 +884,11 @@ void vHavokCharacterController::Serialize(VArchive &ar)
 
     // VHAVOKCHARACTERCONTROLLER_VERSION_6
     ar << m_bEnabled;
+
+    // VHAVOKCHARACTERCONTROLLER_VERSION_7
+    ar << Max_Velocity;
+    ar << Max_Acceleration;
+    ar << PenetrationRecoverySpeed;
 	}
 }
 
@@ -922,14 +947,6 @@ void vHavokCharacterController::Step(float fTimeStep, int iNumSteps, float fDura
   VisBaseEntity_cl *pOwnerEntity = (VisBaseEntity_cl *)GetOwner();
 	hkpWorld* world = pModule->GetPhysicsWorld();
 
-  // Rotation is not relevant for capsule so rotate just the entity
-  if (pOwnerEntity->HasRotationDelta())
-  {
-    hkvVec3 vRot = pOwnerEntity->GetRotationDelta();  
-    pOwnerEntity->IncOrientation(vRot);
-    pOwnerEntity->ResetRotationDelta();
-  }
-
   // We can not honor the motion delta as much as possible. Yet the Havok 
   // controller will have effects such as gravity in its previous velocity
   // too. So we really just want to take the planar part (XY) from the motion 
@@ -944,7 +961,7 @@ void vHavokCharacterController::Step(float fTimeStep, int iNumSteps, float fDura
   hkvVec3 vMotionVelocity;
   vMotionVelocity.x = vMotionDelta.x / fDuration;
   vMotionVelocity.y = vMotionDelta.y / fDuration;
-  vMotionVelocity.z = Fly_State ? (vMotionDelta.z / fDuration) : 0;
+  vMotionVelocity.z = Fly_State ? (vMotionDelta.z / fDuration) : 0.0f;
 
   m_pCharacterProxy->drawDebug(this);
 
@@ -976,14 +993,16 @@ void vHavokCharacterController::Step(float fTimeStep, int iNumSteps, float fDura
     // update the state
     {
       hkVector4 hVel;
-      vHavokConversionUtils::VisVecToPhysVecLocal( vMotionVelocity, hVel );
+      vHavokConversionUtils::VisVecToPhysVecLocal(vMotionVelocity, hVel);
 
       hkpCharacterInput input;
       hkpCharacterOutput output;
 
-      hkVector4 down; down = world->getGravity(); down.normalize3();
+      hkVector4 down; 
+      down = world->getGravity(); 
+      down.normalize3();
 
-      input.m_userData = hkUlong(&m_characterInput); //set additional characterinput (currently only fly_state)
+      input.m_userData = hkUlong(&m_characterInput); // set additional character input (currently only fly_state)
       input.m_inputLR = hkReal(0);
       (-hVel.length<3>()).store<1>(&input.m_inputUD); // negative for always forward movement
 
@@ -992,8 +1011,8 @@ void vHavokCharacterController::Step(float fTimeStep, int iNumSteps, float fDura
 
       input.m_up.setNeg4(down);	  
 
-      // XXX, forward should not be zero
-      if ( hkMath::equal(input.m_inputUD, 0.f) )
+      // forward vector should not be zero
+      if (hkMath::equal(input.m_inputUD, 0.0f))
       {
         input.m_inputUD = hkReal(0);
         input.m_forward = hkVector4::getConstant<HK_QUADREAL_1000>();
@@ -1013,7 +1032,7 @@ void vHavokCharacterController::Step(float fTimeStep, int iNumSteps, float fDura
 
       m_pCharacterProxy->checkSupport(down, input.m_surfaceInfo);
 
-      m_characterContext->update(input, output);
+      m_pCharacterContext->update(input, output);
 
       // Handle steps (can modify character position and output.m_velocity)
       if(Step_Height >= 0.f && Step_Threshold > 0.f && Step_Threshold <= 90.f)
@@ -1031,8 +1050,8 @@ void vHavokCharacterController::Step(float fTimeStep, int iNumSteps, float fDura
       m_pCharacterProxy->m_maxSlopeCosine = hkReal(0);
     }
 
-    hkStepInfo si( world->getCurrentTime(), world->getCurrentTime() + fTimeStep);
-    m_pCharacterProxy->integrateWithCollectors( si, scaledGravity, castContactsCollector, startContactsCollector);
+    hkStepInfo si(world->getCurrentTime(), world->getCurrentTime() + fTimeStep);
+    m_pCharacterProxy->integrateWithCollectors(si, scaledGravity, castContactsCollector, startContactsCollector);
 
     // reset collectors
     castContactsCollector.reset();
@@ -1133,28 +1152,28 @@ void vHavokCharacterController::UpdateOwner()
   if ((!GetOwner()) || (!pModule) || (!pModule->GetPhysicsWorld()))
     return;
 
-	VisBaseEntity_cl *pOwnerEntity = (VisBaseEntity_cl *)GetOwner();
+  VisBaseEntity_cl *pOwnerEntity = static_cast<VisBaseEntity_cl*>(GetOwner());
 
-	// Rotation is not relevant for capsule so rotate just the entity
-	if (pOwnerEntity->HasRotationDelta())
-	{
-		hkvVec3 vRot = pOwnerEntity->GetRotationDelta();  
-		pOwnerEntity->IncOrientation(vRot);
-		pOwnerEntity->ResetRotationDelta();
-	}
+  // Rotation is not relevant for capsule so apply rotation delta directly.
+  if (pOwnerEntity->HasRotationDelta())
+  {
+    const hkvVec3 vRot = pOwnerEntity->GetRotationDelta();  
+    pOwnerEntity->IncOrientation(vRot);
+    pOwnerEntity->ResetRotationDelta();
+  }
 
-	if (m_pCharacterProxy)
-	{
-		hkvVec3 pos;
-		// Get the transformation from Havok
-		pModule->MarkForRead();
-		const hkVector4& hPos = m_pCharacterProxy->getPosition();
-		vHavokConversionUtils::PhysVecToVisVecWorld( hPos, pos ); 
-		pModule->UnmarkForRead();
+  if (m_pCharacterProxy)
+  {
+    hkvVec3 pos;
+    // Get the transformation from Havok
+    pModule->MarkForRead();
+    const hkVector4& hPos = m_pCharacterProxy->getPosition();
+    vHavokConversionUtils::PhysVecToVisVecWorld(hPos, pos); 
+    pModule->UnmarkForRead();
 
-		// Rotation is not relevant as capsule
-		pOwnerEntity->SetPosition(pos);
-	}
+    // Rotation is not relevant for capsule.
+    pOwnerEntity->SetPosition(pos);
+  }
 }
 
 void vHavokCharacterController::GetCurrentLinearVelocity(hkvVec3& currentVelocity) const
@@ -1223,8 +1242,11 @@ void vHavokCharacterController::CreateStateMachineAndContext()
   manager->registerState( state,	HK_CHARACTER_FLYING);
   state->removeReference();
 
-  m_characterContext = new hkpCharacterContext(manager, HK_CHARACTER_ON_GROUND);
-  m_characterContext->setCharacterType( hkpCharacterContext::HK_CHARACTER_PROXY );
+  m_pCharacterContext = new hkpCharacterContext(manager, HK_CHARACTER_ON_GROUND);
+  m_pCharacterContext->setCharacterType(hkpCharacterContext::HK_CHARACTER_PROXY);
+  m_pCharacterContext->setFilterEnable(true);
+  m_pCharacterContext->setFilterParameters(1.0f, VIS2HK_FLOAT_SCALED(Max_Velocity), VIS2HK_FLOAT_SCALED(Max_Acceleration));
+
   manager->removeReference();
 }
 
@@ -1247,82 +1269,86 @@ void vHavokCharacterController::CreateHavokController()
   VisBaseEntity_cl *pOwnerEntity = (VisBaseEntity_cl *) GetOwner();
   VASSERT(pOwnerEntity != NULL);
 
-	m_characterInput.m_fly = Fly_State;
+  m_characterInput.m_fly = Fly_State;
 
-	// The controller itself
-	{
-		// Construct a shape
-		hkVector4 vTop; vHavokConversionUtils::VisVecToPhysVecLocal(Character_Top, vTop);
-		hkVector4 vBottom; vHavokConversionUtils::VisVecToPhysVecLocal(Character_Bottom, vBottom);
-    float fRadius = float(VIS2HK_FLOAT_SCALED(Capsule_Radius));
+  // Construct a shape
+  hkVector4 vTop; vHavokConversionUtils::VisVecToPhysVecLocal(Character_Top, vTop);
+  hkVector4 vBottom; vHavokConversionUtils::VisVecToPhysVecLocal(Character_Bottom, vBottom);
+  float fRadius = float(VIS2HK_FLOAT_SCALED(Capsule_Radius));
     
-    hkvMat4 worldTransform = ApplyEntityScale(vTop, vBottom, fRadius);
+  hkvMat4 worldTransform = ApplyEntityScale(vTop, vBottom, fRadius);
 
-    // remove scaling part of transformation matrix
-    bool bMatrixValid = true;
-    for (int i=0;i<3;i++)
+  // remove scaling part of transformation matrix
+  bool bMatrixValid = true;
+  for (int i=0;i<3;i++)
+  {
+    const hkvVec3 vColumn = worldTransform.getColumn(i).getAsVec3();
+    if (vColumn.isZero(HKVMATH_SMALL_EPSILON))
     {
-      const hkvVec3 vColumn = worldTransform.getColumn(i).getAsVec3();
-      if (vColumn.isZero(HKVMATH_SMALL_EPSILON))
-      {
-        bMatrixValid = false;
-        break;
-      }
+      bMatrixValid = false;
+      break;
     }
-    if (bMatrixValid)
-      worldTransform.setScalingFactors (hkvVec3 (1));
-    else
-    {
-      worldTransform.setIdentity();
-      Vision::Error.Warning("vHavokCharacterController has invalid transformation - set to identity!");
-    }
+  }
+  if (bMatrixValid)
+    worldTransform.setScalingFactors (hkvVec3 (1));
+  else
+  {
+    worldTransform.setIdentity();
+    Vision::Error.Warning("vHavokCharacterController has invalid transformation - set to identity!");
+  }
 
-    // TODO:
-    // Check Static_Friction, Dynamic_Friction, Max_Slope, Character_Mass, Character_Strength ?
-    // -> Other Havok wrappers like vHavokRigidBody don't care about 'allowed' ranges (Havok clamps ?)
+  // TODO:
+  // Check Static_Friction, Dynamic_Friction, Max_Slope, Character_Mass, Character_Strength ?
+  // -> Other Havok wrappers like vHavokRigidBody don't care about 'allowed' ranges (Havok clamps ?)
 
-		// Create a capsule to represent the character standing
-		hkpShape* standCapsule = new hkpCapsuleShape(vTop, vBottom, fRadius);
+  // Create a capsule to represent the character standing
+  hkpShape* standCapsule = new hkpCapsuleShape(vTop, vBottom, fRadius);
 
-		// Construct a Shape Phantom
-		hkTransform hkTfOut;
-		vHavokConversionUtils::VisMatVecToPhysTransformWorld(worldTransform.getRotationalPart(), worldTransform.getTranslation(), hkTfOut);
-		hkpShapePhantom* phantom = new hkpSimpleShapePhantom(standCapsule, hkTfOut, m_iCollisionFilter);
-		standCapsule->removeReference();
+  // Construct a Shape Phantom
+  hkTransform hkTfOut;
+  vHavokConversionUtils::VisMatVecToPhysTransformWorld(worldTransform.getRotationalPart(), worldTransform.getTranslation(), hkTfOut);
+  hkpShapePhantom* phantom = new hkpSimpleShapePhantom(standCapsule, hkTfOut, m_iCollisionFilter);
+  standCapsule->removeReference();
 
-		// Construct a character proxy
-		hkpCharacterProxyCinfo cpci;
-		vHavokConversionUtils::VisVecToPhysVecWorld( worldTransform.getTranslation(), cpci.m_position );
-		vHavokConversionUtils::VisVecToPhysVec_noscale(worldTransform.getRotationalPart().getAxis(2), cpci.m_up);
-		cpci.m_up.normalize<3>();
+  // Construct a character proxy
+  hkpCharacterProxyCinfo cpci;
+  vHavokConversionUtils::VisVecToPhysVecWorld( worldTransform.getTranslation(), cpci.m_position );
+  vHavokConversionUtils::VisVecToPhysVec_noscale(worldTransform.getRotationalPart().getAxis(2), cpci.m_up);
+  cpci.m_up.normalize<3>();
 
-		// Controller properties
-		cpci.m_staticFriction = Static_Friction;
-		cpci.m_dynamicFriction = Dynamic_Friction;
-		cpci.m_userPlanes = 4;
-		cpci.m_keepDistance = .05f;
-		cpci.m_maxSlope = hkvMath::Deg2Rad(Max_Slope);
+  // Controller properties
+  cpci.m_staticFriction = Static_Friction;
+  cpci.m_dynamicFriction = Dynamic_Friction;
+  cpci.m_userPlanes = 4;
+  cpci.m_keepDistance = 0.05f;
+  cpci.m_maxSlope = hkvMath::Deg2Rad(Max_Slope);
 
-		// This value will affect how much the character pushes down on objects it stands on. 
-		cpci.m_characterMass = Character_Mass;
+  // This value will affect how much the character pushes down on objects it stands on. 
+  cpci.m_characterMass = Character_Mass;
 
-		// This value will affect how much the character is able to push other objects around.
-		cpci.m_characterStrength = Character_Strength;
+  // This value will affect how much the character is able to push other objects around.
+  cpci.m_characterStrength = Character_Strength;
 
-		cpci.m_shapePhantom = phantom;
+  cpci.m_shapePhantom = phantom;
 
-		//cpci.m_penetrationRecoverySpeed = 0.1f;
+  cpci.m_penetrationRecoverySpeed = PenetrationRecoverySpeed;
 
-		m_pCharacterProxy = new vHavokCharacterPushableProxy( cpci, this );
-	}
+  // Temporarily disable warning: "Shape phantom has not yet been added to the world. Initial position has been ignored".
+  // If the character controller is enabled then the phantom will be added to the world and its position will be updated below.
+  hkError::getInstance().setEnabled(0x6cee9071, false);
+  m_pCharacterProxy = new vHavokCharacterPushableProxy( cpci, this );
+  hkError::getInstance().setEnabled(0x6cee9071, true);
 
-	//
-	// Create the Character state machine and context
-	//
+  //
+  // Create the Character state machine and context
+  //
   CreateStateMachineAndContext();
 
   if (m_bEnabled)
-	  pModule->AddCharacterController(this);
+  {
+    pModule->AddCharacterController(this);
+    SetPosition(worldTransform.getTranslation());
+  }
 }
 
 //-----------------------------------------------------------------------------------
@@ -1531,10 +1557,10 @@ void vHavokCharacterController::DeleteHavokController()
 		pModule->UnmarkForWrite();
 	}
 
-  if (m_characterContext != NULL)
+  if (m_pCharacterContext != NULL)
   {
-    m_characterContext->removeReference();
-    m_characterContext	= HK_NULL;
+    m_pCharacterContext->removeReference();
+    m_pCharacterContext	= HK_NULL;
   }
 }
 
@@ -1628,23 +1654,26 @@ START_VAR_TABLE(vHavokCharacterController,IVObjectComponent,"Havok Character Con
   DEFINE_VAR_BOOL_AND_NAME(vHavokCharacterController, m_bEnabled, "Enabled", "Enable or disable component", "True", 0, 0);
   DEFINE_VAR_VECTOR_FLOAT(vHavokCharacterController, Character_Top, "Top of character in local entity space.", "0/0/150", 0, 0); 
 	DEFINE_VAR_VECTOR_FLOAT(vHavokCharacterController, Character_Bottom, "Bottom of character in local entity space.", "0/0/30", 0, 0); 
-	DEFINE_VAR_FLOAT(vHavokCharacterController, Capsule_Radius, "Radius of the character in local entity space.", "30.0", 0, 0); 
+	DEFINE_VAR_FLOAT(vHavokCharacterController, Capsule_Radius, "Radius of the character in local entity space.", "30.0", 0, "Clamp(1e-6,1e6)"); 
 	DEFINE_VAR_BOOL(vHavokCharacterController, Debug, "Enables/Disables Physics Debug Rendering.", "FALSE", 0, 0);
 	DEFINE_VAR_COLORREF(vHavokCharacterController, DebugColor, "Color of this RB when Debug Rendering is active.", "255,50,50,255", 0, NULL);
-	DEFINE_VAR_FLOAT(vHavokCharacterController, Static_Friction, "Default static friction for surfaces hit.", "0.0", 0, 0);
-	DEFINE_VAR_FLOAT(vHavokCharacterController, Dynamic_Friction, "Default dynamic friction for surfaces hit.", "0.8", 0, 0);
+	DEFINE_VAR_FLOAT(vHavokCharacterController, Static_Friction, " Controls the static friction for surfaces hit.", "0.0", 0, "Clamp(0,1)");
+  DEFINE_VAR_FLOAT(vHavokCharacterController, Dynamic_Friction, "Controls the dynamic friction for surfaces hit. A value of 0 maintains character momentum. A value of 1 clips all momentum against the normal of the surface hit.", "0.8", 0, "Clamp(0,1)");
 	DEFINE_VAR_FLOAT(vHavokCharacterController, Max_Slope, "Maximum slope that the character can walk up (In degrees, Max: 90 deg.).", "75", 0, "Clamp(0, 90)");
-	DEFINE_VAR_FLOAT(vHavokCharacterController, Character_Mass, "Mass of the character, standing on things.", "100", 0, 0);
-	DEFINE_VAR_FLOAT(vHavokCharacterController, Character_Strength, "Maximum constant force that the character controller can impart onto moving objects.", "5000", 0, 0);
+	DEFINE_VAR_FLOAT(vHavokCharacterController, Character_Mass, "Mass of the character, standing on things.", "100", 0, "Clamp(0,1000)");
+	DEFINE_VAR_FLOAT(vHavokCharacterController, Character_Strength, "Maximum force that the character controller can impart onto moving objects.", "5000", 0, "Clamp(0,7.9E+28)");
 	DEFINE_VAR_BOOL(vHavokCharacterController, Fly_State, "Whether the character should fly. If set to true the gravity will be ignored and also the Z value of the motion delta is applied", "FALSE", 0, 0);
-	DEFINE_VAR_FLOAT(vHavokCharacterController, Gravity_Scale, "Scalar factor to scale the global gravity strength. Use 0.0 for no gravity. Default is 1.0 (normal gravity)", "1.0", 0, 0); 
-	DEFINE_VAR_FLOAT(vHavokCharacterController, Jump_Height, "Jump Height of the character.", "1.5", 0, 0); 
-	DEFINE_VAR_FLOAT(vHavokCharacterController, Step_Height, "Maximum step height that the character can climb.", "30.0", 0, 0);
+	DEFINE_VAR_FLOAT(vHavokCharacterController, Gravity_Scale, "Scalar factor to scale the global gravity strength. Use 0.0 for no gravity. Default is 1.0 (normal gravity)", "1.0", 0, "Clamp(0,1e3)"); 
+	DEFINE_VAR_FLOAT(vHavokCharacterController, Jump_Height, "Jump Height of the character in meters.", "1.5", 0, "Clamp(0,100)"); 
+	DEFINE_VAR_FLOAT(vHavokCharacterController, Step_Height, "Maximum step height that the character can climb in Vision units.", "30.0", 0, 0);
 	DEFINE_VAR_FLOAT(vHavokCharacterController, Step_Threshold, "Minimum slope threshold for when to identify steps (In degrees, Max: 90 deg.).", "60.0", 0, "Clamp(0, 90)");
+  DEFINE_VAR_FLOAT(vHavokCharacterController, Max_Velocity, "Maximum velocity in Vision units: Used to stabilize character controller movement.", "1500.0", 0, "Clamp(0, 1e12)");
+  DEFINE_VAR_FLOAT(vHavokCharacterController, Max_Acceleration, "Maximum acceleration in Vision units: Used to stabilize character controller movement.", "4000.0", 0, "Clamp(0, 1e12)");
+  DEFINE_VAR_FLOAT(vHavokCharacterController, PenetrationRecoverySpeed, "Controls how quickly the character controller is pushed away when penetrating collision geometry.", "0.5", 0, "Clamp(0, 10)");
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

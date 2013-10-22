@@ -35,17 +35,13 @@ HK_FORCE_INLINE	/*static*/ hkSimdReal HK_CALL hkcdPointLineDistanceSquared(hkVec
 //
 HK_FORCE_INLINE	/*static*/ hkSimdReal HK_CALL hkcdPointSegmentDistanceSquared(hkVector4Parameter point, hkVector4Parameter lineStart, hkVector4Parameter lineEnd, hkVector4* HK_RESTRICT projectionOut)
 {
-	// Load constants.
-	hkSimdReal	zero; zero.setZero();
-	hkSimdReal	one = hkSimdReal_1;
-
 	// Compute projection fraction.
 	hkVector4	delta; delta.setSub(lineStart, lineEnd);
 	hkVector4	origin; origin.setSub(lineStart, point);
 	hkSimdReal	fraction = delta.dot<3>(origin) / delta.lengthSquared<3>();
 
 	// Clip fraction (handle the case where |delta|^2 == 0).
-	fraction.setClamped(fraction, zero, one);
+	fraction.setClampedZeroOne(fraction);
 
 	// Compute distance and set projectionOut if required.
 	hkVector4	projection; projection.setSubMul(origin, delta, fraction);
@@ -156,7 +152,7 @@ HK_FORCE_INLINE /*static*/ hkSimdReal HK_CALL hkcdPointCapsuleClosestPoint( hkVe
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

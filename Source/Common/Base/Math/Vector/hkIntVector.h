@@ -12,13 +12,6 @@
 #	error You need to include Common/Base/hkBase.h before this file.
 #endif
 
-#if defined(HK_PLATFORM_PSVITA)
-// Compiler-specific keyword to denote that the address is unaligned.
-#	define HK_INT_VECTOR_UNALIGNED_PTR __unaligned
-#else
-#	define HK_INT_VECTOR_UNALIGNED_PTR
-#endif
-
 namespace hkCompileError
 {
 	template <bool b> struct HK_INT_VECTOR_SUBVECTOR_INDEX_OUT_OF_RANGE;
@@ -37,6 +30,9 @@ namespace hkCompileError
 #define HK_INT_VECTOR_NOT_IMPLEMENTED HK_COMPILE_TIME_ASSERT2(N==0, HK_INT_VECTOR_NOT_IMPLEMENTED_FOR_THIS_VECTOR_LENGTH)
 #define HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK HK_COMPILE_TIME_ASSERT2((N>0)&&(N<=4), HK_INT_VECTOR_UNSUPPORTED_VECTOR_LENGTH)
 #define HK_INT_VECTOR_IMM_SPLAT_VALUE_CHECK HK_COMPILE_TIME_ASSERT2((VALUE>=-16)&&(VALUE<=15), HK_INT_VECTOR_ILLEGAL_VALUE_FOR_IMM_SPLAT)
+
+// Components that aren't loaded during hkIntVector::load() are initialized to this in Debug and Dev configurations.
+#define HK_INT_VECTOR_DEBUG_FILL_VALUE (0xDEADBEEF)
 
 /*	Endianness, and words such as "left", "right", "head", "tail":
 
@@ -101,20 +97,28 @@ class hkIntVector
 		HK_FORCE_INLINE int getComponent(int I) const;
 		template <int I> HK_FORCE_INLINE int getComponent() const;
 
-			/// Load from 16 byte aligned address.
+			/// Load from 16 byte aligned address. Template parameter is the number of hkUint32's to load.
 		template <int N> HK_FORCE_INLINE void load(const hkUint32* p);
 
-			/// Load from an unaligned address.
-		template <int N> HK_FORCE_INLINE void loadNotAligned(const HK_INT_VECTOR_UNALIGNED_PTR hkUint32* p);
+			/// Load from an unaligned address. Template parameter is the number of hkUint32's to load.
+		template <int N> HK_FORCE_INLINE void loadNotAligned(const hkUint32* p);
 
-			/// Store to an aligned address
+			/// Load unsigned integer for N components from linear addresses at \a p. Not loaded components are undefined. 
+			/// See the documentation at the template values for the requested IO mode.
+		template <int N, hkMathIoMode IO > HK_FORCE_INLINE void load(const hkUint32* p);
+
+
+			/// Store to an aligned address. Template parameter is the number of hkUint32's to store.
 		template <int N> HK_FORCE_INLINE void store(hkUint32* p) const;
 
 		template <int N> HK_FORCE_INLINE void store(hkInt32* p) const { store<N>((hkUint32*)p); }
 
-
-			/// Store to an unaligned address
+			/// Store to an unaligned address. Template parameter is the number of hkUint32's to load.
 		template <int N> HK_FORCE_INLINE void storeNotAligned(hkUint32* p) const;
+
+			/// Store unsigned integer values of N components to linear addresses at \a p.
+			/// See the documentation at the template values for the requested IO mode.
+		template <int N, hkMathIoMode A> HK_FORCE_INLINE void store(hkUint32* p) const;
 
 
 		/// cast a vector to an int vector. 
@@ -157,6 +161,8 @@ class hkIntVector
 		HK_FORCE_INLINE const hkVector4Comparison greaterZeroS32() const;
 		HK_FORCE_INLINE const hkVector4Comparison equalZeroS32() const;
 		HK_FORCE_INLINE const hkVector4Comparison greaterEqualS32(hkIntVectorParameter b) const;
+
+		HK_FORCE_INLINE const hkVector4fComparison equalS32(hkIntVectorParameter b) const;
 
 		// Will implement these as needed. There are potentially a LOT of functions to implement here
 		//HK_FORCE_INLINE void setCompareEqual(32/16/8)( hkIntVectorParameter a, hkIntVectorParameter b );
@@ -358,6 +364,12 @@ class hkIntVector
 		HK_FORCE_INLINE int getComponentAtVectorMax(hkVector4fParameter v) const;
 		HK_FORCE_INLINE int getComponentAtVectorMax(hkVector4dParameter v) const;
 
+		/// Assuming that this = (i0, i1, i2, i3) and v = (v0, v1, v2, v3), the function will return ik
+		/// where k in {0,..., 3} such that vk = max{v0, v1, v2, v3}.
+		/// In case of equality, returns first index
+		HK_FORCE_INLINE int getFirstComponentAtVectorMax(hkVector4fParameter v) const;
+		HK_FORCE_INLINE int getFirstComponentAtVectorMax(hkVector4dParameter v) const;
+
 		/// Get a constant vector.
 		template<hkIntVectorConstant vectorConstant>
 		HK_FORCE_INLINE static const hkIntVector& HK_CALL getConstant();
@@ -490,7 +502,7 @@ typedef hkIntVectorConstantU8 hkIntVectorPermutation;
 #endif //HK_MATH_INTVECTOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

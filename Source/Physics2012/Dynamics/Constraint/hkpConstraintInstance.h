@@ -74,7 +74,9 @@ class hkpConstraintInstance : public hkReferencedObject
 				// Standard constraint linking two bodies
 			TYPE_NORMAL = 0,
 				// Chain of constraints. See hkpConstraintChainInstance
-			TYPE_CHAIN = 1
+			TYPE_CHAIN = 1,
+				// Non-chain constraint that is not supported on SPU
+			TYPE_DISABLE_SPU = 2
 		};
 
 		enum AddReferences
@@ -471,7 +473,7 @@ HK_CLASSALIGN(struct,HK_REAL_ALIGNMENT) hkConstraintInternal
 #endif // HKP_CONSTRAINT_INSTANCE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

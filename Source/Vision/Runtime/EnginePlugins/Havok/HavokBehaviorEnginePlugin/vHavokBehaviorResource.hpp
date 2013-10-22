@@ -18,47 +18,65 @@ class hkbProjectAssetManager;
 class vHavokBehaviorComponent;
 class vHavokBehaviorResourceManager;
 
-/// This resource represents a Havok Behavior PROJECT file and all its dependencies
+/// \brief
+///   This resource represents a Havok Behavior PROJECT file and all its dependencies
 class vHavokBehaviorResource : public VManagedResource
 {
 	protected:
-		///  called by vHavokBehaviorResourceManager::CreateResource
-		VHAVOKBEHAVIOR_IMPEXP vHavokBehaviorResource( const char* filePath ); 
+    ///
+    /// @name Constructor / Destructor
+    /// @{
+    ///
+
+    /// \brief
+    ///   Constructor
+    ///
+		/// Called by vHavokBehaviorResourceManager::CreateResource
+		VHAVOKBEHAVIOR_IMPEXP vHavokBehaviorResource(const char* filePath); 
 
 	public:
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE ~vHavokBehaviorResource();
+		VHAVOKBEHAVIOR_IMPEXP virtual ~vHavokBehaviorResource();
 
-		/// Overriden functions
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE BOOL Reload();
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE BOOL Unload();
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE void GetDependencies(VResourceSnapshot &snapshot);
+    ///
+    /// @}
+    ///
+
+    ///
+    /// @name VManagedResource implementation
+    /// @{
+    ///
+
+		VHAVOKBEHAVIOR_IMPEXP virtual BOOL Reload() HKV_OVERRIDE;
+		VHAVOKBEHAVIOR_IMPEXP virtual BOOL Unload() HKV_OVERRIDE;
+		VHAVOKBEHAVIOR_IMPEXP virtual void GetDependencies(VResourceSnapshot &snapshot) HKV_OVERRIDE;
+
+    ///
+    /// @}
+    ///
 
 	protected:
 
 		friend class vHavokBehaviorResourceManager;
 
-		/// common initialization function
+    /// \brief
+		///   Common initialization function.
 		void Init();
 
-		/// List of files dependent on this resource
-		hkArray<hkStringPtr> m_dependentFiles;
-
-		/// Analogous array to m_dependentFiles, but tracks the size of the files
-		hkArray<int> m_dependentFileSizes;
+		hkArray<hkStringPtr> m_dependentFiles;  ///< List of files dependent on this resource
+		hkArray<int> m_dependentFileSizes;      ///< Analogous array to m_dependentFiles, but tracks the size of the files
 };
+
+#if !defined(_VISION_DOC)
 
 class vHavokBehaviorAssetLoader : public hkbOnHeapAssetLoader
 {
 	public:
-		
-		vHavokBehaviorAssetLoader( vHavokBehaviorResourceManager* resourceManager );
+		vHavokBehaviorAssetLoader(vHavokBehaviorResourceManager* resourceManager);
 
 	protected:
-
-		virtual void* loadFile( const hkStringBuf& fullPath, hkStreamReader* stream, void*& storingData  ) HK_OVERRIDE;
+		virtual void* loadFile(const hkStringBuf& fullPath, hkStreamReader* stream, void*& storingData) HK_OVERRIDE;
 
 	public:
-
 		vHavokBehaviorResourceManager* m_resourceManager;
 };
 
@@ -74,11 +92,12 @@ private:
   vHavokBehaviorResourceManager *m_resourceManager;
 };
 
+#endif
 
 #endif	// __VHAVOK_BEHAVIOR_RESOURCE_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

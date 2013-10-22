@@ -57,7 +57,8 @@ class hkpBroadPhase: public hkReferencedObject
 		{
 			BROADPHASE_16BIT,	///< 16 bits sweep and prune broad phase.
 			BROADPHASE_32BIT,	///< 32 bits sweep and prune broad phase.
-			BROADPHASE_TREE,	///< Tree or Hybrid.
+			BROADPHASE_TREE_16BIT,	///< 16 bit tree or Hybrid.
+			BROADPHASE_TREE_32BIT,	///< 32 bit tree or Hybrid.
 		};
 
 		/// Supported functionalities
@@ -328,6 +329,7 @@ class hkpBroadPhase: public hkReferencedObject
 
 		typedef void (HK_CALL *updateTreeBroadPhaseFunc)( hkpBroadPhase* treeBroadPhase, hkReal physicsDeltaTime );
 		static updateTreeBroadPhaseFunc s_updateTreeBroadPhaseFunction;
+		static updateTreeBroadPhaseFunc s_updateTreeBroadPhaseFunction32;
 
 
 			/// Use this helper class to enable 32 bit SAP broadphase. Put it *before* world construction, in the same scope as the call to hkpWorld's constructor.
@@ -399,7 +401,7 @@ class hkpBroadPhase: public hkReferencedObject
 #endif // HK_COLLIDE2_BROAD_PHASE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

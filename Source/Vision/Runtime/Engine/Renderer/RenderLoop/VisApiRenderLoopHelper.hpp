@@ -11,28 +11,9 @@
 #ifndef DEFINE_VISAPIRENDERLOOPHELPER
 #define DEFINE_VISAPIRENDERLOOPHELPER
 
-#define VIS_GEOMSTYLE_OPAQUE                    1
-#define VIS_GEOMSTYLE_TRANSLUCENT               2
-#define VIS_GEOMSTYLE_TRANSLUCENT_LIT           3
-
 // Shadows: Shadow Casters
 #define VIS_LIGHTSRCVIS_PRIMITIVES              1
 #define VIS_LIGHTSRCVIS_MODELS                  2
-#define VIS_LIGHTSRCVIS_VISIBILITYOBJECTS       4
-#define VIS_LIGHTSRCVIS_ALLGEOMTYPES           15
-#define VIS_LIGHTSRCVIS_ONLYSHADOWS            32
-#define VIS_LIGHTSRCVIS_ALLINFLUENCEDGEOMETRY  64
-
-#define VIS_LIGHTFLAGS_DYNAMICLIGHTS                0x00000001
-#define VIS_LIGHTFLAGS_STATICLIGHTS                 0x00000002
-#define VIS_LIGHTFLAGS_ALL_LIGHTS                   (VIS_LIGHTFLAGS_DYNAMICLIGHTS|VIS_LIGHTFLAGS_STATICLIGHTS)
-#define VIS_LIGHTFLAGS_RECOMPUTE                    0x00000004
-#define VIS_LIGHTFLAGS_CONSIDERWORLDINFLUENCEMASK   0x00000010
-#define VIS_LIGHTFLAGS_CONSIDERENTITYINFLUENCEMASK  0x00000020
-
-#define VIS_RLP_MODELSTATE_UNINITIALISED        0
-#define VIS_RLP_MODELSTATE_BASE                 1
-#define VIS_RLP_MODELSTATE_SHADER               2
 
 #define VIS_PROFILINGINFO_TEXT         0x01
 #define VIS_PROFILINGINFO_GEOMETRY     0x02
@@ -94,18 +75,18 @@ class VisRenderLoopHelper_cl
     ///
 
 
-    /// \brief Flags that specify which render-targets should be cleared.
+    /// \brief Flags that specify which render targets should be cleared.
     enum VClearTargetFlags_e
     {
-      VCTF_Color        = 1 << 0,                                     ///< Clears all color render-targets
-      VCTF_Stencil      = 1 << 1,                                     ///< Clears the stencil buffer
-      VCTF_Depth        = 1 << 2,                                     ///< Clears the depth buffer
-      VCTF_DepthStencil = VCTF_Stencil | VCTF_Depth,                  ///< Clears the depth/stencil buffer (usually faster than just clearing one of them)
-      VCTF_All          = VCTF_Color | VCTF_Stencil | VCTF_Depth,     ///< Clears all buffers (color + depth + stencil)
+      VCTF_Color        = 1 << 0,                                     ///< Clears all color render targets.
+      VCTF_Stencil      = 1 << 1,                                     ///< Clears the stencil buffer.
+      VCTF_Depth        = 1 << 2,                                     ///< Clears the depth buffer.
+      VCTF_DepthStencil = VCTF_Stencil | VCTF_Depth,                  ///< Clears the depth/stencil buffer (usually faster than just clearing one of them).
+      VCTF_All          = VCTF_Color | VCTF_Stencil | VCTF_Depth,     ///< Clears all buffers (color + depth + stencil).
     };
   
     /// \brief
-    ///   Clears the depth, stencil, and/or color buffers
+    ///   Clears the depth, stencil, and/or color buffers.
     /// 
     /// This method may exclusively be called in render loop implementations.
     /// 
@@ -129,7 +110,7 @@ class VisRenderLoopHelper_cl
     VISION_APIFUNC void ClearScreen(unsigned int uiBufferFlags = VCTF_All, VColorRef iClearColor = VColorRef(0,0,0,0), float fDepthRef = 1.0f, int iStencilRef = 0, int iRTMask = 1) const;
 
     /// \brief
-    ///   Renders a collection of particle groups
+    ///   Filters and renders a collection of particle groups.
     /// 
     /// The groups in this collection will neither be sorted nor checked for visibility.
     /// 
@@ -155,11 +136,24 @@ class VisRenderLoopHelper_cl
     VISION_APIFUNC void RenderParticleSystems(const VisParticleGroupCollection_cl *pGroups, unsigned int iOrder, unsigned int iFilterMask);
 
     /// \brief
-    ///   This version of RenderParticleSystems renders the passed collection without further filtering
+    ///   Renders a collection of particle groups.
+    /// 
+    /// The groups in this collection will neither be sorted nor checked for visibility.
+    /// 
+    /// To sort the particle groups (e.g. according to their distance from the camera), use the
+    /// VisParticleGroupCollection_cl::SortParticleGroups function.
+    ///
+    /// This method may exclusively be called in render loop implementations.
+    /// 
+    /// \param pGroups
+    ///   Pointer to the particle group collection.
+    /// 
+    /// \sa VisParticleGroupCollection_cl
+    /// \sa VisParticleGroupCollection_cl::SortParticleGroups
     VISION_APIFUNC void RenderParticleSystems(const VisParticleGroupCollection_cl *pGroups);
 
     /// \brief
-    ///   Renders a collection of particle groups with a specific shader
+    ///   Renders a collection of particle groups with a specific shader.
     /// 
     /// The groups in this collection will neither be sorted nor checked for visibility.
     /// 
@@ -180,22 +174,22 @@ class VisRenderLoopHelper_cl
     /// \brief
     ///   Renders the current sky.
     /// 
-    ///  For a detailed reference of sky definitions, please refer to the VSky  class.
+    /// For a detailed reference of sky definitions, please refer to the VSky class.
     /// 
     /// This method may exclusively be called in render loop implementations.
     /// 
     /// \param pSky
-    ///   The sky to be rendered. Can be NULL to use VIsion::World.GetActiveSky()
-    VISION_APIFUNC void RenderSky(IVSky *pSky=NULL);
+    ///   The sky to be rendered. Can be NULL to use VIsion::World.GetActiveSky().
+    VISION_APIFUNC void RenderSky(IVSky *pSky = NULL);
 
     /// \brief
     ///   Render all visibility portals for debug purposes. Called when DEBUGRENDERFLAG_PORTALS is
-    ///   specified for VisProfiling_cl::SetDebugRenderFlags
+    ///   specified for VisProfiling_cl::SetDebugRenderFlags.
     VISION_APIFUNC void RenderPortals();
 
     /// \brief
     ///   Render all visibility zones for debug purposes. Called when
-    ///   DEBUGRENDERFLAG_VISIBILITYZONES is specified for VisProfiling_cl::SetDebugRenderFlags
+    ///   DEBUGRENDERFLAG_VISIBILITYZONES is specified for VisProfiling_cl::SetDebugRenderFlags.
     VISION_APIFUNC void RenderVisibilityZones();
 
     /// \brief
@@ -216,7 +210,7 @@ class VisRenderLoopHelper_cl
     ///   lists, per-object information, etc.), and geometric output (e.g. lines, bounding boxes). Since
     ///   some renderer implementation may require separate rendering of textual and geometric output (e.g.
     ///   since the geometric output requires a depth buffer), this parameter can be used to specify what
-    ///   should be rendererd. Allowed inputs are VIS_PROFILINGINFO_ALL (default), VIS_PROFILINGINFO_TEXT,
+    ///   should be rendered. Allowed inputs are VIS_PROFILINGINFO_ALL (default), VIS_PROFILINGINFO_TEXT,
     ///   and VIS_PROFILINGINFO_GEOMETRY.
     VISION_APIFUNC void RenderProfilingInfo(int iInfoType = VIS_PROFILINGINFO_ALL);
 
@@ -226,7 +220,7 @@ class VisRenderLoopHelper_cl
     /// This method may exclusively be called in render loop implementations.
     /// 
     /// The visibility filter bitmasks are taken from VisScreenMask_cl::GetVisibleBitmask and
-    /// compared to the filter mask of the current render context
+    /// compared to the filter mask of the current render context.
     /// (VisRenderContext_cl::GetRenderFilterMask)
     /// 
     /// The visible screen masks are sorted by their sorting order (VisScreenMask_cl::SetOrder).
@@ -298,17 +292,17 @@ class VisRenderLoopHelper_cl
     /// This method may exclusively be called in render loop implementations.
     /// 
     /// \param pEntity
-    ///   Pointer to entity that should be rendered
+    ///   Pointer to entity that should be rendered.
     /// 
     /// \param iNumShaders
-    ///   Number of shaders with which the entity is to be rendered
+    ///   Number of shaders with which the entity is to be rendered.
     /// 
     /// \param pShaderList
-    ///   Pointer to the list of shaders with which the entity is to be rendered
+    ///   Pointer to the list of shaders with which the entity is to be rendered.
     VISION_APIFUNC void RenderEntityWithShaders(VisBaseEntity_cl *pEntity, unsigned int iNumShaders, VCompiledShaderPass **pShaderList);
 
     /// \brief
-    ///   Renders an entity with a set of surface-specific shaders
+    ///   Renders an entity with a set of surface-specific shaders.
     /// 
     /// Since entities may have multiple surfaces, this method provides a way to dynamically render
     /// shaders on specific surfaces of an entity. For this purpose, the VisDrawCallInfo_t
@@ -325,27 +319,23 @@ class VisRenderLoopHelper_cl
     ///   Pointer to entity that should be rendered
     /// 
     /// \param iNumModelSurfaceShaders
-    ///   Number of VisDrawCallInfo_t structures passed in the respective array
+    ///   Number of VisDrawCallInfo_t structures passed in the respective array.
     /// 
     /// \param pModelSurfaceShaderList
     ///   Pointer to the array of surface/shader assignments for this entity.
     VISION_APIFUNC void RenderEntityWithSurfaceShaderList(VisBaseEntity_cl *pEntity, unsigned int iNumModelSurfaceShaders, const VisDrawCallInfo_t *pModelSurfaceShaderList);
 
     /// \brief
-    ///   Render a collection of entities with the default material shaders or with the assigned shader set respectively
-    VISION_APIFUNC void RenderEntitiesWithDefaultShaders(const VisEntityCollection_cl &EntityCollection, bool bPreBasepass, int iPreferEntityThreshold);
-
-    /// \brief
-    ///   Render a collection of entities (all materials with the same shader pass)
+    ///   Render a collection of entities (all materials with the same shader pass).
     ///
     /// This function is useful to render entities into a context with the same shader pass, e.g. depth fill pass.
     /// This function calls BeginEntityRendering/EndEntityRendering internally.
     ///
     /// \param EntityCollection
-    ///   The input collection of objects to render
+    ///   The input collection of objects to render.
     ///
     /// \param ShaderPass
-    ///   The shader pass used for rendering
+    ///   The shader pass used for rendering.
     ///
     /// \param iFirstEntity
     ///   The first entity in the collection to render. 0 to start at the beginning of the collection.
@@ -355,15 +345,15 @@ class VisRenderLoopHelper_cl
     VISION_APIFUNC void RenderEntitiesWithShader(const VisEntityCollection_cl &EntityCollection, VCompiledShaderPass &ShaderPass, int iFirstEntity = 0, int iNumEntities = -1);
 
     /// \brief
-    ///   Opens a BeginEntityRendering/EndEntityRendering bracket. Some functions may only be called inside the scope of that bracket
+    ///   Opens a BeginEntityRendering/EndEntityRendering bracket. Some functions may only be called inside the scope of that bracket.
     VISION_APIFUNC void BeginEntityRendering();
 
     /// \brief
-    ///   Ends a BeginEntityRendering/EndEntityRendering bracket. Some functions may only be called inside the scope of that bracket
+    ///   Ends a BeginEntityRendering/EndEntityRendering bracket. Some functions may only be called inside the scope of that bracket.
     VISION_APIFUNC void EndEntityRendering();
 
     /// \brief
-    ///   Renders a collection of mesh buffer objects
+    ///   Renders a collection of mesh buffer objects.
     /// 
     /// The mesh buffer objects are additionally filtered using a bitmask which is compared to the
     /// order value.
@@ -375,33 +365,33 @@ class VisRenderLoopHelper_cl
     /// Also see VisMeshBufferObject_cl::SetOrder.
     /// 
     /// \param objectlist
-    ///   Collection of mesh buffer objects  to be rendered
+    ///   Collection of mesh buffer objects  to be rendered.
     /// 
     /// \param iFilterMask
-    ///   Filter bitmask for the order bitmask. See VisMeshBufferObject_cl::SetOrder
+    ///   Filter bitmask for the order bitmask. See VisMeshBufferObject_cl::SetOrder.
     /// 
     /// \sa VisRenderLoopHelper_cl::RenderMeshBufferObjectsWithShader
     /// \sa VisMeshBufferObject_cl::SetOrder
     VISION_APIFUNC void RenderMeshBufferObjects(const VisMeshBufferObjectCollection_cl &objectlist, unsigned int iFilterMask=0xffffffff);
 
     /// \brief
-    ///   Same as RenderMeshBufferObjects, but uses a shader for rendering all objects
+    ///   Same as RenderMeshBufferObjects, but uses a shader for rendering all objects.
     /// 
     /// \param objectlist
-    ///   Collection of mesh buffer objects to be rendered
+    ///   Collection of mesh buffer objects to be rendered.
     /// 
     /// \param shader
-    ///   Shader used for rendering the objects in the collection
+    ///   Shader used for rendering the objects in the collection.
     /// 
     /// \param iFilterMask
-    ///   Filter bitmask for the order bitmask. See VisMeshBufferObject_cl::SetOrder
+    ///   Filter bitmask for the order bitmask. See VisMeshBufferObject_cl::SetOrder.
     /// 
     /// \sa VisRenderLoopHelper_cl::RenderMeshBufferObjects
     /// \sa VisMeshBufferObject_cl::SetOrder
     VISION_APIFUNC void RenderMeshBufferObjectsWithShader(const VisMeshBufferObjectCollection_cl &objectlist, VCompiledShaderPass &shader, unsigned int iFilterMask=0xffffffff);
 
 
-    /// \brief Computes the far frustum corners in world space. DEPRECATED: USe 'ComputeFrustumFarCorners' instead.
+    /// \brief Computes the far frustum corners in world space. DEPRECATED: Use 'ComputeFrustumFarCorners' instead.
     /// 
     /// Far Corners are returned in this order:
     /// Bottom Left, Top Left, Top Right, Bottom Right
@@ -520,7 +510,7 @@ class VisRenderLoopHelper_cl
     /// 
     /// \param bConsiderCastShadowFlag
     ///   If true, only candidates with SetCastShadows flag enabled go into the lists, otherwise
-    ///   the light influence bitflags are compared
+    ///   the light influence bitflags are compared.
     VISION_APIFUNC void GetVisibleGeometryInLightsourceRange(VisStaticGeometryInstanceCollection_cl *pStaticGeomInstances, VisEntityCollection_cl *pEntities, VisVisibilityObjectCollection_cl *pVisObjects, const VisLightSource_cl &lightSource, bool bConsiderCastShadowFlag=false);
 
     ///
@@ -556,131 +546,56 @@ class VisRenderLoopHelper_cl
     ///
 
     ///
-    /// @name Custom Lighting Helper Functions
-    /// @{
-    ///
-
-    /// \brief
-    ///   Determines the currently most relevant lights from a collection of input light sources.
-    /// 
-    /// Using a heuristic, this method determines the lights from the input collection which are
-    /// most relevant for the visible part of the scene, and adds them to the output collection.
-    /// The maximum number of lights to be returned is specified as a parameter to this method.
-    /// 
-    /// This method may exclusively be called in render loop implementations.
-    /// 
-    /// Note that iMaxLights is currently limited to eight light sources.
-    /// 
-    /// \param InputLightSources
-    ///   Input light source collection
-    /// 
-    /// \param OutputLightSources
-    ///   Output light source collection
-    /// 
-    /// \param iMaxLights
-    ///   Maximum number of lights to be added to the output collection
-    /// 
-    /// \param bIncludeProjected
-    ///   If set to FALSE, projected lights are ignored
-    /// 
-    /// \param iFlags
-    ///   Determines which types of lights are to be considered. The following flags are valid:
-    ///   \li VIS_LIGHTFLAGS_DYNAMICLIGHTS : dynamic lights are considered.
-    /// 
-    ///   \li VIS_LIGHTFLAGS_STATICLIGHTS : static lights are considered.
-    /// 
-    ///   \li VIS_LIGHTFLAGS_ALL_LIGHTS : both dynamic and static lights are considered
-    ///     (combination of previous constants).
-    /// 
-    ///   \li VIS_LIGHTFLAGS_CONSIDERWORLDINFLUENCEMASK : If specified, the light's world influence
-    ///     bitmask is checked to be !=0.
-    /// 
-    ///   \li VIS_LIGHTFLAGS_CONSIDERENTITYINFLUENCEMASK : If specified, the light's object
-    ///     influence bitmask is checked to be !=0.
-    VISION_APIFUNC void GetMostRelevantLights(const VisLightSrcCollection_cl &InputLightSources, VisLightSrcCollection_cl &OutputLightSources, unsigned int iMaxLights, BOOL bIncludeProjected, int iFlags);
-
-
-    /// \brief
-    ///   Determines the currently most relevant lights for the bounding box.
-    /// 
-    /// Using a heuristic, this method determines the lights from the scene which are most relevant
-    /// for the bounds, and adds them to the output collection. The maximum number of lights to be
-    /// returned is specified as a parameter to this method.
-    /// 
-    /// This method may exclusively be called in render loop implementations.
-    /// 
-    /// Note that iMaxLights is currently limited to eight light sources.
-    /// 
-    /// \param bounds
-    ///   The bounding box to determine the lights for
-    /// 
-    /// \param outputLightSources
-    ///   Output light source collection
-    /// 
-    /// \param maxLights
-    ///   Maximum number of lights to be added to the output collection
-    VISION_APIFUNC void GetMostRelevantLightsForBoundingBox(const hkvAlignedBBox& bounds, VisLightSrcCollection_cl& outputLightSources, int maxLights);
-
-
-    ///
-    /// @}
-    ///
-
-    ///
     /// @name Tagging Functions
     /// @{
     ///
 
 
     /// \brief
-    ///   Resets the tags on all lightsources.
+    ///   Resets the tags on all light sources.
     /// 
-    /// This method has very little overhead.
+    /// This method operates in constant time.
     VISION_APIFUNC void ResetLightSourceTags();
 
     /// \brief
-    ///   Returns whether a light source has been tagged
-    /// 
-    /// since the last call to ResetLightSourceTags.
+    ///   Returns whether a light source has been tagged since the last call to ResetLightSourceTags.
     /// 
     /// \param pLight
-    ///   pointer to light source
+    ///   Pointer to light source.
     /// 
     /// \return
     ///   BOOL: TRUE if the light has been tagged, otherwise FALSE.
     VISION_APIFUNC BOOL IsLightSourceTagged(const VisLightSource_cl *pLight);
 
     /// \brief
-    ///   Tags a light source
+    ///   Tags a light source.
     /// 
     ///  The tag is removed in the next call to ResetLightSourceTags.
     /// 
     /// \param pLight
-    ///   Pointer to light source to be tagged
+    ///   Pointer to light source to be tagged.
     VISION_APIFUNC void TagLightSource(VisLightSource_cl *pLight);
 
     /// \brief
     ///   Resets the tags on all entities.
     /// 
-    /// Calling this method takes virtually no time.
+    /// This method operates in constant time.
     VISION_APIFUNC void ResetEntityTags();
 
     /// \brief
-    ///   Tags an entity
+    ///   Tags an entity.
     /// 
     ///  The tag is removed in the next call to ResetEntityTags.
     /// 
     /// \param pEntity
-    ///   Pointer to entity to be tagged
+    ///   Pointer to entity to be tagged.
     VISION_APIFUNC void TagEntity(VisBaseEntity_cl *pEntity);
 
     /// \brief
-    ///   Returns whether an entity has been tagged
-    /// 
-    /// since the last call to ResetEntityTags.
+    ///   Returns whether an entity has been tagged since the last call to ResetEntityTags.
     /// 
     /// \param pEntity
-    ///   pointer to entity.
+    ///   Pointer to entity.
     /// 
     /// \return
     ///   BOOL: TRUE if the entity has been tagged, otherwise FALSE.
@@ -689,11 +604,11 @@ class VisRenderLoopHelper_cl
     /// \brief
     ///   Resets the tags on all visibility objects.
     /// 
-    /// Calling this method takes virtually no time.
+    /// This method operates in constant time.
     VISION_APIFUNC void ResetVisibilityObjectTags();
 
     /// \brief
-    ///   Tags a visibility object
+    ///   Tags a visibility object.
     /// 
     ///  The tag is removed in the next call to ResetVisibilityObjectTags.
     /// 
@@ -702,9 +617,7 @@ class VisRenderLoopHelper_cl
     VISION_APIFUNC void TagVisibilityObject(VisVisibilityObject_cl *pVisObj);
 
     /// \brief
-    ///   Returns whether a visibility object has been tagged
-    /// 
-    /// since the last call to ResetVisibilityObjectTags.
+    ///   Returns whether a visibility object has been tagged since the last call to ResetVisibilityObjectTags.
     /// 
     /// \param pVisObj
     ///   Pointer to visibility object.
@@ -719,64 +632,66 @@ class VisRenderLoopHelper_cl
     ///
 
     ///
-    /// @name Lightgrid Functions
+    /// @name Light grid Functions
     /// @{
     ///
 
 
     /// \brief
-    ///   Access the global light grid of the scene
+    ///   Access the global light grid of the scene.
     /// 
-    /// This can be a NULL pointer if the scene has no lightgrid information.
+    /// This can be a NULL pointer if the scene has no light grid information.
     /// 
-    /// The lightgrid can be used to do some custom light color lookups.
+    /// The light grid can be used to do some custom light color lookups.
     /// 
     /// \return
-    ///   VLightGrid_cl *pGrid : A pointer to the lightgrid
+    ///   A pointer to the light grid.
     /// 
     /// \sa VLightGrid_cl
     /// \sa VisRenderLoopHelper_cl::SetLightGrid
-    inline VLightGrid_cl *GetLightGrid() const {return m_spLightGrid;}
+    inline VLightGrid_cl *GetLightGrid() const {
+      return m_spLightGrid;
+    }
 
     /// \brief
-    ///   Sets the light grid used for scene lighting
+    ///   Sets the light grid used for scene lighting.
     /// 
     /// Usually it isn't needed to set the light grid manually, since the engine will automatically
     /// load the light grid file corresponding to the loaded .lit file.
     /// 
     /// \param pGrid
-    ///   The light grid instance to set
+    ///   The light grid instance to set.
     /// 
     /// \sa VLightGrid_cl
     /// \sa VisRenderLoopHelper_cl::GetLightGrid
     VISION_APIFUNC void SetLightGrid(VLightGrid_cl * pGrid);
 
     /// \brief
-    ///   Tracks the light grid colors of an entity into shader constants
+    ///   Tracks the light grid colors of an entity into shader constants.
     /// 
-    /// The entity's position is used to perform the lightgrid lookup in the global lightgrid. The
+    /// The entity's position is used to perform the light grid lookup in the global light grid. The
     /// function takes care of caching entity light grid colors in case the entity does not change
-    /// its position, because lightgrid lookups are relatively expensive.
+    /// its position, because light grid lookups are relatively expensive.
     /// 
     /// The resulting colors are stored internally. The next time a shader is set which uses light
     /// grid tracking, the  colors will automatically be uploaded into the correct shader
     /// constants.
     /// 
     /// \param pEntity
-    ///   Entity for which the lightgrid colors should be tracked.
+    ///   Entity for which the light grid colors should be tracked.
     /// 
     /// \sa VLightGrid_cl
     /// \sa VisRenderLoopHelper_cl::GetLightGrid
     VISION_APIFUNC void TrackLightGridInfo(VisBaseEntity_cl *pEntity);
 
     /// \brief
-    ///   Tracks custom lightgrid colors into shader constants so the colors are available in the shader.
+    ///   Tracks custom light grid colors into shader constants so the colors are available in the shader.
     /// 
     /// The colors are stored internally. The next time a shader is set which uses light grid
     /// tracking, the  colors will automatically be uploaded into the correct shader constants.
     /// 
     /// \param pColors
-    ///   A pointer to 6 vectors which represent the 6 colors of a lightgrid sample. The order of
+    ///   A pointer to 6 vectors which represent the 6 colors of a light grid sample. The order of
     ///   cube directions is +x,-x,+y,-y,+z,-z 
     /// 
     /// \sa VLightGrid_cl
@@ -784,11 +699,11 @@ class VisRenderLoopHelper_cl
     VISION_APIFUNC void TrackLightGridInfo(const hkvVec3* pColors);
 
     /// \brief
-    ///   Tracks custom lightgrid colors into shader constants so the colors are available in the shader.
+    ///   Tracks custom light grid colors into shader constants so the colors are available in the shader.
     /// 
-    /// This version performs a lightgrid lookup of the specified position in the global lightgrid.
+    /// This version performs a light grid lookup of the specified position in the global light grid.
     /// 
-    /// However, if lightgrid information of entities are supposed to be tracked, the version of
+    /// However, if light grid information of entities are supposed to be tracked, the version of
     /// TrackLightGridInfo that takes an entity as input is much faster, since it can efficiently
     /// cache results on a per-entity basis.
     /// 
@@ -796,7 +711,7 @@ class VisRenderLoopHelper_cl
     /// tracking, the  colors will automatically be uploaded into the correct shader constants.
     /// 
     /// \param vPos
-    ///   a position used for lightgrid lookup.
+    ///   a position used for light grid lookup.
     /// 
     /// \sa VLightGrid_cl
     /// \sa VisRenderLoopHelper_cl::GetLightGrid
@@ -834,7 +749,7 @@ class VisRenderLoopHelper_cl
     ///   (VisLightSource_cl::GetLightInfluenceBitMaskEntity).
     /// 
     /// \sa TrackLightGridInfo
-    VISION_APIFUNC void GetDynamicLightContribution(const hkvVec3& vPos, hkvVec3* pDestColors, int iLightMask=0xffffffff);
+    VISION_APIFUNC void GetDynamicLightContribution(const hkvVec3& vPos, hkvVec3* pDestColors, unsigned int iLightMask = 0xffffffffu);
 
     /// \brief
     ///   Forces cached light grid data to be updated for all relevant scene objects by invalidating all cached values.
@@ -849,16 +764,14 @@ class VisRenderLoopHelper_cl
     VISION_APIFUNC void InvalidateLightgrid();
 
     /// \brief
-    ///   Indicates whether the scene has valid lightmaps. Lightmap textures are available in all
-    ///   cases
+    ///   Indicates whether the scene has valid lightmaps.
     inline bool HasLightmaps() const
     {
       return m_bHasLightmaps;
     }
 
     /// \brief
-    ///   Indicates whether a light grid file has been loaded for the scene. If not, a dummy light
-    ///   grid object is created.
+    ///   Indicates whether a light grid file has been loaded for the scene.
     inline bool HasLightGrid() const
     {
       return m_spLightGrid != NULL;
@@ -874,7 +787,7 @@ class VisRenderLoopHelper_cl
     ///
 
     /// \brief
-    ///   Begins a block of 2D overlay rendering, e.g. for GUI
+    ///   Begins a block of 2D overlay rendering, e.g. for GUI.
     /// 
     /// This function can be called at any time inside the render loop, but not outside.
     /// 
@@ -1005,7 +918,7 @@ class VisRenderLoopHelper_cl
 
     /// \brief
     ///   Starts a block inside a render loop for low level mesh rendering without mesh buffer
-    ///   object instances
+    ///   object instances.
     /// 
     /// Inside a BeginMeshRendering/EndMeshRendering block, mesh buffers can be rendered directly
     /// by binding streams and texture samplers.
@@ -1060,10 +973,6 @@ class VisRenderLoopHelper_cl
     /// These streams are used when rendering the meshes via RenderMeshes. Distinct streams can be
     /// set from more than on mesh buffer (e.g. using the color stream from another mesh buffer)
     /// 
-    /// Beginning with Vision 7.2, streams do NOT automatically overwrite previously streams. Use
-    /// the stream masks to ensure that you are not duplicating stream components if you bind
-    /// multiple mesh buffers, and call ResetMeshStreams to restart binding mesh buffers.
-    /// 
     /// \param pMesh
     ///   The source mesh buffer that contains the streams.
     /// 
@@ -1101,14 +1010,6 @@ class VisRenderLoopHelper_cl
     /// 
     /// This function supports instancing, i.e. providing distinct geometry streams and
     /// per-instance streams.
-    /// 
-    /// Beginning with Vision 7.2, streams do NOT automatically overwrite previously streams. Use
-    /// the stream masks to ensure that you are not duplicating stream components if you bind
-    /// multiple mesh buffers, and call ResetMeshStreams to restart binding mesh buffers.
-    /// 
-    /// When migrating to Vision 7.2 from earlier versions, note that the meaning of the
-    /// iInstanceCount parameter has changed, and that there is a new method called
-    /// VisRenderLoopHelper_cl::SetMeshInstanceCount.
     /// 
     /// Note that Xbox360 requires manual handling of instancing in the shader using the vfetch
     /// instruction.
@@ -1165,7 +1066,7 @@ class VisRenderLoopHelper_cl
     ///   previously set stream information (mesh buffer, first vertex, instance count) at a specific
     ///   index. When replacing streams, the order of the replacement does not matter (e.g. you can
     ///   replace stream index 1, then 0, then 2). Replacing streams is only possible when the
-    ///   stream mask of the newly set stream matches that of the stream previusly set at the same
+    ///   stream mask of the newly set stream matches that of the stream previously set at the same
     ///   index.
     ///   Stream Replacement can be used to reduce CPU overhead during rendering, since it reduces
     ///   the need for calls to ResetMeshStreams().
@@ -1570,7 +1471,7 @@ class VisRenderLoopHelper_cl
     ///   VisMeshBuffer_cl::MB_PrimitiveType_e.
     /// 
     /// \param iFirstPrimitive
-    ///   0-based index of the first primitive(=triangle) to render. For indexed tri-strips this is actually the index offset
+    ///   0-based index of the first primitive(=triangle) to render. For indexed tri-strips this is actually the index offset.
     /// 
     /// \param iPrimitiveCount
     ///   number of primitives(=triangles) to render.
@@ -1877,19 +1778,19 @@ class VisRenderLoopHelper_cl
     VISION_APIFUNC void SetClearScreenEffect(VCompiledEffect *pClearEffect);
 
     /// \brief
-    ///   Sets the shader effect used for non-standard clear screen operations (e.g. FP16/32
+    ///   Gets the shader effect used for non-standard clear screen operations (e.g. FP16/32
     ///   clears, MRT clears). Whether this effect is used or not depends on the respective
     ///   platform.
     inline VCompiledEffect *GetClearScreenEffect() { return m_spClearEffect; }
 
     /// \brief
-    ///   Sets the shader effect used for non-standard clear screen operations (e.g. FP16/32
-    ///   clears, MRT clears). Whether this effect is used or not depends on the respective
+    ///   Gets the shader technique used for non-standard clear screen operations (e.g. FP16/32
+    ///   clears, MRT clears). Whether this technique is used or not depends on the respective
     ///   platform.
     VISION_APIFUNC VCompiledTechnique *GetClearScreenTechnique(int iNumRTs);
 
     /// \brief
-    ///   Sets the default shader effect for particle groups
+    ///   Sets the default shader effect for particle groups.
     /// 
     /// When using hardware spanning for particle groups, the vertex shader is responsible for
     /// computing the final vertex positions for each corner vertex of a particle. If no shaders
@@ -1926,7 +1827,7 @@ class VisRenderLoopHelper_cl
 
     /// \brief
     ///   Sets up a shader technique config (inclusion/exclusion flags) that can be used to get the
-    ///   appropriate particle shader technique
+    ///   appropriate particle shader technique.
     /// 
     /// \param iFlags
     ///   Supported bitflags are:
@@ -1944,11 +1845,11 @@ class VisRenderLoopHelper_cl
     VISION_APIFUNC void SetParticlePropertiesVSRegister(int iRegister=38);
 
     /// \brief
-    ///   Returns the current start register for tracking per instance vertex shader constants. The default start register is 38 (see constant table layout in vForge)
+    ///   Returns the current start register for tracking per instance vertex shader constants. The default start register is 38 (see constant table layout in vForge).
     VISION_APIFUNC int GetParticlePropertiesVSRegister() const;
 
     /// \brief
-    ///   Returns a shader pass instance that outputs plain diffuse color in the pixel shader
+    ///   Returns a shader pass instance that outputs plain diffuse color in the pixel shader.
     VISION_APIFUNC VCompiledShaderPass *GetFullbrightShader();
 
     ///
@@ -1961,7 +1862,7 @@ class VisRenderLoopHelper_cl
     ///
 
     /// \brief
-    ///   Sets a global renderloop that replaces the main renderloop
+    ///   Sets a global renderloop that replaces the main renderloop.
     /// 
     /// This feature is used by vForge to render the geometry with a custom shader effect (e.g.
     /// directional lighting).
@@ -1984,7 +1885,7 @@ class VisRenderLoopHelper_cl
 
     /// \brief
     ///   Returns the replacement renderloop instance. This is NULL for normal rendering and
-    ///   outside vForge
+    ///   outside vForge.
     inline IVisRenderLoop_cl *GetReplacementRenderLoop() const
     {
       return m_spReplacementRenderLoop;
@@ -1997,12 +1898,12 @@ class VisRenderLoopHelper_cl
 #if defined(_VR_DX11) || defined(_VISION_XENON) || defined(_VISION_WIIU)
 
     ///
-    /// @name Memexport/stream Out Support (Xbox360, PC DX10, PC DX11)
+    /// @name Memexport / Stream Out Support (Xbox360, PC DX10, PC DX11)
     /// @{
     ///
 
     /// \brief
-    ///   Sets the shader for quaternion-based memexport vertex shader skinning
+    ///   Sets the shader for quaternion-based memexport vertex shader skinning.
     /// 
     /// This shader will be responsible for skinning animated models using quaternions, and
     /// exporting them to memory using Xbox360's memexport feature or DX10 Stream Out.
@@ -2190,18 +2091,9 @@ class VisRenderLoopHelper_cl
     /// @}
     ///
 
-    ///
-    /// @name Platform-specific Shaders
-    /// @{
-    ///
 
     // internal
     VISION_APIFUNC void FlushParticleBuffer();
-
-
-    ///
-    /// @}
-    ///
 
     ///
     /// @name Rendering Static Geometry Instances
@@ -2244,7 +2136,7 @@ class VisRenderLoopHelper_cl
     ///   Collection of static geometry instances to render.
     /// 
     /// \param ePassType
-    ///   The pass type to render
+    ///   The pass type to render.
     /// 
     /// \param iTagFilter
     ///   If iTagFilter==VTF_IGNORE_TAGGED_ENTRIES, tagged entries inside the specified collection will not be rendered.
@@ -2343,7 +2235,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

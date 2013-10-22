@@ -37,15 +37,15 @@ public:
 			///
 		hkSimpleMemorySystem();
 
-		virtual hkMemoryRouter* mainInit(const FrameInfo& info, Flags f=FLAG_ALL);
-		virtual hkResult mainQuit(Flags f=FLAG_ALL);
-		virtual void threadInit(hkMemoryRouter& r, const char* name, Flags f=FLAG_ALL);
-		virtual void threadQuit(hkMemoryRouter& r, Flags f=FLAG_ALL);
+		virtual hkMemoryRouter* mainInit(const FrameInfo& info, Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual hkResult mainQuit(Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual void threadInit(hkMemoryRouter& r, const char* name, Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual void threadQuit(hkMemoryRouter& r, Flags f=FLAG_ALL) HK_OVERRIDE;
 		
 			/// Get the aggregated statistics.
-		virtual void getMemoryStatistics(MemoryStatistics& stats); 
+		virtual void getMemoryStatistics(MemoryStatistics& stats) HK_OVERRIDE;
 			/// Print statistics for the allocators.
-		virtual void printStatistics(hkOstream& ostr);
+		virtual void printStatistics(hkOstream& ostr) const HK_OVERRIDE;
 
 			/// Set the base allocator. The solver allocator will use the default hkSolverAllocator.
 			/// Note that memory statistics will be wrong because all allocation types will forward
@@ -59,7 +59,7 @@ public:
 			/// Get all allocators
 		MemoryAllocators& getAllocators();
 
-		virtual hkMemoryAllocator* getUncachedLockedHeapAllocator();
+		virtual hkMemoryAllocator* getUncachedLockedHeapAllocator() HK_OVERRIDE;
 
 	protected:
 
@@ -72,7 +72,7 @@ public:
 #endif // HKBASE_hkSimpleMemorySystem_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

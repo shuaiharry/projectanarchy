@@ -23,22 +23,7 @@ ANALYSIS_IGNORE_ALL_END
 class hkvStateSync
 {
 private:
-  struct ModuleSyncInfo
-  {
-    hkMemoryInitUtil::SyncInfo m_baseSystemInfo; // mem, singletons etc
-    hkCriticalSection* m_mtCheckSection; // the multithreading debug check 
-    hkMonitorStream* m_monitors; // montor ptrs as monitors not a normal singleton
-    hkStackTracer* m_mtCheckStackTracer; // the multithreading debug check 
-    hkStackTracer::CallTree* m_mtCheckStackTree; // the multithreading debug check 
-  };
-
-  struct ThreadSyncInfo
-  {
-    hkMemoryRouter* m_memoryRouter;
-    hkMonitorStream* m_monitors;
-  };
-
-  typedef void (HK_CALL *moduleThreadStartedFunc)(const ThreadSyncInfo&);
+  typedef void (HK_CALL *moduleThreadStartedFunc)(const hkMemoryInitUtil::SyncInfo&);
   typedef void (HK_CALL *moduleThreadFinishingFunc)();
 
   struct ModuleNotifyEntry
@@ -79,9 +64,9 @@ public:
     }
     
     // Sync statics and singletons from the global module
-    ModuleSyncInfo moduleInfo;
-    getGlobalModuleSyncInfo(moduleInfo);
-    setMyModuleSyncInfo(moduleInfo);
+    hkMemoryInitUtil::SyncInfo syncInfo;
+    getGlobalModuleSyncInfo(syncInfo);
+    setMyModuleSyncInfo(syncInfo);
 
     // Register this module to receive thread notifications
     registerModuleForThreadNotifications(
@@ -114,9 +99,9 @@ public:
     hkReferencedObject::lockInit(hkReferencedObject::LOCK_MODE_AUTO);
     
     // Notify other modules, and allow them to sync to our initialization
-    ThreadSyncInfo myThreadInfo;
-    getMyThreadSyncInfo(myThreadInfo);
-    notifyOtherModulesOfThreadStarted(getMyModuleId(), myThreadInfo);
+    hkMemoryInitUtil::SyncInfo mySyncInfo;
+    getMyThreadSyncInfo(mySyncInfo);
+    notifyOtherModulesOfThreadStarted(getMyModuleId(), mySyncInfo);
   }
   
   // Notifies the state synchronization that a is going to end. The state
@@ -141,63 +126,64 @@ public:
 
 private:
   // Writes the static module state of this module to moduleInfo
-  HK_FORCE_INLINE static void getMyModuleSyncInfo(ModuleSyncInfo& moduleInfo)
+  HK_FORCE_INLINE static void getMyModuleSyncInfo(hkMemoryInitUtil::SyncInfo& syncInfo)
   {
-    moduleInfo.m_baseSystemInfo.m_memoryRouter = hkMemoryRouter::getInstancePtr();
-    moduleInfo.m_baseSystemInfo.m_singletonList = hkSingletonInitList;
-    moduleInfo.m_baseSystemInfo.m_memorySystem = hkMemorySystem::getInstancePtr();
-    moduleInfo.m_monitors = hkMonitorStream::getInstancePtr();
-    moduleInfo.m_mtCheckSection = hkMultiThreadCheck::m_criticalSection;
-    moduleInfo.m_mtCheckStackTracer = hkMultiThreadCheck::s_stackTracer;
-    moduleInfo.m_mtCheckStackTree = hkMultiThreadCheck::s_stackTree;
+    syncInfo.m_memoryRouter = hkMemoryRouter::getInstancePtr();
+    syncInfo.m_singletonList = hkSingletonInitList;
+    syncInfo.m_memorySystem = hkMemorySystem::getInstancePtr();
+    syncInfo.m_monitors = hkMonitorStream::getInstancePtr();
+    syncInfo.m_mtCheckSection = hkMultiThreadCheck::m_criticalSection;
+    syncInfo.m_stackTracerImpl = hkStackTracer::getImplementation();
+    syncInfo.m_mtCheckStackTree = hkMultiThreadCheck::s_stackTree;
+    syncInfo.m_mtRefLockedAllPtr = hkMemoryRouter::getInstance().getRefObjectLocalStore();
   }
 
   // Writes the static module state of the module owning the base system
   // to moduleInfo
-  ASSETFRAMEWORK_IMPEXP static void getGlobalModuleSyncInfo(ModuleSyncInfo& moduleInfo);
+  ASSETFRAMEWORK_IMPEXP static void getGlobalModuleSyncInfo(hkMemoryInitUtil::SyncInfo& syncInfo);
 
   // Initializes the static state of this module from moduleInfo
-  HK_FORCE_INLINE static void setMyModuleSyncInfo(const ModuleSyncInfo& moduleInfo)
+  HK_FORCE_INLINE static void setMyModuleSyncInfo(const hkMemoryInitUtil::SyncInfo& syncInfo)
   {
     extern hkBool hkBaseSystemIsInitialized;
     extern HK_THREAD_LOCAL( hkMonitorStream* ) hkMonitorStream__m_instance;
-    if (!hkBaseSystemIsInitialized && (moduleInfo.m_baseSystemInfo.m_memoryRouter != NULL))
+    if (!hkBaseSystemIsInitialized && (syncInfo.m_memoryRouter != NULL))
     {
-      hkMemoryRouter::replaceInstance(moduleInfo.m_baseSystemInfo.m_memoryRouter);
-      hkMemorySystem::replaceInstance(moduleInfo.m_baseSystemInfo.m_memorySystem);
-      if (moduleInfo.m_baseSystemInfo.m_singletonList != NULL) 
+      hkStackTracer::replaceImplementation(syncInfo.m_stackTracerImpl);
+      hkMemoryRouter::replaceInstance(syncInfo.m_memoryRouter);
+      hkMemorySystem::replaceInstance(syncInfo.m_memorySystem);
+      if (syncInfo.m_singletonList != NULL) 
       { 
-        hkSingletonInitNode::populate(hkSingletonInitList, moduleInfo.m_baseSystemInfo.m_singletonList); 
+        hkSingletonInitNode::populate(hkSingletonInitList, syncInfo.m_singletonList); 
       }
       hkReferencedObject::lockInit(hkReferencedObject::LOCK_MODE_AUTO);
       hkBaseSystem::initSingletons();
-      HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, moduleInfo.m_monitors);
-      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection = moduleInfo.m_mtCheckSection; )
-      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTracer = moduleInfo.m_mtCheckStackTracer; )
-      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTree = moduleInfo.m_mtCheckStackTree; )
+      HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, syncInfo.m_monitors);
+      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection = syncInfo.m_mtCheckSection; )
+      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTree = syncInfo.m_mtCheckStackTree; )
       hkBaseSystemIsInitialized = true;
     }
   }
   
   // Initializes the static state of the module owning the base system from moduleInfo
-  ASSETFRAMEWORK_IMPEXP static void setGlobalModuleSyncInfo(const ModuleSyncInfo& moduleInfo);
+  ASSETFRAMEWORK_IMPEXP static void setGlobalModuleSyncInfo(const hkMemoryInitUtil::SyncInfo& syncInfo);
 
   // Gets the thread-local state of the current thread in this module and writes it 
   // to threadInfo
-  HK_FORCE_INLINE static void getMyThreadSyncInfo(ThreadSyncInfo& threadInfo)
+  HK_FORCE_INLINE static void getMyThreadSyncInfo(hkMemoryInitUtil::SyncInfo& syncInfo)
   {
-    threadInfo.m_memoryRouter = hkMemoryRouter::getInstancePtr();
-    threadInfo.m_monitors = hkMonitorStream::getInstancePtr();
+    syncInfo.m_memoryRouter = hkMemoryRouter::getInstancePtr();
+    syncInfo.m_monitors = hkMonitorStream::getInstancePtr();
   }
 
   // Writes the information in threadInfo to the thread-local state of the current thread
   // in this module
-  HK_FORCE_INLINE static void HK_CALL setMyThreadSyncInfo(const ThreadSyncInfo& threadInfo)
+  HK_FORCE_INLINE static void HK_CALL setMyThreadSyncInfo(const hkMemoryInitUtil::SyncInfo& syncInfo)
   {
     extern HK_THREAD_LOCAL( hkMonitorStream* ) hkMonitorStream__m_instance;
-    hkMemoryRouter::replaceInstance(threadInfo.m_memoryRouter);
+    hkMemoryRouter::replaceInstance(syncInfo.m_memoryRouter);
     hkReferencedObject::lockInit(hkReferencedObject::LOCK_MODE_AUTO);
-    HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, threadInfo.m_monitors);
+    HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, syncInfo.m_monitors);
   }
 
   // Clears the thread-local state of the current thread in this module
@@ -229,7 +215,7 @@ private:
   // thread got started. This method must be called in the context of the thread being
   // started.
   ASSETFRAMEWORK_IMPEXP static void notifyOtherModulesOfThreadStarted(
-    hkUlong moduleId, ThreadSyncInfo& threadInfo);
+    hkUlong moduleId, hkMemoryInitUtil::SyncInfo& syncInfo);
 
   // Notifies all modules except the calling one (identified by moduleId) that a 
   // thread is finishing. This method must be called from that thread.
@@ -251,7 +237,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

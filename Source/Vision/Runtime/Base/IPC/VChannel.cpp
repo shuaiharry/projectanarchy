@@ -8,7 +8,7 @@
 
 #include <Vision/Runtime/Base/BasePCH.h>
 #include <Vision/Runtime/Base/IPC/VChannel.hpp>
-#include <Vision/Runtime/Base/System/Memory/VMemDbg.hpp>
+
 
 Channel::Channel(UINT id, Mode mode, IChannelListener* listener, 
   HANDLE serverMessagesEvent, HANDLE clientMessagesEvent)
@@ -109,7 +109,7 @@ HANDLE Channel::GetPendingMessagesEvent()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

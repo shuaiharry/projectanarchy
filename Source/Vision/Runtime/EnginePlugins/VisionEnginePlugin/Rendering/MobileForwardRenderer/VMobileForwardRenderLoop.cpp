@@ -563,6 +563,7 @@ void VMobileForwardRenderLoop::RenderLitGeometry(VisLightSource_cl *pLight, IVSh
     VisSurface_cl *pSurface;
     VisSurface_cl *pLastSurface = NULL;
     VCompiledTechnique *pLastTechnique = NULL;
+    IVShadowMapComponent* pLastShadowMapComponent = NULL;
 
     // We start collecting illuminated mesh instances. Whenever a relevant property changes, we set the
     // shader information, render all collected world instances, and start collecting from scratch.
@@ -595,14 +596,17 @@ void VMobileForwardRenderLoop::RenderLitGeometry(VisLightSource_cl *pLight, IVSh
       if (pShadowMapGenDir)
       {
         if (!pShadowMapGenDir->IsMeshInsideOrthoShadowVolume(pGI))
+        {
           pTmpShadowMapComponent = NULL;
+        }
       }
 #endif
 
-      if (pLastSurface!=pSurface)
+      if (pLastSurface != pSurface || pLastShadowMapComponent != pTmpShadowMapComponent)
       { 
-        pTechnique = GetLightShader(pLight, bBasePass, pSurface, fFade, pTmpShadowMapComponent);          
+        pTechnique = GetLightShader(pLight, bBasePass, pSurface, fFade, pTmpShadowMapComponent);
         pLastSurface = pSurface;
+        pLastShadowMapComponent = pTmpShadowMapComponent;
       }
       if (pTechnique == NULL || !pTechnique->GetShaderCount())
       {
@@ -824,7 +828,7 @@ VCompiledTechnique *VMobileForwardRenderLoop::GetLightShader(VisLightSource_cl *
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

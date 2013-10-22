@@ -9,28 +9,29 @@
 
 #include <Vision/Samples/Engine/RPGPlugin/Character.h>
 
-#include <Vision/Samples/Engine/RPGPlugin/AiControllerComponent.h>
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Effects/BlobShadow.hpp>
+
+#include <Behavior/Behavior/Event/hkbEventQueue.h>
+#include <Behavior/Behavior/World/hkbWorld.h>
+
+#include <Vision/Runtime/EnginePlugins/Havok/HavokBehaviorEnginePlugin/vHavokBehaviorComponent.hpp>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokCharacterController.hpp>
+
 #include <Vision/Samples/Engine/RPGPlugin/Attachment.h>
+#include <Vision/Samples/Engine/RPGPlugin/AttackableComponent.h>
 #include <Vision/Samples/Engine/RPGPlugin/DependencyHelper.h>
 #include <Vision/Samples/Engine/RPGPlugin/DestructibleEntity.h>
 #include <Vision/Samples/Engine/RPGPlugin/GameManager.h>
 #include <Vision/Samples/Engine/RPGPlugin/InventoryPickup.h>
 #include <Vision/Samples/Engine/RPGPlugin/MeshTrailEffectComponent.h>
+#include <Vision/Samples/Engine/RPGPlugin/PlayerControllerComponent.h>
 #include <Vision/Samples/Engine/RPGPlugin/PlayerUI.h>
+#include <Vision/Samples/Engine/RPGPlugin/Projectile.h>
+#include <Vision/Samples/Engine/RPGPlugin/ProjectileHealing.h>
 #include <Vision/Samples/Engine/RPGPlugin/VisionEffectHelper.h>
 #include <Vision/Samples/Engine/RPGPlugin/VisionGameDebug.h>
 #include <Vision/Samples/Engine/RPGPlugin/VisionHavokBehaviorHelper.h>
 #include <Vision/Samples/Engine/RPGPlugin/VisionHavokConversion.h>
-#include <Vision/Samples/Engine/RPGPlugin/VisionUserMessages.h>
-
-#include <Animation/Physics2012Bridge/Instance/hkaRagdollInstance.h>
-
-#include <Vision/Runtime/EnginePlugins/Havok/HavokBehaviorEnginePlugin/vHavokBehaviorComponent.hpp>
-#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokCharacterController.hpp>
-
-#include <Physics2012/Dynamics/Phantom/hkpShapePhantom.h>
-#include <Physics2012/Utilities/CharacterControl/CharacterProxy/hkpCharacterProxy.h>
-
 
 V_IMPLEMENT_SERIAL(RPG_Character, RPG_DamageableEntity, 0, &g_RPGPluginModule);
 
@@ -140,13 +141,11 @@ RPG_Character::RPG_Character()
   , m_knockBackStartTime(0.0f)
   , m_knockBackDuration(0.0f)
   , m_knockBackVector(0.0f, 0.0f, 0.0f)
-  , m_locallyControlled(false)
   , m_dead(false)
   , m_feigningDeath(false)
   , m_timeOfDeath(0.0f)
-  , m_deathDissolveDelay(10.0f)
+  , m_deathDissolveDelay(5.0f)
   , m_deathImpulse(0.0f, 0.0f, 0.0f)
-  , m_actionHandler()
   , m_actionData()
   , m_inventoryHandler()
   , m_stats()
@@ -184,6 +183,9 @@ RPG_Character::RPG_Character()
     m_characterEffectDefinitions[i] = RPG_EffectDefinition();
     m_characterEffects[i] = NULL;
   }
+
+  for(int i = 0; i < RPG_CharacterAnimationEvent::kNumCharacterAnimationEvents; ++i)
+    m_animationEventIds[i] = -1;
 }
 
 void RPG_Character::CalcPositionForTargeting(hkvVec3& targetOut) const
@@ -261,7 +263,7 @@ void RPG_Character::ThinkFunction()
   UpdateBehaviorWorldFromModel();
 }
 
-void RPG_Character::ServerTick(float const deltaTime)
+void RPG_Character::ServerTick(float deltaTime)
 {
   // @TODO: dispose entity when dead after a certain amount of time.
   if (!IsDead())
@@ -275,13 +277,12 @@ void RPG_Character::ServerTick(float const deltaTime)
     }
   }
 
-  if (!IsDead() || m_actionHandler.IsPerformingAction(AT_Die))
+  if (!IsDead())
   {
-    m_actionHandler.Tick(deltaTime);
+    ProcessAnimationEvents();
     m_inventoryHandler.Tick(deltaTime);
   }
 
-//#ifdef _DEBUG   // @note (kmack): don't prevent debug output for designers & artists using release builds
   if (m_debugDisplayStats && !IsDead())
   {
     RPG_VisionGameDebug::DebugDisplayCharacterStats(*this);
@@ -298,13 +299,12 @@ void RPG_Character::ServerTick(float const deltaTime)
   {
     RPG_VisionGameDebug::DebugDisplayNavmeshStatus(*this);
   }
-//#endif
 
   if(m_controller)
   {
     m_controller->ServerTick(deltaTime);
 
-    m_havokBehavior->SetFloatVar("MoveSpeed", m_controller->GetSpeed());
+    SetAnimationVariable(RPG_CharacterAnimationVariable::kMoveSpeed, m_controller->GetSpeed());
   }
   else
   {
@@ -313,12 +313,6 @@ void RPG_Character::ServerTick(float const deltaTime)
       RemoveComponent(m_characterController);
       m_characterController = NULL;
     }
-  }
-
-  // kill characters who leave the navmesh
-  if(!IsOnNavMesh())
-  {
-    Die();
   }
 }
 
@@ -334,38 +328,11 @@ hkvVec3 const RPG_Character::GetEyePosition() const
   return position;
 }
 
-/// Sets whether or not this character is locally controlled
-void RPG_Character::SetLocallyControlled(bool locallyControlled)
-{
-  m_locallyControlled = locallyControlled;
-
-  //if(m_locallyControlled)
-  //{
-  //  RPG_PlayerUI::s_instance.SetPlayer(this);
-
-  //  RPG_PlayerCamera* camera = static_cast<RPG_PlayerCamera*>(Components().GetComponentOfBaseType(V_RUNTIME_CLASS(RPG_PlayerCamera)));
-
-  //  if(camera)
-  //  {
-  //    camera->SetOwner(this);
-  //  }
-  //}
-}
-
-/// Gets whether or not this character is locally controlled
 bool RPG_Character::GetLocallyControlled() const
 {
-  return m_locallyControlled;
-}
-
-const RPG_ActionHandler& RPG_Character::GetActionHandler() const
-{
-  return m_actionHandler;
-}
-
-RPG_ActionHandler& RPG_Character::GetActionHandler()
-{
-  return m_actionHandler;
+  // True if this controller is the same one that is set in the UI
+  RPG_ControllerComponent *const uiController = RPG_PlayerUI::s_instance.GetController();
+  return GetController() == uiController;
 }
 
 const RPG_InventoryHandler& RPG_Character::GetInventoryHandler() const
@@ -396,6 +363,205 @@ const RPG_CharacterActionData& RPG_Character::GetCharacterActionData() const
 RPG_CharacterActionData& RPG_Character::GetCharacterActionData()
 {
   return m_actionData;
+}
+
+void RPG_Character::DoMeleeAttack(RPG_DamageableEntity *targetEntity)
+{
+  CreateCharacterEffect(FX_MeleeBasicAttack);
+
+  if(targetEntity)
+  {
+    hkvVec3 targetToCharacterProjectedDir;
+    float targetToCharacterProjectedDist;
+    RPG_ControllerUtil::GetProjectedDirAndDistanceFromTarget(this, targetEntity, targetToCharacterProjectedDir, targetToCharacterProjectedDist);
+
+    float const minDist = RPG_ControllerUtil::GetMinimumDistanceToAttack(this, targetEntity);
+
+    if(targetToCharacterProjectedDist < minDist)
+    {
+      hkvVec3 const impactDirection = (targetEntity->GetPosition() - GetPosition()).getNormalized();
+      targetEntity->TakeDamage(RPG_CharacterUtil::CalcOutgoingDamage(this), impactDirection * RPG_CharacterUtil::CalcImpactSpeed(this));
+    }
+  }
+}
+
+void RPG_Character::DoRangedAttack(hkvVec3 const& targetPoint)
+{
+  RPG_Projectile *projectile = static_cast<RPG_Projectile *>(Vision::Game.CreateEntity("RPG_Projectile", GetPosition()));
+  {
+    projectile->SetCharacterOwner(this);
+    projectile->SetProjectileMesh(GetProjectileMeshFilename());
+    projectile->SetProjectileEffect(PFX_Inflight, GetCharacterEffectDefinition(FX_RangedAttackProjectile));
+    projectile->SetProjectileEffect(PFX_Impact, GetCharacterEffectDefinition(FX_RangedAttackImpact));
+  }
+
+  hkvVec3 firePosition = GetPosition();
+  {
+    // TODO cache this
+    int boneIndex = -1;
+    {
+      VString const& boneName = GetCharacterActionData().GetRangedAttackProjectileLaunchBone();
+
+      if(!boneName.IsEmpty())
+      {
+        boneIndex = GetMesh()->GetSkeleton()->GetBoneIndexByName(boneName.AsChar());
+
+        if(boneIndex == -1)
+        {
+          Vision::Error.Warning("RPG_Action_RangedAttack::FireAttack - Supplied bone name doesn't exist on this skeleton: %s", boneName.AsChar());
+          //VASSERT_MSG(boneIndex != -1, "Supplied bone name doesn't exist on this skeleton.");
+        }
+      }
+    }
+
+    if(boneIndex != -1)
+    {
+      // find the projectile launch bone's position in worldspace
+      hkvVec3 boneWorldSpaceTranslation;
+      hkvQuat boneWorldSpaceRotation;
+      VVERIFY(GetBoneCurrentWorldSpaceTransformation(boneIndex, boneWorldSpaceTranslation, boneWorldSpaceRotation));
+      firePosition = boneWorldSpaceTranslation;
+    }
+    else
+    {
+      // no bone identified - just raise the projectile up a bit
+      firePosition.z += 100.0f;
+    }
+  }
+  
+  float const speed = GetCharacterActionData().GetRangedAttackProjectileSpeed();
+
+  hkvVec3 fireDirection = targetPoint - firePosition; 
+  fireDirection.z = 0.0f;
+
+  if(fireDirection.normalizeIfNotZero() == HKV_SUCCESS)
+  {
+    projectile->Fire(firePosition, fireDirection, speed);
+  }
+}
+
+void RPG_Character::DoAoeAttack()
+{
+  // TODO utility function? Populate target array
+  VArray<RPG_DamageableEntity*> targets;
+  {
+    float const aoeRadius = GetCharacterActionData().GetAoeAttackRange();
+    hkvVec3 const& currentPosition = GetPosition();
+
+    // find potential targets in range
+    VArray<RPG_DamageableEntity*> const& attackableEntities = RPG_GameManager::s_instance.GetAttackableEntities();
+    for(int i = 0; i < attackableEntities.GetSize(); ++i)
+    {
+      RPG_DamageableEntity* attackableEntity = attackableEntities.GetAt(i);
+
+      // ignore self
+      if (attackableEntity == this)
+        continue;
+
+      // find range to target character
+      hkvVec3 const& targetPosition = attackableEntity->GetPosition();
+      float currentRangeSquared = (currentPosition - targetPosition).getLengthSquared();
+      if (currentRangeSquared <= aoeRadius * aoeRadius)
+      {
+        targets.Add(attackableEntity);
+      }
+    }
+  }
+
+  // Deal damage
+  int const outgoingDamage = RPG_CharacterUtil::CalcOutgoingDamage(this, GetCharacterActionData().GetAoeAttackDamageMultiplier());
+  float const impactSpeed = RPG_CharacterUtil::CalcImpactSpeed(this, GetCharacterActionData().GetAoeAttackImpactSpeedMultiplier());
+
+  for (int i = 0; i < targets.GetSize(); ++i)
+  {
+    RPG_DamageableEntity* attackableEntity = targets.GetAt(i);
+    VASSERT(attackableEntity);
+
+    hkvVec3 const impactDirection = (attackableEntity->GetPosition() - GetPosition()).getNormalized();
+    attackableEntity->TakeDamage(outgoingDamage, impactDirection * impactSpeed);
+  }
+}
+
+void RPG_Character::DoPowerAttack()
+{
+  // TODO utility function? Populate target array
+  hkvVec3 const& characterPosition = GetPosition();
+  VArray<RPG_DamageableEntity*> targets;
+  {
+    float const attackRange = GetCharacterActionData().GetPowerAttackRange();
+    float const attackAngle = GetCharacterActionData().GetPowerAttackAngle();
+    hkvVec3 const& characterDirection = GetDirection();
+
+    // find potential targets in range
+    VArray<RPG_DamageableEntity*> const& attackableEntities = RPG_GameManager::s_instance.GetAttackableEntities();
+    for(int i = 0; i < attackableEntities.GetSize(); ++i)
+    {
+      RPG_DamageableEntity *target = attackableEntities.GetAt(i);
+
+      // ignore self
+      if (target == this)
+        continue;
+
+      hkvVec3 const& targetPosition = target->GetPosition();
+
+      // find range to target character
+      float const currentRangeSquared = (characterPosition - targetPosition).getLengthSquared();
+      if (currentRangeSquared <= attackRange * attackRange)
+      {
+        // if target is in range, is target within angle of a frustum offset behind the character owner?
+        float const frustumBaseOffset = GetCollisionRadius() / hkvMath::tanDeg(attackAngle);  // move the frustum base behind the character such that the walls of the frustum will align to the character's width
+        hkvVec3 const frustumBase = characterPosition - frustumBaseOffset * characterDirection;
+        hkvVec3 frustumBaseToTarget = targetPosition - frustumBase;
+        frustumBaseToTarget.z = 0.f; // get rid of the up component
+        frustumBaseToTarget.normalizeIfNotZero();
+
+        if (GetDirection().dot(frustumBaseToTarget) >= hkvMath::cosDeg(attackAngle))
+        {
+          // target is within the angle of the frustum base, now is the target in front of my character owner?
+          hkvVec3 characterOwnerToTarget = targetPosition - characterPosition;
+          characterOwnerToTarget.z = 0.f;
+          if (characterDirection.dot(characterOwnerToTarget) > 0) // no need to normalize, since we only care about the sign of the dot.
+          {
+            targets.Add(target);
+          }
+        }
+      }
+    }
+  }
+
+  // Deal damage
+  int const outgoingDamage = RPG_CharacterUtil::CalcOutgoingDamage(this, GetCharacterActionData().GetPowerAttackDamageMultiplier());
+  float const impactSpeed = RPG_CharacterUtil::CalcImpactSpeed(this, GetCharacterActionData().GetPowerAttackImpactSpeedMultiplier());
+
+  for (int i = 0; i < targets.GetSize(); ++i)
+  {
+    RPG_DamageableEntity *target = targets.GetAt(i);
+
+    hkvVec3 attackLine = GetDirection();
+    attackLine.z = 0.0f; attackLine.normalize();
+
+    float const lineProjection = target->GetPosition().dot(attackLine) - characterPosition.dot(attackLine);
+    hkvVec3 const closestPointOnAttackLine = characterPosition + lineProjection * attackLine;
+    hkvVec3 impactDirection = (target->GetPosition() - closestPointOnAttackLine); impactDirection.z = 0.0f;
+
+    if(impactDirection.normalizeIfNotZero() != HKV_SUCCESS)
+    {
+      if(Vision::Game.GetFloatRand() > 0.5f)
+      {
+        impactDirection.x = attackLine.y;
+        impactDirection.y = -attackLine.x;
+      }
+      else
+      {
+        impactDirection.x = -attackLine.y;
+        impactDirection.y = -attackLine.x;
+      }
+    }
+    impactDirection += attackLine;
+    impactDirection.normalize();
+
+    target->TakeDamage(outgoingDamage, impactDirection * impactSpeed);
+  }
 }
 
 /// Applies damage to this character
@@ -529,71 +695,39 @@ void RPG_Character::Die()
   SetWeaponTrailEnabledForEquippedWeapon(false);
   DetachEquipmentOnDeath();
 
-  // override any active Action with the Dying Action.
-  GetActionHandler().PerformAction(AT_Die, true);
-}
+  RaiseAnimationEvent(RPG_CharacterAnimationEvent::kDie);
 
-bool RPG_Character::IsAttacking() const
-{
-  return m_actionHandler.IsPerformingAction(AT_MeleeAttack) ||
-    m_actionHandler.IsPerformingAction(AT_PowerAttack) ||
-    m_actionHandler.IsPerformingAction(AT_AoeAttack) ||
-    m_actionHandler.IsPerformingAction(AT_RangedAttack);
-}
-
-bool RPG_Character::IsDoingSpecialAttack() const
-{
-  return m_actionHandler.IsPerformingAction(AT_PowerAttack) ||
-    m_actionHandler.IsPerformingAction(AT_AoeAttack);
-}
-
-bool RPG_Character::IsTargetWithinAttackRange(RPG_DamageableEntity* target) const
-{
-  return IsTargetWithinRange(target, GetEquippedWeaponRange());
-}
-
-bool RPG_Character::IsTargetWithinAttackRange(const hkvVec3& targetPosition) const
-{
-  return IsTargetWithinRange(targetPosition, GetEquippedWeaponRange());
-}
-
-bool RPG_Character::IsTargetWithinRange(RPG_DamageableEntity* target, float const range) const
-{
-  float const rangeSquared = range * range;
-
-  hkvVec3 const& currentPosition = GetPosition();
-
-  float currentRangeSquared = (currentPosition - target->GetPosition()).getLengthSquared();
-
-  // subtract radius of both characters
-  currentRangeSquared -= GetCollisionRadius() * GetCollisionRadius();
-  currentRangeSquared -= target->GetCollisionRadius() * target->GetCollisionRadius();
-  
-  if(currentRangeSquared <= rangeSquared)
+  // remove the blob shadow component
+  VBlobShadow *blobShadow = static_cast<VBlobShadow *>(Components().GetComponentOfType(V_RUNTIME_CLASS(VBlobShadow)));
+  if(blobShadow)
   {
-    return true;
+    RemoveComponent(blobShadow);
   }
 
-  return false;
-}
-
-bool RPG_Character::IsTargetWithinRange(const hkvVec3& targetPosition, float const range) const
-{
-  float const rangeSquared = range * range;
-
-  hkvVec3 const& currentPosition = GetPosition();
-
-  float currentRangeSquared = (currentPosition - targetPosition).getLengthSquared();
-
-  // subtract my radius
-  currentRangeSquared -= GetCollisionRadius() * GetCollisionRadius();
-
-  if(currentRangeSquared <= rangeSquared)
+  // remove the attackable component
+  RPG_AttackableComponent* attackableComponent = static_cast<RPG_AttackableComponent*>(Components().GetComponentOfType(V_RUNTIME_CLASS(RPG_AttackableComponent)));
+  if(attackableComponent)
   {
-    return true;
+    RemoveComponent(attackableComponent);
   }
 
-  return false;
+  // remove the controller component
+  SetController(NULL);
+
+  // remove the character controller component
+  if(m_characterController)
+  {
+    RemoveComponent(m_characterController);
+  }
+
+  // remove the collision mesh
+  SetCollisionMesh(NULL);
+
+  // play any visual and/or sound effects associated with this action
+  CreateCharacterEffect(FX_Die);
+
+  // spawn death pickups for this character (health and mana globes)
+  SpawnDeathPickups();
 }
 
 bool RPG_Character::IsDead() const
@@ -608,33 +742,6 @@ bool RPG_Character::IsFeigningDeath() const
 
 void RPG_Character::SpawnDeathPickups()
 {
-  // spawn health pickups
-  int numHealthPickupsToSpawn = m_numHealthPickupsDroppedOnDeathMin;
-
-  VASSERT(m_numHealthPickupsDroppedOnDeathMax >= m_numHealthPickupsDroppedOnDeathMin);
-  if(m_numHealthPickupsDroppedOnDeathMin != m_numHealthPickupsDroppedOnDeathMax)
-  {
-    numHealthPickupsToSpawn = m_numHealthPickupsDroppedOnDeathMin + Vision::Game.GetRand() % (m_numHealthPickupsDroppedOnDeathMax - m_numHealthPickupsDroppedOnDeathMin + 1);
-  }
-
-  for(int index = 0; index < numHealthPickupsToSpawn; ++index)
-  {
-    RPG_GameManager::s_instance.CreateEntityFromScript(m_healthPickupScriptName, GetEyePosition(), GetOrientation());
-  }
-
-  // spawn mana pickups
-  int numManaPickupsToSpawn = m_numManaPickupsDroppedOnDeathMin;
-
-  VASSERT(m_numManaPickupsDroppedOnDeathMax >= m_numManaPickupsDroppedOnDeathMin);
-  if(m_numManaPickupsDroppedOnDeathMin != m_numManaPickupsDroppedOnDeathMax)
-  {
-    numManaPickupsToSpawn = m_numManaPickupsDroppedOnDeathMin + Vision::Game.GetRand() % (m_numManaPickupsDroppedOnDeathMax - m_numManaPickupsDroppedOnDeathMin + 1);
-  }
-
-  for(int index = 0; index < numManaPickupsToSpawn; ++index)
-  {
-    RPG_GameManager::s_instance.CreateEntityFromScript(m_manaPickupScriptName, GetEyePosition(), GetOrientation());
-  }
 }
 
 const hkvVec3& RPG_Character::GetDeathImpulse() const
@@ -652,26 +759,82 @@ vHavokBehaviorComponent const *RPG_Character::GetBehaviorComponent() const
   return m_havokBehavior;
 }
 
-void RPG_Character::OnHavokBehaviorEvent(const VString& eventName)
+void RPG_Character::RaiseAnimationEvent(RPG_CharacterAnimationEvent::Enum animationEvent)
 {
-#ifdef _DEBUG
-  if (m_debugDisplayBehaviorEvents)
-  {
-    VString msg;
-    msg.Format("Behavior Event: %s", eventName.AsChar());
-    Vision::Error.SystemMessage(msg.AsChar());
-    Vision::Message.Add(1, msg.AsChar());
-  }
-#endif
+  VASSERT(m_havokBehavior);
+  int const eventId = m_animationEventIds[animationEvent];
+  if(m_havokBehavior && eventId >= 0)
+    m_havokBehavior->m_character->getEventQueue()->enqueueWithExternalId(eventId);
+}
 
-  // pass this event on to the action handler
-  m_actionHandler.OnHavokBehaviorEvent(eventName);
+void RPG_Character::SetAnimationVariable(RPG_CharacterAnimationVariable::Enum const animationVariable, float const value)
+{
+  VASSERT(m_havokBehavior);
+  int const variableId = m_animationVariableIds[animationVariable];
+  if(m_havokBehavior && variableId >= 0)
+    m_havokBehavior->m_character->getBehavior()->setVariableValueWord(variableId, value);
+}
 
-  if (eventName == "LEFT_FOOT_DOWN" || eventName == "RIGHT_FOOT_DOWN")
+// Note: potentially called from Havok worker thread
+void RPG_Character::InitAnimationEventIds()
+{
+  hkStringMap<int> const& eventNameToIdMap = vHavokBehaviorModule::GetInstance()->getBehaviorWorld()->accessEventLinker().m_nameToIdMap;
   {
-    //Vision::Error.SystemMessage("Event: Footstep");
-    CreateCharacterEffect(FX_Footstep);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kDie] = eventNameToIdMap.getWithDefault("Die", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kTakeControl] = eventNameToIdMap.getWithDefault("TakeControl", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kMove] = eventNameToIdMap.getWithDefault("Move", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kMoveEnd] = eventNameToIdMap.getWithDefault("MoveEnd", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kMeleeAttack] = eventNameToIdMap.getWithDefault("MeleeAttack", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kMeleeAttackEnd] = eventNameToIdMap.getWithDefault("MeleeAttackEnd", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kRangedAttack] = eventNameToIdMap.getWithDefault("RangedAttack", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kRangedAttackEnd] = eventNameToIdMap.getWithDefault("RangedAttackEnd", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kAoeAttack] = eventNameToIdMap.getWithDefault("AoeAttack", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kAoeAttackEnd] = eventNameToIdMap.getWithDefault("AoeAttackEnd", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kPowerAttack] = eventNameToIdMap.getWithDefault("PowerAttack", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kPowerAttackEnd] = eventNameToIdMap.getWithDefault("PowerAttackEnd", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kHeal] = eventNameToIdMap.getWithDefault("Heal", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kHealEnd] = eventNameToIdMap.getWithDefault("HealEnd", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kSpawnEffect] = eventNameToIdMap.getWithDefault("SpawnEffect", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kFootStepEffect] = eventNameToIdMap.getWithDefault("FootStepEffect", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kMeleeAttackFire] = eventNameToIdMap.getWithDefault("MeleeAttackFire", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kRangedAttackFire] = eventNameToIdMap.getWithDefault("RangedAttackFire", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kAoeAttackFire] = eventNameToIdMap.getWithDefault("AoeAttackFire", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kPowerAttackFire] = eventNameToIdMap.getWithDefault("PowerAttackFire", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kHealFire] = eventNameToIdMap.getWithDefault("HealFire", -1);
+
+    m_animationEventIds[RPG_CharacterAnimationEvent::kChallenge] = eventNameToIdMap.getWithDefault("Challenge", -1);
+    m_animationEventIds[RPG_CharacterAnimationEvent::kChallengeEnd] = eventNameToIdMap.getWithDefault("ChallengeEnd", -1);
   }
+}
+
+void RPG_Character::InitAnimationVariableIds()
+{
+  hkStringMap<int> const& eventNameToIdMap = vHavokBehaviorModule::GetInstance()->getBehaviorWorld()->accessVariableLinker().m_nameToIdMap;
+  {
+    m_animationVariableIds[RPG_CharacterAnimationVariable::kMoveSpeed] = eventNameToIdMap.getWithDefault("MoveSpeed", -1);
+  }
+}
+
+void RPG_Character::OnHavokAnimationEvent(hkbEvent const& behaviorEvent, bool raisedBySdk)
+{
+  if(behaviorEvent.getPayload())
+  {
+    // Explicit lock (not necessary if LOCK_MODE_AUTO is set, which it is by default, but play safe)
+    hkReferencedObject::lockAll();
+    {
+      behaviorEvent.getPayload()->addReference();
+    }
+    hkReferencedObject::unlockAll();
+  }
+  m_queuedAnimationEvents.pushBack(behaviorEvent);
 }
 
 void RPG_Character::SetController(RPG_ControllerComponent *newController)
@@ -706,54 +869,6 @@ float RPG_Character::GetAggroRadius() const
   return m_aggroRadius;
 }
 
-int RPG_Character::GetMinDamage() const
-{
-  const RPG_InventoryItem* equippedWeapon = m_inventoryHandler.GetEquippedWeapon();
-  if (equippedWeapon)
-  {
-    float damage = m_stats.GetBaseDamage() * equippedWeapon->GetMinDamage();
-    damage += damage * m_stats.GetWeaponDamageModifier();
-    return static_cast<int>(damage);
-  }
-  else
-  {
-    return m_stats.GetBaseDamage();
-  }
-}
-
-int RPG_Character::GetMaxDamage() const
-{
-  const RPG_InventoryItem* equippedWeapon = m_inventoryHandler.GetEquippedWeapon();
-  if (equippedWeapon)
-  {
-    float damage = m_stats.GetBaseDamage() * equippedWeapon->GetMaxDamage();
-    damage += damage * m_stats.GetWeaponDamageModifier();
-    return static_cast<int>(damage);
-  }
-  else
-  {
-    return m_stats.GetBaseDamage();
-  }
-}
-
-float RPG_Character::GetAttackSpeed() const
-{
-  const RPG_InventoryItem* equippedWeapon = m_inventoryHandler.GetEquippedWeapon();
-  if (equippedWeapon)
-  {
-    return m_stats.GetBaseAttackSpeed() * equippedWeapon->GetSpeed();
-  }
-  else
-  {
-    return static_cast<float>(m_stats.GetBaseAttackSpeed());
-  }
-}
-
-float RPG_Character::GetDPS() const
-{
-  return 1000.0f/GetAttackSpeed() * ((GetMinDamage() + GetMaxDamage()) /2.0f); // atk/second * avg adjusted damage
-}
-
 int RPG_Character::GetArmor() const
 {
   // armor is calculated as a float, and fractional component is discarded for the return val
@@ -786,6 +901,35 @@ bool RPG_Character::IsShieldEquipped() const
   return false;
 }
 
+void RPG_Character::ProcessAnimationEvents()
+{
+  // Havok Behavior currently forces a synchronous update, so there should be no contention here; lock to be safe
+  hkReferencedObject::lockAll();
+  {
+    for(hkArray<hkbEvent>::const_iterator it = m_queuedAnimationEvents.begin(), end = m_queuedAnimationEvents.end(); it != end; ++it)
+    {
+      OnProcessAnimationEvent(*it);
+
+      VASSERT(m_controller);
+      if(m_controller)
+        m_controller->OnProcessAnimationEvent(this, *it);
+
+      hkbEventPayload *const payload = (*it).getPayload();
+      if(payload)
+        payload->removeReference();
+    }
+  }
+  hkReferencedObject::unlockAll();
+
+  m_queuedAnimationEvents.clear();
+}
+
+void RPG_Character::OnProcessAnimationEvent(hkbEvent const& behaviorEvent)
+{
+  if(GetIdForAnimationEvent(RPG_CharacterAnimationEvent::kFootStepEffect) == behaviorEvent.getId())
+    CreateCharacterEffect(FX_Footstep);
+}
+
 void RPG_Character::UpdateBehaviorWorldFromModel()
 {
   VASSERT(m_havokBehavior);
@@ -810,71 +954,10 @@ void RPG_Character::MessageFunction(int id, INT_PTR paramA, INT_PTR paramB)
 
   switch(id)
   {
-  case RPG_VisionUserMessages::kPostAiCharacterStep:
-    {
-      union { INT_PTR ip; float f; } const INT_PTR__float = { paramA };
-
-      hkaiCharacter const* aiCharacter = reinterpret_cast<hkaiCharacter const*>(paramB);
-      float const deltaTime = INT_PTR__float.f;
-
-      if(m_characterController)
-      {
-        hkVector4 aiDisplacement;
-        aiDisplacement.setMul(deltaTime, aiCharacter->getVelocity());
-
-        hkvVec3 displacement;
-        RPG_VisionHavokConversion::HavokToVisionPoint(aiDisplacement, displacement);
-
-        IncMotionDeltaWorldSpace(displacement);
-
-        if(m_knockBackDuration > 0.0f)
-        {
-          const float currentTime = Vision::GetTimer()->GetCurrentTime();
-          const float knockBackTimeNormalized = (currentTime - m_knockBackStartTime) / m_knockBackDuration;
-          if(knockBackTimeNormalized < 1.0f)
-          {
-            const hkvVec3 knockBackVector = m_knockBackVector * (1.0f - knockBackTimeNormalized);
-            IncMotionDeltaWorldSpace(knockBackVector);
-          }
-          else
-          {
-            m_knockBackDuration = 0.0f;
-            m_knockBackStartTime = 0.0f;
-            m_knockBackVector.setZero();
-          }
-        }
-
-        m_characterController->Step(INT_PTR__float.f, 1, INT_PTR__float.f);
-
-        vHavokPhysicsModule::GetInstance()->MarkForWrite();
-        const_cast<hkaiCharacter*>(aiCharacter)->setPosition(m_characterController->GetCharacterProxy()->getPosition());
-        vHavokPhysicsModule::GetInstance()->UnmarkForWrite();
-      }
-
-      // Update behavior animation
-      VASSERT(m_havokBehavior);
-      VASSERT(m_havokBehavior->m_character);
-      if(m_havokBehavior && m_havokBehavior->m_character)
-      {
-        VASSERT(m_controller);
-        if(m_controller)
-        {
-          m_havokBehavior->SetFloatVar("MoveSpeed", m_controller->GetSpeed());
-        }
-      }
-    }
+  case RPG_VisionUserMessages::kHavokAnimationEvent:
+    OnHavokAnimationEvent(*(hkbEvent*)(paramA), paramB != 0);
     break;
   }
-}
-
-VBool RPG_Character::WantsDeserializationCallback(const VSerializationContext& context)
-{
-  return TRUE;
-}
-
-void RPG_Character::OnDeserializationCallback(const VSerializationContext& context)
-{
-  RPG_DamageableEntity::OnDeserializationCallback(context);
 }
 
 void RPG_Character::PostInitialize()
@@ -894,10 +977,14 @@ void RPG_Character::PostInitialize()
   // Behavior animation init
   m_havokBehavior = static_cast<vHavokBehaviorComponent *>(Components().GetComponentOfType(V_RUNTIME_CLASS(vHavokBehaviorComponent)));
 
+  VASSERT(m_havokBehavior->m_character);
   if(!m_havokBehavior->m_character)
   {
     m_havokBehavior->InitVisionCharacter(this);
   }
+
+  InitAnimationEventIds();
+  InitAnimationVariableIds();
 
   UpdateBehaviorWorldFromModel();
 
@@ -928,6 +1015,7 @@ void RPG_Character::PostInitialize()
   m_characterController->Capsule_Radius = m_collisionRadius;
   m_characterController->Character_Bottom = hkvVec3(0.0f, 0.0f, m_collisionRadius);
   m_characterController->Character_Top = hkvVec3(0.0f, 0.0f, m_collisionHeight - m_collisionRadius);
+  m_characterController->Gravity_Scale = 3.0f;
   AddComponent(m_characterController);
 
   // Initialize health
@@ -945,15 +1033,10 @@ void RPG_Character::PostInitialize()
   m_inventoryHandler.Initialize(this);
   //RPG_InventoryHandler::AddDefaultInventory(*this);
 
-  m_actionHandler.Initialize(this);
-
   RPG_GameManager::s_instance.AddCharacter(this);
 
   // setup default equipment
   SetUpDefaultEquipment();
-
-  // play this character's spawn effect
-  GetActionHandler().PerformAction(AT_Spawn, true);
 
   // if this character has any ambient effects defined, start them up now.
   CreateCharacterEffect(FX_Ambient);
@@ -1011,34 +1094,37 @@ void RPG_Character::DetachEquipmentOnDeath()
   }
 }
 
-void RPG_Character::CreateCharacterEffect(RPG_CharacterEffect_e const& effectType)
+void RPG_Character::CreateCharacterEffect(RPG_CharacterEffect_e const effectType)
 {
+  RPG_EffectDefinition const& effectDef = GetCharacterEffectDefinition(effectType);
+  RPG_Effect *&effect = m_characterEffects[effectType];
+
   // create an entry for this instantiated effect, if needed
-  if (!m_characterEffects[effectType])
+  if (!effect)
   {
-    m_characterEffects[effectType] = static_cast<RPG_Effect*>(RPG_GameManager::s_instance.CreateEntity("RPG_Effect", GetPosition()));
+    effect = vstatic_cast<RPG_Effect *>(Vision::Game.CreateEntity("RPG_Effect", GetPosition()));
   }
-  VASSERT(m_characterEffects[effectType]);
+  VASSERT(effect);
 
   // whether this effect has been newly created, or is being recycled, its position and orientation need to be aligned with the character.
-  m_characterEffects[effectType]->SetPosition(GetPosition());
-  m_characterEffects[effectType]->SetOrientation(GetOrientation());
+  effect->SetPosition(GetPosition());
+  effect->SetOrientation(GetOrientation());
 
   // create this effect's visual and audio components
-  if (m_characterEffectDefinitions[effectType].m_attachEffect)
+  if (effectDef.m_attachEffect)
   {
-    m_characterEffects[effectType]->Create(m_characterEffectDefinitions[effectType], this); // attached effect
+    effect->Create(effectDef, this); // attached effect
   }
   else
   {
     // if we're not attached, but we've been given a bone name, spawn unattached at that bone's current location.
     int boneIndex = -1;
-    if (!m_characterEffectDefinitions[effectType].m_vfxBoneName.IsEmpty())
+    if (!effectDef.m_vfxBoneName.IsEmpty())
     {
-      boneIndex = GetMesh()->GetSkeleton()->GetBoneIndexByName(m_characterEffectDefinitions[effectType].m_vfxBoneName.AsChar());
+      boneIndex = GetMesh()->GetSkeleton()->GetBoneIndexByName(effectDef.m_vfxBoneName.AsChar());
       if(boneIndex == -1)
       {
-        Vision::Error.Warning("RPG_Character::CreateCharacterEffect - Supplied bone name doesn't exist on this skeleton: %s", m_characterEffectDefinitions[effectType].m_vfxBoneName.AsChar());
+        Vision::Error.Warning("RPG_Character::CreateCharacterEffect - Supplied bone name doesn't exist on this skeleton: %s", effectDef.m_vfxBoneName.AsChar());
       }
     }
 
@@ -1050,16 +1136,16 @@ void RPG_Character::CreateCharacterEffect(RPG_CharacterEffect_e const& effectTyp
       VVERIFY(GetBoneCurrentWorldSpaceTransformation(boneIndex, boneWorldSpaceTranslation, boneWorldSpaceRotation));
       hkvVec3 boneWorldSpaceOrientation;
       boneWorldSpaceRotation.getAsEulerAngles(boneWorldSpaceOrientation.z, boneWorldSpaceOrientation.y, boneWorldSpaceOrientation.x); // zyx. Because fancy, that's why.
-      m_characterEffects[effectType]->Create(m_characterEffectDefinitions[effectType], boneWorldSpaceTranslation, boneWorldSpaceOrientation);  // unattached effect at this character's location
-  }
+      effect->Create(effectDef, boneWorldSpaceTranslation, boneWorldSpaceOrientation);  // unattached effect at this character's location
+    }
     else
     {
-      m_characterEffects[effectType]->Create(m_characterEffectDefinitions[effectType], GetPosition(), GetOrientation());  // unattached effect at this character's location
+      effect->Create(effectDef, GetPosition(), GetOrientation());  // unattached effect at this character's location
     }
   }
 }
 
-VisParticleEffect_cl* RPG_Character::GetPersistentCharacterEffect(RPG_CharacterEffect_e const& effectType) const
+VisParticleEffect_cl* RPG_Character::GetPersistentCharacterEffect(RPG_CharacterEffect_e const effectType) const
 {
   if (m_characterEffects[effectType])
   {
@@ -1068,7 +1154,7 @@ VisParticleEffect_cl* RPG_Character::GetPersistentCharacterEffect(RPG_CharacterE
   return NULL;
 }
 
-void RPG_Character::PauseCharacterEffect(RPG_CharacterEffect_e const& effectType)
+void RPG_Character::PauseCharacterEffect(RPG_CharacterEffect_e const effectType)
 {
   if (m_characterEffects[effectType])
   {
@@ -1076,7 +1162,7 @@ void RPG_Character::PauseCharacterEffect(RPG_CharacterEffect_e const& effectType
   }
 }
 
-void RPG_Character::FinishCharacterEffect(RPG_CharacterEffect_e const& effectType)
+void RPG_Character::FinishCharacterEffect(RPG_CharacterEffect_e const effectType)
 {
   if (m_characterEffects[effectType])
   {
@@ -1089,13 +1175,11 @@ void RPG_Character::FinishCharacterEffect(RPG_CharacterEffect_e const& effectTyp
 
 void RPG_Character::StopAllPersistentCharacterEffects()
 {
-  for (int i = 0; i < FX_Count; ++i)
-  {
-    RPG_CharacterEffect_e const effectType = static_cast<RPG_CharacterEffect_e>(i);
-    FinishCharacterEffect(effectType);
-  }
+  for(int i = 0; i < FX_Count; ++i)
+    FinishCharacterEffect(static_cast<RPG_CharacterEffect_e>(i));
 }
 
+// TODO modifying definitions?
 void RPG_Character::ActivateCharacterEffectDebugDisplay()
 {
   for (int i = 0; i < FX_Count; ++i)
@@ -1146,11 +1230,6 @@ void RPG_Character::Teleport(hkvVec3 const& position)
   UpdateBinding();
 }
 
-RPG_EffectDefinition const& RPG_Character::GetCharacterEffectDefinition(RPG_CharacterEffect_e const& effectType) const
-{
-  return m_characterEffectDefinitions[effectType];
-}
-
 VString const& RPG_Character::GetProjectileMeshFilename() const
 {
   return m_projectileMeshFilename;
@@ -1181,23 +1260,6 @@ void RPG_Character::SetWeaponTrailEnabledForEquippedWeapon(bool const enabled)
       }
     }
   }
-}
-
-float RPG_Character::GetEquippedWeaponRange() const
-{
-  const RPG_InventoryItem* equippedWeapon = GetInventoryHandler().GetEquippedWeapon();
-  float equippedWeaponRange = 0.0f;
-
-  if (equippedWeapon)
-  {
-    equippedWeaponRange = equippedWeapon->GetRange();
-  }
-  else
-  {
-    Vision::Error.Warning("Character is missing an equipped weapon. Using default range.");
-    equippedWeaponRange = 150.f;  // Fall back to a magic number and warn the client that we're doing this.
-  }
-  return equippedWeaponRange;
 }
 
 void RPG_Character::SetUpDefaultEquipment()
@@ -1265,8 +1327,36 @@ void RPG_Character::SetVisible(bool visible)
   }
 }
 
+int RPG_CharacterUtil::CalcOutgoingDamage(RPG_Character const *character, float const damageMultiplier)
+{
+  int outgoingDamage = 0;
+  {
+    RPG_InventoryItem const *const equippedWeapon = character->GetInventoryHandler().GetEquippedWeapon();
+    if(equippedWeapon)
+    {
+      int const characterBaseDamage = character->GetCharacterStats().GetBaseDamage();
+      float const damageMin = characterBaseDamage * equippedWeapon->GetMinDamage();
+      float const damageMax = characterBaseDamage * equippedWeapon->GetMaxDamage();
+      outgoingDamage = static_cast<int>((damageMin + Vision::Game.GetFloatRand() * (damageMax - damageMin)) * damageMultiplier + 0.5f);
+    }
+  }
+
+  return outgoingDamage;
+}
+
+float RPG_CharacterUtil::CalcImpactSpeed(RPG_Character const *character, float const impactSpeedMultiplier)
+{
+  float impactSpeed = 0;
+  RPG_InventoryItem const *const equippedWeapon = character->GetInventoryHandler().GetEquippedWeapon();
+  if(equippedWeapon)
+  {
+    impactSpeed = equippedWeapon->GetImpactSpeed() * impactSpeedMultiplier;
+  }
+  return impactSpeed;
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

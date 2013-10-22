@@ -28,8 +28,8 @@ public:
 
 	VHAVOKAI_IMPEXP vHavokAiNavMeshInstance(); // default for when loading from scene
 	VHAVOKAI_IMPEXP vHavokAiNavMeshInstance(vHavokAiNavMeshResource* resource, hkaiSectionUid uid); 
-	VHAVOKAI_IMPEXP VOVERRIDE ~vHavokAiNavMeshInstance();
-	VHAVOKAI_IMPEXP VOVERRIDE void DisposeObject() HKV_OVERRIDE;
+	VHAVOKAI_IMPEXP virtual ~vHavokAiNavMeshInstance();
+	VHAVOKAI_IMPEXP virtual void DisposeObject() HKV_OVERRIDE;
 	VHAVOKAI_IMPEXP void Release();
 
 	///
@@ -42,11 +42,11 @@ public:
 	///
 
 	V_DECLARE_SERIAL_DLLEXP( vHavokAiNavMeshInstance, VHAVOKAI_IMPEXP );
-	VHAVOKAI_IMPEXP VOVERRIDE void AssertValid() HKV_OVERRIDE;
-	VHAVOKAI_IMPEXP VOVERRIDE void Serialize(VArchive &ar) HKV_OVERRIDE;
-	VHAVOKAI_IMPEXP VOVERRIDE void OnSerialized(VArchive &ar) HKV_OVERRIDE;
+	VHAVOKAI_IMPEXP virtual void AssertValid() HKV_OVERRIDE;
+	VHAVOKAI_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+	VHAVOKAI_IMPEXP virtual void OnSerialized(VArchive &ar) HKV_OVERRIDE;
 #ifdef SUPPORTS_SNAPSHOT_CREATION
-	VHAVOKAI_IMPEXP VOVERRIDE void GetDependencies(VResourceSnapshot &snapshot) HKV_OVERRIDE;
+	VHAVOKAI_IMPEXP virtual void GetDependencies(VResourceSnapshot &snapshot) HKV_OVERRIDE;
 #endif
 
 	///
@@ -59,15 +59,18 @@ public:
 	///
 
 	/// \brief
-	///   Gets the navmesh resource used by this instance
-	inline vHavokAiNavMeshResource* GetResource() const { return m_resource; }
+	///   Gets the nav mesh resource used by this instance.
+	inline vHavokAiNavMeshResource* GetResource() const 
+  { 
+    return m_resource; 
+  }
 
 	/// \brief
-	/// Calls vHavokAiModule::AddNavMeshToWorld for all navMeshes.
+	///   Calls vHavokAiModule::AddNavMeshToWorld for all navMeshes.
 	VHAVOKAI_IMPEXP void AddNavMeshToWorld(hkaiWorld* world = HK_NULL);
 
 	/// \brief
-	/// Calls vHavokAiModule::RemoveNavMeshFromWorld for all navMeshes.
+	///   Calls vHavokAiModule::RemoveNavMeshFromWorld for all navMeshes.
 	VHAVOKAI_IMPEXP void RemoveNavMeshFromWorld();
 
 	///
@@ -80,12 +83,19 @@ public:
 	///
 
 	/// \brief
-	/// various accessors
-	VHAVOKAI_IMPEXP hkaiNavMeshInstance* GetNavMeshInstance()										{ return m_instance; }
-	VHAVOKAI_IMPEXP const hkaiNavMeshInstance* GetNavMeshInstance(int index) const					{ return m_instance; }
+	///   Returns the Havok AI nav mesh instance.
+	VHAVOKAI_IMPEXP hkaiNavMeshInstance* GetNavMeshInstance()										
+  { 
+    return m_instance; 
+  }
+
+	VHAVOKAI_IMPEXP const hkaiNavMeshInstance* GetNavMeshInstance(int index) const					
+  { 
+    return m_instance; 
+  }
 
 	/// \brief
-	/// Get bounding box in Vision units
+	///   Get bounding box in Vision units
 	VHAVOKAI_IMPEXP hkvAlignedBBox GetBoundingBox();
 
 	///
@@ -98,7 +108,7 @@ public:
 	///
 
 	/// \brief
-	/// for debug rendering
+	///   Function used for debug rendering.
 	VHAVOKAI_IMPEXP void DebugRender(float displayOffsetHavokScale, bool colorRegions = false);
 
 	///
@@ -123,7 +133,7 @@ protected:
 #endif	// __VHAVOK_AI_NAVMESH_INSTANCE_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

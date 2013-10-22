@@ -15,41 +15,43 @@
 
 #define HKV_INVALID_INDEX ULONG_MAX
 
+/// \brief
+///   Possible sorting criteria for lists of assets.
 enum hkvAssetSortingCriterion
 {
-  HKV_ASC_NAME,
-  HKV_ASC_TYPE,
-  HKV_ASC_TAG,
-  HKV_ASC_VARIANT,
-  HKV_ASC_FOLDER,
+  HKV_ASC_NAME,     ///< Sort by asset name
+  HKV_ASC_TYPE,     ///< Sort by asset type name
+  HKV_ASC_TAG,      ///< Sort by number of tags set
+  HKV_ASC_VARIANT,  ///< Sort by number of variants set, then by variant names
+  HKV_ASC_FOLDER,   ///< Sort by folder path
 };
 
+
+/// \brief
+///   Return values for loading asset libraries.
 enum hkvAssetLibraryLoadResult
 {
-  HKV_ALLR_SUCCESS,
-  HKV_ALLR_PATH_NOT_FOUND,
-  HKV_ALLR_LIBRARY_ALREADY_PRESENT,
-  HKV_ALLR_LIBRARY_NOT_FOUND,
-  HKV_ALLR_LIBRARY_LOAD_FAILED
+  HKV_ALLR_SUCCESS,                 ///< The library has been loaded successfully
+  HKV_ALLR_PATH_NOT_FOUND,          ///< The asset library path is not a valid path
+  HKV_ALLR_LIBRARY_ALREADY_PRESENT, ///< A new library should have been created, but an asset library file already exists
+  HKV_ALLR_LIBRARY_NOT_FOUND,       ///< An existing asset library should be loaded, but no asset library file was found
+  HKV_ALLR_LIBRARY_LOAD_FAILED      ///< Loading a library failed for another reason (i.e., inaccessible or corrupt file)
 };
 
-enum hkvAssetLibraryMode
-{
-  HKV_ALM_AUTOMATIC,
-  HKV_ALM_MANUAL
-};
 
+/// \brief
+///   Generic return values for asset operations.
 enum hkvAssetOperationResult
 {
-  HKV_AOR_SUCCESS,
-  HKV_AOR_FAILURE,
-  HKV_AOR_MAY_RETRY
+  HKV_AOR_SUCCESS,   ///< The operation succeeded
+  HKV_AOR_FAILURE,   ///< The operation failed
+  HKV_AOR_MAY_RETRY  ///< The operation failed, but there is a chance of it succeeding when retried.
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

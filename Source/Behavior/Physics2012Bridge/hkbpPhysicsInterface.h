@@ -15,6 +15,7 @@
 class hkVisualDebugger;
 
 	/// This is a Havok Physics2012 implementation of the hkbPhysicsInterface.
+	/// It uses provided jobQueue and jobThreadPool for multithreaded stepping, or falls back to single threaded stepping.
 class hkbpPhysicsInterface : public hkbPhysicsInterface
 {
 
@@ -28,13 +29,20 @@ class hkbpPhysicsInterface : public hkbPhysicsInterface
 
 			/// Create a Havok Physics2012 interface which wraps the provided hkpWorld.
 			/// A jobQueue and jobThreadPool must be provided for multithreaded physics stepping.
-			/// A physics interface without a world is still useful for certain serialization functions (Eg. createRagdollInstance).
-		hkbpPhysicsInterface( hkpWorld* world = HK_NULL, hkJobQueue* jobQueue = HK_NULL, hkJobThreadPool* jobThreadPool = HK_NULL );
+			/// A physics interface without a world is useful for certain serialization functions
+			/// (Eg. createRagdollInstance) but cannot be stepped.
+		hkbpPhysicsInterface(
+			hkpWorld* world = HK_NULL,
+			hkJobQueue* jobQueue = HK_NULL,
+			hkJobThreadPool* jobThreadPool = HK_NULL );
 
-			/// Create a Physics2012 interface.
+			/// Create a Havok Physics2012 interface.
 			/// An hkpWorld will be created from the provided cinfo.
 			/// A jobQueue and jobThreadPool must be provided for multithreaded physics stepping.
-		hkbpPhysicsInterface( hkpWorldCinfo& cinfo, hkJobQueue* jobQueue = HK_NULL, hkJobThreadPool* jobThreadPool = HK_NULL );
+		hkbpPhysicsInterface(
+			hkpWorldCinfo& cinfo,
+			hkJobQueue* jobQueue = HK_NULL,
+			hkJobThreadPool* jobThreadPool = HK_NULL );
 
 			// Dtor.
 		virtual ~hkbpPhysicsInterface();
@@ -51,25 +59,40 @@ class hkbpPhysicsInterface : public hkbPhysicsInterface
 
 			/// Create an hkbpRagdollInterface from the ragdoll data in the provide root level container.
 			/// Note: characterSetup can be null, it is provided only as extra information when available.
-		virtual hkbRagdollInterface* createRagdollInterface( const hkbCharacterSetup* characterSetup, const hkRootLevelContainer& rootContainer ) const HK_OVERRIDE;
+		virtual hkbRagdollInterface* createRagdollInterface(
+			const hkbCharacterSetup* characterSetup,
+			const hkRootLevelContainer& rootContainer ) const HK_OVERRIDE;
 	
 			/// Create an hkbpCharacterController (either proxy or rigid body) based on the provided setup information.
 			/// This character controller is ready to be integrated.
-		virtual hkbCharacterController* createCharacterController( const struct hkbCharacterControllerSetup& setup, const struct hkbCharacterControllerInstanceSetup& instanceSetup  ) const HK_OVERRIDE;
+		virtual hkbCharacterController* createCharacterController(
+			const struct hkbCharacterControllerSetup& setup,
+			const struct hkbCharacterControllerInstanceSetup& instanceSetup  ) const HK_OVERRIDE;
 
 			/// Create an hkbpRagdollXController (either powered or rigid body) based on the provided setup information.
 			/// This ragdoll controller is ready to be driven.
-		virtual hkbRagdollController* createRagdollController( const struct hkbRagdollControllerSetup& setup, const struct hkbRagdollControllerInstanceSetup& instanceSetup ) const HK_OVERRIDE;
+		virtual hkbRagdollController* createRagdollController(
+			const struct hkbRagdollControllerSetup& setup,
+			const struct hkbRagdollControllerInstanceSetup& instanceSetup ) const HK_OVERRIDE;
 
 	//////////////////////////////////////////////////////////////////////////
 	// hkbSpatialQueryInterface Methods
 	//////////////////////////////////////////////////////////////////////////
 
 			/// Cast a ray into the hkpWorld.
-		virtual hkBool castRay( const hkVector4& fromWS, const hkVector4& toWS, hkReal& hitFractionOut, hkVector4& normalWSOut ) HK_OVERRIDE;
+		virtual hkBool castRay(
+			const hkVector4& fromWS,
+			const hkVector4& toWS,
+			hkReal& hitFractionOut,
+			hkVector4& normalWSOut ) HK_OVERRIDE;
 
 			/// Cast a ray into the hkpWorld.
-		virtual hkBool castRay( const hkVector4& fromWS, const hkVector4& toWS, hkUint32 collisionFilterInfo, hkReal& hitFractionOut, hkVector4& normalWSOut ) HK_OVERRIDE;
+		virtual hkBool castRay(
+			const hkVector4& fromWS,
+			const hkVector4& toWS,
+			hkUint32 collisionFilterInfo,
+			hkReal& hitFractionOut,
+			hkVector4& normalWSOut ) HK_OVERRIDE;
 
 			/// Get nearby rigid bodies in the hkpWorld.
 			/// This implementation calls hkpWorld::getClosestPoints() with a hkpSphereShape as input.  You may want to
@@ -185,7 +208,10 @@ class hkbpPhysicsInterface : public hkbPhysicsInterface
 	protected:
 
 			/// Common init for ctors.
-		void init( hkpWorld* world, hkJobQueue* jobQueue, hkJobThreadPool* jobThreadPool );
+		void init(
+			hkpWorld* world,
+			hkJobQueue* jobQueue,
+			hkJobThreadPool* jobThreadPool );
 
 			/// The hkpWorld instance for this physics interface.
 		hkRefPtr<hkpWorld> m_world; //+nosave
@@ -205,7 +231,7 @@ class hkbpPhysicsInterface : public hkbPhysicsInterface
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -22,55 +22,21 @@
 
 extern VModule g_vHavokModule;
 
-#ifdef WIN32
-  #ifdef VHAVOKMODULE_EXPORTS
-    #define VHAVOK_IMPEXP __declspec(dllexport)
-  #elif defined VHAVOKMODULE_IMPORTS
-    #define VHAVOK_IMPEXP __declspec(dllimport)
-  #else
-    #define VHAVOK_IMPEXP
-  #endif
-  
-#elif defined (_VISION_XENON)
-    #define VHAVOK_IMPEXP 
-    
-
-
-#elif defined (_VISION_PS3)
-  #define VHAVOK_IMPEXP
-  
-
-  
-#elif defined (_VISION_IOS) || defined(_VISION_ANDROID)
-  #define VHAVOK_IMPEXP
-
-#elif defined(_VISION_PSP2)
-    #define VHAVOK_IMPEXP 
-
-#elif defined(_VISION_WIIU)
-	#define VHAVOK_IMPEXP 
-
-#else
- #error Undefined platform!
-#endif
-
 // Common typedefs
 typedef VPListT<VisStaticMeshInstance_cl> VisStaticMeshInstCollection;
 
 
 #if defined(SN_TARGET_PS3)
 
-// Undefining _M_PPCBE in PS3 because Havok then thinks it is a pure PPC architecture.
+// Undefining _M_PPCBE in PS3 because Havok Physics would think it is a pure PPC architecture.
 // Search for "_M_PPCBE" in hkBaseTypes.h. It sets HK_ARCH_PPC instead of HK_ARCH_PS3/PS3SPU
 #ifdef _M_PPCBE
-#undef _M_PPCBE
-#define RESTORE_M_PPCBE
+# undef _M_PPCBE
+#  define RESTORE_M_PPCBE
+# endif
 #endif
 
-#endif
-
-
-#ifdef _VISION_ANDROID
+#if defined(_VISION_ANDROID) || defined(_VISION_TIZEN)
 #undef printf
 #endif
 
@@ -120,12 +86,13 @@ typedef VPListT<VisStaticMeshInstance_cl> VisStaticMeshInstCollection;
 // Vision - custom shapes
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokVisionShapes.h>
 
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokPhysicsImportExport.h>
+
 #pragma managed(pop)
 
-
 #if defined(RESTORE_M_PPCBE) && !defined(_M_PPCBE)
-#define _M_PPCBE
-#undef RESTORE_M_PPCBE
+# define _M_PPCBE
+# undef RESTORE_M_PPCBE
 #endif
 
 ///
@@ -139,18 +106,17 @@ public:
   virtual ~IHavokStepper()
   {}
 
-  VOVERRIDE void Step( float dt ) = 0;
+  virtual void Step( float dt ) = 0;
 
 	/// Called by the Havok physics module on de-initialization. It is called before anything
 	/// was actually deleted, with the hkpWorld marked for write.
-  VOVERRIDE void OnDeInitPhysicsModule() {}
+  virtual void OnDeInitPhysicsModule() {}
 };
 
-
-#endif //VISION_HAVOK_INCLUDED_HPP
+#endif // VISION_HAVOK_INCLUDED_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

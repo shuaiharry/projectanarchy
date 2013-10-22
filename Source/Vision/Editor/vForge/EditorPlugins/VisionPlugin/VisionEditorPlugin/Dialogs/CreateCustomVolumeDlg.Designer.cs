@@ -62,6 +62,7 @@
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.ShowInTaskbar = false;
       this.Name = "CreateCustomVolumeDlg";
       this.Text = "Create Volume";
       this.ResumeLayout(false);

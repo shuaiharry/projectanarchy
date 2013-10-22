@@ -39,7 +39,7 @@ public:
   /// \see
   ///   IVObjectComponent
   /// 
-  SCRIPT_IMPEXP VAnimationComponent(int iComponentFlags=VIS_OBJECTCOMPONENTFLAG_NONE);
+  SCRIPT_IMPEXP VAnimationComponent(int iComponentFlags=VIS_OBJECTCOMPONENTFLAG_NOSERIALIZE);
 
   /// 
   /// \brief
@@ -93,20 +93,14 @@ public:
   /// @{
   ///
 
-  /// \brief
-  ///   Overridden function. Blob shadows can be attached to VisObject3D_cl instances
   SCRIPT_IMPEXP virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut);
 
+  SCRIPT_IMPEXP virtual void SetOwner(VisTypedEngineObject_cl *pOwner) HKV_OVERRIDE;
 
-  /// \brief
-  ///   RTTI macro
   V_DECLARE_SERIAL(VAnimationComponent, SCRIPT_IMPEXP)
 
-  /// \brief
-  ///   RTTI macro to add a variable table
   V_DECLARE_VARTABLE(VAnimationComponent, SCRIPT_IMPEXP)
 
-  /// \Serialization
   SCRIPT_IMPEXP virtual void Serialize( VArchive &ar );
 
   ///
@@ -127,7 +121,7 @@ protected:
 #endif // __ANIMAION_COMPONENT_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -21,6 +21,8 @@ void VisProfilingMenu::OnInitDialog()
   m_iNextPageID = VGUIManager::GetID("PMID_NEXTPAGE");
   m_iResetMaxID = VGUIManager::GetID("PMID_RESETMAX");
   m_iReloadResourcesID = VGUIManager::GetID("PMID_RELOADRESOURCES");
+  m_iNextShading = VGUIManager::GetID("PMID_NEXT_SHADING");
+  m_iToggleTouchAreas = VGUIManager::GetID("PMID_TOGGLE_TOUCH_AREAS");
   m_iHideID = VGUIManager::GetID("PMID_HIDE");
 }
 
@@ -82,8 +84,8 @@ void VisProfilingMenu::OnItemClicked(VMenuEventDataObject *pEvent)
   }
   else if (iID == m_iPolyCountID)
   {
-    Vision::Profiling.ToggleObjectTriangleCounts();
-    Vision::Profiling.ToggleOverallPolygons();
+    Vision::Profiling.ToggleDebugRenderFlags(DEBUGRENDERFLAG_OBJECT_TRIANGLECOUNT);
+    Vision::Profiling.ToggleDebugRenderFlags(DEBUGRENDERFLAG_POLYGONCOUNT);
   }
   else if (iID == m_iPrevPageID)
   {
@@ -102,12 +104,23 @@ void VisProfilingMenu::OnItemClicked(VMenuEventDataObject *pEvent)
     //special shader assignment treatment
     Vision::Shaders.GetShaderFXLibManager().ResetCompiledEffectCaches();
 
-    int iCount = Vision::ResourceSystem.ReloadModifiedResourceFiles(NULL, TRUE, TRUE);
+    int iCount = Vision::ResourceSystem.ReloadModifiedResourceFiles(NULL, VURO_HOT_RELOAD);
     
     // Reassign all shaders
     Vision::Shaders.ReloadAllShaderAssignmentFiles();
 
     Vision::Message.Add(1, "%d resources were outdated and have been reloaded",iCount);
+  }
+  else if (iID == m_iNextShading)
+  {
+#if defined(SUPPORTS_DEBUG_SHADING) && defined(HK_DEBUG)
+    static_cast<VisSampleApp*>(Vision::GetApplication())->NextDebugShadingMode();
+#endif
+  }
+  else if (iID == m_iToggleTouchAreas)
+  {
+    VisSampleApp* pSampleApp = static_cast<VisSampleApp*>(Vision::GetApplication());
+    pSampleApp->EnableTouchAreaRendering(!pSampleApp->IsTouchAreaRenderingEnabled());
   }
   else if (iID == m_iHideID)
   {
@@ -119,7 +132,7 @@ void VisProfilingMenu::OnItemClicked(VMenuEventDataObject *pEvent)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

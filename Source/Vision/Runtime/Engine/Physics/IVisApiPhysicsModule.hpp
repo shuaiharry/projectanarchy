@@ -115,6 +115,10 @@ public:
   virtual void onFinished() { bFinished = true; }
 
   /// \brief
+  ///   This function is called when this object is added to the queue through EnqueueRaycast
+  virtual void onEnqueued() {}
+
+  /// \brief
   ///   This function should be implemented to indicate if this struct will contain all the hits (true)
   ///   or only the closest (false).
   virtual bool allHits() = 0;
@@ -409,6 +413,29 @@ public:
   virtual void FetchPhysicsResults() = 0;
 
   /// \brief
+  ///  Set the number of physics ticks per second.
+  ///
+  /// \param iTickCount
+  ///   Value of how often the physics is stepped per second. 
+  ///   Set to zero if you want to use variable time stepping. This makes the simulation indeterministic.
+  /// 
+  /// \param iMaxTicksPerFrame
+  ///   Value that is used to clamp the number of ticks performed in one frame. For instance, if simulation is 
+  ///   set to 60Hz and the game renders with 10fps then 6 ticks would be performed. 6 ticks however can be too 
+  ///   much and cause further slowdown (negative feedback). So it might be necessary to clamp this value
+  ///   which however results in physics running slower.
+  ///
+  virtual void SetPhysicsTickCount(int iTickCount, int iMaxTicksPerFrame) = 0;
+
+  /// \brief
+  ///   Returns the simulation tick count per second.
+  virtual int GetPhysicsTickCount() const = 0;
+
+  /// \brief
+  ///   Returns the maximum number of simulation ticks per frame.
+  virtual int GetMaxTicksPerFrame() const = 0;
+
+  /// \brief
   ///   Returns the type of the physics module (abstract)
   /// 
   /// Custom physics modules have to return IVisPhysicsModule_cl::CUSTOM.
@@ -418,7 +445,6 @@ public:
   /// 
   /// \sa IVisPhysicsModule_cl::Init
   virtual eMODULETYPE GetType() = 0;
-  
 
   ///
   /// @}
@@ -698,7 +724,7 @@ typedef VSmartPtr<IVisPhysicsModule_cl> IVisPhysicsModulePtr;
 #endif   // FR_DEFINE_VISAPIPHYSICSMODULE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

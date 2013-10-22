@@ -65,28 +65,33 @@ class hkbHandIkDriverInfo : public hkReferencedObject
 
 				/// Index of the shoulder bone.  If this is not -1, it overrides the character boneInfo.
 			hkInt16 m_shoulderIndex;	//+default(-1)
-										//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
+										//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
 										//+hk.Description("The shoulder bone.")
+										//+hk.Ui(group="Hand IK Bones")
 
 				/// Index of the sibling of the shoulder bone. If the bone is specified then the hand IK modifier applies the same rotation to the sibling bone as it does to the shoulder bone.
 			hkInt16 m_shoulderSiblingIndex; //+default(-1)
 											//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
 											//+hk.Description("The sibling of the shoulder bone. If the bone is specified then the hand IK modifier applies the same rotation to the sibling bone as it does to the shoulder bone.")
+											//+hk.Ui(group="Hand IK Sibling Bones")
 
 				/// Index of the elbow bone.  If this is not -1, it overrides the character boneInfo.
 			hkInt16 m_elbowIndex;	//+default(-1)
-									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
+									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
 									//+hk.Description("The elbow bone.")
+									//+hk.Ui(group="Hand IK Bones")
 
 				/// Index of the sibling of the elbow bone. If the bone is specified then the hand IK modifier applies the same rotation to the sibling bone as it does to the elbow bone.
 			hkInt16 m_elbowSiblingIndex;	//+default(-1)
 											//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
 											//+hk.Description("The sibling of the elbow bone. If the bone is specified then the hand IK modifier applies the same rotation to the sibling bone as it does to the elbow bone.")
+											//+hk.Ui(group="Hand IK Sibling Bones")
 
 				/// Index of the wrist bone.  If this is not -1, it overrides the character boneInfo.
 			hkInt16 m_wristIndex;	//+default(-1)
-									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
+									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
 									//+hk.Description("The wrist bone.")
+									//+hk.Ui(group="Hand IK Bones")
 
 				/// Set to true if the position of the end effector is to be solved for
 			hkBool m_enforceEndPosition;	//+default(true)
@@ -121,7 +126,7 @@ class hkbHandIkDriverInfo : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -204,8 +204,15 @@ void VFpsCameraEntity::CommonInit()
   m_fHalfScreenSizeY = (float)(Vision::Video.GetYRes()>>1);
 
   // create and attach a CameraEntity_cl object if we are playing the game (not in editing mode)
-  if (Vision::Editor.IsPlayingTheGame())
+  if (Vision::Editor.IsPlaying())
   {
+#if defined( HK_DEBUG )
+    if ( Vision::Editor.IsInEditor() && !Vision::Editor.IsPlayingTheGame() )
+    {
+      Vision::Message.Add( 1, "When using vForge, please instantiate objects of type VFpsCameraEntity only in 'Play the Game' mode." );
+    }
+#endif
+
     hkvVec3 v3Pos = GetPosition();
 
     // grab camera
@@ -254,7 +261,7 @@ START_VAR_TABLE(VFpsCameraEntity, VisBaseEntity_cl, "VFpsCameraEntity", 0, "")
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

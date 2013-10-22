@@ -314,7 +314,7 @@ HK_FORCE_INLINE hkVector4Comparison hkcdRayBundleCapsuleIntersect( const hkcdRay
 	}
 
 	hkVector4 ptHeight;
-	hkVector4 pointAProj; pointAProj.setAll(vertex0.dot<3>(axis));
+	const hkSimdReal pointAProj = vertex0.dot<3>(axis);
 
 	// Find intersection point of actual ray with infinite cylinder
 	hkFourTransposedPoints intersectPt;
@@ -410,7 +410,7 @@ HK_FORCE_INLINE hkVector4Comparison hkcdRayBundleCapsuleIntersect( const hkcdRay
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -83,22 +83,22 @@ public:
   /// @{
   ///
 
-  VISION_APIFUNC VOVERRIDE void SetEffect(VisSurface_cl *pSurface, 
-    VCompiledEffect *pFX, VTechniqueConfig* pDefaultConfig = NULL);
+  VISION_APIFUNC virtual void SetEffect(VisSurface_cl *pSurface, 
+    VCompiledEffect *pFX, VTechniqueConfig* pDefaultConfig = NULL) HKV_OVERRIDE;
 
   /// \brief
   ///   Overridden function for static lighting. See base class.
-  VISION_APIFUNC VOVERRIDE VCompiledEffect* CreateMaterialEffect(
-    VisSurface_cl *pSurface, int iFlags=0);
+  VISION_APIFUNC virtual VCompiledEffect* CreateMaterialEffect(
+    VisSurface_cl *pSurface, int iFlags=0) HKV_OVERRIDE;
 
   /// \brief
   ///   Overridden function for dynamic lighting. See base class.
-  VISION_APIFUNC VOVERRIDE VCompiledTechnique* GetDynamicLightShader(
-    const VisLightSource_cl *pLight, const VisSurface_cl *pSurface, bool bForEntity);
+  VISION_APIFUNC virtual VCompiledTechnique* GetDynamicLightShader(
+    const VisLightSource_cl *pLight, const VisSurface_cl *pSurface, bool bForEntity) HKV_OVERRIDE;
 
   /// \brief
   ///   Implements IVisRenderLoop_cl
-  VISION_APIFUNC VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData);
+  VISION_APIFUNC virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE;
 
   ///
   /// @}
@@ -115,12 +115,18 @@ private:
   void SetDynamicLightingTechniques(VisSurface_cl *pSurface, VCompiledEffect *pFX, const VTechniqueConfig &defaultConfig, 
                                     int iLightingFlags);
 
+  void RecreateAllLightingShaders();
+
+  bool UseGlobalAmbientColor() const; // Evaluates if the global ambient color should be taken into account for the lighting.
+
+  // Member variables
+  bool m_bLastReassignUsedGlobalAmbient; // Used to check if shaders have to be reassigned when the global ambient color changes.
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

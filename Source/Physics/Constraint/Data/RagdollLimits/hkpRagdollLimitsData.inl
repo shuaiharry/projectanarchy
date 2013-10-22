@@ -83,7 +83,7 @@ inline void hkpRagdollLimitsData::setAngularLimitsTauFactor( hkReal mag )
 	m_atoms.m_coneLimit.m_angularLimitsTauFactor   = mag;
 	m_atoms.m_planesLimit.m_angularLimitsTauFactor = mag;
 }
-	
+
 inline hkReal hkpRagdollLimitsData::getAngularLimitsTauFactor() const
 {
 	if (m_atoms.m_twistLimit.m_angularLimitsTauFactor != m_atoms.m_coneLimit.m_angularLimitsTauFactor
@@ -95,7 +95,9 @@ inline hkReal hkpRagdollLimitsData::getAngularLimitsTauFactor() const
 	return m_atoms.m_twistLimit.m_angularLimitsTauFactor;
 }
 
-hkpRagdollLimitsData::hkpRagdollLimitsData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) 
+#ifndef HK_PLATFORM_SPU
+
+hkpRagdollLimitsData::hkpRagdollLimitsData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f)
 {
 	if (f.m_finishing && getConeLimitStabilization())
 	{
@@ -104,8 +106,10 @@ hkpRagdollLimitsData::hkpRagdollLimitsData(hkFinishLoadedObjectFlag f) : hkpCons
 	}
 }
 
+#endif
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

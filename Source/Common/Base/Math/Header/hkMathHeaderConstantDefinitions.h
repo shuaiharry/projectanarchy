@@ -5,7 +5,8 @@
  * Product and Trade Secret source code contains trade secrets of Havok. Havok Software (C) Copyright 1999-2013 Telekinesys Research Limited t/a Havok. All Rights Reserved. Use of this software is subject to the terms of an end user license agreement.
  *
  */
-//HK_REFLECTION_PARSER_EXCLUDE_FILE
+#ifndef HKMATH_HEADERCONSTANTDEFINITIONS_H
+#define HKMATH_HEADERCONSTANTDEFINITIONS_H
 
 // hkSimdReal_
 #define hkSimdReal_Minus1 (hkSimdReal::getConstant<HK_QUADREAL_MINUS1>())
@@ -234,6 +235,7 @@ enum hkIntVectorConstant
 	HK_QUADINT_4,
 	HK_QUADINT_0123,
 	HK_QUADINT_0123_INT24W,	///< lower bits hold 0123, upper bits are set, so that reinterpreting this value as float will give a valid floating point number
+	HK_QUADINT_3,
 
 	// Permutation constants, for Xbox broadcast(i), do not change order!
 	HK_QUADINT_PERM_XXXX,
@@ -244,8 +246,10 @@ enum hkIntVectorConstant
 	HK_QUADINT_END
 };
 
+#endif //HKMATH_HEADERCONSTANTDEFINITIONS_H
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

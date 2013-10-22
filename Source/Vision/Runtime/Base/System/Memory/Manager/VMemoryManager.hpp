@@ -46,7 +46,7 @@ VBASE_IMPEXP IVMemoryManager* GetVMemoryManager();
 ///  The previous memory manager
 VBASE_IMPEXP IVMemoryManager* SetVMemoryManager(IVMemoryManager* pManager);
 
-#ifdef WIN32
+#if defined( WIN32 ) && !defined( _VISION_WINRT )
 
 // Dynamically linked - we need to fetch the default manager through the .exe
 #define DEFINE_MEMORYMANAGER(manager)         \
@@ -191,7 +191,7 @@ public:
 #endif // DC_VMEMORYMANAGER_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

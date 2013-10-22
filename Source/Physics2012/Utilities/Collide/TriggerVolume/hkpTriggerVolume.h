@@ -99,6 +99,16 @@ class hkpTriggerVolume : public hkReferencedObject, public hkpContactListener, p
 		virtual void entityAddedCallback( hkpEntity* entity );
 		virtual void entityRemovedCallback( hkpEntity* entity );
 
+		/// When setting a new shape, there are two cases to evaluate:
+		/// Case 1: The User called 'hkpRigidBody::setShape()'. In this case, we'll remove the entity from the overlapping bodies in the
+		/// following callback, firing 'triggerEventCallback()' directly with 'ENTERED_EVENT' and with with 'LEFT_EVENT in the next step through
+		/// 'hkpTriggerVolume::collisionAddedCallback()' and 'hkpTriggerVolume::postSimulationCallback()'.
+		/// Case 2: The User called 'hkpRigidBody::updateShape()'. In this case, we will not remove the entity ftom the overlapping bodies and both
+		///         Removed and Added (if the collidable with the updated shape still collides with the TriggerVolume) events will be processed at
+		///         the same time in the next step. Note that this means that the user will only receive a 'hkpTriggerVolume::collisionAddedCallback()'
+		///         callback if the collidable with the updated shape does not collide with the TriggerVolume anymore.
+		virtual void entityShapeSetCallback( hkpEntity* entity); 
+
 			/// Called when the triggerBody has been added to the world.
 		void triggerBodyEnteredWorld( hkpWorld* );
 			/// Called when the triggerBody has been removed from the world or deleted.
@@ -156,6 +166,18 @@ class hkpTriggerVolume : public hkReferencedObject, public hkpContactListener, p
 
 			/// Free references to any bodies in the event queue and clear the array.
 		inline void abandonEventQueue();
+
+	private:
+
+		/// Flag used to determine whether we are currently processing body overlaps through
+		/// 'postSimulationCallback()' or 'updateOverlaps()'.
+		hkBool m_isProcessingBodyOverlaps; //+nosave
+
+		/// The array of bodies in contact with the triggerBody as 'postSimulationCallback()'
+		/// and 'updateOverlaps()' get executed. It keeps track of bodies removal done through
+		/// the callbacks which need to be processed immediately.
+		hkArray<hkpRigidBody*> m_newOverlappingBodies; //+nosave
+
 };
 
 #include <Physics2012/Utilities/Collide/TriggerVolume/hkpTriggerVolume.inl>
@@ -163,7 +185,7 @@ class hkpTriggerVolume : public hkReferencedObject, public hkpContactListener, p
 #endif // HK_TRIGGER_VOLUME_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

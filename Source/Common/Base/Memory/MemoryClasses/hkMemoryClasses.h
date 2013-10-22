@@ -83,6 +83,9 @@ HK_MEMORY_CLASS_DEFINITION_START
 	//these are for use by the demos
 	HK_MEMORY_CLASS(DEMO,			HK_MEMORY_CLASS_ROOT)
 
+	//these are for milsim library
+	HK_MEMORY_CLASS(MILSIM,			HK_MEMORY_CLASS_ROOT)
+
 	//these are for use by users
 	HK_MEMORY_CLASS(USER,			HK_MEMORY_CLASS_ROOT)
 
@@ -155,6 +158,10 @@ HK_MEMORY_CLASS_DEFINITION_START
 	HK_MEMORY_CLASS(AI_STEERING,		HK_MEMORY_CLASS_AI)
 	HK_MEMORY_CLASS(AI_SPATIAL,			HK_MEMORY_CLASS_AI)
 
+	// these are sub-classes of milsim
+	HK_MEMORY_CLASS(MILSIM_FLT,			HK_MEMORY_CLASS_MILSIM)
+	HK_MEMORY_CLASS(MILSIM_COMMON,		HK_MEMORY_CLASS_MILSIM)
+
 	// Sub classes of user memory classes
 	HK_MEMORY_CLASS(USER_1,	HK_MEMORY_CLASS_USER)
 	HK_MEMORY_CLASS(USER_2,	HK_MEMORY_CLASS_USER)
@@ -165,7 +172,7 @@ HK_MEMORY_CLASS_DEFINITION_START
 HK_MEMORY_CLASS_DEFINITION_END
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

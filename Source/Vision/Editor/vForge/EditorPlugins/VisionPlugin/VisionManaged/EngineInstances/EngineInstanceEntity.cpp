@@ -11,8 +11,6 @@
 
 #using <mscorlib.dll>
 #include <Vision/Runtime/Base/Graphics/Shader/vShaderConstantHelper.hpp>
-#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/MobileForwardRenderer/VFakeSpecularGenerator.hpp>
-#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Effects/CubeMapHandle.hpp>
 
 using namespace System;
 using namespace System::Diagnostics;
@@ -586,238 +584,6 @@ namespace VisionManaged
     pEnt->SetClipMode((fNear>0.f || fFar>0.f) ? VIS_LOD_TEST_BOUNDINGBOX :VIS_LOD_TEST_NONE);
   }
 
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Special EngineInstanceCubemapEntity implementation
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-  EngineInstanceCubemapEntity::EngineInstanceCubemapEntity(Shape3D ^shape) : EngineInstanceEntity("CubeMapHandle_cl", "gizmo_link.model", shape, nullptr, true)
-  {
-    m_bExport = true;
-    SetPreviewVisible(false);
-    VisBaseEntity_cl *pEntity = GetEntity();
-    VDynamicMesh *pModel = pEntity->GetMesh();
-    pEntity->SetLightInfluenceBitMask(0);
-    pModel->SetAllowShaderAssignment(false); // also never update shader assignment
-    pModel->SetSupportMaterialEditing(false); // dont show in the material editor
-  }
-  
-
-  void EngineInstanceCubemapEntity::DisposeObject()
-  {
-    EngineInstanceEntity::DisposeObject();
-  }
- 
-  void EngineInstanceCubemapEntity::SetPreviewVisible(bool bStatus)
-  {
-    VisBaseEntity_cl *pEntity = GetEntity();
-    pEntity->SetVisibleBitmask(bStatus ? 1:0);
-  }
-
-  void EngineInstanceCubemapEntity::SetRendererConfig(String^ rendererConfig)
-  {
-    VString configFile;
-    ConversionUtils::StringToVString(rendererConfig, configFile);
-
-    IVFileInStream* pStream = Vision::File.Open(configFile.AsChar());
-
-    CubeMapHandle_cl* pCubeMap = static_cast<CubeMapHandle_cl*>(GetEntity());
-
-    if(pStream)
-    {
-      IVRendererNode* pNode = IVRendererNode::ReadFromStream(pStream);
-      pCubeMap->SetRendererNode(pNode);
-      pStream->Close();
-    }
-    else
-    {
-      pCubeMap->SetRendererNode(NULL);
-    }
-  }
-
-
-  void EngineInstanceCubemapEntity::AssignCubemapShader(const char *szCubemapKey)
-  {
-    if (!szCubemapKey || !szCubemapKey[0])
-      return;
-
-    char szParamStr[1024];
-    sprintf(szParamStr,"Cubemap=%s;PassType=%s;",szCubemapKey, VPassTypeToString(VPT_TransparentPass));
-    VisBaseEntity_cl *pEntity = GetEntity();
-    Vision::Shaders.LoadShaderLibrary("\\Shaders\\Cubemap.ShaderLib",SHADERLIBFLAG_HIDDEN);
-    VCompiledTechnique *pTechnique = Vision::Shaders.CreateTechnique("Cubemap",szParamStr);
-    VDynamicMesh *pModel = pEntity->GetMesh();
-    if (pModel && pTechnique)
-    {
-      VisShaderSet_cl *pSet = new VisShaderSet_cl();
-      pSet->BuildForDynamicMesh(pModel,NULL,pTechnique);
-      pEntity->SetShaderSet(pSet);
-    }
-  }
-
-  void EngineInstanceCubemapEntity::SetBlurPasses(int iBlurPasses)
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    pEntity->SetBlurPasses(iBlurPasses);
-  }
-
-  void EngineInstanceCubemapEntity::SetAutoGenMipMaps(bool bStatus)
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    pEntity->SetAutoGenMipMaps(bStatus);
-  }
-
-  void EngineInstanceCubemapEntity::SetCubemapKey(String ^key, int iEdgeSize)
-  {
-    VString sKey;
-    ConversionUtils::StringToVString(key,sKey);
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    pEntity->SetCubemapKey(sKey,iEdgeSize);
-    AssignCubemapShader(sKey);
-  }
-
-  void EngineInstanceCubemapEntity::SetRenderingType(CubeMapRenderingType_e eRenderingType)
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    switch(eRenderingType)
-    {
-      case CubeMapRenderingType_e::RendererNode:
-        pEntity->SetRenderLoop(NULL);
-        break;
-
-      case CubeMapRenderingType_e::Specular:
-        pEntity->SetRendererNode(NULL);
-        pEntity->SetRenderLoop(new VFakeSpecularGenerator);
-        break;
-
-      case CubeMapRenderingType_e::Scene:
-        pEntity->SetRendererNode(NULL);
-        pEntity->SetRenderLoop(new VisionRenderLoop_cl);
-        break;
-    }
-  }
-
-  void EngineInstanceCubemapEntity::SetSpecularPower(float fSpecularPower)
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    if(pEntity->GetRenderLoop()->GetTypeId() == VFakeSpecularGenerator::GetClassTypeId())
-    {
-      static_cast<VFakeSpecularGenerator*>(pEntity->GetRenderLoop())->SetSpecularPower(fSpecularPower);
-    }
-  }
-
-  void EngineInstanceCubemapEntity::SetRenderFilterMask(unsigned int iMask)
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    pEntity->SetRenderFilterMask(iMask);
-  }
-
-  void EngineInstanceCubemapEntity::SetClipPlanes(float fNear, float fFar)
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    pEntity->SetClipPlanes(fNear, fFar);
-  }
-
-  void EngineInstanceCubemapEntity::SetUpdateParams(bool bContinuous, float fInterval, int iCount, bool bAlternate)
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    pEntity->SetContinuousUpdate(bContinuous);
-    pEntity->SetUpdateParams(fInterval, iCount);
-    pEntity->SetAlternatingUpdate(bAlternate);
-  }
-
-
-  void EngineInstanceCubemapEntity::UpdateCubemap()
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    pEntity->Invalidate();
-  }
-
-
-  bool EngineInstanceCubemapEntity::OnExport(SceneExportInfo ^info) 
-  {
-    if (!m_bExport) // do not save as entity
-      return true;
-
-    VisBaseEntity_cl *pEntity = GetEntity();
-    if (pEntity == NULL)
-      return true;
-
-    // export without model assigned:
-    VDynamicMeshPtr spOldModel = pEntity->GetMesh();
-    pEntity->SetMesh((VDynamicMesh *)NULL);
-    VArchive &ar = *((VArchive *)info->NativeShapeArchivePtr.ToPointer());
-    ar << pEntity;
-    pEntity->SetMesh(spOldModel);
-    return true;
-  }
-
-
-  bool EngineInstanceCubemapEntity::SaveToFile(String ^filename)
-  {
-    CubeMapHandle_cl *pEntity = (CubeMapHandle_cl *)GetEntity();
-    if (!pEntity || !pEntity->GetCubeMapTexture())
-      return false;
-
-    String ^absFilename = EditorManager::Project->MakeAbsolute(filename);
-    VString sFilename,sAbsFilename;
-    ConversionUtils::StringToVString(filename,sFilename);
-    ConversionUtils::StringToVString(absFilename,sAbsFilename);
-    HRESULT res = S_FALSE;
-
-    ManagedBase::RCS::GetProvider()->EditFile(absFilename);
-
-#if defined(_VR_DX11) && defined(_VR_DX11_SUPPORTS_D3DX)
-    if (!pEntity->GetCubeMapTexture()->GetD3DResource())
-      return false;
-
-    ID3D11Texture2D* originalTexture = static_cast<ID3D11Texture2D*>(pEntity->GetCubeMapTexture()->GetD3DResource());
-    D3D11_TEXTURE2D_DESC desc;
-    originalTexture->GetDesc(&desc);
-
-    // Dynamically generated cube maps may have a typeless format which cannot be saved as a legacy DDS
-    if(desc.Format == DXGI_FORMAT_B8G8R8A8_TYPELESS)
-    {
-      // Copy the original cubemap into a typed one to force saving as a non-DX10 DDS file
-      desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-
-      ID3D11Texture2D* newTexture;
-      res = VVideo::GetD3DDevice()->CreateTexture2D(&desc, NULL, &newTexture);
-      if(res != S_OK)
-        return false;
-
-      VVideo::GetD3DDeviceContext()->CopyResource(newTexture, originalTexture);
-      
-      res = D3DX11SaveTextureToFile(VVideo::GetD3DDeviceContext(), newTexture, D3DX11_IFF_DDS, sAbsFilename.AsChar());
-      newTexture->Release();
-    } else {
-      res = D3DX11SaveTextureToFile(VVideo::GetD3DDeviceContext(), originalTexture, D3DX11_IFF_DDS, sAbsFilename.AsChar());
-    }
-#elif !defined(_VR_DX11)
-    if (!pEntity->GetCubeMapTexture()->GetD3DInterface())
-      return false;
-    res = D3DXSaveTextureToFile(sAbsFilename.AsChar(),D3DXIFF_DDS,pEntity->GetCubeMapTexture()->GetD3DInterface(),NULL);
-#endif
-    if (res!=S_OK)
-      return false;
-    /*    
-    VTextureManager& manager = Vision::TextureManager.GetManager();
-    VTextureObject *pCubeTex = manager.LoadCubemapTextureFromFile(filename);
-    if (!pCubeTex)
-      return false;
-
-    pCubeTex->CheckFileModified();
-*/
-    VFileTime newFileTime;
-    if (VFileHelper::GetModifyTime(sAbsFilename.AsChar(), newFileTime))
-      pEntity->GetCubeMapTexture()->SetTimeStamp(newFileTime);
-
-    ManagedBase::RCS::GetProvider()->AddFile(absFilename, true);
-    return true;
-  }
-
-
-
   /////////////////////////////////////////////////////////////////////////////////////////////////////
   // class EngineInstanceBoneProxy
   /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -836,15 +602,12 @@ namespace VisionManaged
   
   bool EngineInstanceBoneProxy::OnExport(SceneExportInfo ^info) 
   {
-    return true; // only export it implicitly as a parent of something 
-    /*
-    if (m_pBoneProxy)
-    {
-      VArchive &ar = *((VArchive *)info->NativeShapeArchivePtr.ToPointer());
-      ar << m_pBoneProxy;
-    }
+    if (m_pBoneProxy==NULL || m_pBoneProxy->GetNumChildren()==0)
+      return true;
+
+    VArchive &ar = *((VArchive *)info->NativeShapeArchivePtr.ToPointer());
+    ar << m_pBoneProxy;
     return true;
-    */
   }
 
   VisBaseEntity_cl *EngineInstanceBoneProxy::GetParentEntity()
@@ -917,7 +680,7 @@ namespace VisionManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

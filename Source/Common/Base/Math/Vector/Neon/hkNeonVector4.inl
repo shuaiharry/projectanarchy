@@ -95,9 +95,19 @@ HK_FORCE_INLINE void hkVector4f::setAdd(hkVector4fParameter v0, hkVector4fParame
 	m_quad = vaddq_f32( v0.m_quad, v1.m_quad );
 }
 
+HK_FORCE_INLINE void hkVector4f::setAdd(hkVector4fParameter v0, hkSimdFloat32Parameter v1)
+{
+	m_quad = vaddq_f32( v0.m_quad, vcombine_f32(v1.m_real,v1.m_real) );
+}
+
 HK_FORCE_INLINE void hkVector4f::setSub(hkVector4fParameter v0, hkVector4fParameter v1)
 {
 	m_quad = vsubq_f32( v0.m_quad, v1.m_quad );
+}
+
+HK_FORCE_INLINE void hkVector4f::setSub(hkVector4fParameter v0, hkSimdFloat32Parameter v1)
+{
+	m_quad = vsubq_f32( v0.m_quad, vcombine_f32(v1.m_real,v1.m_real) );
 }
 
 HK_FORCE_INLINE void hkVector4f::setMul(hkVector4fParameter v0, hkVector4fParameter v1)
@@ -1231,6 +1241,18 @@ struct unroll_load_D<N, HK_IO_NATIVE_ALIGNED> { HK_FORCE_INLINE static void appl
 	}
 } };
 template <int N>
+struct unroll_load<N, HK_IO_BYTE_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadFloat32& self, const hkFloat32* HK_RESTRICT p)
+{
+	// neon does not align 
+	unroll_load<N, HK_IO_NATIVE_ALIGNED>::apply(self,p);
+} };
+template <int N>
+struct unroll_load_D<N, HK_IO_BYTE_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadFloat32& self, const hkDouble64* HK_RESTRICT p)
+{
+	// neon does not align 
+	unroll_load_D<N, HK_IO_NATIVE_ALIGNED>::apply(self,p);
+} };
+template <int N>
 struct unroll_load<N, HK_IO_SIMD_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadFloat32& self, const hkFloat32* HK_RESTRICT p)
 {
 	// neon does not align HK_MATH_ASSERT(0x64211c2f, ( ((hkUlong)p) & ((sizeof(hkFloat32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
@@ -1530,6 +1552,12 @@ struct unroll_store<N, HK_IO_NATIVE_ALIGNED> { HK_FORCE_INLINE static void apply
 	}
 } };
 template <int N>
+struct unroll_store<N, HK_IO_BYTE_ALIGNED> { HK_FORCE_INLINE static void apply(const hkQuadFloat32& self, hkFloat32* HK_RESTRICT p)
+{
+	// neon does not align
+	unroll_store<N, HK_IO_NATIVE_ALIGNED>::apply(self,p);
+} };
+template <int N>
 struct unroll_store<N, HK_IO_SIMD_ALIGNED> { HK_FORCE_INLINE static void apply(const hkQuadFloat32& self, hkFloat32* HK_RESTRICT p)
 {
 	// neon does not align HK_MATH_ASSERT(0x64211c2f, ( ((hkUlong)p) & ((sizeof(hkFloat32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
@@ -1776,7 +1804,7 @@ HK_FORCE_INLINE void hkVector4f::store(hkFloat16* p) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

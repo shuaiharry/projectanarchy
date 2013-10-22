@@ -27,17 +27,11 @@
 // Havok Physics
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokPhysicsModule.hpp>
 
-// Scaleform
-#if defined(RPG_UI_SCALEFORM) && RPG_UI_SCALEFORM
-  #include <Vision/Runtime/EnginePlugins/ThirdParty/ScaleformEnginePlugin/vScaleformManager.hpp>
-  #include <Vision/Runtime/EnginePlugins/ThirdParty/ScaleformEnginePlugin/VScaleformMovie.hpp>
-  #include <Vision/Runtime/EnginePlugins/ThirdParty/ScaleformEnginePlugin/VScaleformUtil.hpp>
-#endif
-
 // Havok AI
 #include <Ai/Pathfinding/World/hkaiWorld.h>
 #include <Ai/Pathfinding/Character/hkaiCharacter.h>
 #include <Ai/Pathfinding/Character/Behavior/hkaiPathFollowingBehavior.h>
+#include <Ai/Physics2012Bridge/LocalSteering/hkaiPhysics2012BodyObstacleGenerator.h>
 
 // Havok Behavior
 #include <Behavior/Behavior/Character/hkbCharacter.h>
@@ -47,13 +41,30 @@
 #define RPG_SERIALIZATION_SCRIPT_PROPERTIES 1
 #define RPG_USE_EXPLOSIONS 1
 #define RPG_SCREENSHOT_NODEBUGTEXT 1
+#define RPG_FMOD_SUPPRESS_NONNULL_ASSERTS 1
+
+#if !defined (RPG_DUMP_CRT_OBJECTS_ON_EXIT)
+# define RPG_DUMP_CRT_OBJECTS_ON_EXIT 0
+#endif
+
+#if !defined (RPG_UI_SCALEFORM)
+# define RPG_UI_SCALEFORM 0
+#endif
+
+#if !defined (HAVOK_FORCE_SINGLETHREADED)
+# define HAVOK_FORCE_SINGLETHREADED 0
+#endif
+
+#if !defined (HAVOK_VISION_RESTRUCTURING)
+# define HAVOK_VISION_RESTRUCTURING 0
+#endif
 
 #include <Vision/Samples/Engine/RPGPlugin/Plugin.h>
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

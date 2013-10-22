@@ -250,6 +250,9 @@ public:
   ///
 
 private:
+  /// \brief
+  ///   Returns the shared shader resource for the given stage, if available.
+  VShaderPassResource* GetSharedShaderResource(VShaderStage_e eShaderStage);
 
   // Member variables
   VShaderEffectLib* m_pOwnerLib;          ///< Library that "owns" (contains) this shader pass resource
@@ -285,6 +288,9 @@ private:
     VComputeShaderObjectPtr   m_spCachedComputeShader;
   #endif
 
+  // Shared ShaderPass resources in case the resource has been detached from the shader lib.
+  VRefCountedCollection<VShaderPassResource> m_sharedShaderPassResources;
+
   unsigned int m_uiRequiresRecompilation;
 
   #ifdef _VR_GLES2
@@ -296,7 +302,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -256,24 +256,47 @@ void ChannelPipe::ProcessMessages()
 {
   TRACE0("Processing messages...");
 
-  if (!m_connected) return;
+  if (!m_connected)
+    return;
+
+  // Reset event before starting processing. Otherwise, resetting the event and adding new
+  // data could overlap the wrong way.
+  ResetPendingEvent();
 
   char buffer[MAX_MSG_DATA];
-  DWORD bytesRead = 1;
 
-  while (bytesRead != 0)
+  while (true)
   {
+    DWORD bytesRead = 0;
+
+    BOOL peekRes = PeekNamedPipe(m_pipe, buffer, MAX_MSG_DATA, &bytesRead, NULL, NULL);
+    DWORD peekError = (peekRes == FALSE) ? GetLastError() : NO_ERROR;
+    if (peekError == ERROR_BROKEN_PIPE || peekError == ERROR_PIPE_NOT_CONNECTED)
+    {
+      TRACE0("Pipe broken; closing client end.");
+      CloseHandle(m_pipe);
+      m_pipe = INVALID_HANDLE_VALUE;
+      m_connected = false;
+      break;
+    }
+    if (peekError != NO_ERROR || (bytesRead == 0))
+    {
+      TRACE0("No more data in pipe; exiting processing loop.");
+      break;
+    }
+
     TRACE0("Reading from pipe...");
 
     ResetEvent(m_readEvent);
     OVERLAPPED overlapped;
     ZeroMemory(&overlapped, sizeof(OVERLAPPED));
     overlapped.hEvent = m_readEvent;
+    bytesRead = 0;
 
     BOOL readRes = ReadFile(m_pipe, buffer, MAX_MSG_DATA, &bytesRead, &overlapped);
     if (!readRes)
     {
-      DWORD readReturnCode = HandleOverlapped(m_pipe, &overlapped, &bytesRead, INFINITE);
+      DWORD readReturnCode = HandleOverlapped(m_pipe, &overlapped, m_cancelEvent, &bytesRead, INFINITE);
       if (readReturnCode == ERROR_BROKEN_PIPE || readReturnCode == ERROR_PIPE_NOT_CONNECTED)
       {
         TRACE0("Pipe broken; closing client end.");
@@ -302,16 +325,7 @@ void ChannelPipe::ProcessMessages()
       }
       m_listener->OnMessageReceived(msg);
     }
-
-    //more Messages?
-    if (!PeekNamedPipe(m_pipe, buffer, MAX_MSG_DATA, &bytesRead, NULL, NULL))
-    {
-      break;
-    }
   }
-
-  //reset event when finished processing
-  ResetPendingEvent();
 
   TRACE0("Finished processing messages.");
 }
@@ -332,7 +346,7 @@ void ChannelPipe::SetConnectTimeout(UINT timeout)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

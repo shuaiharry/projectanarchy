@@ -26,13 +26,13 @@ class hkPooledAllocator : public hkMemoryAllocator
 			///
 		void quit();
 
-		virtual void* blockAlloc( int numBytes );
-		virtual void blockFree( void* p, int numBytes );
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
 		
 		hkBool32 isOk() const;
 
-		virtual void getMemoryStatistics( MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
 			/// Purges allocated pools if there's no active allocations
 		bool purge();
@@ -61,7 +61,7 @@ class hkPooledAllocator : public hkMemoryAllocator
 #endif // HKBASE_hkPooledAllocator_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

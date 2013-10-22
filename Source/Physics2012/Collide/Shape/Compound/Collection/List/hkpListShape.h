@@ -13,12 +13,12 @@
 
 #include <Physics2012/Collide/Shape/Compound/Collection/hkpShapeCollection.h>
 #include <Common/Base/Types/Geometry/Aabb/hkAabbUtil.h>
+#include <Common/Base/Container/BitField/hkBitField.h>
 
 extern const class hkClass hkpListShapeChildInfoClass;
 
 extern const hkClass hkpListShapeClass;
 
-class hkBitField;
 struct hkAabbUint32;
 struct hkpCollisionInput;
 
@@ -222,7 +222,7 @@ class hkpListShape : public hkpShapeCollection
 #endif // HK_COLLIDE2_LIST_SHAPE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

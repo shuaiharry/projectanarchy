@@ -10,6 +10,7 @@
 
 #include <Ai/Pathfinding/NavMesh/hkaiNavMeshUtils.h>
 #include <Ai/Pathfinding/NavMesh/hkaiGeneralAccessor.h>
+#include <Common/Base/Container/Set/hkSet.h>
 
 #ifdef HK_PLATFORM_SPU
 #	define HK_FORCE_INLINE_ON_CPU
@@ -155,7 +156,12 @@ class hkaiNavMeshTraversalUtils
 			hkHalf		m_valueHalf;
 		};
 
-		static void HK_CALL resetClearanceForFace( hkaiNavMeshInstance& meshInstance, hkaiNavMesh::FaceIndex faceIndex );
+		static void HK_CALL resetClearanceForFace( hkaiNavMeshInstance& meshInstance, hkaiNavMesh::FaceIndex faceIndex, bool resetEdgeClearance = true, bool resetGlobalClearance = false);
+
+			/// Recomputes all dirty global clearance values for the instance.
+			/// A value is considered dirty if it is greater than the maxGlobalClearance for the instance.
+			/// Note that hkaiNavMeshCutter::recomputeDirtyGlobalClearances() is faster since it can use an optimized mediator query,
+		static void HK_CALL computeAllGlobalClearances( hkaiNavMeshInstance& meshInstance, hkVector4Parameter up );
 
 		static bool isVertexClearanceForEdgeLessThan(
 			const hkaiGeneralAccessor& accessor,
@@ -224,6 +230,12 @@ class hkaiNavMeshTraversalUtils
 			hkVector4Parameter up,
 			hkSimdRealParameter maxClearance);
 
+		static hkSimdReal HK_CALL computeGlobalClearance(
+			hkaiNavMeshInstance& meshInstance,
+			const hkaiNavMeshQueryMediator* worldMediator,
+			hkaiNavMesh::VertexIndex vIdx,
+			hkVector4Parameter up);
+
 		static hkSimdReal HK_CALL computeVertexClearance(
 			const hkaiGeneralAccessor& accessor,
 			hkaiPackedKey faceKey,
@@ -232,14 +244,17 @@ class hkaiNavMeshTraversalUtils
 			hkVector4Parameter up, 
 			hkSimdRealParameter maxRadius);
 
-		static hkSimdReal updateClearance(const hkaiGeneralAccessor& accessor, 
+		static hkSimdReal HK_CALL updateClearance(const hkaiGeneralAccessor& accessor, 
 			hkaiPackedKey faceKey,
 			const hkaiNavMesh::Edge& edge,
 			hkVector4Parameter up,
 			int clearanceIndex,
 			hkSimdRealParameter clearance);
 
-		static void updateGlobalClearance(const hkaiGeneralAccessor& mesh, int vertexIndex, 
+		static void HK_CALL updateGlobalClearance( hkaiNavMeshInstance& mesh, int vertexIndex, 
+			hkSimdRealParameter clearance);
+
+		static void HK_CALL updateGlobalClearance(const hkaiGeneralAccessor& mesh, int vertexIndex, 
 			hkSimdRealParameter clearance);
 
 };
@@ -251,7 +266,7 @@ class hkaiNavMeshTraversalUtils
 #endif // HKAI_NAVIGATION_MESH_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

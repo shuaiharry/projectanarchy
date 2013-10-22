@@ -35,6 +35,7 @@ class hkaiStaticTreeNavMeshQueryMediator : public hkaiNavMeshQueryMediator
 		void				setNavMeshAndTree( const hkaiNavMesh* navMesh, hkcdStaticAabbTree* staticTree );
 
 		virtual hkaiPackedKey	getClosestPoint( const GetClosestPointInput& input, hkVector4& closestPointOut ) const HK_OVERRIDE;
+		virtual hkaiPackedKey	getClosestBoundaryEdge( const GetClosestBoundaryEdgeInput& input, hkVector4& closestPointOut ) const HK_OVERRIDE;
 
 		virtual bool		castRay( const RaycastInput& input, HitDetails& hitOut ) const HK_OVERRIDE;
 
@@ -53,7 +54,7 @@ class hkaiStaticTreeNavMeshQueryMediator : public hkaiNavMeshQueryMediator
 #endif // HK_AI_STATIC_TREE_NAV_MESH_MEDIATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -845,7 +845,7 @@ void VTerrainSectorManager::EndVisibilityUpdate(VTerrainVisibilityCollectorCompo
     // special treatment when the sector might be in visibility zones that are not of type VSectorVisibilityZone
     if (infoComp.m_pTerrain->m_bVisibleInVisZones)
     {
-      const VisStaticGeometryInstanceCollection_cl *pVisibleOpaqueGeoInstances = infoComp.m_pCollector->GetVisibleStaticGeometryInstancesForPass(VPT_TransparentPass);
+      const VisStaticGeometryInstanceCollection_cl *pVisibleOpaqueGeoInstances = infoComp.m_pCollector->GetVisibleStaticGeometryInstancesForPass(VPT_PrimaryOpaquePass);
       const int iGeomCount = pVisibleOpaqueGeoInstances->GetNumEntries();
       for (int i=0;i<iGeomCount;i++)
       {
@@ -1455,7 +1455,7 @@ VTerrainConstantBufferGlobals *VTerrainSectorManager::GetGlobalsConstantBuffer()
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -11,7 +11,8 @@
 HK_FORCE_INLINE	void hkcdRay::setDirection(hkVector4Parameter direction, hkSimdRealParameter fraction)
 {
 	m_direction.setXYZ_W(direction, fraction);
-	m_invDirection.setReciprocal<HK_ACC_23_BIT,HK_DIV_SET_MAX>(direction);	
+	m_invDirection.setReciprocal<HK_ACC_23_BIT,HK_DIV_SET_MAX>(direction);
+	m_invDirection.setInt24W(int(m_direction.greaterEqualZero().getMask()) & hkVector4ComparisonMask::MASK_XYZ);
 }
 
 //
@@ -94,7 +95,7 @@ inline void hkcdRayBundle::getDirection(hkFourTransposedPoints& directionOut) co
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

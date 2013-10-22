@@ -22,6 +22,7 @@
 
 
 // readable version numbers, also easier to find in the source code as numbers
+#define VISION_ARCHIVE_VERSION_031   31
 #define VISION_ARCHIVE_VERSION_030   30
 #define VISION_ARCHIVE_VERSION_029   29
 #define VISION_ARCHIVE_VERSION_028   28
@@ -46,7 +47,7 @@
 #define VISION_ARCHIVE_VERSION_003   3
 #define VISION_ARCHIVE_VERSION_002   2
 
-#define VISION_ARCHIVE_VERSION  VISION_ARCHIVE_VERSION_030
+#define VISION_ARCHIVE_VERSION  VISION_ARCHIVE_VERSION_031
 
 
 /*
@@ -171,7 +172,7 @@ inline BOOL VisCheckForValidArchive( int iLoadedArchiveVersion, int iEngineArchi
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

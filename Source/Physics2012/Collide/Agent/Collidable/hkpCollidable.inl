@@ -11,7 +11,7 @@
 inline hkpCollidable::hkpCollidable(const hkpShape* shape, const hkMotionState* ms, int type)
 :	hkpCdBody(shape, ms), m_ownerOffset(0), 
 		m_broadPhaseHandle(type),
-		m_allowedPenetrationDepth(-1.0f)
+		m_allowedPenetrationDepth(hkReal(-1))
 {
 	m_broadPhaseHandle.setOwner(this); // 'this' valid here.
 	m_forceCollideOntoPpu = hkpCollidable::FORCE_PPU_SHAPE_UNCHECKED;
@@ -24,7 +24,7 @@ inline hkpCollidable::hkpCollidable(const hkpShape* shape, const hkMotionState* 
 inline hkpCollidable::hkpCollidable(const hkpShape* shape, const hkTransform* t, int type)
 :	hkpCdBody(shape, t) , m_ownerOffset(0),
 	m_broadPhaseHandle(type),
-	m_allowedPenetrationDepth(-1.0f)
+	m_allowedPenetrationDepth(hkReal(-1))
 {
 	m_broadPhaseHandle.setOwner(this); // 'this' valid here.
 	m_forceCollideOntoPpu = hkpCollidable::FORCE_PPU_SHAPE_UNCHECKED;
@@ -150,7 +150,7 @@ HK_FORCE_INLINE void hkpCollidable::setAllowedPenetrationDepth( hkReal val )
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -118,41 +118,6 @@ namespace VisionManaged
     bool m_bVisible;
   };
 
-
-  public ref class EngineInstanceCubemapEntity : public EngineInstanceEntity
-  {
-  public:
-    enum class CubeMapRenderingType_e {
-      Scene,
-      Specular,
-      RendererNode
-    };
-
-    EngineInstanceCubemapEntity(Shape3D ^shape);
-    virtual void DisposeObject() override;
-
-    // overridden entity functions
-    virtual bool OnExport(SceneExportInfo ^info) override;
-
-    void SetBlurPasses(int iNumPasses);
-    void SetAutoGenMipMaps(bool bStatus);
-    void SetCubemapKey(String ^key, int iEdgeSize);
-    void SetPreviewVisible(bool bStatus);
-    void SetRendererConfig(String^ rendererConfig);
-    void UpdateCubemap();
-
-    // special functions:
-    void SetRenderFilterMask(unsigned int iMask);
-    void SetClipPlanes(float fNear, float fFar);
-    void SetUpdateParams(bool bContinuous, float fInterval, int iCount, bool bAlternate);
-    bool SaveToFile(String ^filename);
-    void SetExportAsEntity(bool bStatus) {m_bExport=bStatus;}
-    void AssignCubemapShader(const char *szCubemapKey);
-    void SetRenderingType(CubeMapRenderingType_e eRenderingType);
-    void SetSpecularPower(float fSpecularPower);
-    bool m_bExport;
-  };
-
   public ref class EngineInstanceBoneProxy : public IEngineInstanceObject3D
   {
   public:
@@ -180,7 +145,7 @@ namespace VisionManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

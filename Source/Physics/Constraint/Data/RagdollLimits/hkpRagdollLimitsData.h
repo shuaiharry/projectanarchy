@@ -26,7 +26,7 @@ class hkpRagdollLimitsData : public hkpConstraintData
 
 		enum
 		{
-			SOLVER_RESULT_TWIST	= 0,	// angular limits defined around m_freeAxisA 
+			SOLVER_RESULT_TWIST	= 0,	// angular limits defined around m_freeAxisA
 			SOLVER_RESULT_CONE	= 1,	// angular constraint defined by m_constrainedAxis1A
 			SOLVER_RESULT_PLANE	= 2,	// angular constraint defined by m_constrainedAxis2A
 			SOLVER_RESULT_MAX	= 3
@@ -76,12 +76,16 @@ class hkpRagdollLimitsData : public hkpConstraintData
 		/// Constructor.
 		hkpRagdollLimitsData();
 
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		inline hkpRagdollLimitsData(hkFinishLoadedObjectFlag f);
 
+#endif
+
 		/// Setup a ragdoll constraint based on information in world space.
 		/// Use the set angle limit methods to add in the extra data.
-		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, 
+		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
 						const hkVector4& twistAxisW, const hkVector4& planeAxisW);
 
 		/// Setup a ragdoll constraint based on information in body space.
@@ -124,7 +128,7 @@ class hkpRagdollLimitsData : public hkpConstraintData
 		/// this value from 0 to 1 for a newly created constraint,
 		/// you can nicely blend in the limits.
 		inline void setAngularLimitsTauFactor( hkReal mag );
-			
+
 		/// get the m_angularLimitsTauFactor;
 		inline hkReal getAngularLimitsTauFactor() const;
 
@@ -133,7 +137,7 @@ class hkpRagdollLimitsData : public hkpConstraintData
 
 		/// Gets the maximum twist limit (in radians).
 		inline hkReal getTwistMaxAngularLimit() const;
-	   
+
 		/// Gets the maximum plane limit (in radians).
 		inline hkReal getPlaneMaxAngularLimit() const;
 
@@ -161,7 +165,7 @@ class hkpRagdollLimitsData : public hkpConstraintData
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
 
 	public:
-		
+
 		HK_ALIGN_REAL( Atoms m_atoms );
 };
 
@@ -171,7 +175,7 @@ class hkpRagdollLimitsData : public hkpConstraintData
 #endif // HKP_RAGDOLL_LIMITS_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

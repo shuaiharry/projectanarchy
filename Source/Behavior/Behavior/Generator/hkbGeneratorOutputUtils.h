@@ -34,7 +34,8 @@ class hkbGeneratorOutputUtils
 											hkReal weight, 
 											hkbGeneratorOutput& finalOutput,
 											hkReal* trackWeightSums,
-											hkReal* sparseTrackWeights );
+											hkReal* sparseTrackWeights,
+											hkBool32 greedyBlend = false );
 
 			/// Overlay a palette track onto another one.  If the data overlaps, the data from trackIn is used.
 		static void HK_CALL overlayPaletteTrack(	const hkbGeneratorOutput::ConstTrack& trackIn,
@@ -260,7 +261,7 @@ class hkbGeneratorOutputUtils
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

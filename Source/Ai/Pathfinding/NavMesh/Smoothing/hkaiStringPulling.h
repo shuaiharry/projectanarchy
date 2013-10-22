@@ -31,6 +31,7 @@ public:
 
 	friend class hkaiNavMeshPathSmoothingUtil;
 
+		/// Which side of the funnel the point is on.
 	enum Side
 	{
 		RIGHT = 0,
@@ -39,6 +40,7 @@ public:
 		UNDEFINED = -1
 	};
 
+		/// Point type.
 	enum Type
 	{
 		NONE = 0,
@@ -282,7 +284,7 @@ private:
 #endif // HKAI_STRING_PULLING_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

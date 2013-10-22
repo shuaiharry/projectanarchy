@@ -42,7 +42,7 @@ public:
       //prevent double initialization
       self->DeInit();
       self->SetInitialAnimation(szInitialAnimation);
-      self->Init(pOwner, pTable, true);
+      self->Init(pTable, true);
       
       //get the scripting component...
       VScriptComponent *pComponent = (VScriptComponent *)pOwner->Components().GetComponentOfBaseType(V_RUNTIME_CLASS(VScriptComponent));
@@ -140,7 +140,7 @@ public:
   ///     elseif eventType == Vision.EVENT_TRANSITION_START_REACHED then
   ///       Debug:PrintLine(self:GetKey()..": Transition Start reached '"..self.Transition:GetInactiveState().."'/'"..self.Transition:GetInactiveState().."'")
   ///     else
-  ///       Debug:PrintLine(self:GetKey()..": Unkown transition event "..eventType.."'"..self.Transition:GetInactiveState().."'/'"..self.Transition:GetActiveState().."'")
+  ///       Debug:PrintLine(self:GetKey()..": Unknown transition event "..eventType.."'"..self.Transition:GetInactiveState().."'/'"..self.Transition:GetActiveState().."'")
   ///     end
   ///   end
   ///   \endcode

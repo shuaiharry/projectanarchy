@@ -11,11 +11,11 @@
 #ifndef VISCORERESOURCEBACKGROUNDRESTORER_HPP_INCLUDED
 #define VISCORERESOURCEBACKGROUNDRESTORER_HPP_INCLUDED
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 
 #include <Vision/Runtime/Engine/System/Resource/IVisApiBackgroundResourceRestorer.hpp>
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 
 /// \brief
 ///   Handles restoring resources when the application was in the background state.
@@ -23,21 +23,35 @@ class VisResourceSystemBackgroundRestorer_cl : public IVisBackgroundResourceRest
 {
 public:
   // Constructor
-  VisResourceSystemBackgroundRestorer_cl(const VisResourceConfig_t &config,
-    int iTotalResourceSize, int iOldParticleRingBufferSize);
+  VisResourceSystemBackgroundRestorer_cl(const VisResourceConfig_t &config);
 
   // Interface
-  void BeginRestore(DynArray_cl<VResourceManager*> resourceManagers,
-    int iNumResourceManagers);
+  void Unload(const DynArray_cl<VResourceManager*>& resourceManagers, int iNumResourceManagers);
+
+  void BeginRestore();
 
   virtual bool IsFinished() const HKV_OVERRIDE;
 
   virtual void Tick() HKV_OVERRIDE;
 
 private:
+  // Private functions
+  void RestoreShaders();
+
+  void RelinkStaticMeshInstances();
+  void InvalidateVertexSkinningResults();
+
+  void EndRestore();
+
+  // Helpers
+  void UpdateProgress();
+
+  static unsigned int ComputeResourceSize(const VManagedResource* pResource);
+  static unsigned int ComputeShaderPassResourceSize(const VShaderPassResource* pShaderPassResource);
+
   // Member variables
   int m_iResMgrIndex, m_iResIndex;
-  int m_iTotalResourceSize, m_iRestoredSize;
+  unsigned int m_iTotalResourceSize, m_iRestoredSize;
   int m_iOldParticleRingBufferSize;
   VisResourceConfig_t m_config;
 
@@ -48,7 +62,9 @@ private:
 
   VisBackgroundRestoreObject_cl m_callbackData;
   bool m_bFinished;
-  float m_fProgressUpdateGranularity, m_fLastProgress;
+
+  float m_fProgressUpdateGranularity;
+  int m_iLastProgressCount;
 };
 
 //-----------------------------------------------------------------------------------
@@ -56,7 +72,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

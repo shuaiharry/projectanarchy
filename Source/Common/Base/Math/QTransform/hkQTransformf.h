@@ -22,9 +22,9 @@ class hkQTransformf
 public:
 
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_MATH, hkQTransformf);
-#if defined(HK_REAL_IS_FLOAT)
+
 	HK_DECLARE_REFLECTION();
-#endif
+
 	
 
 	/// Default constructor - all elements are uninitialized.
@@ -135,7 +135,7 @@ public:
 #endif	// HK_MATH_Q_TRANSFORMf_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

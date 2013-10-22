@@ -106,12 +106,17 @@ namespace VisionManaged
     VisStaticMeshInstance_cl *pMainInst = GetLOD0();
     if (pMainInst==NULL)
       return;
+
     hkvMat4 transform;
     CreateTransformation(transform);
+
     FOREACH_MESH_LOD    
+
       pInstance->SetTransform(transform);
       pInstance->ReComputeBoundingBoxes();
-      if (!EditorManager::VisibilityBuilder->UseInEngine) // don't reassign in this mode because we might be in the middle of an export process
+
+      // don't reassign in this mode because we might be in the middle of an export process
+      if (!EditorManager::VisibilityBuilder->UseInEngine) 
         pInstance->AssignToVisibilityZones();
     }
 
@@ -641,10 +646,13 @@ namespace VisionManaged
 
     m_pSubMeshes->Clear();
 
-    for (int i=0;i<m_iLODCount;i++)
+    for (int i = 0; i < m_iLODCount; i++)
     {
       VisStaticMeshInstance_cl* pMeshInst = m_spLODList[i];
-      for (int j=0;j<pMeshInst->GetSubmeshInstanceCount();j++)
+      if (pMeshInst == NULL)
+        continue;
+
+      for (int j = 0; j < pMeshInst->GetSubmeshInstanceCount(); j++)
       {
         m_pSubMeshes->AppendEntry(pMeshInst->GetSubmeshInstance(j));
       }
@@ -672,7 +680,7 @@ namespace VisionManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

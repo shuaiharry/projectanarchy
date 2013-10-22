@@ -6,8 +6,6 @@
  *
  */
 
-/// \file vTestUnit.hpp
-
 #ifndef H_TEST_AUTOMATION_CLASS
 #define H_TEST_AUTOMATION_CLASS
 
@@ -17,7 +15,6 @@
 
 #define MAX_TESTS 256
 #define MAX_CONFIGS 256
-
 
 // possible styles for the Printf function
 enum ePRINTFSTYLE
@@ -307,7 +304,7 @@ public:
 
   /// \brief 
   ///  A printf like function that outputs the string to the xml file
-  void XMLPrintf ( const char *s, ... );
+  VBASE_IMPEXP void XMLPrintf ( const char *s, ... );
 
   ///
   /// @}
@@ -482,9 +479,8 @@ public:
   static VTestUnit* m_pActiveTestUnit;
 
 protected:
-  // tests have many friends :D 
-  friend class CDialogSettings; ///< is always there if you need him
-  friend class VTestClass;      ///< not a friend but is our child
+  friend class CDialogSettings;
+  friend class VTestClass;
 
   /// \brief
   ///   Initializes the test
@@ -499,7 +495,6 @@ protected:
   ///   VBool: returns FALSE if an exception was catched. Otherwise TRUE is returned
   virtual VBASE_IMPEXP VBool DoTestInit(VTestClass *pTest);
 
-  
   /// \brief
   ///   Runs the test (implementation calls RunSubTest)
   /// 
@@ -516,7 +511,6 @@ protected:
   ///   VTestUnit::RunSubTests is returned
   virtual VBASE_IMPEXP VBool DoTestRun(VTestClass *pTest);
 
-
   /// \brief
   ///   Deinitializes the test
   /// 
@@ -530,14 +524,12 @@ protected:
   ///   VBool: returns FALSE if an exception was catched. Otherwise TRUE is returned
   virtual VBASE_IMPEXP VBool DoTestDeInit(VTestClass *pTest);
 
-  
   /// \brief
   ///   Initializes, runs and deinitializes the subtest (VTestUnit::DoSubTestInit,
   ///   VTestUnit::DoSubTestRun, VTestUnit::DoSubTestDeInit) It also checks whether subtest is
   ///   enabled. This function calls the VTestUnit::DoSubTestRun function until it returns FALSE.
   ///   This is e.g. used by the engine tests to run the same subtest for multiple frames.
   void RunSubTests(VTestClass *pTest, int iSubTest);
-
 
   /// \brief
   ///   Initializes the subtest
@@ -555,7 +547,6 @@ protected:
   ///   VBool: returns FALSE if an exception was catched. Otherwise TRUE is returned
   virtual VBASE_IMPEXP VBool DoSubTestInit(VTestClass *pTest, int iSubTest);
 
-  
   /// \brief
   ///   Runs the subtest
   /// 
@@ -576,7 +567,6 @@ protected:
   ///   VTestClass::RunSubTest is returned
   virtual VBASE_IMPEXP VBool DoSubTestRun(VTestClass *pTest, int iSubTest);
 
-
   /// \brief
   ///   Deinitializes the subtest
   /// 
@@ -592,7 +582,6 @@ protected:
   /// \return
   ///   VBool: returns FALSE if an exception was catched. Otherwise TRUE is returned
   virtual VBASE_IMPEXP VBool DoSubTestDeInit(VTestClass *pTest, int iSubTest);
-
 
   /// \brief
   ///   Adds some statistics to the log window. You can override this function if you want to add
@@ -625,8 +614,9 @@ protected:
   // Returns time in milliseconds.
   unsigned int GetTime() const;
   
-  // lots of private states
+  VTestClass *m_pCurrentTest;   ///< pointer to the current test
 
+private:
   int              m_iOutputMode;             ///< define for output (e.g. AOUT_WINCONSOLE), each combination
   
   char             m_szHTMLFile[FS_MAX_PATH]; ///< html outputfilename
@@ -653,7 +643,6 @@ protected:
   
   int m_iCurrentTest;           ///< index of current executed test
   int m_iCurrentTestIter;       ///< iterator index
-  VTestClass *m_pCurrentTest;   ///< pointer to the current test
   int m_iCurrentSubTestNr;      ///< index of the current subtest (within a test)
   int m_iCurrentSubTestFrameNr; ///< frame number within the current subtest
 
@@ -685,7 +674,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

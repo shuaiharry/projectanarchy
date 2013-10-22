@@ -64,7 +64,7 @@ VCustomVolumeObject* VCustomVolumeManager::SearchInstance(const char* szObjectKe
   for (int i=0;i<iCount;i++)
   {
     VCustomVolumeObject* pCustomVolumeObject = m_instances.GetAt(i);
-    if(pCustomVolumeObject->HasObjectKey(szObjectKey))
+    if(pCustomVolumeObject != NULL && pCustomVolumeObject->HasObjectKey(szObjectKey))
       return pCustomVolumeObject;
   }
 
@@ -76,9 +76,12 @@ void VCustomVolumeManager::ReleaseAll()
   m_bAllowDeletion = false;
   for(int i=0; i<m_instances.GetLength(); ++i)
   {
-    delete m_instances[i];
+    if(m_instances[i] != NULL && !m_instances[i]->IsCreatedFromEditor())
+    {
+      delete m_instances[i];
+      m_instances[i] = NULL;
+    }
   }
-  m_instances.SetSize(0,-1,false);
   m_bAllowDeletion = true;
 }
 
@@ -97,7 +100,7 @@ VCustomVolumeManager& VCustomVolumeManager::GlobalManager()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

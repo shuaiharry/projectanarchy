@@ -29,7 +29,7 @@ class hkFreeList
 
 		HK_DECLARE_PLACEMENT_ALLOCATOR();
 
-		typedef void (HK_CALL *MemoryWalkCallback)(void* start, hk_size_t size,hkBool allocated,int pool,void* param);
+		typedef void (HK_CALL *MemoryWalkCallback)(void* start, hk_size_t size, bool allocated,int pool,void* param);
 
 			/// The size of an element, and the alignment all elements must have
 		hkFreeList( hk_size_t elementSize, hk_size_t alignment, hk_size_t blockSize, hkMemoryAllocator* elementAllocator = HK_NULL, hkMemoryAllocator* blockAllocator = HK_NULL);
@@ -92,7 +92,7 @@ class hkFreeList
 		hkBool isFreeElementAvailable() const { return m_free || m_top < m_blockEnd; }
 
 			/// Simple memory stats
-		void getMemoryStatistics(hkMemoryAllocator::MemoryStatistics& stats);
+		void getMemoryStatistics(hkMemoryAllocator::MemoryStatistics& stats) const;
 
 			/// Finds blocks which are not used, and puts them on the 'freeBlocks' list.
 			/// Returns number of blocks found, or <0 if couldn't do the work
@@ -167,7 +167,7 @@ class hkFreeList
 		int _freeBlocks(Block* cur);
 
 			// Calculates the sum size of a linked list of blocks
-		hk_size_t _calculateBlockAllocatedSize(Block* cur);
+		hk_size_t _calculateBlockAllocatedSize(Block* cur) const;
 	
 			// Sets up allocation - assumes all memory has been freed
 		void _init(hk_size_t elementSize, hk_size_t align, hk_size_t blockSize, hkMemoryAllocator* elementAllocator, hkMemoryAllocator* blockAllocator);
@@ -237,7 +237,7 @@ class hkFreeList
 #endif // HK_FREELIST
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

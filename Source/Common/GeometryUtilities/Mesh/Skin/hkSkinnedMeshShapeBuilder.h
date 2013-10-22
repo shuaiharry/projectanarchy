@@ -12,8 +12,10 @@
 #include <Common/GeometryUtilities/Mesh/Skin/hkSkinnedMeshShape.h>
 #include <Common/GeometryUtilities/Mesh/hkMeshSystem.h>
 #include <Common/GeometryUtilities/Mesh/hkMeshVertexBuffer.h>
+#include <Common/GeometryUtilities/Mesh/hkMeshTexture.h>
 #include <Common/GeometryUtilities/Mesh/Utils/PrimitiveUtil/hkMeshPrimitiveUtil.h>
 #include <Common/GeometryUtilities/Mesh/IndexedTransformSet/hkIndexedTransformSet.h>
+#include <Common/GeometryUtilities/Mesh/Utils/DisplacementMappingUtil/hkDisplacementMappingUtil.h>
 #include <Common/Base/Container/BitField/hkBitField.h>
 
 class hkAabb;
@@ -26,13 +28,26 @@ class hkSkinnedMeshBuilder
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_SCENE_DATA, hkSkinnedMeshBuilder);
 
 		// Type shortcuts
-		typedef hkSkinnedMeshShape::BoneSetId	BoneSetId;
+		typedef hkSkinnedMeshShape::BoneSetId				BoneSetId;
+		typedef hkDisplacementMappingUtil::DominantsBuffer	DominantsBuffer;
 
 		/// Skinning info
 		struct SkinningInfo
 		{
 			int	m_boneIndex;		///< First bone of the bone-set
 			int	m_lastVertex;		///< Index of the last vertex in the group
+		};
+
+		/// Vertex buffer
+		struct VertexBuffer : public hkReferencedObject
+		{
+			HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_SCENE_DATA);
+
+			/// Constructor
+			VertexBuffer(hkMeshSystem* meshSystem, const hkVertexFormat& vFmt, int numVerts, bool hasDominants);
+
+			hkRefPtr<hkMeshVertexBuffer> m_vb;		///< The vertex buffer
+			DominantsBuffer m_dominants;			///< The displacement mapping dominants buffer (if any)
 		};
 
 	public:
@@ -49,7 +64,7 @@ class hkSkinnedMeshBuilder
 		void addMesh(const hkMeshShape* meshShape, const hkQTransform& meshTransform, int numBones);
 
 			/// Builds the skinned mesh shape
-		void build(bool buildSingleMesh = false);
+		void build(bool buildSingleMesh = false, hkUint8 numBonesPerVertex = 1);
 
 			/// Gets skinning info
 		void getSkinningInfo( hkArray<SkinningInfo>& sectionsOut );
@@ -74,6 +89,7 @@ class hkSkinnedMeshBuilder
 			int m_surfaceIndex;					///< Index of the surface in m_surfaces
 			int m_subMeshIndex;					///< Index of the sub-mesh
 			int m_boneSetIndex;					///< Index of the bone-set driving this mesh section
+			bool m_hasDominants;				///< True if the section uses a dominants buffer (i.e. for displacement mapping)
 			BoneSetId m_meshBoneSetId;			///< BoneSet Id in the built mesh
 
 			hkBitField m_originalUsedVertices;	///< Bit-field marking the vertices used in this section
@@ -84,6 +100,9 @@ class hkSkinnedMeshBuilder
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_SCENE_DATA, hkSkinnedMeshBuilder::SkinDescriptor);
 
+			/// Constructor
+			SkinDescriptor();
+
 			/// Counts the number of sub-meshes
 			int countSubmeshes() const;
 
@@ -91,6 +110,7 @@ class hkSkinnedMeshBuilder
 			hkMeshBoneIndexMapping m_worldFromLocalBoneMap;	///< Bone mapping. Maps a descriptor bone index to the global bone index
 			hkBitField m_usedBones;							///< A bit-field of used bones
 			hkArray<MeshSection> m_sections;				///< Mesh sections in this skin
+			bool m_hasDominants;							///< True if any of the descriptor's sections has dominants
 		};
 
 	protected:
@@ -108,13 +128,13 @@ class hkSkinnedMeshBuilder
 		int addSurface(hkMeshMaterial* surface);
 
 			/// Computes the shared vertex buffer format
-		void computeVertexFormat();
+		void computeVertexFormat(hkUint8 numBonesPerVertex);
 
 			/// Computes the number of vertices in the given skin
 		int computeNumVertices(SkinDescriptor& sd);
 
 			/// Fills the provided skinned vertex buffer with the data from the given skin descriptor
-		void fillSkinnedVertexBuffer(hkMeshVertexBuffer* skinnedVb, int vbOffset, int numVbVerts, const SkinDescriptor& sd);
+		void fillSkinnedVertexBuffer(VertexBuffer* skinnedVb, int vbOffset, int numVbVerts, const SkinDescriptor& sd);
 
 			/// Copies a sub-set of vertices from one locked vertex buffer to another
 		void copyVertices(	const hkMeshVertexBuffer::LockedVertices& dstVerts, const hkVertexFormat& dstVtxFmt, int dstStartVertex, 
@@ -127,7 +147,7 @@ class hkSkinnedMeshBuilder
 		void computeIndexFormat(const SkinDescriptor& sd, hkMergeMeshPrimitvesCalculator& mpc);
 
 			/// Creates the mesh for the given descriptor. The indices are not properly set at this stage
-		hkMeshShape* createMesh(const SkinDescriptor* HK_RESTRICT descriptors, int numDescriptors, const hkMergeMeshPrimitvesCalculator& mpc, hkMeshVertexBuffer* vb);
+		hkMeshShape* createMesh(const SkinDescriptor* HK_RESTRICT descriptors, int numDescriptors, const hkMergeMeshPrimitvesCalculator& mpc, VertexBuffer* vb);
 
 			/// Fills the provided skinned index buffer with the data from the given skin descriptor
 		void fillSkinnedIndexBuffer(const SkinDescriptor* HK_RESTRICT descriptors, int numDescriptors, hkMeshShape* skinnedMesh);
@@ -165,7 +185,7 @@ class hkSkinnedMeshBuilder
 #endif	//	HK_SKINNED_MESH_SHAPE_BUILDER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

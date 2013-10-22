@@ -296,6 +296,27 @@ public:
   }
 
   /// \brief
+  ///   Determines whether automatic repositioning should be handled through the scene manager.
+  ///
+  /// If enabled (default) and if a SetRepositionInterval has been set, the repositioning of shapes in zones is handled automatically in the
+  /// HandleZones function of the specific implementation of VisionSceneManager_cl::HandleZones.
+  /// If disabled, RepositionAllZones must be called through custom code (see actual implementation in VisionSceneManager_cl::HandleZones)
+  ///
+  /// \param bStatus
+  ///   The new status
+  inline void SetHandleRepositioning(bool bStatus)
+  {
+    m_bHandleRepositioning = bStatus;
+  }
+
+  /// \brief
+  ///   Returns the flag that has been previously set via SetHandleRepositioning. The default state is true.
+  inline bool GetHandleRepositioning() const
+  {
+    return m_bHandleRepositioning;
+  }
+
+  /// \brief
   ///   Internal function
   VISION_APIFUNC void SetGlobalPivot(const hkvVec3d& zonePivot);
 
@@ -350,8 +371,9 @@ public:
   ///
   VISION_APIFUNC void GatherEntitiesInBoundingBox(const hkvAlignedBBox &bbox, VisEntityCollection_cl &destList);
 
-  //Force zone update for handling slew conditions
-  VISION_APIFUNC void RepositionAllZones();
+  /// \brief
+  ///   Overridable function to force zone update for handling slew conditions
+  VISION_APIFUNC virtual void RepositionAllZones();
 
 protected:
 
@@ -362,6 +384,7 @@ protected:
   VResourceSnapshotQueue m_SnapshotQueue;
   
   VisZoneRepositionInfo_t m_RepositionInfo;
+  bool m_bHandleRepositioning;
   
   ///
   /// @}
@@ -558,7 +581,6 @@ public:
   }
 
 
-
   /// \brief
   ///   Helper function that purges/unloads unused resources while sticking to the passed time limit
   VISION_APIFUNC bool PurgeResources(__int64 iEndTime);
@@ -580,6 +602,7 @@ public:
 protected:
   bool m_bAnyZoneUnloaded, m_bAnyZoneCaching;
   bool m_bPreferUnload;
+
   // deferred loading of full-res resources
   VResourceCollection m_FullResQueue;
   VSmartPtr<VLoadingTask> m_spLoadingTask;
@@ -598,7 +621,7 @@ typedef VSmartPtr<IVisSceneManager_cl> IVisSceneManagerPtr;
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

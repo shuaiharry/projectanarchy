@@ -177,7 +177,7 @@ unsigned int vHavokDisplayGeometryList::GetSize() const
   return m_iSize;
 }
 
-BOOL vHavokDisplayGeometryList::IsVisible(unsigned int iID) const
+BOOL vHavokDisplayGeometryList::IsVisible(hkUlong iID) const
 {
   for (unsigned int i = 0; i < m_iSize; ++i)
   {
@@ -189,7 +189,7 @@ BOOL vHavokDisplayGeometryList::IsVisible(unsigned int iID) const
   return FALSE;
 }
 
-void vHavokDisplayGeometryList::Remove(unsigned int iID)
+void vHavokDisplayGeometryList::Remove(hkUlong iID)
 {
   bool bDeleted = false;
   for (unsigned int i = 0; i < m_iSize; ++i)
@@ -206,7 +206,7 @@ void vHavokDisplayGeometryList::Remove(unsigned int iID)
     m_iSize = m_List.Pack();
 }
 
-void vHavokDisplayGeometryList::SetColor(unsigned int iID, VColorRef iColor)
+void vHavokDisplayGeometryList::SetColor(hkUlong iID, VColorRef iColor)
 {
   for (unsigned int i = 0; i < m_iSize; ++i)
   {
@@ -215,7 +215,7 @@ void vHavokDisplayGeometryList::SetColor(unsigned int iID, VColorRef iColor)
   }
 }
 
-void vHavokDisplayGeometryList::SetOwner(unsigned int iID, VisObject3D_cl *pOwner)
+void vHavokDisplayGeometryList::SetOwner(hkUlong iID, VisObject3D_cl *pOwner)
 {
   for (unsigned int i = 0; i < m_iSize; ++i)
   {
@@ -224,7 +224,7 @@ void vHavokDisplayGeometryList::SetOwner(unsigned int iID, VisObject3D_cl *pOwne
   }
 }
 
-void vHavokDisplayGeometryList::SetVisible(unsigned int iID, BOOL bVisible)
+void vHavokDisplayGeometryList::SetVisible(hkUlong iID, BOOL bVisible)
 {
   for (unsigned int i = 0; i < m_iSize; ++i)
   {
@@ -233,7 +233,7 @@ void vHavokDisplayGeometryList::SetVisible(unsigned int iID, BOOL bVisible)
   }
 }
 
-void vHavokDisplayGeometryList::UpdateTransform(unsigned int iID, const hkTransform &transform)
+void vHavokDisplayGeometryList::UpdateTransform(hkUlong iID, const hkTransform &transform)
 {
   for (unsigned int i = 0; i < m_iSize; ++i)
   {
@@ -346,7 +346,7 @@ hkResult vHavokDisplayHandler::addGeometryInstance(hkUlong originalInstanceId, c
 
 hkResult vHavokDisplayHandler::updateGeometry(const hkTransform &transform, hkUlong id, int tag)
 {
-  m_Geometries.UpdateTransform( (unsigned int)id, transform);
+  m_Geometries.UpdateTransform(id, transform);
   return HK_SUCCESS;
 }
 
@@ -361,7 +361,7 @@ hkResult vHavokDisplayHandler::updateGeometry(const hkMatrix4& transform, hkUlon
 
 hkResult vHavokDisplayHandler::removeGeometry(hkUlong id, int tag, hkUlong shapeIdHint)
 {
-  m_Geometries.Remove((unsigned int)id);
+  m_Geometries.Remove(id);
   return HK_SUCCESS;
 }
 
@@ -499,26 +499,26 @@ void vHavokDisplayHandler::Step(float dt)
 
 void vHavokDisplayHandler::SetColor(hkUlong id, VColorRef iColor)
 {
-  m_Geometries.SetColor((unsigned int)id, iColor);
+  m_Geometries.SetColor(id, iColor);
 }
 
 void vHavokDisplayHandler::SetVisible(hkUlong id, BOOL bVisible)
 {
-  m_Geometries.SetVisible((unsigned int)id, bVisible);
+  m_Geometries.SetVisible(id, bVisible);
 }
 
 BOOL vHavokDisplayHandler::IsVisible(hkUlong id) const
 {
-  return m_Geometries.IsVisible((unsigned int)id);
+  return m_Geometries.IsVisible(id);
 }
 
 void vHavokDisplayHandler::SetOwner(hkUlong id, VisObject3D_cl *pOwner)
 {
-  m_Geometries.SetOwner((unsigned int)id, pOwner);
+  m_Geometries.SetOwner(id, pOwner);
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

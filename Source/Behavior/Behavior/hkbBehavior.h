@@ -12,14 +12,14 @@
 #include <Common/Base/hkBase.h>
 #include <Common/Base/Reflection/Attributes/hkAttributes.h>
 #include <Common/Base/Container/String/hkStringBuf.h>
+#include <Behavior/Behavior/hkbBase.h>
 #include <Behavior/Behavior/Error/hkbError.h>
 #include <Behavior/Behavior/Attributes/hkbAttributes.h>
-#include <Behavior/Behavior/hkbMacros.h>
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

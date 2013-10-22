@@ -8,10 +8,6 @@
 
 /// \file vHavokVisualDebugger.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKVISUALDEBUGGER_HPP_INCLUDED
 #define VHAVOKVISUALDEBUGGER_HPP_INCLUDED
 
@@ -24,7 +20,6 @@
 class hkVisualDebugger;
 class hkpPhysicsContext;
 
-
 /// 
 /// \brief
 ///   Console Action for toggling the Havok Visual Debugger.
@@ -34,9 +29,8 @@ class vHavokVisualDebuggerAction : public VAction
   V_DECLARE_ACTION(vHavokVisualDebuggerAction);
 
 public:
-  VOVERRIDE VBool Do(const class VArgList &argList);
+  virtual VBool Do(const class VArgList &argList) HKV_OVERRIDE;
 };
-
 
 /// 
 /// \brief
@@ -44,12 +38,12 @@ public:
 /// 
 class vHavokVisualDebuggerCallbackData_cl : public IVisCallbackDataObject_cl
 {
-	public:
-		VHAVOK_IMPEXP vHavokVisualDebuggerCallbackData_cl(VisCallback_cl* pSender, hkVisualDebugger* vdb, hkArray<hkProcessContext*>* contexts );
+public:
+  VHAVOK_IMPEXP vHavokVisualDebuggerCallbackData_cl(VisCallback_cl* pSender, hkVisualDebugger* vdb, 
+    hkArray<hkProcessContext*>* contexts);
 
-	public:
-		hkVisualDebugger* m_pVisualDebugger;
-		hkArray<hkProcessContext*>* m_contexts;
+  hkVisualDebugger* m_pVisualDebugger;
+  hkArray<hkProcessContext*>* m_contexts;
 };
 
 /// 
@@ -67,7 +61,6 @@ public:
   /// @{
   ///
   
-
   /// 
   /// \brief
   ///   Constructor of the Havok Visual Debugger
@@ -76,9 +69,11 @@ public:
   ///
   /// \param pPhysicsWorld
   ///   Pointer to the Havok Physics World
+  ///
+  /// \param iPort
+  ///  The port to listen at for VDB connections
   /// 
-  vHavokVisualDebugger(hkpWorld* pPhysicsWorld);
-
+  vHavokVisualDebugger(hkpWorld* pPhysicsWorld, int iPort = HK_VISUAL_DEBUGGER_DEFAULT_PORT);
 
   /// 
   /// \brief
@@ -86,19 +81,30 @@ public:
   /// 
   /// Deinitializes the visual debugger.
   ///
-  ~vHavokVisualDebugger();
-
+  virtual ~vHavokVisualDebugger();
 
   ///
   /// @}
   ///
 
+  ///
+  /// @name Settings
+  /// @{
+  ///
+
+  /// 
+  /// \brief
+  ///   Sets the listening port of the visual debugger and restarts the server.
+  VHAVOK_IMPEXP void SetPort(int iPort);
+
+  ///
+  /// @}
+  ///
 
   ///
   /// @name Access to Havok Internals
   /// @{
   ///
-
 
   /// 
   /// \brief
@@ -107,26 +113,27 @@ public:
   /// \returns
   ///   Pointer to the visual debugger (or NULL if visual debugger is not initialized).
   /// 
-  inline hkVisualDebugger* GetVisualDebugger() { return m_pVisualDebugger; }
-
+  inline hkVisualDebugger* GetVisualDebugger() 
+  { 
+    return m_pVisualDebugger; 
+  }
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Stepping
   /// @{
   ///
 
-
   /// 
   /// \brief
-  ///   Steps the visual debugger. Called once per frame.
+  ///   Steps the visual debugger. 
+  ///
+  /// Called once per frame.
   /// 
   VHAVOK_IMPEXP void Step();
-
 
   ///
   /// @}
@@ -137,16 +144,14 @@ public:
   VHAVOK_IMPEXP static VisCallback_cl OnAddingDefaultViewers;
 
 public:
-
-  hkpPhysicsContext* m_physicsContext;          ///< Physics Context that holds all physics viewer
+  hkpPhysicsContext* m_physicsContext;    ///< Physics Context that holds all physics viewer
   hkVisualDebugger* m_pVisualDebugger;    ///< Internal Havok Visual Debugger
-
 };
 
 #endif // VHAVOKVISUALDEBUGGER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

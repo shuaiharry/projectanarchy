@@ -20,7 +20,8 @@ public:
 		RESULT_HIT_END, ///< Hit the last edge of an incomplete path; FV is an estimate only
 		RESULT_POSITION_SECTION_UNLOADED, ///< The character's current section has been unloaded.
 		RESULT_EDGE_SECTION_UNLOADED, ///< The section containing the first upcoming edge has been unloaded.
-		RESULT_NO_EDGES ///< The edge path did not have any future edges to scan.
+		RESULT_NO_EDGES, ///< The edge path did not have any future edges to scan.
+		RESULT_OPPOSED_INTERSECTION, ///< Two opposed corners intersected.
 	};
 
 	/// Determine the direction a character should move in to maximize their progress along
@@ -71,6 +72,13 @@ public:
 		hkVector4 & nextCornerLocal,
 		hkVector4 & nextUserEdgePlane);
 
+	static CalcForwardVectorResult calcForwardVector_corner(
+		hkaiEdgePath const& edgePath, 
+		int edgeIndex,
+		bool edgeIsLeft,
+		int & nextEdgeIndex,
+		bool & nextIsLeft);
+
 	/// Calculate the matrix which will transform the points of the targetEdge
 	/// into the local space of the nav mesh instance at  positionSectionIndex,
 	/// or into global space if positionSectionIndex is 
@@ -90,6 +98,14 @@ public:
 		hkaiStreamingCollection const* streamingCollection,
 		int & followingEdge,
 		bool & followingIsLeft);
+
+	/// Resolve the edge's persistent edge key to a current packed key. This is
+	/// robust against re-cuts, and uses the edge vertices to validate the key.
+	static hkaiPackedKey HK_CALL resolveEdgeToKey(
+		hkaiEdgePath::Edge const& edge,
+		hkaiGeneralAccessor const& accessor,
+		hkaiNavMeshCutter const* cutter,
+		hkaiPackedKey & faceKeyOut);
 
 	/// Calculate two point-circle tangents.
 	/// 
@@ -166,7 +182,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

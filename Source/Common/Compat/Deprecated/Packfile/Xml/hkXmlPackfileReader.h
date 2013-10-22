@@ -10,6 +10,7 @@
 
 #include <Common/Compat/Deprecated/Packfile/hkPackfileReader.h>
 #include <Common/Base/Container/StringMap/hkStringMap.h>
+#include <Common/Serialize/Util/hkSerializeDeprecated.h>
 
 class hkRelocationInfo;
 class hkChainedClassNameRegistry;
@@ -26,6 +27,10 @@ class hkXmlPackfileReader : public hkPackfileReader
 
 			///
 		~hkXmlPackfileReader();
+
+
+			/// Reads an XML packfile header from buffer.
+		hkResult readHeader(hkStreamReader* stream, hkSerializeDeprecated::XmlPackfileHeader& out);
 
 			/// Load the entire file, fixes up all pointers.
 			/// If the root element packfile has a "classversion" attribute,
@@ -91,7 +96,7 @@ class hkXmlPackfileReader : public hkPackfileReader
 #endif // HK_XML_PACKFILE_READER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

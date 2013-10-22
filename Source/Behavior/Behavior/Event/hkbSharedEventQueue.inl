@@ -14,6 +14,7 @@ HK_FORCE_INLINE void hkbSharedEventQueue::enqueue( hkbEvent event, hkbCharacter*
 	QueueEntry entry;
 	entry.m_character = character;
 	entry.m_event = event;
+	entry.m_characterId = -1; // this gets filled out by sortDeterministically
 
 	// lock the queue and enqueue the event
 	m_criticalSection.enter();
@@ -27,7 +28,7 @@ HK_FORCE_INLINE int hkbSharedEventQueue::getSize() const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

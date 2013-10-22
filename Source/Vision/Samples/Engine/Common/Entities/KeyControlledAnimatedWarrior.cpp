@@ -183,6 +183,9 @@ void KeyControlledAnimatedWarrior_cl::InitFunction()
 
 void KeyControlledAnimatedWarrior_cl::ThinkFunction()
 {
+  if (!IsEnabled())
+    return;
+
   if (m_bKeyboardInputAllowed)
     ProcessKeyboardEvents();
   
@@ -261,7 +264,7 @@ START_VAR_TABLE(KeyControlledAnimatedWarrior_cl, AnimatedWarrior_cl, "An animate
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

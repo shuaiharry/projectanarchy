@@ -230,11 +230,12 @@ inline hkMemoryRouter* HK_CALL hkMemoryRouter::getInstancePtr()
 #	define HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR_BY_SIZE_UNCHECKED(MEMORY_CLASS, CLASS_TYPE, ALLOCATOR) \
 		HK_FORCE_INLINE void* HK_CALL operator new(hk_size_t nbytes) { \
 			HK_ASSERT2(0x6c787b7f, nbytes == sizeof(CLASS_TYPE), "Incorrect allocation size. Check that the most derived class has an allocator declaration" ); \
-			void* obj = hkMemoryRouter::getInstance().ALLOCATOR().blockAlloc(static_cast<int>(nbytes)); \
+			void* obj = hkMemoryRouter::getInstance().ALLOCATOR().blockAlloc(sizeof(CLASS_TYPE)); \
 			HK_MEMORY_TRACKER_ON_NEW_OBJECT(CLASS_TYPE, nbytes, obj); \
 			return obj; }	\
 		HK_FORCE_INLINE void  HK_CALL operator delete(void* p, hk_size_t nbytes) { \
 			if (p) { \
+				HK_ASSERT2(0x6c787b7f, nbytes == sizeof(CLASS_TYPE), "Incorrect deallocation size. Check that the most derived class has an allocator declaration" ); \
 				HK_MEMORY_TRACKER_ON_DELETE_OBJECT(p); \
 				hkMemoryRouter::getInstance().ALLOCATOR().blockFree(p, sizeof(CLASS_TYPE)); \
 			} }\
@@ -341,7 +342,7 @@ inline hkMemoryRouter* HK_CALL hkMemoryRouter::getInstancePtr()
 	}
 
 	template <typename TYPE>
-	HK_FORCE_INLINE hkBool32 HK_CALL hkShrinkAllocatedStack(TYPE* ptr, int n)
+	HK_FORCE_INLINE bool HK_CALL hkShrinkAllocatedStack(TYPE* ptr, int n)
 	{
 		hkMemoryRouter::getInstance().stack().shrinkAllocatedStack(ptr, HK_NEXT_MULTIPLE_OF(128, n * hkSizeOfTypeOrVoid<TYPE>::val));
 		return true;
@@ -372,7 +373,7 @@ inline hkMemoryRouter* HK_CALL hkMemoryRouter::getInstancePtr()
 	}
 
 	template <typename TYPE>
-	HK_FORCE_INLINE hkBool32 HK_CALL hkShrinkAllocatedStack(TYPE* ptr, int n)
+	HK_FORCE_INLINE bool HK_CALL hkShrinkAllocatedStack(TYPE* ptr, int n)
 	{
 		return false;
 	}
@@ -422,7 +423,7 @@ extern void HK_CALL HK_ASSERT_OBJECT_SIZE_OK_FUNC(hk_size_t nbytes);
 #endif // HKBASE_hkMemoryRouter_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

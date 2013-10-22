@@ -16,6 +16,7 @@
 
 #include <Behavior/Behavior/Character/hkbCharacter.h>
 #include <Behavior/Behavior/World/hkbWorld.h>
+#include <Behavior/Behavior/Event/hkbEvent.h>
 #include <Behavior/Behavior/Character/hkbCharacterData.h>
 #include <Behavior/Behavior/Event/hkbEventQueue.h>
 
@@ -53,6 +54,7 @@ vHavokBehaviorComponent::vHavokBehaviorComponent()
 	m_entityOwner = HK_NULL;
 	m_enableRagdoll = TRUE;
 	m_useBehaviorWorldFromModel = TRUE;
+	m_isListeningToEvents = false;
 }
 
 void vHavokBehaviorComponent::SetOwner(VisTypedEngineObject_cl *pOwner)
@@ -71,7 +73,7 @@ void vHavokBehaviorComponent::SetOwner(VisTypedEngineObject_cl *pOwner)
 		}
 		else
 		{
-			Deinit();
+			DeInit();
 		}
 	}
 }
@@ -213,7 +215,7 @@ void vHavokBehaviorComponent::OnVariableValueChanged(VisVariable_cl *pVar, const
 			else
 			{
 				// Cleanup
-				Deinit();
+				DeInit();
 
 				// Reinit
 				InitVisionCharacter( entityOwner );
@@ -282,11 +284,17 @@ void vHavokBehaviorComponent::MessageFunction(int id, INT_PTR paramA, INT_PTR pa
 	}
 }
 
-void vHavokBehaviorComponent::Deinit()
+void vHavokBehaviorComponent::DeInit()
 {
 	vHavokBehaviorModule* behaviorModule = vHavokBehaviorModule::GetInstance();
 	if( behaviorModule != HK_NULL )
 	{
+		if ( m_isListeningToEvents )
+		{
+			hkbWorld* world = behaviorModule->getBehaviorWorld();
+			world->removeListener( this );
+		}
+
 		behaviorModule->removeCharacter( this );
 		if( m_character != HK_NULL )
 		{
@@ -302,6 +310,7 @@ void vHavokBehaviorComponent::Deinit()
 void vHavokBehaviorComponent::InitVisionCharacter( VisBaseEntity_cl* entityOwner )
 {
 	m_entityOwner = entityOwner;
+	m_isListeningToEvents = false;
 
 	vHavokBehaviorModule* behaviorModule = vHavokBehaviorModule::GetInstance();
 	if( behaviorModule != HK_NULL )
@@ -333,8 +342,7 @@ void vHavokBehaviorComponent::UpdateAnimationAndBoneIndexList()
 		// create an anim config, if one is not present
 		if ( m_entityOwner->GetAnimConfig() == HK_NULL )
 		{
-			VisAnimFinalSkeletalResult_cl* finalSkeletalResult = HK_NULL;
-			VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateSkeletalConfig(mesh, &finalSkeletalResult);
+			VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateSkeletalConfig(mesh);
 			m_entityOwner->SetAnimConfig( pConfig );
 		}
 
@@ -413,6 +421,10 @@ void vHavokBehaviorComponent::UpdateCollisionFilters( hkbCharacter* character )
 	}
 }
 
+void vHavokBehaviorComponent::OnFrameStart()
+{
+	hkString::memSet( m_triggeredEvents.begin(), false, sizeof( bool ) * m_triggeredEvents.getSize() );
+}
 
 void vHavokBehaviorComponent::OnAfterHavokUpdate()
 {
@@ -641,7 +653,7 @@ void vHavokBehaviorComponent::GetDependencies(VResourceSnapshot &snapshot)
 }
 #endif
 
-void vHavokBehaviorComponent::GetProjectPath( hkStringBuf& projectPath )
+void vHavokBehaviorComponent::GetProjectPath(hkStringBuf& projectPath) const
 {
 	// Get full path
 	VString fullProjectPath = m_projectName;
@@ -708,22 +720,43 @@ void vHavokBehaviorComponent::SetFloatVar(const char* variableName, float value)
 		hkbBehaviorGraph* behavior = m_character->getBehavior();
 		int idx = world->getVariableId(variableName);
 
-		if (idx >= 0)
+		if ( idx >= 0 && behavior->hasVariable( idx )  )
 		{
 			behavior->setVariableValueWord( idx, value, true );
 		}
 	}
 }
 
+float vHavokBehaviorComponent::GetFloatVar(const char* variableName)
+{
+	if ( m_character != HK_NULL )
+	{
+		hkbWorld* world = m_character->getWorld();
+		hkbBehaviorGraph* behavior = m_character->getBehavior();
+		int idx = world->getVariableId(variableName);
+
+		if ( idx >= 0 && behavior->hasVariable( idx ) )
+		{
+			float value = behavior->getVariableValueWord<float>( idx );
+			return value;
+		}
+	}
+
+	return 0.0f;
+}
+
 void vHavokBehaviorComponent::SetWordVar(const char* variableName, int value)
 {
-	hkbWorld* world = m_character->getWorld();
-	hkbBehaviorGraph* behavior = m_character->getBehavior();
-	int idx = world->getVariableId(variableName);
-
-	if (idx >= 0)
+	if ( m_character != HK_NULL )
 	{
-		behavior->setVariableValueWord( idx, value, true );
+		hkbWorld* world = m_character->getWorld();
+		hkbBehaviorGraph* behavior = m_character->getBehavior();
+		int idx = world->getVariableId(variableName);
+
+		if ( idx >= 0 && behavior->hasVariable( idx )  )
+		{
+			behavior->setVariableValueWord( idx, value, true );
+		}
 	}
 }
 
@@ -737,23 +770,107 @@ void vHavokBehaviorComponent::SetBoolVar(const char* variableName, bool value)
 		hkbBehaviorGraph* behavior = m_character->getBehavior();
 		int idx = world->getVariableId(variableName);
 
-		if (idx >= 0)
+		if ( idx >= 0 && behavior->hasVariable( idx ) )
 		{
 			behavior->setVariableValueWord<hkUint8>( idx, value );
 		}
 	}
 }
 
-void vHavokBehaviorComponent::TriggerEvent(const char* eventName)
+bool vHavokBehaviorComponent::GetBoolVar(const char* variableName) const
 {
+	if ( m_character != HK_NULL )
+	{
+		hkbWorld* world = m_character->getWorld();
+		hkbBehaviorGraph* behavior = m_character->getBehavior();
+		int idx = world->getVariableId(variableName);
+
+		if ( idx >= 0 && behavior->hasVariable( idx ) )
+		{
+			hkUint8 value = behavior->getVariableValueWord<hkUint8>( idx );
+			return value == 1;
+		}
+	}
+
+	return false;
+}
+
+void vHavokBehaviorComponent::TriggerEvent(const char* eventName) const
+{
+	if ( m_character != HK_NULL )
+	{
+		hkbWorld* world = m_character->getWorld();
+		hkbBehaviorGraph* behavior = m_character->getBehavior();
+
+		int idx = world->getEventId(eventName);
+
+		if ( idx >=0 && behavior->getInternalEventId( idx ) >= 0 )
+		{
+			m_character->getEventQueue()->enqueueWithExternalId(idx);
+		}
+	}
+}
+
+void vHavokBehaviorComponent::RegisterEventHandler(const char* eventName)
+{
+	if ( m_character == HK_NULL )
+	{
+		return;
+	}
+
 	hkbWorld* world = m_character->getWorld();
 	hkbBehaviorGraph* behavior = m_character->getBehavior();
 
-	int idx = world->getEventId(eventName);
-
-	if ( idx >=0 )
+	int eventId = world->getEventId(eventName);
+	if ( eventId >=0 && behavior->getInternalEventId( eventId ) >= 0 )
 	{
-		m_character->getEventQueue()->enqueueWithExternalId(idx);
+		int prevSize = m_triggeredEvents.getSize();
+		int missingEventsCount = eventId - prevSize + 1;
+		if ( missingEventsCount > 0 )
+		{
+			m_triggeredEvents.expandBy( missingEventsCount );
+			hkString::memSet( m_triggeredEvents.begin() + prevSize, false, sizeof( bool ) * missingEventsCount );
+		}
+
+		if ( !m_isListeningToEvents )
+		{
+			world->addListener( this );
+			m_isListeningToEvents = true;
+		}
+	}
+}
+
+
+bool vHavokBehaviorComponent::WasEventTriggered(const char* eventName) const
+{
+	if ( m_character == HK_NULL )
+	{
+		return false;
+	}
+
+	hkbWorld* world = m_character->getWorld();
+	hkbBehaviorGraph* behavior = m_character->getBehavior();
+
+	int eventId = world->getEventId(eventName);
+	if ( eventId >=0 && behavior->getInternalEventId( eventId ) >= 0 )
+	{
+		return m_triggeredEvents[eventId];
+	}
+
+	return false;
+}
+
+void vHavokBehaviorComponent::eventRaisedCallback( hkbCharacter* character, const hkbEvent& event, bool raisedBySdk )
+{
+	if ( m_character == character )
+	{
+		hkbWorld* world = m_character->getWorld();
+
+		int eventId = event.getId();
+		if ( eventId < m_triggeredEvents.getSize() )
+		{
+			m_triggeredEvents[eventId] = true;
+		}
 	}
 }
 
@@ -805,7 +922,7 @@ START_VAR_TABLE(vHavokBehaviorComponent, IVObjectComponent, "Havok Behavior Char
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

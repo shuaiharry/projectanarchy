@@ -23,7 +23,7 @@ hkaAnimationSampleAndCombineJob::hkaAnimationSampleAndCombineJob()
 	m_animatedSkeletonOnCPU = HK_NULL;
 	m_animationControls = HK_NULL;
 	m_referencePose = HK_NULL;
-	m_referencePoseWeightThreshold = 0.0f;
+	m_referencePoseWeightThreshold = 0;
 	m_numSkeletonBones = 0;
 	m_parentIndices = HK_NULL;
 
@@ -59,8 +59,8 @@ hkaQuantizedSampleAndCombineJob::hkaQuantizedSampleAndCombineJob()
 	m_referenceBones = HK_NULL;
 	m_referenceFloats = HK_NULL;
 	m_parentIndices = HK_NULL;
-	m_minimumWeight = 0.0f;
-	m_frameSteppingTolerance = 0.0f;
+	m_minimumWeight = 0;
+	m_frameSteppingTolerance = 0;
 	m_bonesOut = HK_NULL;
 	m_floatsOut = HK_NULL;
 	m_boneWeightsOut = HK_NULL;
@@ -91,7 +91,7 @@ hkBool hkaAnimationSampleAndCombineJob::isValid() const
 	hkBool valid = true;
 
 	// DMA: SC0
-	if((m_referencePose) && (m_referencePoseWeightThreshold > 0.0f))
+	if((m_referencePose) && (m_referencePoseWeightThreshold > 0))
 	{
 		valid = valid & testValidForDMA("reference pose", m_referencePose,  sizeof(hkQsTransform) * m_maxBone);
 		if(!valid)	return false;
@@ -129,7 +129,7 @@ hkaAnimationSampleOnlyJob::AnimationData::AnimationData()
 void hkaAnimationSampleOnlyJob::AnimationData::init()
 {
 	m_frameIndex = 0;
-	m_frameDelta = 0.0f; 
+	m_frameDelta = 0; 
 	m_maxTransformTrack = 0;
 	m_maxFloatTrack = 0;
 	m_animationOnCPU = HK_NULL;
@@ -151,7 +151,7 @@ hkBool hkaAnimationSampleOnlyJob::AnimationData::isValid() const
 
 	// Test frame delta
 	{
-		valid = valid && ((m_frameDelta >= 0.0f) && (m_frameDelta <= 1.0f));
+		valid = valid && ((m_frameDelta >= 0) && (m_frameDelta <= 1));
 		HK_ASSERT2(0x73a3d963, valid, "m_frameDelta not in range [0.0f, 1.0f]");
 		if(!valid) return false;
 	}
@@ -209,8 +209,8 @@ hkaAnimationSampleAndCombineJob::ControlData::ControlData()
 void hkaAnimationSampleAndCombineJob::ControlData::init()
 {
 	m_frameIndex = 0;
-	m_frameDelta = 0.0f; 
-	m_weight = 0.0f;
+	m_frameDelta = 0; 
+	m_weight = 0;
 	m_animationType = hkaAnimation::HK_UNKNOWN_ANIMATION;
 	m_numValidChunks = 0;
 	m_transformTrackWeights = HK_NULL;
@@ -231,7 +231,7 @@ hkBool hkaAnimationSampleAndCombineJob::ControlData::isValid() const
 
 	// Test frame delta
 	{
-		valid = valid && ((m_frameDelta >= 0.0f) && (m_frameDelta <= 1.0f));
+		valid = valid && ((m_frameDelta >= 0) && (m_frameDelta <= 1));
 		HK_ASSERT2(0x652a900b, valid, "m_frameDelta not in range [0.0f, 1.0f]");
 		if(!valid) return false;
 	}
@@ -299,7 +299,7 @@ void hkaQuantizedSampleAndCombineJob::QuantizedAnimationEntry::setAnimData( cons
 #endif // !defined(HK_PLATFORM_SPU)
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

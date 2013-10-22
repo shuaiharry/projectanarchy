@@ -188,70 +188,219 @@ HK_FORCE_INLINE int hkIntVector::getComponent(int idx) const
 	}
 }
 
-template <>
-HK_FORCE_INLINE void hkIntVector::loadNotAligned<4>(const hkUint32* p)
+//
+// Load operations
+//
+
+namespace hkIntVector_AdvancedInterface
 {
-	m_quad = _mm_loadu_si128((const __m128i*) p);
+	template <int N, hkMathIoMode A>
+	struct unrollU32_load { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+		HK_INT_VECTOR_NOT_IMPLEMENTED;
+	} };
+
+	template <int N>
+	struct unrollU32_load<N, HK_IO_BYTE_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+		switch(N)
+		{
+		case 1:
+			self = _mm_castps_si128(_mm_load_ss((const float*)p));
+			break;
+		case 2:
+			self = _mm_loadl_epi64((const __m128i*)p);
+			break;
+		case 3:
+			self = _mm_set_epi32(0, p[2], p[1], p[0]);
+			break;
+		case 4: 
+		default:
+			self = _mm_loadu_si128((const __m128i*) p);
+			break;
+		}
+	} };
+
+	template <int N>
+	struct unrollU32_load<N, HK_IO_NATIVE_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x64211c2f, ( ((hkUlong)p) & (sizeof(hkUint32)-1) ) == 0, "pointer must be aligned to native size of hkUint32.");
+		unrollU32_load<N, HK_IO_BYTE_ALIGNED>::apply(self,p);
+	} };
+
+	template <int N>
+	struct unrollU32_load<N, HK_IO_SIMD_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
+		switch(N)
+		{
+		case 4:
+			self = _mm_load_si128((const __m128i*)p);
+			break;
+		default:
+			unrollU32_load<N, HK_IO_BYTE_ALIGNED>::apply(self,p);
+			break;
+		}
+
+	} };
+
+	template <int N>
+	struct unrollU32_load<N, HK_IO_NOT_CACHED> { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
+		unrollU32_load<N, HK_IO_SIMD_ALIGNED>::apply(self,p);
+	} };
+
 }
 
-template <>
-HK_FORCE_INLINE void hkIntVector::loadNotAligned<3>(const hkUint32* p)
+template <int N, hkMathIoMode IO>
+HK_FORCE_INLINE void hkIntVector::load(const hkUint32* p)
 {
-	m_quad = _mm_set_epi32(0, p[2], p[1], p[0]);
-	HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[3] = 0xffffffff;)
+	HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_load<N,IO>::apply(m_quad, p);
+#if defined(HK_DEBUG)
+	switch (N)
+	{
+	case 1:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[1] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	case 2:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[2] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	case 3:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[3] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	default: break;
+	}
+#endif
 }
 
-template <>
-HK_FORCE_INLINE void hkIntVector::loadNotAligned<2>(const hkUint32* p)
+template <int N>
+HK_FORCE_INLINE void hkIntVector::load(const hkUint32* p)
 {
-	m_quad = _mm_loadl_epi64((const __m128i*)p);
-	HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[2] = 0xffffffff; HK_M128(m_quad).m128i_u32[3] = 0xffffffff;)
-}
-
-template <>
-HK_FORCE_INLINE void hkIntVector::loadNotAligned<1>(const hkUint32* p)
-{
-	m_quad = _mm_castps_si128(_mm_load_ss((const float*)p));
-	HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[1] = 0xffffffff; HK_M128(m_quad).m128i_u32[2] = 0xffffffff; HK_M128(m_quad).m128i_u32[3] = 0xffffffff;)
+	HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_load<N,HK_IO_SIMD_ALIGNED>::apply(m_quad, p);
+#if defined(HK_DEBUG)
+	switch (N)
+	{
+	case 1:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[1] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	case 2:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[2] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	case 3:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[3] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	default: break;
+	}
+#endif
 }
 
 template <int N>
 HK_FORCE_INLINE void hkIntVector::loadNotAligned(const hkUint32* p)
 {
-	HK_INT_VECTOR_NOT_IMPLEMENTED;
+	HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_load<N,HK_IO_BYTE_ALIGNED>::apply(m_quad, p);
+#if defined(HK_DEBUG)
+	switch (N)
+	{
+	case 1:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[1] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	case 2:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[2] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	case 3:
+		HK_ON_DEBUG(HK_M128(m_quad).m128i_u32[3] = HK_INT_VECTOR_DEBUG_FILL_VALUE;)
+	default: break;
+	}
+#endif
 }
 
-template <>
-HK_FORCE_INLINE void hkIntVector::storeNotAligned<4>(hkUint32* p) const
+//
+// Store operations
+//
+
+namespace hkIntVector_AdvancedInterface
 {
-	_mm_storeu_si128((__m128i*) p, m_quad);
-}
+	template <int N, hkMathIoMode IoMode>
+	struct unrollU32_store { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		HK_INT_VECTOR_NOT_IMPLEMENTED;
+	} };
 
-template <>
-HK_FORCE_INLINE void hkIntVector::storeNotAligned<3>(hkUint32* p) const
+	template <int N>
+	struct unrollU32_store<N, HK_IO_BYTE_ALIGNED> { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		switch(N)
+		{
+		case 1:
+			_mm_store_ss((float*)p, _mm_castsi128_ps(self));
+			break;
+		case 2:
+			_mm_storel_epi64((__m128i*) p, self);
+			break;
+		case 3:
+			{
+				_mm_storel_epi64((__m128i*) p, self);
+				const hkQuadUint p2 = _mm_shuffle_epi32(self,_MM_SHUFFLE(2,2,2,2));
+				_mm_store_ss((float*)(p+2), _mm_castsi128_ps(p2));
+			}
+			break;
+		default:
+			_mm_storeu_si128((__m128i*) p, self);
+			break;
+		}
+	} };
+
+	template <int N>
+	struct unrollU32_store<N, HK_IO_NATIVE_ALIGNED> { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x64211c2f, ( ((hkUlong)p) & (sizeof(hkUint32)-1) ) == 0, "pointer must be aligned to native size of hkUint32.");
+		unrollU32_store<N, HK_IO_BYTE_ALIGNED>::apply(self,p);
+	} };
+
+	template <int N>
+	struct unrollU32_store<N, HK_IO_SIMD_ALIGNED> { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
+		switch(N)
+		{
+		case 4:
+			_mm_store_si128((__m128i*)p, self);
+			break;
+		default:
+			unrollU32_store<N, HK_IO_BYTE_ALIGNED>::apply(self,p);
+			break;
+		}
+	} };
+
+	template <int N>
+	struct unrollU32_store<N, HK_IO_NOT_CACHED> { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x64211c2f, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
+		unrollU32_store<N, HK_IO_SIMD_ALIGNED>::apply(self,p);
+	} };
+
+} // namespace 
+
+
+template <int N, hkMathIoMode IO> 
+HK_FORCE_INLINE void hkIntVector::store(hkUint32* p) const
 {
-	_mm_storel_epi64((__m128i*) p, m_quad);
-	const hkQuadUint p2 = _mm_shuffle_epi32(m_quad,_MM_SHUFFLE(2,2,2,2));
-	_mm_store_ss((float*)(p+2), _mm_castsi128_ps(p2));
+	HK_VECTOR4f_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_store<N,IO>::apply(m_quad, p);
 }
 
-template <>
-HK_FORCE_INLINE void hkIntVector::storeNotAligned<2>(hkUint32* p) const
+template <int N> 
+HK_FORCE_INLINE void hkIntVector::store(hkUint32* p) const
 {
-	_mm_storel_epi64((__m128i*) p, m_quad);
+	HK_VECTOR4f_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_store<N,HK_IO_SIMD_ALIGNED>::apply(m_quad, p);
 }
 
-template <>
-HK_FORCE_INLINE void hkIntVector::storeNotAligned<1>(hkUint32* p) const
-{
-	_mm_store_ss((float*)p, _mm_castsi128_ps(m_quad));
-}
-
-template <int N>
+template <int N> 
 HK_FORCE_INLINE void hkIntVector::storeNotAligned(hkUint32* p) const
 {
-	HK_INT_VECTOR_NOT_IMPLEMENTED;
+	HK_VECTOR4f_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_store<N,HK_IO_BYTE_ALIGNED>::apply(m_quad, p);
 }
+
+
+
 
 //
 // Logical operations
@@ -388,6 +537,12 @@ HK_FORCE_INLINE const hkVector4Comparison hkIntVector::compareEqualS32( hkIntVec
 	__m128i m = _mm_cmpeq_epi32(m_quad, b.m_quad);
 	return hkVector4fComparison::convert(_mm_castsi128_ps(m));
 #endif
+}
+
+HK_FORCE_INLINE const hkVector4fComparison hkIntVector::equalS32(hkIntVectorParameter b) const
+{
+	__m128i m = _mm_cmpeq_epi32(m_quad, b.m_quad);
+	return hkVector4fComparison::convert(_mm_castsi128_ps(m));
 }
 
 HK_FORCE_INLINE void hkIntVector::setOr(hkIntVectorParameter a, hkIntVectorParameter b)
@@ -1025,37 +1180,6 @@ HK_FORCE_INLINE void hkIntVector::setConvertF32toS32(hkVector4dParameter vIn)
 #endif
 }
 
-template <>
-HK_FORCE_INLINE void hkIntVector::load<4>(const hkUint32* p)
-{
-	HK_MATH_ASSERT(0x70aae483, ((hkUlong)p & 0xf) == 0, "pointer for hkIntVector::load<4> must be 16-byte aligned");
-	m_quad = _mm_load_si128((const __m128i*)p);
-}
-
-template <int N>
-HK_FORCE_INLINE void hkIntVector::load(const hkUint32* p)
-{
-	HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "p must be aligned.");
-	loadNotAligned<N>(p);
-}
-
-//
-//	Store to an aligned address
-
-template <>
-HK_FORCE_INLINE void hkIntVector::store<4>(hkUint32* p) const
-{
-	HK_MATH_ASSERT(0x70aae483, ((hkUlong)p & 0xf) == 0, "pointer for hkIntVector::store<4> must be 16-byte aligned");
-	_mm_store_si128((__m128i*)p, m_quad);
-}
-
-template <int N>
-HK_FORCE_INLINE void hkIntVector::store(hkUint32* p) const
-{
-	HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "p must be aligned.");
-	storeNotAligned<N>(p);
-}
-
 //
 //	Assuming that this = (i0, i1, i2, i3) and v = (v0, v1, v2, v3), the function will set this = (ik, ik, ik, ik)
 //	 where k ={0,..., 3} such that vk = max{v0, v1, v2, v3}.
@@ -1213,6 +1337,82 @@ HK_FORCE_INLINE int hkIntVector::getComponentAtVectorMax(hkVector4dParameter vIn
 	return _mm_cvtsi128_si32(tmpI0);
 }
 
+
+HK_FORCE_INLINE int hkIntVector::getFirstComponentAtVectorMax(hkVector4fParameter vIn) const
+{
+	const __m128 v = vIn.m_quad;
+
+	__m128 tmpV0 = _mm_shuffle_ps(v, v, _MM_SHUFFLE(0, 3, 2, 1));	// tmpV0 = (vy, vz, vw, vx)
+	hkQuadUint tmpI0 = _mm_shuffle_epi32(m_quad, _MM_SHUFFLE(0, 3, 2, 1));			// tmpI0 = (iy, iz, iw, ix)
+
+	// tmpI1	= [ (vx > vy) ? ix : iy, *, (vz > vw) ? iz : iw, * ]
+	//			= [ idx(vx, vy), *, idx(vz, vw), * ]
+	hkQuadUint cmp		= _mm_castps_si128(_mm_cmpgt_ps(tmpV0, v));
+#if HK_SSE_VERSION >= 0x41
+	hkQuadUint tmpI1	= _mm_blendv_epi8(m_quad, tmpI0, cmp);
+#else
+	hkQuadUint tmpI1	= _mm_or_si128( _mm_and_si128(cmp, tmpI0), _mm_andnot_si128(cmp, m_quad) );
+#endif
+
+	// tmpV1 = [max(vx, vy), *, max(vz, vw), *]
+	__m128 tmpV1 = _mm_max_ps(tmpV0, v);
+
+	// tmpV0 = [max(vz, vw), *]
+	// tmpI0 = [idx(vz, vw), *]
+	tmpV0 = _mm_shuffle_ps(tmpV1, tmpV1, _MM_SHUFFLE(2, 2, 2, 2));
+	tmpI0 = _mm_shuffle_epi32(tmpI1, _MM_SHUFFLE(2, 2, 2, 2));
+
+	cmp		= _mm_castps_si128(_mm_cmpgt_ps(tmpV0, tmpV1));
+#if HK_SSE_VERSION >= 0x41
+	tmpI0	= _mm_blendv_epi8(tmpI1, tmpI0, cmp);
+#else
+	tmpI0	= _mm_or_si128( _mm_and_si128(cmp, tmpI0), _mm_andnot_si128(cmp, tmpI1));
+#endif
+
+	// The value we're interested in is at component 0
+	return _mm_cvtsi128_si32(tmpI0);
+}
+
+HK_FORCE_INLINE int hkIntVector::getFirstComponentAtVectorMax(hkVector4dParameter vIn) const
+{
+#if HK_SSE_VERSION >= 0x50
+	const __m128 v = _mm256_cvtpd_ps(vIn.m_quad);
+#else
+	const __m128 xy = _mm_cvtpd_ps(vIn.m_quad.xy);
+	const __m128 zw = _mm_cvtpd_ps(vIn.m_quad.zw);
+	const __m128 v = _mm_shuffle_ps(xy,zw,_MM_SHUFFLE(1,0,1,0));
+#endif
+
+	__m128 tmpV0 = _mm_shuffle_ps(v, v, _MM_SHUFFLE(0, 3, 2, 1));	// tmpV0 = (vy, vz, vw, vx)
+	hkQuadUint tmpI0 = _mm_shuffle_epi32(m_quad, _MM_SHUFFLE(0, 3, 2, 1));			// tmpI0 = (iy, iz, iw, ix)
+
+	// tmpI1	= [ (vx > vy) ? ix : iy, *, (vz > vw) ? iz : iw, * ]
+	//			= [ idx(vx, vy), *, idx(vz, vw), * ]
+	hkQuadUint cmp		= _mm_castps_si128(_mm_cmpgt_ps(tmpV0, v));
+#if HK_SSE_VERSION >= 0x41
+	hkQuadUint tmpI1	= _mm_blendv_epi8(m_quad, tmpI0, cmp);
+#else
+	hkQuadUint tmpI1	= _mm_or_si128( _mm_and_si128(cmp, tmpI0), _mm_andnot_si128(cmp, m_quad) );
+#endif
+
+	// tmpV1 = [max(vx, vy), *, max(vz, vw), *]
+	__m128 tmpV1 = _mm_max_ps(tmpV0, v);
+
+	// tmpV0 = [max(vz, vw), *]
+	// tmpI0 = [idx(vz, vw), *]
+	tmpV0 = _mm_shuffle_ps(tmpV1, tmpV1, _MM_SHUFFLE(2, 2, 2, 2));
+	tmpI0 = _mm_shuffle_epi32(tmpI1, _MM_SHUFFLE(2, 2, 2, 2));
+
+	cmp		= _mm_castps_si128(_mm_cmpgt_ps(tmpV0, tmpV1));
+#if HK_SSE_VERSION >= 0x41
+	tmpI0	= _mm_blendv_epi8(tmpI1, tmpI0, cmp);
+#else
+	tmpI0	= _mm_or_si128( _mm_and_si128(cmp, tmpI0), _mm_andnot_si128(cmp, tmpI1));
+#endif
+
+	// The value we're interested in is at component 0
+	return _mm_cvtsi128_si32(tmpI0);
+}
 
 HK_FORCE_INLINE void hkIntVector::setSelect(hkVector4fComparisonParameter selectMask, hkIntVectorParameter trueValue, hkIntVectorParameter falseValue)
 {
@@ -1511,7 +1711,7 @@ HK_FORCE_INLINE int hkIntVector::horizontalMaxS32() const
 template <>
 HK_FORCE_INLINE hkInt64 hkIntVector::dot<1>(hkIntVectorParameter v) const
 {
-#if ( HK_SSE_VERSION >= 0x41 )
+#if ( HK_SSE_VERSION >= 0x41 ) && defined(HK_PLATFORM_X64)
 	return _mm_extract_epi64(_mm_mul_epi32(m_quad, v.m_quad), 0);
 #else
 	return	(hkInt64)v.getComponent<0>() * (hkInt64)getComponent<0>();
@@ -1521,7 +1721,7 @@ HK_FORCE_INLINE hkInt64 hkIntVector::dot<1>(hkIntVectorParameter v) const
 template <>
 HK_FORCE_INLINE hkInt64 hkIntVector::dot<2>(hkIntVectorParameter v) const
 {
-#if ( HK_SSE_VERSION >= 0x41 )
+#if ( HK_SSE_VERSION >= 0x41 ) && defined(HK_PLATFORM_X64)
 	const __m128i d_2_0		= _mm_mul_epi32(m_quad, v.m_quad);											// [a2b2, a0b0]
 	const __m128i d_3_1		= _mm_mul_epi32(_mm_srli_si128(m_quad, 4), _mm_srli_si128(v.m_quad, 4));	// [a3b3, a1b1]
 	return _mm_extract_epi64(_mm_add_epi64(d_2_0, d_3_1), 0);
@@ -1534,7 +1734,7 @@ HK_FORCE_INLINE hkInt64 hkIntVector::dot<2>(hkIntVectorParameter v) const
 template <>
 HK_FORCE_INLINE hkInt64 hkIntVector::dot<3>(hkIntVectorParameter v) const
 {
-#if ( HK_SSE_VERSION >= 0x41 )
+#if ( HK_SSE_VERSION >= 0x41 ) && defined(HK_PLATFORM_X64)
 	const __m128i d_2_0		= _mm_mul_epi32(m_quad, v.m_quad);											// [a2b2, a0b0]
 	const __m128i d_3_1		= _mm_mul_epi32(_mm_srli_si128(m_quad, 4), _mm_srli_si128(v.m_quad, 4));	// [a3b3, a1b1]
 	const __m128i d_23_01	= _mm_add_epi64(d_2_0, d_3_1);												// [a2b2 + a3b3, a0b0 + a1b1]
@@ -1550,7 +1750,7 @@ HK_FORCE_INLINE hkInt64 hkIntVector::dot<3>(hkIntVectorParameter v) const
 template <>
 HK_FORCE_INLINE hkInt64 hkIntVector::dot<4>(hkIntVectorParameter v) const
 {
-#if ( HK_SSE_VERSION >= 0x41 )
+#if ( HK_SSE_VERSION >= 0x41 ) && defined(HK_PLATFORM_X64)
 	const __m128i d_2_0		= _mm_mul_epi32(m_quad, v.m_quad);											// [a2b2, a0b0]
 	const __m128i d_3_1		= _mm_mul_epi32(_mm_srli_si128(m_quad, 4), _mm_srli_si128(v.m_quad, 4));	// [a3b3, a1b1]
 	const __m128i d_23_01	= _mm_add_epi64(d_2_0, d_3_1);												// [a2b2 + a3b3, a0b0 + a1b1]
@@ -1592,7 +1792,7 @@ HK_FORCE_INLINE void hkIntVector::setAbsS32(hkIntVectorParameter v)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -74,11 +74,31 @@ HK_FORCE_INLINE hkSimdFloat32 hkSweptTransformf::getInterpolationValueHiAccuracy
 
 HK_FORCE_INLINE void hkSweptTransformf::_approxTransformAt( hkTime t, hkTransformf& transformOut ) const 
 {
-	_approxTransformAt(hkSimdFloat32::fromFloat(hkFloat32(t)),transformOut);
+#if defined(HK_PLATFORM_PS3_SPU)
+	// on SPU force outline
+	approxTransformAt(t,transformOut);
+#else
+	const hkSimdFloat32 dt = getInterpolationValue(hkSimdFloat32::fromFloat(hkFloat32(t))); // early transition
+
+	hkQuaternionf q;
+	q.m_vec.setInterpolate( m_rotation0.m_vec, m_rotation1.m_vec, dt );
+	q.normalize();
+
+	transformOut.setRotation( q );
+	transformOut.getTranslation().setInterpolate( m_centerOfMass0, m_centerOfMass1, dt);
+
+	hkVector4f centerShift;
+	centerShift._setRotatedDir( transformOut.getRotation(), m_centerOfMassLocal); // inline
+	transformOut.getTranslation().sub( centerShift );
+#endif
 }
 
 HK_FORCE_INLINE void hkSweptTransformf::_approxTransformAt( hkSimdFloat32Parameter t, hkTransformf& transformOut ) const 
 {
+#if defined(HK_PLATFORM_PS3_SPU)
+	// on SPU force outline
+	approxTransformAt(t, transformOut);
+#else
 	const hkSimdFloat32 dt = getInterpolationValue(t);
 
 	hkQuaternionf q;
@@ -89,14 +109,15 @@ HK_FORCE_INLINE void hkSweptTransformf::_approxTransformAt( hkSimdFloat32Paramet
 	transformOut.getTranslation().setInterpolate( m_centerOfMass0, m_centerOfMass1, dt);
 
 	hkVector4f centerShift;
-	centerShift._setRotatedDir( transformOut.getRotation(), m_centerOfMassLocal);
+	centerShift._setRotatedDir( transformOut.getRotation(), m_centerOfMassLocal); // inline
 	transformOut.getTranslation().sub( centerShift );
+#endif
 }
 
 #undef HK_SWEPT_TRANSFORMf_ASSERT_STRING
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

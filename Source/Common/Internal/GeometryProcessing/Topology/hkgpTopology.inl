@@ -99,26 +99,27 @@ HKGP_FORCE_INLINE EDGE		TOPOLOGY_TYP::flip() const
 //
 TOPOLOGY_HDR
 template <typename FNC>
-HKGP_FORCE_INLINE void		TOPOLOGY_TYP::applyFan(FNC& fnc) const
+HKGP_FORCE_INLINE bool		TOPOLOGY_TYP::applyFan(FNC& fnc) const
 {
 	EDGE	base(self());
 	EDGE	curr(base);
 	do
 	{
-		if(fnc(curr)) curr=curr.turnCw(); else return;
+		if(fnc(curr)) curr=curr.turnCw(); else return false;
 	} while(curr.isValid() && (curr!=base));
 	if(!curr.isValid())
 	{
 		curr=base.turnCcw();
 		while(curr.isValid())
 		{
-			if(fnc(curr)) curr=curr.turnCcw(); else return;
+			if(fnc(curr)) curr=curr.turnCcw(); else return false;
 		}
 	}
+	return true;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

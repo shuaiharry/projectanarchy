@@ -17,9 +17,9 @@ class hkpPulleyConstraintData : public hkpConstraintData
 {
 	public:
 
-		enum 
+		enum
 		{
-			SOLVER_RESULT_LIN_0	= 0,	// linear constraint 
+			SOLVER_RESULT_LIN_0	= 0,	// linear constraint
 			SOLVER_RESULT_MAX	= 1
 		};
 
@@ -50,19 +50,23 @@ class hkpPulleyConstraintData : public hkpConstraintData
 		};
 
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
-		
+
 		/// Constructor.
 		hkpPulleyConstraintData();
+
+#ifndef HK_PLATFORM_SPU
 
 		/// Serialization constructor.
 		hkpPulleyConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
 
+#endif
+
 		/// Sets the pulley up with world space information.
 		/// Will compute a rest length too (so call setlength after this if needed)
-		inline void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, 
+		inline void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
 								const hkVector4& pivotAW, const hkVector4& pivotBW,
 								const hkVector4& pulleyPivotAW, const hkVector4& pulleyPivotBW, hkReal leverageOnBodyB );
 
@@ -74,8 +78,8 @@ class hkpPulleyConstraintData : public hkpConstraintData
 								const hkVector4& pulleyPivotAW, const hkVector4& pulleyPivotBW, hkReal leverageOnBodyB );
 
 		/// Gets the length of the rope. Full length == length of rope from bodyA to pulleyPivotA + leverageRation * (length of rope from body B to pulleyPivotB)
-		inline hkReal getRopeLength(hkReal length); 
-		
+		inline hkReal getRopeLength(hkReal length);
+
 		/// Gets the leverage ratio of the pulley. Pulley exerts 'leverageRatio' times greater forces on bodyB.
 		inline hkReal getLeverageOnBodyB();
 
@@ -98,9 +102,9 @@ class hkpPulleyConstraintData : public hkpConstraintData
 		virtual void getConstraintInfo( hkpConstraintData::ConstraintInfo& infoOut ) const;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
+
 	public:
-		
+
 		HK_ALIGN_REAL( Atoms m_atoms );
 };
 
@@ -110,7 +114,7 @@ class hkpPulleyConstraintData : public hkpConstraintData
 #endif // HKP_PULLEY_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

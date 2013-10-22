@@ -22,13 +22,13 @@ class hkpPointToPathDrawer : public hkpConstraintDrawer
 
 		void drawConstraint(const hkpPointToPathConstraintData* constraintData,
 			const hkTransform& localToWorldA, const hkTransform& localToWorldB,
-			hkDebugDisplayHandler* displayHandler, int id, int tag);	
+			hkDebugDisplayHandler* displayHandler, int id, int tag);
 };
 
 #endif	// HKP_POINTTOPATHDRAWER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

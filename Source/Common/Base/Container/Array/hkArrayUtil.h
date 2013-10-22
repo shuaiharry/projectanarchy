@@ -14,17 +14,17 @@ class hkArrayUtil
 {
 public:
 
-	template<typename T> static HK_FORCE_INLINE void construct(T* t, int n, hkTypeIsPod);
-	template<typename T> static HK_FORCE_INLINE void construct(T* t, int n, hkTypeIsClass);
+	template<typename T> static HK_FORCE_INLINE void construct(T* t, int n, hkTrait::TypeIsPod);
+	template<typename T> static HK_FORCE_INLINE void construct(T* t, int n, hkTrait::TypeIsClass);
 
-	template<typename T> static HK_FORCE_INLINE void constructWithCopy(T* t, int n, const T& tcopy, hkTypeIsPod);
-	template<typename T> static HK_FORCE_INLINE void constructWithCopy(T* t, int n, const T& tcopy, hkTypeIsClass);
+	template<typename T> static HK_FORCE_INLINE void constructWithCopy(T* t, int n, const T& tcopy, hkTrait::TypeIsPod);
+	template<typename T> static HK_FORCE_INLINE void constructWithCopy(T* t, int n, const T& tcopy, hkTrait::TypeIsClass);
 
-	template<typename T> static HK_FORCE_INLINE void destruct(T* t, int n, hkTypeIsPod);
-	template<typename T> static HK_FORCE_INLINE void destruct(T* t, int n, hkTypeIsClass);
+	template<typename T> static HK_FORCE_INLINE void destruct(T* t, int n, hkTrait::TypeIsPod);
+	template<typename T> static HK_FORCE_INLINE void destruct(T* t, int n, hkTrait::TypeIsClass);
 
-	template<typename T> static HK_FORCE_INLINE void constructWithArray(T* t, int n, const T* tcopy, hkTypeIsPod);
-	template<typename T> static HK_FORCE_INLINE void constructWithArray(T* t, int n, const T* tcopy, hkTypeIsClass);
+	template<typename T> static HK_FORCE_INLINE void constructWithArray(T* t, int n, const T* tcopy, hkTrait::TypeIsPod);
+	template<typename T> static HK_FORCE_INLINE void constructWithArray(T* t, int n, const T* tcopy, hkTrait::TypeIsClass);
 
 	static hkResult HK_CALL _reserve( hkMemoryAllocator& a, void*, int reqElem, int sizeElem);
 	static void HK_CALL _reserveMore( hkMemoryAllocator& a, void* array, int sizeElem);
@@ -37,7 +37,7 @@ public:
 #endif // HKBASE_HKARRAY_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

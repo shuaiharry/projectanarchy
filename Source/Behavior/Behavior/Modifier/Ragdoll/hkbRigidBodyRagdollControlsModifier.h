@@ -66,7 +66,7 @@ class hkbRigidBodyRagdollControlsModifier : public hkbModifier
 		struct hkbRigidBodyRagdollControlData m_controlData;
 
 			/// The bones to be driven by the rigid body ragdoll controller.  If this is empty, all bones will be driven.
-		hkRefPtr<hkbBoneIndexArray> m_bones;	//+hkb.RoleAttribute("ROLE_DEFAULT","FLAG_RAGDOLL")
+		hkRefPtr<hkbBoneIndexArray> m_bones;	//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL|FLAG_NOT_VARIABLE")
 												//+hk.Description("The bones to be driven by the rigid body ragdoll controller.  If this is empty, all bones will be driven.")	
 
 			/// How much to blend in the animation pose with the ragdoll pose. Set to 0 for only ragdoll and 1 for only animation.
@@ -82,7 +82,7 @@ class hkbRigidBodyRagdollControlsModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

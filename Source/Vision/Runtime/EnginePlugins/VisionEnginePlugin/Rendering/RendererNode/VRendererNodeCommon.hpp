@@ -17,6 +17,7 @@
 #endif
 
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Postprocessing/SimpleCopyPostprocess.hpp>
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Sky/Sky.hpp>
 
 class VBufferResolver;
 
@@ -128,6 +129,8 @@ public:
   ///  Overridden method. Propagates the change to all attached post processors.
   EFFECTS_IMPEXP virtual void OnViewPropertiesChanged() HKV_OVERRIDE;
 
+  EFFECTS_IMPEXP virtual void DeInitializeRenderer() HKV_OVERRIDE;
+
   /// @}
 
   /// @name Post processor and component handling
@@ -169,6 +172,18 @@ public:
   /// \brief
   ///   Return true if this renderer node has any render context that outputs directly into the backbuffer
   EFFECTS_IMPEXP bool RendersIntoBackBuffer();
+
+  /// \brief
+  ///   Called when the renderer node is activated.
+  EFFECTS_IMPEXP virtual void OnActivate() HKV_OVERRIDE;
+
+  /// \brief
+  ///   Called when the renderer node is deactivated.
+  EFFECTS_IMPEXP virtual void OnDeactivate()  HKV_OVERRIDE;
+
+  /// \brief
+  ///   Returns whether the renderer node is currently active.
+  EFFECTS_IMPEXP virtual bool IsActive() const;
 
   /// @}
 
@@ -330,8 +345,65 @@ public:
   ///  internal method
   EFFECTS_IMPEXP void SetResolveColorBufferRenderHook(unsigned int uiRenderHook);
 
+  ///
   /// @}
+  ///
 
+  ///
+  /// @name Sky
+  /// @{
+  ///
+
+  /// \brief
+  ///   Creates the sky for the deferred rendering system.
+  ///
+  /// Creates the sky for the Deferred Rendering System. In the integrated Time of Day system, the Deferred
+  /// Rendering System blends between three different cube map skies depending on the daytime. 
+  /// 
+  /// \param szPrefixNoon
+  ///   Filename prefix for the set of sky textures at noon. The suffixes "_right", "_left", "_top", "_bottom",
+  ///   "_front", and "_back" will be added to the prefix to construct the final file names.
+  /// 
+  /// \param szPrefixDawn
+  ///   Filename prefix for the set of sky textures at dawn. The suffixes "_right", "_left", "_top", "_bottom",
+  ///   "_front", and "_back" will be added to the prefix to construct the final file names.
+  /// 
+  /// \param szPrefixDusk
+  ///   Filename prefix for the set of sky textures at dusk. The suffixes "_right", "_left", "_top", "_bottom",
+  ///   "_front", and "_back" will be added to the prefix to construct the final file names.
+  /// 
+  /// \param szPrefixNight
+  ///   Filename prefix for the set of sky textures at night. The suffixes "_right", "_left", "_top", "_bottom",
+  ///   "_front", and "_back" will be added to the prefix to construct the final file names.
+  /// 
+  /// \param szExtension
+  ///   Extension of the sky texture filenames (e.g. "dds" or "bmp").
+  /// 
+  /// \param bUseBottom
+  ///   true if the bottom part of the sky texture should be loaded, otherwise false.
+  EFFECTS_IMPEXP void CreateSky(const char *szPrefixNoon, const char *szPrefixDawn, const char *szPrefixDusk, const char *szPrefixNight, const char *szExtension, bool bUseBottom = true);
+
+  /// \brief
+  ///   Destroys the sky along with all associated texture resources.
+  EFFECTS_IMPEXP void DestroySky();
+
+  /// \brief
+  ///   Accessor for the sky instance that is used. The return value can be NULL.
+  inline VSky *GetSky() const 
+  {
+    return m_spSky;
+  }
+
+  ///
+  /// @}
+  ///
+
+  /// \brief
+  ///   Updates the sky and time of day.
+  ///
+  /// This method should be called periodically (i.e. once per frame) if the sun or time of day settings are
+  /// changed. If time of day is disabled the default global ambient color is set.
+  EFFECTS_IMPEXP void UpdateTimeOfDay();
 
 protected:
   /// \brief
@@ -398,11 +470,10 @@ protected:
 protected:
   bool m_bUsesDirectRenderToFinalTargetContext;              ///< Renderer node implementations can choose to set this to true if they don't have any PP effects which require an offscreen RT. The VRendererNodeCommon will then refrain from creating a simply copy postprocessor for the final copy operation and assume that the renderer node outputs directly to the backbuffer.
 
-
-
 private:
 
   bool m_bSavedGlobalWireframeState;
+  bool m_bIsRendererNodeActive;
 
   VBufferResolver* m_pColorBufferResolver;
   unsigned int m_uiResolveColorBufferRenderHook;
@@ -415,7 +486,7 @@ private:
   VCompiledTechniquePtr m_spSceneDepthTechnique;
   VCompiledTechniquePtr m_spDepthOnlyTechnique;
 
-  VGammaCorrection_e m_gammaCorrection;
+  VSkyPtr m_spSky;
 
   V_DECLARE_SERIAL_DLLEXP(VRendererNodeCommon, EFFECTS_IMPEXP);
   V_DECLARE_VARTABLE(VRendererNodeCommon, EFFECTS_IMPEXP);
@@ -441,7 +512,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

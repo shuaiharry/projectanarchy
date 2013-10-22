@@ -64,27 +64,27 @@ class hkFreeListMemorySystem : public hkMemorySystem
 			/// Dtor
 		~hkFreeListMemorySystem();
 
-		virtual hkMemoryRouter* mainInit(const FrameInfo& info, Flags f=FLAG_ALL);
-		virtual hkResult mainQuit(Flags f=FLAG_ALL);
-		virtual void threadInit(hkMemoryRouter& r, const char* name, Flags f=FLAG_ALL);
-		virtual void threadQuit(hkMemoryRouter& r, Flags f=FLAG_ALL);
+		virtual hkMemoryRouter* mainInit(const FrameInfo& info, Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual hkResult mainQuit(Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual void threadInit(hkMemoryRouter& r, const char* name, Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual void threadQuit(hkMemoryRouter& r, Flags f=FLAG_ALL) HK_OVERRIDE;
 
-		virtual void garbageCollectThread(hkMemoryRouter&);
-		virtual void garbageCollectShared();
+		virtual void garbageCollectThread(hkMemoryRouter&) HK_OVERRIDE;
+		virtual void garbageCollectShared() HK_OVERRIDE;
 
 		hkMemoryAllocator* getAllocator() { return m_systemAllocator; }
 
-		virtual void printStatistics(hkOstream& ostr);
+		virtual void printStatistics(hkOstream& ostr) const HK_OVERRIDE;
 		void getMemoryStatistics(MemoryStatistics& stats);
-		virtual hkResult getMemorySnapshot(hkMemorySnapshot& snapshot);
+		virtual hkResult getMemorySnapshot(hkMemorySnapshot& snapshot) const HK_OVERRIDE;
 
-		virtual hkResult setHeapSoftLimit(int nbytes);
-		virtual int getHeapSoftLimit() const;
-		virtual bool solverCanAllocSingleBlock( int numBytes );
-		virtual bool heapCanAllocTotal( int numBytes );
-		virtual hkMemoryAllocator* getUncachedLockedHeapAllocator();
+		virtual hkResult setHeapSoftLimit(int nbytes) HK_OVERRIDE;
+		virtual int getHeapSoftLimit() const HK_OVERRIDE;
+		virtual bool solverCanAllocSingleBlock( int numBytes ) HK_OVERRIDE;
+		virtual bool heapCanAllocTotal( int numBytes ) HK_OVERRIDE;
+		virtual hkMemoryAllocator* getUncachedLockedHeapAllocator() HK_OVERRIDE;
 
-		virtual void setHeapScrubValues(hkUint32 allocValue, hkUint32 freeValue);
+		virtual void setHeapScrubValues(hkUint32 allocValue, hkUint32 freeValue) HK_OVERRIDE;
 	protected:
 
 			//
@@ -119,7 +119,7 @@ class hkFreeListMemorySystem : public hkMemorySystem
 		ThreadData m_threadData[THREAD_MAX];
 
 			/// Lock for thread local data
-		hkCriticalSection m_threadDataLock;
+		mutable hkCriticalSection m_threadDataLock;
 
 		int m_flags;
 };
@@ -127,7 +127,7 @@ class hkFreeListMemorySystem : public hkMemorySystem
 #endif // HKBASE_hkFreeListSystem_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

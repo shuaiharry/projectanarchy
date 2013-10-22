@@ -19,6 +19,15 @@ inline hkaiDirectedGraphVisitor::hkaiDirectedGraphVisitor()
 	m_cachedIncomingSectionId = -1;
 	m_cachedOutgoingSectionId = -1;
 	m_cachedGeneralSectionId = -1;
+
+#ifndef HK_PLATFORM_SPU
+	m_edgeFilter = HK_NULL;
+	m_costModifier = HK_NULL;
+#endif
+
+	m_numGoals = 0;
+	m_goalNodes = HK_NULL;
+	m_finalCosts = HK_NULL;
 }
 
 #ifndef HK_PLATFORM_SPU
@@ -33,8 +42,40 @@ inline hkaiDirectedGraphVisitor::hkaiDirectedGraphVisitor(const hkaiDirectedGrap
 	m_cachedIncomingSectionId = -1;
 	m_cachedOutgoingSectionId = -1;
 	m_cachedGeneralSectionId = -1;
+
+	m_edgeFilter = HK_NULL;
+	m_costModifier = HK_NULL;
+
+	m_numGoals = 0;
+	m_goalNodes = HK_NULL;
+	m_finalCosts = HK_NULL;
 }
 #endif
+
+HK_FORCE_INLINE void hkaiDirectedGraphVisitor::init( const hkaiStreamingCollection::InstanceInfo* streamingInfo, 
+													const hkaiAstarCostModifier* costModifier, 
+													const hkaiAstarEdgeFilter* edgeFilter )
+{
+	m_streamingInfo = streamingInfo;
+#ifndef HK_PLATFORM_SPU
+	m_costModifier = costModifier;
+	m_edgeFilter = edgeFilter;
+#endif
+}
+
+inline void hkaiDirectedGraphVisitor::setTraversalInfo ( const hkaiAgentTraversalInfo& info)
+{
+	m_agentInfo = info;
+}
+
+
+inline void hkaiDirectedGraphVisitor::setGoals( const hkaiPackedKey* goalKeys, const hkReal* finalCosts, int numGoals )
+{
+	m_goalNodes = goalKeys;
+	m_finalCosts = finalCosts;
+	m_numGoals = numGoals;
+}
+
 
 #define HKAI_NULL_GRAPH_MSG "Null graph at section index " << sectionId << ". Make sure to specify the graph in e.g. hkaiWorld::loadNavMeshInstance, or disable hierarchical A*."
 
@@ -88,14 +129,14 @@ inline hkBool32 hkaiDirectedGraphVisitor::isGoal( SearchIndex nit ) const
 // Get an upper bound on the number of nodes adjacent to a given node.
 int hkaiDirectedGraphVisitor::getMaxNeighborCount( SearchIndex nit ) const
 {
-	HK_ASSERT(0x43af1466, nit == m_cachedNodeIndex);
+	HK_ASSERT(0x43af1466, nit == m_cachedNodeKey);
 	HK_ON_SPU( hkSpuDmaManager::waitForDmaCompletion(EDGE_DMA_GROUP); )
 	return m_cachedNode.m_numEdges + m_cachedInstanceNode.m_numEdges;
 }
 
 void hkaiDirectedGraphVisitor::getNeighbors( SearchIndex nit, hkArrayBase< EdgeKey >& neighbors ) const
 {
-	HK_ASSERT(0x43af1466, nit == m_cachedNodeIndex);
+	HK_ASSERT(0x43af1466, nit == m_cachedNodeKey);
 
 	const int numOriginalEdges = m_cachedNode.m_numEdges;
 	const int numInstancedEdges = m_cachedInstanceNode.m_numEdges;
@@ -126,7 +167,7 @@ void hkaiDirectedGraphVisitor::getNeighbors( SearchIndex nit, hkArrayBase< EdgeK
 	}
 }
 
-inline hkaiDirectedGraphVisitor::SearchIndex hkaiDirectedGraphVisitor::edgeTarget( SearchIndex nit, EdgeKey eit ) const
+inline hkaiDirectedGraphVisitor::SearchIndex hkaiDirectedGraphVisitor::edgeTarget( SearchIndex nit, EdgeKey edgeIndex ) const
 {
 	//HK_ASSERT(0x1ab9fd3b, eit - m_cachedNode.m_startEdgeIndex >= 0);
 	//HK_ASSERT(0xb2326f3, eit - m_cachedNode.m_startEdgeIndex < MAX_VERTEX_DEGREE + 2);
@@ -135,32 +176,95 @@ inline hkaiDirectedGraphVisitor::SearchIndex hkaiDirectedGraphVisitor::edgeTarge
 	return m_currentEdge->getOppositeNodeKeyUnchecked();
 }
 
-inline hkaiDirectedGraphVisitor::EdgeCost hkaiDirectedGraphVisitor::getTotalCost(SearchIndex nit, SearchIndex adj, EdgeKey eit, const EdgeCost costToParent) const
+inline hkaiDirectedGraphVisitor::EdgeCost hkaiDirectedGraphVisitor::getTotalCost(SearchIndex nit, SearchIndex adj, EdgeKey edgeIndex, const EdgeCost costToParent_float) const
 {
 	//HK_ASSERT(0x2665283f, eit - m_cachedNode.m_startEdgeIndex >= 0);
 	//HK_ASSERT(0x59a664b2, eit - m_cachedNode.m_startEdgeIndex < MAX_VERTEX_DEGREE + 2);
 
 	//HK_ASSERT(0x2c21c36c, m_currentEdge == m_localEdgeStart + eit - m_cachedNode.m_startEdgeIndex );
-	return costToParent + m_currentEdge->m_cost;
+
+	hkSimdReal edgeCost; edgeCost.setFromHalf(m_currentEdge->m_cost);
+	hkSimdReal costToParent = hkSimdReal::fromFloat(costToParent_float);
+
+	if (m_finalCosts)
+	{
+		for(int i=0; i<m_numGoals; i++)
+		{
+			if (m_goalNodes[i] == adj)
+			{
+				edgeCost = edgeCost + hkSimdReal::fromFloat( m_finalCosts[i] );
+			}
+		}
+	}
+
+#ifndef HK_PLATFORM_SPU
+	if(m_costModifier)
+	{
+		hkaiDirectedGraphNodePairInfo nodeEdgeInfo;
+		nodeEdgeInfo.m_currentNodeInfo.setNode(nit, &m_cachedNode, m_cachedPosition );
+		
+		HK_ASSERT(0x7da65f88, hkaiGetRuntimeIdFromPacked(adj) == m_cachedOutgoingSectionId);
+		hkaiDirectedGraphInstance::NodeIndex adjacentNodeIndex = hkaiGetIndexFromPacked(adj);
+		const hkaiDirectedGraphExplicitCost::PaddedNode adjacentNode = getOutgoingAccessor()->getNode(adjacentNodeIndex);
+		hkVector4 adjacentPos; getOutgoingAccessor()->getPosition(adjacentNodeIndex, adjacentPos);
+
+		nodeEdgeInfo.m_adjacentNodeInfo.setNode(adj, &adjacentNode, adjacentPos );
+		nodeEdgeInfo.m_edge = m_currentEdge;
+		nodeEdgeInfo.m_edgeKey = hkaiGetPackedKey(m_cachedIncomingSectionId, edgeIndex);
+		
+		hkaiAstarCostModifier::DirectedGraphGetModifiedCostCallbackContext context( m_streamingInfo, m_agentInfo, nodeEdgeInfo, costToParent, edgeCost);
+		nodeEdgeInfo.validate(m_streamingInfo);
+
+		edgeCost = m_costModifier->getModifiedCost( context );
+		
+		// Don't let any cost modifiers set the edge cost negative
+		edgeCost.setMax(hkSimdReal_0, edgeCost);
+	}
+#endif
+
+	hkSimdReal totalCost = costToParent + edgeCost;
+
+	return totalCost.getReal();
 }
 
 //
 // End hkaiAstar interface
 //
 
-inline hkBool32 hkaiDirectedGraphVisitor::isValidEdgeTarget( SearchIndex adj ) const
+inline hkBool32 hkaiDirectedGraphVisitor::isValidEdgeTarget( hkaiPackedKey adj ) const
 {
 	return true;
 }
 
 // Edges with negative costs aren't traversable
 // During streaming, we negate the edge cost for edges into sections that haven't been loaded let
-inline hkBool32 hkaiDirectedGraphVisitor::isEdgeTraversable(SearchIndex nit, SearchIndex adj, EdgeKey eit) const
+inline hkBool32 hkaiDirectedGraphVisitor::isEdgeTraversable(SearchIndex curNodeKey, SearchIndex adjNodeKey, EdgeKey curEdgeIndex) const
 {
 	//HK_ASSERT(0x2665283f, eit - m_cachedNode.m_startEdgeIndex >= 0);
 	//HK_ASSERT(0x59a664b2, eit - m_cachedNode.m_startEdgeIndex < MAX_VERTEX_DEGREE + 2);
 
 	//HK_ASSERT(0x2c21c36c, m_currentEdge == m_localEdgeStart + eit - m_cachedNode.m_startEdgeIndex );
+#ifndef HK_PLATFORM_SPU
+	if(m_edgeFilter)
+	{
+		hkaiDirectedGraphNodePairInfo nodeEdgeInfo;
+		nodeEdgeInfo.m_currentNodeInfo.setNode(m_cachedNodeKey, &m_cachedNode, m_cachedPosition );
+
+		HK_ASSERT(0x7da65f88, hkaiGetRuntimeIdFromPacked(adjNodeKey) == m_cachedOutgoingSectionId);
+		hkaiDirectedGraphInstance::NodeIndex adjacentNodeIndex = hkaiGetIndexFromPacked(adjNodeKey);
+		const hkaiDirectedGraphExplicitCost::PaddedNode adjacentNode = getOutgoingAccessor()->getNode(adjacentNodeIndex);
+		hkVector4 adjacentPos; getOutgoingAccessor()->getPosition(adjacentNodeIndex, adjacentPos);
+
+		nodeEdgeInfo.m_adjacentNodeInfo.setNode(adjNodeKey, &adjacentNode, adjacentPos );
+		nodeEdgeInfo.m_edge = m_currentEdge;
+		nodeEdgeInfo.m_edgeKey = hkaiGetPackedKey( m_cachedIncomingSectionId, curEdgeIndex );
+		hkaiAstarEdgeFilter::DirectedGraphIsEnabledCallbackContext context( m_streamingInfo, m_agentInfo, nodeEdgeInfo);
+		
+		nodeEdgeInfo.validate(m_streamingInfo);
+
+		return m_edgeFilter->isEnabled( context );
+	}
+#endif
 	return true;
 }
 
@@ -226,7 +330,7 @@ static void _copyEdges( hkaiDirectedGraphExplicitCost::Edge* edgeLocalDst, const
 //
 inline void hkaiDirectedGraphVisitor::nextNode(SearchIndex nid, hkBool32 updateSearchState)
 {
-	HK_ON_DEBUG( m_cachedNodeIndex = nid );
+	m_cachedNodeKey = nid;
 
 	int sectionId = hkaiGetRuntimeIdFromPacked(nid);
 	
@@ -241,6 +345,7 @@ inline void hkaiDirectedGraphVisitor::nextNode(SearchIndex nid, hkBool32 updateS
 		const int nodeIndex = hkaiGetIndexFromPacked( nid );
 		m_cachedNode = getIncomingAccessor()->getNode(nodeIndex);
 		getIncomingAccessor()->getInstancedNode(nodeIndex, m_cachedInstanceNode);
+		getIncomingAccessor()->getPosition(nodeIndex, m_cachedPosition);
 
 		
 		// Clamp the cached node's num edges so that we don't overwrite memory
@@ -349,7 +454,7 @@ inline void hkaiDirectedGraphVisitor::nodeClosed(SearchIndex) const {}
 //
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

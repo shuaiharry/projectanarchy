@@ -112,30 +112,31 @@ class hkbTransitionEffect : public hkbGenerator
 
 	protected:
 		
-			/// For internal use only.
-			/// Overriding binding information; used when this TE is executed in the context of a global transition into a different behavior graph.
+			// For internal use only.
+			// Overriding binding information; used when this TE is executed in the context of a global transition into a different behavior graph.
 		hkRefPtr<hkReferencedObject> m_patchedBindingInfo; //+nosave
 
-			/// The default event mode to use when the event mode of a transition effect is EVENT_MODE_USE_DEFAULT.
-			/// You should not set this to EVENT_MODE_USE_DEFAULT.
-			/// Subclasses should set this to hkbProjectData::m_defaultEventMode inside activate().
+			// The default event mode to use when the event mode of a transition effect is EVENT_MODE_USE_DEFAULT.
+			// You should not set this to EVENT_MODE_USE_DEFAULT.
+			// Subclasses should set this to hkbProjectData::m_defaultEventMode inside activate().
 		hkEnum< hkbTransitionEffect::EventMode, hkInt8 > m_defaultEventMode; //+nosave
 
-			// This should be called by every subclass of hkbTransitionEffect just before activating 
-			// the to-generator.  It checks whether the toGenerator is already active and
-			// uses m_selfTransitionMode to make a decision about what to do about it.
-		void applySelfTransitionMode( hkbBehaviorGraph& rootBehaviorGraph, hkbGenerator* toGenerator );
+			// The effective self transition mode depends on the toGenerator (see SELF_TRANSITION_MODE_CONTINUE_IF_CYCLIC_BLEND_IF_ACYCLIC).
+			// This function returns either SELF_TRANSITION_MODE_RESET, SELF_TRANSITION_MODE_BLEND, or SELF_TRANSITION_MODE_CONTINUE taking into account
+			// the TE mode and the toGenerator's cyclic status.
+		SelfTransitionMode computeSelfTransitionMode( const hkbContext& context, hkbGenerator* toGenerator );
+
+			// Apply the selfTransitionMode computed in computeSelfTransitionMode.
+			// This should be called only once after the toGenerator has been (re)activated.
+		void applySelfTransitionMode( const hkbContext& context, hkbGenerator* toGenerator, SelfTransitionMode selfTransitionMode );
 
 			// return the event mode, applying the default if appropriate
 		int getEventMode();
 
-			// Checks to see if the to-generator is active, and skips over any modifier generators.
-		bool needSelfTransition( const hkbContext& context, hkbGenerator* toGenerator );
-
-			/// Function for internal use.
-			/// This function prepares m_patchedBindingInfo to redirect copyVariablesToMembers functions to the proper variables.
-			/// This is necessary for effects used by global transitions since they are authored in the context of one
-			/// behavior graph but are executed in another.
+			// Function for internal use.
+			// This function prepares m_patchedBindingInfo to redirect copyVariablesToMembers functions to the proper variables.
+			// This is necessary for effects used by global transitions since they are authored in the context of one
+			// behavior graph but are executed in another.
 		void computePatchedBindings( const hkbContext& context, const hkbBehaviorGraph& referenceBehavior );
 
 	public:
@@ -149,7 +150,7 @@ class hkbTransitionEffect : public hkbGenerator
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

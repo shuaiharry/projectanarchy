@@ -8,15 +8,10 @@
 
 /// \file vHavokTriggerVolume.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKTRIGGERVOLUME_HPP_INCLUDED
 #define VHAVOKTRIGGERVOLUME_HPP_INCLUDED
 
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Entities/VCustomVolumeObject.hpp>
-
 
 /// Serialization versions
 #define VHAVOKTRIGGERVOLUME_VERSION_0        0                              // Initial version
@@ -28,35 +23,37 @@
 #define VHAVOKTRIGGERVOLUME_ONCHARACTERENTER    "OnCharacterEnter"
 #define VHAVOKTRIGGERVOLUME_ONCHARACTERLEAVE    "OnCharacterLeave"
 
-
 ///
 /// \brief
-///   Enumeration to define which shape type is used for the trigger volume.
+///   Enumeration defining the shape type of a trigger volume.
+///
 enum VHavokTriggerVolumeShapeType_e
 {
-  VHavokTriggerVolumeShapeType_CONVEX=0,               ///< Convex shape
-  VHavokTriggerVolumeShapeType_MESH=1                  ///< Polygon Mesh
+  VHavokTriggerVolumeShapeType_CONVEX = 0,                ///< Convex shape
+  VHavokTriggerVolumeShapeType_MESH = 1                   ///< Polygon Mesh
 };
 
 ///
 /// \brief
-///   Enumeration to define which motion type is used for the trigger volume.
+///   Enumeration defining the motion type of a trigger volume.
+///
 enum VHavokTriggerVolumeMotionType_e
 {
-  VHavokTriggerVolumeMotionType_FIXED=0,               ///< Collides but doesn't move
-  VHavokTriggerVolumeMotionType_KEYFRAMED=1            ///< Can be moved manually by code
-
+  VHavokTriggerVolumeMotionType_FIXED = 0,                ///< Collides but doesn't move.
+  VHavokTriggerVolumeMotionType_KEYFRAMED = 1             ///< Can only be moved manually via code.
 };
 
 ///
 /// \brief
-///   Enumeration to define which quality type is used for the trigger volume.
+///   Enumeration defining the quality type of a trigger volume.
 enum VHavokTriggerVolumeQualityType_e
 {
-  VHavokTriggerVolumeQualityType_AUTO=0,               ///< Automatic assignment
-  VHavokTriggerVolumeQualityType_FIXED=1,              ///< Use this for fixed trigger volumes
-  VHavokTriggerVolumeQualityType_KEYFRAMED=2,          ///< Use this for keyframed trigger volumes, if you only want to pick up collisions with dynamic bodies  
-  VHavokTriggerVolumeQualityType_KEYFRAMED_REPORTING=3 ///< Use this for keyframed trigger volumes, if you want to pick up collisions also with other keyframed or fixed bodies
+  VHavokTriggerVolumeQualityType_AUTO = 0,                ///< Automatic assignment
+  VHavokTriggerVolumeQualityType_FIXED = 1,               ///< Use this for fixed trigger volumes
+  VHavokTriggerVolumeQualityType_KEYFRAMED = 2,           ///< Use this for keyframed trigger volumes, 
+                                                          ///< if you only want to pick up collisions with dynamic bodies.
+  VHavokTriggerVolumeQualityType_KEYFRAMED_REPORTING = 3  ///< Use this for keyframed trigger volumes, 
+                                                          ///< if you want to pick up collisions also with other keyframed or fixed bodies
 };
 
 // forward declaration
@@ -65,16 +62,16 @@ class vHavokTriggerVolume;
 class vHavokTriggerVolumeInternal;
 class hkpTriggerVolume;
 
-
 /// \brief
-///   Structure that holds information about a trigger, fired by a vHavokTriggerVolume.
+///   Structure that holds information about a trigger event, fired by a vHavokTriggerVolume.
+///
 struct vHavokTriggerInfo
 {
   vHavokTriggerInfo()
+    : m_pTriggerVolume(NULL)
+    , m_pTriggerSourceComponent(NULL)
+    , m_pObject(NULL)
   {
-    m_pTriggerVolume = NULL;
-    m_pTriggerSourceComponent = NULL;
-    m_pObject = NULL;
   }
 
   vHavokTriggerVolume *m_pTriggerVolume;
@@ -82,15 +79,14 @@ struct vHavokTriggerInfo
   hkpWorldObject *m_pObject;
 };
 
-
 /// 
 /// \brief
 ///   This class represents a trigger volume object. It is a component that can be attached to 
-///   objects of class VCustomVolumeObject.
+///   instances of the class VCustomVolumeObject.
 /// 
-/// The vHavokTriggerVolume object is the Vision representation of the hkpTriggerVolume in Havok, 
+/// The vHavokTriggerVolume object is the Vision representation of the hkpTriggerVolume in Havok Physics, 
 /// which are rigid bodies, that record collision events, but have no physical effect. It can be 
-/// used for notifications, when rigid bodies/ character controllers enter/ leave the volume. 
+/// used for notifications, when rigid bodies / character controllers enter / leave the volume. 
 ///
 class vHavokTriggerVolume : public IVObjectComponent
 {
@@ -104,29 +100,31 @@ public:
 
   /// 
   /// \brief
-  ///   Constructor for the Havok Trigger Volume Component.
+  ///   Constructor.
   /// 
   /// \param eShapeType
   ///   Shape type of this trigger volume.
   /// 
-  /// \see
+  /// \sa
   ///   IVObjectComponent::IVObjectComponent
+  ///
   VHAVOK_IMPEXP vHavokTriggerVolume(VHavokTriggerVolumeShapeType_e eShapeType=VHavokTriggerVolumeShapeType_CONVEX);
 
   /// 
   /// \brief
-  ///   Destructor of the Havok Trigger Volume Component. Deletes the Havok trigger volume, if still alive.
+  ///   Destructor of the Havok Trigger Volume Component. Deletes the Havok Physics trigger volume, if still alive.
+  ///
   VHAVOK_IMPEXP virtual ~vHavokTriggerVolume();
 
   ///
   /// \brief
   ///   Removes the trigger volume from the simulation without necessarily deleting this instance.
+  ///
   VHAVOK_IMPEXP VOVERRIDE void DisposeObject();
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name IVObjectComponent Virtual Overrides
@@ -135,59 +133,63 @@ public:
 
   ///
   /// \brief
-  ///   Overridden function to respond to owner changes.
+  ///   Overridden function handling owner changes.
   ///
-  /// By setting the owner of this component the HavokTriggerVolume object will be 
-  /// added to the Havok World and gets registered in the Havok module. 
+  /// By setting the owner of this component the vHavokTriggerVolume object will be 
+  /// added to the Havok Physics World and gets registered in the Havok Physics module. 
   ///
   /// \param pOwner
   ///   The owner of this component.
   /// 
   /// \remarks
-  ///   SetOwner(NULL) removes the HavokTriggeredVolume object from the Havok World and
-  ///   gets unregistered in the Havok module.
-  VHAVOK_IMPEXP VOVERRIDE void SetOwner(VisTypedEngineObject_cl *pOwner);
+  ///   SetOwner(NULL) removes the vHavokTriggeredVolume object from the Havok Physics World and
+  ///   unregisters it in the Havok Physics module.
+  ///
+  VHAVOK_IMPEXP virtual void SetOwner(VisTypedEngineObject_cl *pOwner) HKV_OVERRIDE;
 
   ///
   /// \brief
-  ///   Overridden function to determine if this component can be attached to a given object.
+  ///   Overridden function determining if this component can be attached to a given object.
   ///
   /// The vHavokTriggerVolume component can be attached to VCustomVolumeObject instances.
   /// 
   /// \param pObject
-  ///   Possible owner candidate.
+  ///   Potential owner of this component.
   /// 
   /// \param sErrorMsgOut
   ///   Reference to error message string.
   /// 
   /// \returns
-  ///   TRUE if this component can be attached to the given object, FALSE otherwise.
-  VHAVOK_IMPEXP VOVERRIDE BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut);
+  ///   TRUE if this component can be attached to the given object.
+  ///
+  VHAVOK_IMPEXP virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut) HKV_OVERRIDE;
 
   ///
   /// \brief
-  ///   Overridden function to respond to variable changes.
+  ///   Overridden function handling variable changes.
   /// 
   /// \param pVar
   ///   Pointer to the variable object to identify the variable.
   /// 
   /// \param value
   ///   New value of the variable
-  VHAVOK_IMPEXP VOVERRIDE void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
+  ///
+  VHAVOK_IMPEXP virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char* value) HKV_OVERRIDE;
 
   ///
   /// \brief
-  ///   Overridden function to process incoming messages, such as collision events and property changes
-  VHAVOK_IMPEXP VOVERRIDE void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB);
+  ///   Overridden function processing incoming messages, such as collision events and property changes.
+  ///
+  VHAVOK_IMPEXP virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
 
-
   ///
   /// @name Serialization
-  //@{
+  /// @{
+  ///
 
   /// \brief
   ///   RTTI macro
@@ -201,32 +203,38 @@ public:
   ///   Serialization function
   /// \param ar
   ///   Binary archive
-  VHAVOK_IMPEXP VOVERRIDE void Serialize(VArchive &ar);
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
   /// \brief
-  ///   Overridden function to finalize the Havok trigger volume once the deserialization is finished
-  VHAVOK_IMPEXP VOVERRIDE void OnDeserializationCallback(const VSerializationContext &context);
+  ///   Overridden function finalizing the Havok Physics trigger volume once deserialization has finished.
+  VHAVOK_IMPEXP virtual void OnDeserializationCallback(const VSerializationContext &context) HKV_OVERRIDE;
 
   /// \brief
-  ///   Overridden function to indicate that we need a deserialization callback
-  VOVERRIDE VBool WantsDeserializationCallback(const VSerializationContext &context) {return context.m_eType!=VSerializationContext::VSERIALIZATION_EDITOR;}
+  ///   Overridden function indicating whether the component needs a deserialization callback
+  VHAVOK_IMPEXP virtual VBool WantsDeserializationCallback(const VSerializationContext &context) HKV_OVERRIDE
+  {
+    return (context.m_eType != VSerializationContext::VSERIALIZATION_EDITOR);
+  }
 
   ///
   /// @}
   ///
-
   
   ///
   /// @name Property Functions
   /// @{
   ///
 
+  ///
   /// \brief
-  ///   Gets the owner of this trigger volume as a VisObject3d_cl.
+  ///   Returns the owner of this trigger volume as a VisObject3d_cl.
+  ///
   VHAVOK_IMPEXP VisObject3D_cl *GetOwner3D();
 
+  ///
   /// \brief
   ///   Gets the owner custom volume object of this trigger volume as a VCustomVolumeObject.
+  ///
   VHAVOK_IMPEXP VCustomVolumeObject *GetOwnerCustomVolume();
 
   ///
@@ -240,7 +248,7 @@ public:
 
   ///
   /// \brief
-  ///   Gets the world position of this trigger volume.
+  ///   Returns the world position of this trigger volume.
   ///
   /// \return
   ///   Position vector.
@@ -258,7 +266,7 @@ public:
 
   ///
   /// \brief
-  ///   Gets the world space rotation of this trigger volume.
+  ///   Returns the world space rotation of this trigger volume.
   ///
   /// \return
   ///   Rotation matrix.
@@ -295,43 +303,45 @@ public:
   ///   the collision subsystem this body shouldn't collide with
   ///
   /// \note
-  ///   See the Havok documentation on rigid body collisions for more 
+  ///   See the Havok Physics documentation on rigid body collisions for more 
   ///   information about what values to specify for these parameters.
+  ///
   VHAVOK_IMPEXP void SetCollisionInfo(int iLayer, int iGroup, int iSubsystem, int iSubsystemDontCollideWith);
 
   ///
   /// @}
   ///
 
-
   ///
-  /// @name Access to Havok Internals
+  /// @name Access to Havok Physics Internals
   /// @{
   ///
 
   ///
   /// \brief
-  ///   Gets the Havok internal trigger volume instance (can be NULL if not yet initialized).
+  ///   Gets the internal Havok Physics trigger volume instance (NULL if not initialized).
   ///
   /// \return
-  ///   hkpTriggerVolume: Pointer to the Havok trigger volume (or NULL if not yet initialized).
+  ///   hkpTriggerVolume: Pointer to the Havok Physics trigger volume (NULL if not initialized).
   ///
-  inline hkpTriggerVolume* GetHkTriggerVolume()const { return (hkpTriggerVolume*)m_pTriggerVolume; }
+  inline hkpTriggerVolume* GetHkTriggerVolume() const 
+  { 
+    return (hkpTriggerVolume*)m_pTriggerVolume; 
+  }
 
   ///
   /// \brief
-  ///   Gets the Havok internal rigid body instance, which underlies this trigger volume 
-  ///   (can be NULL if not yet initialized).
+  ///   Gets the Havok Physics internal rigid body instance, which represents this trigger volume 
+  ///   (NULL if not initialized).
   ///
   /// \return
-  ///   hkpRigidBody: Pointer to the Havok rigid body (or NULL if not yet initialized).
+  ///   hkpRigidBody: Pointer to the Havok Physics rigid body (NULL if not initialized).
   ///
-  VHAVOK_IMPEXP hkpRigidBody* GetHkTriggerBody()const; 
+  VHAVOK_IMPEXP hkpRigidBody* GetHkTriggerBody() const; 
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Debug Rendering
@@ -356,34 +366,59 @@ public:
   ///
   VHAVOK_IMPEXP void SetDebugColor(VColorRef color);
 
-  /// \brief Returns whether debug rendering is enabled.
-  inline bool GetDebugRenderEnabled () const { return Debug_Render != FALSE; }
+  ///
+  /// \brief 
+  ///   Returns whether debug rendering is enabled.
+  ///
+  inline bool GetDebugRenderEnabled () const 
+  { 
+    return (Debug_Render == TRUE); 
+  }
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Trigger Components
   /// @{
   ///
 
+  ///
   /// \brief
-  ///   Gets the OnObjectEnter trigger source component.
-  inline VisTriggerSourceComponent_cl* GetOnObjectEnterTrigger()const { return m_spOnObjectEnter; } 
+  ///   Returns the OnObjectEnter trigger source component.
+  ///
+  inline VisTriggerSourceComponent_cl* GetOnObjectEnterTrigger() const 
+  { 
+    return m_spOnObjectEnter; 
+  } 
 
+  ///
   /// \brief
-  ///   Gets the OnObjectLeave trigger source component.
-  inline VisTriggerSourceComponent_cl* GetOnObjectLeaveTrigger()const { return m_spOnObjectLeave; }
+  ///   Returns the OnObjectLeave trigger source component.
+  ///
+  inline VisTriggerSourceComponent_cl* GetOnObjectLeaveTrigger() const 
+  { 
+    return m_spOnObjectLeave; 
+  }
 
+  ///
   /// \brief
-  ///   Gets the OnCharacterEnter trigger source component.
-  inline VisTriggerSourceComponent_cl* GetOnCharacterEnterTrigger()const { return m_spOnCharacterEnter; }
+  ///   Returns the OnCharacterEnter trigger source component.
+  ///
+  inline VisTriggerSourceComponent_cl* GetOnCharacterEnterTrigger() const 
+  { 
+    return m_spOnCharacterEnter; 
+  }
 
+  ///
   /// \brief
-  ///   Gets the OnCharacterLeave trigger source component.
-  inline VisTriggerSourceComponent_cl* GetOnCharacterLeaveTrigger()const { return m_spOnCharacterLeave; }
+  ///   Returns the OnCharacterLeave trigger source component.
+  ///
+  inline VisTriggerSourceComponent_cl* GetOnCharacterLeaveTrigger() const 
+  { 
+    return m_spOnCharacterLeave; 
+  }
 
   ///
   /// @}
@@ -397,12 +432,12 @@ private:
 
   ///
   /// \brief
-  ///   Deinitialization that is used both on DisposeObject and on destruction.
+  ///   Deinitialization that is used both for DisposeObject and on destruction.
   void CommonDeinit();
 
   ///
   /// \brief
-  ///   Creates the actual Havok trigger volume and adds it to the simulation.
+  ///   Creates the actual Havok Physics trigger volume and adds it to the simulation.
   bool CreateHkTriggerVolume(VisStaticMesh_cl* pMesh, const hkvVec3& vScale, int iCreationFlags);
 
   ///
@@ -411,13 +446,13 @@ private:
   void RemoveHkTriggerVolume();
 
   /// \brief
-  ///   Gets the transformation of the owner object from Vision and sets them on the Havok instance.
+  ///   Retrieves the transformation of the owner object from Vision and applies them to the Havok Physics representation.
   void UpdateVision2Havok();
 
  
-  vHavokPhysicsModule *m_pModule;                               ///< Reference to Havok Physics Module
-  vHavokTriggerVolumeInternal *m_pTriggerVolume;                ///< The actual Havok Trigger Volume
-  const char *m_szShapeCacheId;                                 ///< ID of shape of the rigid body in runtime cache table (points to memory in cache table).
+  vHavokPhysicsModule *m_pModule;                               ///< Reference to Havok Physics Module.
+  vHavokTriggerVolumeInternal *m_pTriggerVolume;                ///< The actual Havok Physics Trigger Volume.
+  const char *m_szShapeCacheId;                                 ///< ID of collision shape in runtime cache table (points to memory in cache table).
 
   VSmartPtr<VisTriggerSourceComponent_cl> m_spOnObjectEnter;    ///< Component that triggers the OnObjectEnter event
   VSmartPtr<VisTriggerSourceComponent_cl> m_spOnObjectLeave;    ///< Component that triggers the OnObjectLeave event
@@ -428,14 +463,14 @@ private:
   // Members exposed to vForge:
   //
   int Havok_ShapeType;                                          ///< Shape type of trigger volume's RB
-  int Havok_MotionType;                                         ///< Type of Physics: Fixed or Keyframed
+  int Havok_MotionType;                                         ///< Physics Motion Type: Fixed or Keyframed
   int Havok_QualityType;                                        ///< Quality type: Fixed, Keyframed or Keyframed-Reporting
   int Havok_CollisionLayer;                                     ///< Defines the collision layer this trigger volume's RB is assigned to.
   int Havok_CollisionGroup;                                     ///< Defines the collision group this trigger volume's RB is assigned to.
   int Havok_SubSystemId;                                        ///< Defines the sub system ID of this trigger volume's RB.
   int Havok_SubSystemDontCollideWith;                           ///< Defines the sub system ID this trigger volume's RB should not collide with.
 
-  BOOL Debug_Render;                                            ///< Whether debug rendering is active or not
+  BOOL Debug_Render;                                            ///< Indicates whether debug rendering is active or not.
   VColorRef Debug_Color;                                        ///< Color for debug rendering
 
 };
@@ -443,7 +478,7 @@ private:
 #endif // VHAVOKTRIGGERVOLUME_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

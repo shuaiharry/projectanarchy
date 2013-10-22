@@ -55,6 +55,7 @@ struct hkvAssetCommandAddDataDirectory
     hkStringPtr m_dataDirectory;
     hkStringPtr m_libraryName;
     hkStringPtr m_localFileHint;
+    hkStringPtr m_inputLibraryFile;
     hkBool m_create;
     hkBool m_isProjectRoot;
   };
@@ -166,7 +167,7 @@ struct hkvAssetCommandGetTagsInfo
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

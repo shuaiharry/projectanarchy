@@ -117,7 +117,7 @@ public:
 
   enum VFilePools
   {
-    DISKFILEMANAGER_INPOOL  = 4,
+    DISKFILEMANAGER_INPOOL  = 8,
     DISKFILEMANAGER_OUTPOOL = 1
   };
 
@@ -162,7 +162,7 @@ public:
   void DumpOpenStreams();
 
 protected:
-  virtual IVFileInStream* InternalOpen(const char* pszFileName, int iFlags = 0) HKV_OVERRIDE;
+  virtual IVFileInStream* InternalOpen(const char* pszFileName, int iFlags, const InternalOpenContext& ioc) HKV_OVERRIDE;
   virtual BOOL InternalExists(const char* pszFileName) HKV_OVERRIDE;
   virtual BOOL InternalGetTimeStamp(const char *pszFileName, VFileTime &destTime) HKV_OVERRIDE;
   virtual bool InternalSetDataDirectory(int idx, const char* pszPath) HKV_OVERRIDE;
@@ -249,7 +249,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

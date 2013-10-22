@@ -11,23 +11,28 @@
 #ifndef VISION_FMOD_INCLUDED_HPP
 #define VISION_FMOD_INCLUDED_HPP
 
-#include <fmod.hpp>
-#include <fmod_errors.h>
-#include <fmod_event.hpp>
-#if !defined(_VISION_WIIU)
-#include <fmod_event_net.hpp>
-#endif
+#if defined(VFMOD_NULL)
+  #include <Vision/Runtime/EnginePlugins/ThirdParty/FmodEnginePlugin/Null/VFModNull.hpp>
+#else
 
-#if defined(_VISION_XENON)
-#include <fmodxbox360.h>
-#elif defined(_VISION_PS3)
-#include <fmodps3.h>
-#elif defined(_VISION_PSP2)
-#include <fmodngp.h>
-#elif defined(_VISION_IOS)
-#include <fmodiphone.h>
-#endif
+  #include <fmod.hpp>
+  #include <fmod_errors.h>
+  #include <fmod_event.hpp>
+  #if !defined(_VISION_WIIU)
+    #include <fmod_event_net.hpp>
+  #endif
 
+  #if defined(_VISION_XENON)
+    #include <fmodxbox360.h>
+  #elif defined(_VISION_PS3)
+    #include <fmodps3.h>
+  #elif defined(_VISION_PSP2)
+    #include <fmodngp.h>
+  #elif defined(_VISION_IOS)
+    #include <fmodiphone.h>
+  #endif
+
+#endif
 
 // module for serialization
 extern VModule g_FmodModule;
@@ -100,12 +105,15 @@ typedef VSmartPtr<VFmodReverb> VFmodReverbPtr;
 #define VFMOD_PLATFORM_STR_ANDROID  "android"
 #define VFMOD_PLATFORM_STR_IOS      "ios"
 #define VFMOD_PLATFORM_STR_WIIU     "wiiu"
+#define VFMOD_PLATFORM_STR_TIZEN    "tizen"
 
 // VFMOD_SUPPORTS_NETWORK : support for Fmod Designer Network API 
 
 #if defined (WIN32) 
 #define VFMOD_PLATFORM_STR VFMOD_PLATFORM_STR_PC
-#define VFMOD_SUPPORTS_NETWORK
+#  if !defined(_VISION_WINRT)
+#    define VFMOD_SUPPORTS_NETWORK
+#  endif
 #elif defined (_VISION_XENON) 
 #define VFMOD_PLATFORM_STR VFMOD_PLATFORM_STR_XENON
 #define VFMOD_SUPPORTS_NETWORK
@@ -121,6 +129,9 @@ typedef VSmartPtr<VFmodReverb> VFmodReverbPtr;
 #define VFMOD_SUPPORTS_NETWORK
 #elif defined (_VISION_WIIU)
 #define VFMOD_PLATFORM_STR VFMOD_PLATFORM_STR_WIIU
+#undef VFMOD_SUPPORTS_NETWORK
+#elif defined (_VISION_TIZEN)
+#define VFMOD_PLATFORM_STR VFMOD_PLATFORM_STR_TIZEN
 #undef VFMOD_SUPPORTS_NETWORK
 #else
 #error Undefined platform!
@@ -210,7 +221,7 @@ typedef VSmartPtr<VFmodReverb> VFmodReverbPtr;
 #endif // VISION_FMOD_INCLUDED_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

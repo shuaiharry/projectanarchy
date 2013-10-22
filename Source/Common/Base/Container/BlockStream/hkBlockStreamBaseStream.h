@@ -47,12 +47,12 @@ namespace hkBlockStreamBase
 
 #if !defined(HK_PLATFORM_SPU)
 			/// Convenience constructor.
-			HK_FORCE_INLINE Stream( Allocator* tlAllocator, bool zeroNewBlocks = false ); 
+			HK_FORCE_INLINE Stream( Allocator* tlAllocator, bool zeroNewBlocks = false );
 #endif
 			/// Empty constructor. Call initBlockStream to initialize a stream.
 			HK_FORCE_INLINE Stream(){}
 
-			/// Destructor. You have to call clear() before calling the destructor 
+			/// Destructor. You have to call clear() before calling the destructor
 			/// since destructors do not take parameters, you can't pass a thread allocator.
 			HK_FORCE_INLINE ~Stream();
 
@@ -91,7 +91,7 @@ namespace hkBlockStreamBase
 			//
 			// Getters
 			//
-			
+
 			/// Returns true if the stream has no elements in its blocks (equivalent to getTotalNumElems() == 0).
 			HK_FORCE_INLINE bool isEmpty() const;
 
@@ -112,19 +112,28 @@ namespace hkBlockStreamBase
 			void checkConsistency( ) const;
 
 			/// Checks whether an input array of ranges is consistent with the block stream
-			void checkConsistencyWithGrid( const Range* rangesIn, int numRanges, int rangeStriding, bool allowForUnusedData ) const;
-			
+			void checkConsistencyWithGrid(
+				const Range* rangesIn, int numRanges, int rangeStriding, bool allowForUnusedData ) const;
+
+			/// Checks whether an array of ranges sorted according to Range::compareRange() is consistent with the block
+			/// stream.
+			void checkConsistencyWithSortedRanges(
+				const Range* sortedRanges, int numRanges, int rangeStriding, bool allowForUnusedData ) const;
+
 			/// Checks whether a single range is consistent with the block stream.
 			void checkConsistencyOfRange( const Range& range );
+
+			/// Checks that a given block is owned by this stream.
+			HK_FORCE_INLINE void checkBlockOwnership( const Block* block ) const;
 
 		protected:
 
 			//
-			// Accessors for beginning and end of stream. 
+			// Accessors for beginning and end of stream.
 			//
 
-			/// Returns the first block of the stream. 
-			HK_ON_CPU( HK_FORCE_INLINE ) const Block* begin() const; 
+			/// Returns the first block of the stream.
+			HK_ON_CPU( HK_FORCE_INLINE ) const Block* begin() const;
 
 			/// Returns the first block of the stream.
 			HK_ON_CPU( HK_FORCE_INLINE ) const Block* last() const;
@@ -132,8 +141,8 @@ namespace hkBlockStreamBase
 			/// Returns the first block of the stream, with read-write access.
 			HK_FORCE_INLINE Block* beginRw();
 
-			/// Returns the last block of the stream, with read-write access.  
-			HK_FORCE_INLINE Block* lastRw(); 
+			/// Returns the last block of the stream, with read-write access.
+			HK_FORCE_INLINE Block* lastRw();
 
 			// append a list of ranges, creates lots of holes but is really fast
 			//void append( Allocator* HK_RESTRICT tlAllocator, Range* ranges, int numRanges, int rangeStriding );
@@ -149,26 +158,31 @@ namespace hkBlockStreamBase
 			Block* popBack( Allocator* tlAllocator );
 
 			/// Explicitely frees a block in the stream;
-			void freeBlockWithIndex(Allocator* HK_RESTRICT tlAllocator, Block* HK_RESTRICT blockPpu, int index);		
+			void freeBlockWithIndex(Allocator* HK_RESTRICT tlAllocator, Block* HK_RESTRICT blockPpu, int index);
 
-		public:
+		protected:
+
 			/// The base allocator used to get the blocks
-			protected:		hkBlockStreamAllocator* m_allocator;	
+			hkBlockStreamAllocator* m_allocator;
+
+			/// The total number of elements in this stream. This value is only valid after a call to Writer::finalizeLastBlock().
+			int m_numTotalElements;
+
+			/// Pointer to the corresponding block stream in PPU. Used only in SPU.
+			Stream* m_blockStreamPpu;
 
 			/// True if some blocks of the stream have been freed.
-			public: 		hkBool	m_partiallyFreed;
-			
+			hkBool m_partiallyFreed;
+
 			/// If set, all new blocks will be entirely zeroed (instead of only the header).
-			public:			hkBool  m_zeroNewBlocks;			
+			hkBool m_zeroNewBlocks;
 
 			/// Lock for readers and writers.
-			protected:		hkBool	m_isLocked;
+			hkBool m_isLocked;
 
 			/// If set, a block was sent back to PPU which was touched by a consumer
-			protected:		hkBool  m_spuWronglySentConsumedBlockStreamBack;
+			hkBool m_spuWronglySentConsumedBlockStreamBack;
 
-			///< The total number of elements in this stream. This value is only valid after a call to Writer::finalizeLastBlock().
-							int		m_numTotalElements;	
 		private:
 
 			/// Blocks owned by this stream.
@@ -181,7 +195,7 @@ namespace hkBlockStreamBase
 #endif //HK_BLOCKSTREAM_STREAM_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

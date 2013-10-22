@@ -18,7 +18,7 @@
 // remember if we defined symbols so we can reset them afterward
 
 #ifndef _WIN32_WINNT
-#	ifdef HK_PLATFORM_WINRT 
+#	if defined(HK_PLATFORM_WINRT) || defined(HK_PLATFORM_DURANGO)
 #		define _WIN32_WINNT 0x0602 // Win8 or higher
 #	else
 #		define _WIN32_WINNT 0x0500   // Windows2000 or higher
@@ -91,7 +91,7 @@
 #endif // HK_BASE_WINDOWS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -37,11 +37,11 @@ public:
 
 		struct LifoCheckAllocator : public hkMemoryAllocator
 		{
-			virtual void* blockAlloc( int numBytes );
-			virtual void blockFree( void* p, int numBytes );
-			virtual void* bufRealloc( void* pold, int oldNumBytes, int& reqNumBytesInOut );
-			virtual void getMemoryStatistics( MemoryStatistics& u );
-			virtual int getAllocatedSize(const void* obj, int nbytes);
+			virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+			virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
+			virtual void* bufRealloc( void* pold, int oldNumBytes, int& reqNumBytesInOut ) HK_OVERRIDE;
+			virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+			virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
 			void init(hkMemoryAllocator* base, OutputStringFunc func, void* funcArg);
 			void quit();
@@ -65,21 +65,21 @@ public:
 
 		hkOptimizerMemorySystem();
 
-		virtual hkMemoryRouter* mainInit(const FrameInfo& info, Flags f=FLAG_ALL);
-		virtual hkResult mainQuit(Flags f=FLAG_ALL);
-		virtual void threadInit(hkMemoryRouter& r, const char* name, Flags f=FLAG_ALL);
-		virtual void threadQuit(hkMemoryRouter& r, Flags f=FLAG_ALL);
+		virtual hkMemoryRouter* mainInit(const FrameInfo& info, Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual hkResult mainQuit(Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual void threadInit(hkMemoryRouter& r, const char* name, Flags f=FLAG_ALL) HK_OVERRIDE;
+		virtual void threadQuit(hkMemoryRouter& r, Flags f=FLAG_ALL) HK_OVERRIDE;
 
-		virtual void getMemoryStatistics(MemoryStatistics& stats);
+		virtual void getMemoryStatistics(MemoryStatistics& stats) HK_OVERRIDE;
+		virtual void printStatistics(hkOstream& ostr) const HK_OVERRIDE;
+		virtual void getHeapStatistics(hkMemoryAllocator::MemoryStatistics& stats);
 
-		virtual void printStatistics(hkOstream& ostr);
-
-		virtual void advanceFrame() { m_tempDetector.advanceFrame(); }
+		virtual void advanceFrame() HK_OVERRIDE { m_tempDetector.advanceFrame(); }
 
 		void init(hkMemoryAllocator* a, OutputStringFunc output, void* outputUserData, DetectFlags detect);
 		hkMemoryAllocator* getAllocator() { return m_baseAllocator; }
 		void setAllocator(hkMemoryAllocator* a) { HK_ASSERT(0x62b32838, m_baseAllocator==HK_NULL); m_baseAllocator = a; }
-		virtual hkMemoryAllocator* getUncachedLockedHeapAllocator();
+		virtual hkMemoryAllocator* getUncachedLockedHeapAllocator() HK_OVERRIDE;
 
 	protected:
 
@@ -103,7 +103,7 @@ public:
 #endif // HKBASE_hkOptimizerMemorySystem_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

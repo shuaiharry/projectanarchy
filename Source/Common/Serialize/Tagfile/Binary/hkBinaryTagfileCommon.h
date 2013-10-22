@@ -49,6 +49,17 @@ namespace hkBinaryTagfile
 		BINARY_MAGIC_1 = 0xD011FACE,
 	};
 
+	struct Header
+	{
+		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(Header, HK_MEMORY_CLASS_BASE);
+
+		hkUint32 m_magic1;
+		hkUint32 m_magic2;
+		int m_fileInfo;
+		int m_version;
+		hkStringPtr m_sdk;
+	};
+
 		/// Reverse the endianness of a hkUint32.
 	inline hkUint32 HK_CALL convertEndianU32( hkUint32 n )
 	{
@@ -78,7 +89,7 @@ namespace hkBinaryTagfile
 #endif // HK_BINARY_TAGFILE_COMMON_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

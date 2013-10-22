@@ -11,10 +11,12 @@
 #ifndef HKV_I_PROPERTIES_HPP_INCLUDED
 #define HKV_I_PROPERTIES_HPP_INCLUDED
 
+#include <Common/Base/hkBase.h>
+#include <Common/Base/System/Io/FileSystem/hkFileSystem.h>
+
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/AssetFramework.hpp>
 
 #include "hkvJsonStreamReadHandler.hpp"
-#include <Common/Base/System/Io/FileSystem/hkFileSystem.h>
 
 #include <vector>
 
@@ -414,7 +416,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -7,6 +7,7 @@
  */
 #ifndef HKAI_NAV_MESH_EROSION_H
 #define HKAI_NAV_MESH_EROSION_H
+#include <Ai/Internal/NavMesh/hkaiNavMeshGenerationTypes.h>
 
 class hkaiNavMeshGenerationProgressCallback;
 
@@ -17,16 +18,17 @@ class hkaiNavMeshErosion
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, hkaiNavMeshErosion);
 
+		typedef hkaiNavMeshGenerationResult::GenerationResultEnum GenerationResult;
 		/// Shrink the nav mesh. The callbacks are interpreted as either nav mesh generation or wall climbing accordingly.
-		static void HK_CALL erode(	class hkaiNavMesh& mesh, const struct hkaiNavMeshGenerationSettings& settings, 
-									class hkaiEdgeGeometryRaycaster* edgeConnectionRaycaster, 
-									hkaiNavMeshGenerationProgressCallback* callbacks );
+		static GenerationResult HK_CALL erode(	class hkaiNavMesh& mesh, const struct hkaiNavMeshGenerationSettings& settings, 
+												class hkaiEdgeGeometryRaycaster* edgeConnectionRaycaster, 
+												hkaiNavMeshGenerationProgressCallback* callbacks );
 };
 
 #endif	// HKAI_NAV_MESH_EROSION_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -77,38 +77,107 @@ public:
 class hkvProfileManager : public hkvPropertyReader
 {
 public: // static functions
+  /// \brief
+  ///   Static init function of the profile manager which creates the global instance.
   ASSETFRAMEWORK_IMPEXP static void initProfileManager();
+
+  /// \brief
+  ///   Static de-init function of the profile manager which destroys the global instance.
   ASSETFRAMEWORK_IMPEXP static void deInitProfileManager();
+
+  /// \brief
+  ///   Returns the global instance of the profile manager.
   ASSETFRAMEWORK_IMPEXP static hkvProfileManager* getGlobalInstance();
 
+  /// \brief
+  ///   Returns whether a given platform is supported in this version of Vision. Anarchy builds will only return true for dx9, android and ios.
   ASSETFRAMEWORK_IMPEXP static bool isTargetPlatformSupported(VTargetDevice_e platform);
 
 public: // public functions
   ASSETFRAMEWORK_IMPEXP hkvProfileManager();
   ASSETFRAMEWORK_IMPEXP ~hkvProfileManager();
-  ASSETFRAMEWORK_IMPEXP void clearProfiles(bool emitCallbacks = true);
 
+  /// \brief
+  ///   Resets the profile manager to its initial state. Should be called when a new project is loaded / unloaded.
+  ASSETFRAMEWORK_IMPEXP void clearProfilesAndTemplates(bool emitCallbacks = true);
+
+  /// \brief
+  ///   Loads profile and template information from the given project directory (either Anarchy.assetprj or Project.assetprj).
   ASSETFRAMEWORK_IMPEXP bool loadProfileManifest(const char* projectDir);
-  ASSETFRAMEWORK_IMPEXP bool saveProfileManifest(const char* fileName = NULL);
+
+  /// \brief
+  ///   Saves profile and template information to the same file it was loaded from unless a different path is given.
+  ///
+  /// \param fileName
+  ///   Filename of the manifest. If set to NULL, the file the settings were loaded from is used.
+  ///
+  /// \param force
+  ///   Whether the changes should even be changed if the lock couldn't be acquired. If true, manual merging by the user
+  ///   in the RCS will be required.
+  ASSETFRAMEWORK_IMPEXP bool saveProfileManifest(const char* fileName = NULL, bool force = false);
+
+  /// \brief
+  ///   Returns whether the profile manifest is already loaded.
   ASSETFRAMEWORK_IMPEXP bool isProfileManifestLoaded() const;
+
+  /// \brief
+  ///   Returns the absolute path to the manifest file used (either Anarchy.assetprj or Project.assetprj).
   ASSETFRAMEWORK_IMPEXP const char* getProfileManifestFile() const {return m_manifestFile.cString();};
+
+  /// \brief
+  ///   Returns whether changes have been made to any template or profile.
   ASSETFRAMEWORK_IMPEXP inline bool isDirty() const {return m_dirty;}
+
+  /// \brief
+  ///   Sets whether changes have been made to any template or profile.
   ASSETFRAMEWORK_IMPEXP void setDirty();
   
-  // profile functions
+  /// \brief
+  ///   Returns the number of profiles that are present in this project.
   ASSETFRAMEWORK_IMPEXP hkUint32 getNumberOfProfiles() const;
+
+  /// \brief
+  ///   Returns the profile by the given index. Invalid indices return NULL.
   ASSETFRAMEWORK_IMPEXP hkvProfile::RefCPtr getProfileByIndex(hkUint32 index) const;
+
+  /// \brief
+  ///   Returns the profile by the given name. Invalid names return NULL.
   ASSETFRAMEWORK_IMPEXP hkvProfile::RefCPtr getProfileByName(const char* name) const;
+
+  /// \brief
+  ///   Returns an array of all profiles.
   ASSETFRAMEWORK_IMPEXP const std::vector<hkvProfile::RefPtr>& getProfiles() const;
+
+  /// \brief
+  ///   Returns the index of the given profile. If the name could not be resolved, HKV_INVALID_INDEX is returned.
   ASSETFRAMEWORK_IMPEXP hkUint32 getProfileIndexByName(const char* name) const;
 
+  /// \brief
+  ///   Adds a profile with the given name and platform, copies all settings from another profile if available and returns the new profile's index.
   ASSETFRAMEWORK_IMPEXP hkUint32 addProfile(const char* name, hkvTargetPlatform platform, hkUint32 copySettingsFromProfileIndex = HKV_INVALID_INDEX);
+
+  /// \brief
+  ///   Deletes the profile with the given index. The last and active profile can't be deleted in which case false is returned.
   ASSETFRAMEWORK_IMPEXP hkBool deleteProfile(hkUint32 index);
 
+  /// \brief
+  ///   Returns the index of the currently active profile.
   ASSETFRAMEWORK_IMPEXP hkUint32 getActiveProfileIndex() const;
+
+  /// \brief
+  ///   Returns the currently active profile.
   ASSETFRAMEWORK_IMPEXP hkvProfile::RefCPtr getActiveProfile() const;
+
+  /// \brief
+  ///   Sets the currently active profile by index. If the index is invalid, false is returned.
   ASSETFRAMEWORK_IMPEXP hkBool setActiveProfile(hkUint32 index);
+
+  /// \brief
+  ///   Returns whether the asset preview mode is enabled.
   ASSETFRAMEWORK_IMPEXP hkBool isAssetPreviewModeEnabled() const;
+
+  /// \brief
+  ///   Sets the state of the asset preview mode.
   ASSETFRAMEWORK_IMPEXP void setAssetPreviewMode(bool enableAssetPreviewMode);
 
   // RCS
@@ -121,13 +190,27 @@ public: // public functions
   ASSETFRAMEWORK_IMPEXP const char* getEditorProfileName() const;
 
   // transform rule template functions
-  ASSETFRAMEWORK_IMPEXP hkUint32 getNumberOfTransformRuleTemplates() const;
-  ASSETFRAMEWORK_IMPEXP const hkvTransformRuleTemplate* getTransformRuleTemplateByIndex(hkUint32 index) const;
-  ASSETFRAMEWORK_IMPEXP hkUint32 getTransformRuleTemplateIndexByName(const char* name) const;
-  ASSETFRAMEWORK_IMPEXP hkUint32 addTransformRuleTemplate(const char* name);
-  ASSETFRAMEWORK_IMPEXP hkUint32 duplicateTransformRuleTemplate (hkUint32 index, const char* name);
-  ASSETFRAMEWORK_IMPEXP hkBool deleteTransformRuleTemplate (hkUint32 index);
-  ASSETFRAMEWORK_IMPEXP const char* getTransformRuleTemplateMapping() const;
+  ASSETFRAMEWORK_IMPEXP hkUint32 getNumberOfTransformRuleTemplates(const char* assetType) const;
+  ASSETFRAMEWORK_IMPEXP hkvTransformRuleTemplate* getTransformRuleTemplateByIndex(const char* assetType, hkUint32 templateIndex);
+  ASSETFRAMEWORK_IMPEXP const hkvTransformRuleTemplate* getTransformRuleTemplateByIndex(const char* assetType, hkUint32 templateIndex) const;
+  ASSETFRAMEWORK_IMPEXP hkUint32 getTransformRuleTemplateIndexByName(const char* assetType, const char* name) const;
+  ASSETFRAMEWORK_IMPEXP hkUint32 addTransformRuleTemplate(const char* assetType, const char* name);
+  ASSETFRAMEWORK_IMPEXP hkUint32 duplicateTransformRuleTemplate(const char* assetType, hkUint32 templateIndex, const char* name);
+  ASSETFRAMEWORK_IMPEXP hkBool deleteTransformRuleTemplate(const char* assetType, hkUint32 templateIndex);
+  ASSETFRAMEWORK_IMPEXP const char* getTransformRuleTemplateMapping(const char* assetType) const;
+
+  /// \brief
+  ///   Templates are not reference counted internally so in order to know how many times a template is used you can call this functions
+  ///   which iterates over all assets to build up current reference counts.
+  ///
+  /// \sa getTemplateReferenceCount
+  ASSETFRAMEWORK_IMPEXP void updateTemplateReferenceCounts() const;
+
+  /// \brief
+  ///   Returns the computed reference count for the given template.
+  ///
+  /// \sa updateTemplateReferenceCounts
+  ASSETFRAMEWORK_IMPEXP hkUint32 getTemplateReferenceCount(const char* assetType, hkUint32 templateIndex) const;
 
   virtual hkvJsonStreamReadHandler::ParsingResult ParseMapKey(const unsigned char* value, size_t len);
 
@@ -145,15 +228,22 @@ public: // Data
 
 private:
   void updateTransformRuleTemplateMapping();
+  void resetAssetTypeToTemplatesMap();
+
   void updateLockTimeStamp();
   hkvProfileManager(const hkvProfileManager& profile);
   void operator=(const hkvProfileManager& rhs);
 
 private:
   hkStringPtr m_manifestFile;
-  hkStringPtr m_transformRuleTemplateMapping;
   std::vector<hkvProfile::RefPtr> m_profiles;
-  std::vector<hkvTransformRuleTemplate*> m_transformRuleTemplates;
+
+  class TransformTemplateContainer;
+  TransformTemplateContainer* getTransformTemplateContainer(const char* assetType) const;
+  TransformTemplateContainer* getTransformTemplateContainer(const char* assetType, bool createNew);
+
+  hkStorageStringMap<TransformTemplateContainer*> m_assetTypeToTemplates;
+  typedef hkStorageStringMap<TransformTemplateContainer*>::Iterator TemplateIterator;
   
   hkUint32 m_activeProfile;
   hkBool m_assetPreviewMode;
@@ -179,7 +269,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

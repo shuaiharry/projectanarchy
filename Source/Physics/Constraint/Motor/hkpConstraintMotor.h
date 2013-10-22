@@ -11,7 +11,7 @@
 
 #include <Physics/ConstraintSolver/Solve/hkpSolverResults.h>
 
-extern const hkClass hkpConstraintMotorClass; 
+extern const hkClass hkpConstraintMotorClass;
 
 
 /// Takes 1DOF state as input, and calculates the data, which goes into the constraint solver.
@@ -50,20 +50,20 @@ class hkpConstraintMotor : public hkReferencedObject
 	public:
 
 		hkEnum<MotorType, hkInt8> m_type;
-}; 
+};
 
 
 //
 class hkpMaxSizeConstraintMotor : public hkpConstraintMotor
 {
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT );
 
 		hkpMaxSizeConstraintMotor() { m_type = TYPE_MAX; }
 
 		virtual hkpConstraintMotor* clone() const  { HK_ASSERT2(0xad67ddab, false, "Dummy implementation used."); return HK_NULL; }
-	
+
 	public:
 
 #if defined(HK_REAL_IS_DOUBLE)
@@ -82,7 +82,7 @@ class hkpMaxSizeConstraintMotor : public hkpConstraintMotor
 #endif // HKP_CONSTRAINT_MOTOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

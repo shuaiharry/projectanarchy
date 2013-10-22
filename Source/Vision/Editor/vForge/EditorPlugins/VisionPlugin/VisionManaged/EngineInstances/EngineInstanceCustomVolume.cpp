@@ -731,6 +731,10 @@ namespace VisionManaged
         VASSERT_MSG(false,"missing implementation");
     }
 
+    // Clear trace and collision mesh to force their regeneration
+    pStaticMesh->SetTraceMesh(NULL);
+    pStaticMesh->SetCollisionMesh(NULL);
+
     // inform owner object and its components, that volume geometry has changed
     if (GetO3DPtr())
       GetO3DPtr()->SendMsg(GetO3DPtr(), VIS_MSG_EDITOR_PROPERTYCHANGED, (INT_PTR) "VolumeGeometry", 0 );
@@ -989,7 +993,7 @@ namespace VisionManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

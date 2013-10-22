@@ -85,12 +85,12 @@ HK_FORCE_INLINE void hkVector2d::load( const hkDouble64* p )
 
 HK_FORCE_INLINE void hkVector2d::convertToVector4( hkVector4d& vOut ) const
 {
-	vOut.load<2,HK_IO_NATIVE_ALIGNED>( &x );
+	vOut.load<2,HK_IO_BYTE_ALIGNED>( &x );
 }
 
 HK_FORCE_INLINE void hkVector2d::convertFromVector4( hkVector4dParameter vIn )
 {
-	vIn.store<2,HK_IO_NATIVE_ALIGNED>( &x );
+	vIn.store<2,HK_IO_BYTE_ALIGNED>( &x );
 }
 
 HK_FORCE_INLINE void hkVector2d::setPerp( const hkVector2d& a )
@@ -248,7 +248,7 @@ HK_FORCE_INLINE void HK_CALL hkVector2d::cross(const hkVector2d& vA, const hkVec
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

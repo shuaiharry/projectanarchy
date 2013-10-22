@@ -10,7 +10,7 @@ void* hkLifoAllocator::fastBlockAlloc(int numBytesIn)
 {
 	int numBytes = HK_NEXT_MULTIPLE_OF(16, numBytesIn);
 
-	void* next = hkAddByteOffset(m_cur, numBytes);
+	void* next = static_cast<char*>(m_cur) + numBytes;
 	if (numBytes <= m_slabSize && hkUlong(next) <= hkUlong(m_end))
 	{
 		void* ret = m_cur;
@@ -28,7 +28,7 @@ void hkLifoAllocator::fastBlockFree(void* p, int numBytesIn)
 {
 	int numBytes = HK_NEXT_MULTIPLE_OF(16, numBytesIn);
 	if (numBytesIn <= m_slabSize && 
-		hkAddByteOffset(p, numBytes) == m_cur &&
+		(static_cast<char*>(p) + numBytes) == m_cur &&
 		m_firstNonLifoEnd != p)
 	{
 		// usual case, free top
@@ -41,7 +41,7 @@ void hkLifoAllocator::fastBlockFree(void* p, int numBytesIn)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

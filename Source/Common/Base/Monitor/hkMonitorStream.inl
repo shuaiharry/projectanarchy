@@ -13,7 +13,7 @@
 #include <spu_intrinsics.h>
 #elif defined(HK_PLATFORM_CTR)
 #include <nn/os/os_Tick.h>
-#elif defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_NACL)
+#elif defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_NACL) || defined(HK_PLATFORM_TIZEN)
 #include <time.h>
 #endif
 
@@ -133,7 +133,7 @@ void hkMonitorStream::TimerCommand::setTime()
     m_time0 = (hkUint64) mach_absolute_time();
 #elif defined(HK_PLATFORM_CTR)
 	m_time0 = (hkUint64) nn::os::Tick::GetSystemCurrent();
-#elif defined(HK_PLATFORM_ANDROID)
+#elif defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_TIZEN)
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now); //CLOCK_MONOTONIC_HR not supported on a lot of them (any?)
 	m_time0 = ((hkUint64)now.tv_sec)*1000000000LL + now.tv_nsec;
@@ -374,7 +374,7 @@ class HK_POSSIBLY_UNUSED hkTimeListFunctionHelper
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

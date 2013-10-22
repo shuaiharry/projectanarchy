@@ -12,6 +12,9 @@
 /// hkPackfileHeader meta information
 extern const class hkClass hkPackfileHeaderClass;
 
+class hkPackfileSectionHeader;
+class hkStreamReader;
+
 /// The header of a binary packfile.
 class hkPackfileHeader
 {
@@ -29,8 +32,19 @@ class hkPackfileHeader
 			m_magic[1] = 0x10c0c010;
 			m_contentsVersion[0] = 0;
 			m_flags = 0; // Set to 1 when a packfile is loaded in-place to signify that the packfile is loaded
+			
+			m_pad[0] = 0; // Padding set to zero.
 		}
 		
+		/// Returns a pointer to the i-th packfile section header. 
+		/// Packfile section headers are stored just below the main packfile header.
+		/// It's not safe to perform pointer arithmetics on the returned value.
+		const hkPackfileSectionHeader* getSectionHeader(const void* packfileData, int i) const;
+		/// Non-const overload of the above function.
+		hkPackfileSectionHeader* getSectionHeader(void* packfileData, int i) const;
+
+		static hkResult readHeader(hkStreamReader* stream, hkPackfileHeader& out);
+
 	public:
 		
 			/// Magic file identifier. See constructor for values.
@@ -39,7 +53,7 @@ class hkPackfileHeader
 			/// This is a user settable tag.
 		hkInt32 m_userTag;
 		
-			/// Binary file version. Currently 9
+			/// Binary file version. Currently 11.
 		hkInt32 m_fileVersion;
 		
 			/// The structure layout rules used by this file.
@@ -67,7 +81,7 @@ class hkPackfileHeader
 #endif // HKSERIALIZE_SERIALIZE_BINARY_HKPACKFILEHEADER_XML_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

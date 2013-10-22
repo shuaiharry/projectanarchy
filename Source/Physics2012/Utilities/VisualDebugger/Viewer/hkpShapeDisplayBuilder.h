@@ -89,7 +89,7 @@ class hkpShapeDisplayBuilder: public hkDisplayGeometryBuilder
 										 hkArray<hkDisplayGeometry*>& displayGeometries, const hkVector4* scale = HK_NULL );
 		void buildShapeDisplay_Box( const hkpBoxShape* boxShape, const hkTransform& transform, 
 									hkArray<hkDisplayGeometry*>& displayGeometries, const hkVector4* scale = HK_NULL );
-		void buildShapeDisplay_Triangle( const hkpTriangleShape* triangleShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries );
+		void buildShapeDisplay_Triangle( const hkpTriangleShape* triangleShape, const hkTransform& transform, hkArray<hkDisplayGeometry*>& displayGeometries, const hkVector4* scale = HK_NULL );
 		void buildShapeDisplay_ConvexVertices( const hkpConvexVerticesShape* shape, const hkTransform& transform, 
 											   hkArray<hkDisplayGeometry*>& displayGeometries, 
 											   const hkVector4* scale = HK_NULL );
@@ -202,7 +202,7 @@ HK_SINGLETON_SPECIALIZATION_DECL(hkpUserShapeDisplayBuilder);
 #endif // HK_COLLIDE2_SHAPE_DISPLAY_BUILDER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

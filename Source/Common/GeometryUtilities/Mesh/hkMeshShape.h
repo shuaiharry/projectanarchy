@@ -72,12 +72,25 @@ class hkMeshMaterial: public hkReferencedObject
 		virtual hkMeshTexture* getTexture(int index) const = 0;
 			/// Adds a texture to the material
 		virtual void addTexture(hkMeshTexture* texture) = 0;
+			/// Sets a texture of the given slot
+		virtual void setTexture(int index, hkMeshTexture* texture) = 0;
 
 			/// Gets the color properties of the material
 		virtual void getColors( hkVector4& diffuse, hkVector4& ambient, hkVector4& specular, hkVector4& emissive ) const = 0;
 			/// Sets the color properties of the material
 		virtual void setColors( const hkVector4& diffuse, const hkVector4& ambient, const hkVector4& specular, const hkVector4& emissive ) = 0;
 
+		/// Gets / Sets the user data
+		virtual hkUlong getUserData() const { return 0; }
+		virtual void setUserData(hkUlong userData) {}
+
+		/// Gets / sets the tesselation factor. Triangles will not be tesselated if the factor is 0.0f, and fully tesselated if the factor is 1.0f
+		virtual hkReal getTesselationFactor() const { return 0.0f;	}
+		virtual void setTesselationFactor(hkReal f) {}
+
+		/// Gets / sets the displacement amount. This represents the actual distance a vertex gets displaced for a displacement factor of 1.0f
+		virtual hkReal getDisplacementAmount() const { return 0.0f; }
+		virtual void setDisplacementAmount(hkReal f) {}
 };
 
 
@@ -254,7 +267,7 @@ class hkMeshShape: public hkReferencedObject
 #endif // HK_MESH_SHAPE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

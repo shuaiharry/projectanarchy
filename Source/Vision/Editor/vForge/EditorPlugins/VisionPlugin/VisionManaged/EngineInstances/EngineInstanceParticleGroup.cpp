@@ -222,14 +222,17 @@ namespace VisionManaged
       for (int i=0;i<m_pGroup->GetParticleGroupCount();i++)
       {
         ParticleGroupBase_cl *pGroup = m_pGroup->GetParticleGroup(i);
-        if (!pGroup) continue;
+
+        if( !pGroup )
+          continue;
+        
         switch (g_CurrentPreviewType)
         {
-          case ParticlePreviewType_e::LayerProperties:      RenderPreview_LayerProperties(view,pRI,pGroup);break;
-          case ParticlePreviewType_e::ParticleProperties:   RenderPreview_ParticleProperties(view,pRI,pGroup);break;
-          case ParticlePreviewType_e::EmitterProperties:    RenderPreview_EmitterProperties(view,pRI,pGroup);break;
-          case ParticlePreviewType_e::VisibilityProperties: RenderPreview_VisibilityProperties(view,pRI,pGroup);break;
-          case ParticlePreviewType_e::PhysicsProperties:    RenderPreview_PhysicsProperties(view,pRI,pGroup);break;
+          case ParticlePreviewType_e::LayerProperties:      RenderPreview_LayerProperties(i, view, pRI, pGroup);break;
+          case ParticlePreviewType_e::ParticleProperties:   RenderPreview_ParticleProperties(i, view, pRI, pGroup);break;
+          case ParticlePreviewType_e::EmitterProperties:    RenderPreview_EmitterProperties(i, view, pRI, pGroup);break;
+          case ParticlePreviewType_e::VisibilityProperties: RenderPreview_VisibilityProperties(i, view, pRI, pGroup);break;
+          case ParticlePreviewType_e::PhysicsProperties:    RenderPreview_PhysicsProperties(i, view, pRI, pGroup);break;
           default: break;
         }
 
@@ -237,24 +240,30 @@ namespace VisionManaged
     }
   }
 
-  void EngineInstanceParticleGroup::RenderPreview_LayerProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
+  void EngineInstanceParticleGroup::RenderPreview_LayerProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
   {
   }
 
-  void EngineInstanceParticleGroup::RenderPreview_ParticleProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
+  void EngineInstanceParticleGroup::RenderPreview_ParticleProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
   {
   }
 
-  void EngineInstanceParticleGroup::RenderPreview_EmitterProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
+  void EngineInstanceParticleGroup::RenderPreview_EmitterProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
   {
+    if( iLayer!=g_CurrentPreviewLayer )
+      return;
+
     VisParticleEmitter_cl *pEmitter =  pGroup->GetEmitter();
     VIS_EMITTER_TYPE_e eType = pEmitter->GetType();
     hkvVec3 vParam = pEmitter->m_vParam.getAsVec3 ();
     vParam *= pGroup->GetScaling(); // scale the emitter extent
     float fConeAngle = pEmitter->m_fConeAngle;
     hkvVec3 vPos(m_fPosX, m_fPosY, m_fPosZ);
-    hkvVec3 vDir = m_pGroup->GetDirection();
-    hkvMat3 mRotMat = m_pGroup->GetRotationMatrix();
+    
+    VisParticleEffect_cl *pParentEffect = pGroup->GetParentEffect();
+
+    hkvVec3 vDir = (pParentEffect!=NULL) ? pParentEffect->GetDirection() : m_pGroup->GetDirection();
+    hkvMat3 mRotMat = (pParentEffect!=NULL) ? pParentEffect->GetRotationMatrix() : m_pGroup->GetRotationMatrix();
 
     VSimpleRenderState_t state(VIS_TRANSP_ALPHA, RENDERSTATEFLAG_FRONTFACE);
 
@@ -274,30 +283,28 @@ namespace VisionManaged
         {
           if(pEmitter->m_bEmitFromSurface)
           {
-            hkvMat3 rotMat = m_pGroup->GetRotationMatrix();
-
             hkvVec3 up(0,0,vParam.x);
-            up = rotMat * up;
+            up = mRotMat * up;
             pRI->RenderCone(vPos+up, up.getNormalized(), fConeAngle * 2.0f, 100.f, VColorRef(255,150,0,50), state);
 
             up.set(0,0,-vParam.x);
-            up = rotMat * up;
+            up = mRotMat * up;
             pRI->RenderCone(vPos+up, up.getNormalized(), fConeAngle * 2.0f, 100.f, VColorRef(255,150,0,50), state);
 
             up.set(vParam.x,0,0);
-            up = rotMat * up;
+            up = mRotMat * up;
             pRI->RenderCone(vPos+up, up.getNormalized(), fConeAngle * 2.0f, 100.f, VColorRef(255,150,0,50), state);
 
             up.set(-vParam.x,0,0);
-            up = rotMat * up;
+            up = mRotMat * up;
             pRI->RenderCone(vPos+up, up.getNormalized(), fConeAngle * 2.0f, 100.f, VColorRef(255,150,0,50), state);
 
             up.set(0,vParam.x,0);
-            up = rotMat * up;
+            up = mRotMat * up;
             pRI->RenderCone(vPos+up, up.getNormalized(), fConeAngle * 2.0f, 100.f, VColorRef(255,150,0,50), state);
 
             up.set(0,-vParam.x,0);
-            up = rotMat * up;
+            up = mRotMat * up;
             pRI->RenderCone(vPos+up, up.getNormalized(), fConeAngle * 2.0f, 100.f, VColorRef(255,150,0,50), state);
           }
           else
@@ -489,25 +496,31 @@ namespace VisionManaged
     }
   }
 
-  void EngineInstanceParticleGroup::RenderPreview_VisibilityProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
+  void EngineInstanceParticleGroup::RenderPreview_VisibilityProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
   {
     VisParticleGroupDescriptor_cl *pDesc = pGroup->GetDescriptor();
-    hkvAlignedBBox bbox;
+    VisParticleEffect_cl * pParentEffect = pGroup->GetParentEffect(); //could be null
 
-    // render axis aligned visibility bounding box
-    hkvVec3 vPos(m_fPosX,m_fPosY,m_fPosZ);
-    hkvMat3 rotMat (hkvNoInitialization);
-    rotMat.setFromEulerAngles (m_fRoll, m_fPitch, m_fYaw);
+    hkvMat3 rotMat = (pParentEffect!=NULL) ? pParentEffect->GetRotationMatrix() : pGroup->GetRotationMatrix();
 
-    hkvAlignedBBox orientedBBox = pDesc->m_BoundingBox;
-    orientedBBox.transformFromOrigin (hkvMat4 (rotMat, vPos));
-    bbox.expandToInclude (orientedBBox);
+    hkvAlignedBBox orientedBBox(pDesc->m_BoundingBox.m_vMin, pDesc->m_BoundingBox.m_vMax);
 
-    pRI->DrawLineBox(hkvAlignedBBox((hkvVec3& )bbox.m_vMin,(hkvVec3& )bbox.m_vMax), VColorRef(255,150,0,50), 1.f);
+    hkvMat4 transform(rotMat, (pParentEffect!=NULL) ? pParentEffect->GetPosition() :  pGroup->GetPosition() );
+    transform.setScalingFactors( hkvVec3( pGroup->GetScaling() ) );
+    orientedBBox.transformFromOrigin( transform );
+
+    hkvAlignedBBox bBox( hkvNoInitialization );
+    bBox.setInvalid();
+    bBox.expandToInclude( orientedBBox );
+
+    pRI->DrawLineBox(bBox, (iLayer==g_CurrentPreviewLayer) ? V_RGBA_RED : VColorRef(255,150,0,50), 1.f);
   }
 
-  void EngineInstanceParticleGroup::RenderPreview_PhysicsProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
+  void EngineInstanceParticleGroup::RenderPreview_PhysicsProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup)
   {
+    if( iLayer!=g_CurrentPreviewLayer )
+      return;
+
     //render the gravity vector
     hkvVec3 vGravity = pGroup->GetDescriptor()->m_vGravity;
     hkvVec3 vPos(m_fPosX,m_fPosY,m_fPosZ);
@@ -869,7 +882,7 @@ namespace VisionManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

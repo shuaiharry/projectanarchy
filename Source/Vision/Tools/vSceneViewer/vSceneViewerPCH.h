@@ -15,6 +15,10 @@
 
 #define VISION_SAMPLEAPP_CALLBACKS
 
+// add USE_FILESERVE  to your projects preprocessor options to use file serve on windows
+// add EMULATE_DEVICE to your projects preprocessor options to enable mobile emulation on windows
+// for example: EMULATIE_DEVICE=TARGETDEVICE_ANDROID 
+
 #include <Vision/Runtime/Base/VBase.hpp>
 #include <Vision/Runtime/Engine/System/Vision.hpp>
 #include <Vision/Runtime/Common/VisSampleApp.hpp>
@@ -22,13 +26,10 @@
 #include <Vision/Tools/vSceneViewer/vSceneViewer.h>
 #include <Vision/Tools/vSceneViewer/vLuaScript.h>
 
-// define this temporary for use on win32, if needed
-//#define USE_FILESERVE
-
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

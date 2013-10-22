@@ -553,6 +553,15 @@ class hkbBehaviorGraph : public hkbGenerator
 			/// Give a unique ID for a transition effect back to the pool.
 		void relinquishUniqueIdForTransitionEffect( hkUint16 id );
 
+			/// Get a unique ID for a single dynamic child node (not present at graph load time).
+			/// This is a helper function which simple returns:
+			///		( FIRST_TRANSITION_EFFECT_ID - 1 - ( node->m_id + 1 ) )
+			/// It also checks against the max static node id in debug to ensure we haven't crossed into the static node id space.
+			/// This function currently only supports a single dynamic child node per static node but will likely be
+			/// expanded on in the future.
+			
+		hkUint16 getDynamicChildNodeId( const hkbNode* parentNode );
+
 			/// Get the internal state of the entire graph.
 			/// This should only be called on the root behavior graph.
 		void getInternalStateOfGraph( hkbBehaviorGraphInternalState& internalState );
@@ -818,6 +827,10 @@ class hkbBehaviorGraph : public hkbGenerator
 
 	public:
 
+#if defined(HK_ENABLE_DETERMINISM_CHECKS)
+		virtual void checkDeterminism() HK_OVERRIDE;
+#endif
+
 		hkbBehaviorGraph( hkFinishLoadedObjectFlag flag );
 
 		friend class hkbCpuBehaviorJob;
@@ -829,7 +842,7 @@ class hkbBehaviorGraph : public hkbGenerator
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

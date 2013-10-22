@@ -41,8 +41,8 @@ class hkpCogWheelConstraintData : public hkpConstraintData
 
 			hkpSolverResults m_solverResults[SOLVER_RESULT_MAX];
 
-			// This stores the initial relative angular orientation of the bodies. 0 if uninitialized (triggers 
-			// initialization of m_revolutionCounter too). Non-zero when initialized (set to a tiny number 
+			// This stores the initial relative angular orientation of the bodies. 0 if uninitialized (triggers
+			// initialization of m_revolutionCounter too). Non-zero when initialized (set to a tiny number
 			// (< HK_REAL_EPSILON) for zero values).
 			HK_ALIGN(hkReal m_initialAngleOffset[2],HK_REAL_SIZE);
 
@@ -71,9 +71,9 @@ class hkpCogWheelConstraintData : public hkpConstraintData
 			hkpSetLocalTransformsConstraintAtom	m_transforms;
 			hkpCogWheelConstraintAtom			m_cogWheels;
 		};
-		
+
 	public:
-		
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
@@ -87,7 +87,7 @@ class hkpCogWheelConstraintData : public hkpConstraintData
 		void setInWorldSpace(	const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
 								const hkVector4& rotationPivotA, const hkVector4& rotationAxisA, hkReal radiusA,
 								const hkVector4& rotationPivotB, const hkVector4& rotationAxisB, hkReal radiusB);
-										
+
 		/// Sets the cog wheels up with body space information.
 		/// The parameters are analogical to setInWorldSpace().
 		void setInBodySpace( const hkVector4& rotationPivotAInA, const hkVector4& rotationAxisAInA, hkReal radiusA,
@@ -100,13 +100,13 @@ class hkpCogWheelConstraintData : public hkpConstraintData
 		//
 
 		virtual int getType() const;
-		
+
 		virtual hkBool isValid() const;
 
 		virtual void getConstraintInfo( hkpConstraintData::ConstraintInfo& infoOut ) const;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
+
 	public:
 
 		HK_ALIGN_REAL( Atoms m_atoms );
@@ -118,7 +118,7 @@ class hkpCogWheelConstraintData : public hkpConstraintData
 #endif // HKP_COG_WHEEL_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

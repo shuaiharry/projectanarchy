@@ -73,8 +73,8 @@ public:
   /// 
   /// \param iInitFlags
   ///   A logical combination of flags listed in the VAppFlags enum.
-  VisAppConfig_cl(int iXRes = VVIDEO_DEFAULTWIDTH, int iYRes = VVIDEO_DEFAULTHEIGHT, int iInitFlags = VAPP_INIT_DEFAULTS) :
-    m_videoConfig(iXRes, iYRes)
+  VisAppConfig_cl(int iXRes = VVIDEO_DEFAULTWIDTH, int iYRes = VVIDEO_DEFAULTHEIGHT, int iInitFlags = VAPP_INIT_DEFAULTS)
+    : m_videoConfig(iXRes, iYRes)
   {
     m_iInitFlags = iInitFlags;
 #ifdef WIN32
@@ -104,7 +104,7 @@ public:
 /// A custom controller typically comes in pair with a custom timer implementation to return custom time steps during scene update.
 /// Class VFixStepSceneUpdateController is a predefined implementation of it which allows for running simulation with a fixed tick rate (e.g. 30Hz).
 /// Typical use cases are applications that require deterministic rendering through fix simulation update frequency such as multichannel applications.
-class IVisUpdateSceneController_cl : public VRefCounter
+class IVisUpdateSceneController_cl : public VTypedObject, public VRefCounter
 {
 public:
   /// \brief
@@ -117,7 +117,6 @@ public:
   /// \brief
   ///   Destructor
   VISION_APIFUNC virtual  ~IVisUpdateSceneController_cl();
-
 
   /// \brief
   ///   This function is called by the engine when a new scene has been loaded
@@ -134,6 +133,20 @@ public:
   /// \brief
   /// Overridden function called upon deletion time
   VISION_APIFUNC virtual void DeleteThis() HKV_OVERRIDE;
+
+  ///
+  /// @name Serialization
+  /// @{
+  ///
+
+  V_DECLARE_SERIAL_DLLEXP(IVisUpdateSceneController_cl, VISION_APIDATA)
+
+  VISION_APIFUNC virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
+
 protected:
   bool m_bDeleteObjectUponUnref;
 };
@@ -165,7 +178,7 @@ public:
   /// \sa IVisApp_cl::InitEngine
   /// \sa IVisApp_cl::DeInitEngine
   VISION_APIFUNC IVisApp_cl(const char *pszAuthKey = VISION_AUTHENTICITY_KEY);
-  
+
   /// \brief
   ///   Destructor
   VISION_APIFUNC virtual ~IVisApp_cl();
@@ -182,7 +195,7 @@ public:
   /// This is triggered by each VisRenderContext_cl when it is executed. The reference implementation
   /// calls Vision::RenderSceneHelper(), which forwards execution to the context's render loop.
   VISION_APIFUNC virtual void OnRenderScene() = 0;
-  
+
   /// \brief
   ///   Updates the scene, i.e performs a single game loop simulation tick.
   /// 
@@ -213,7 +226,7 @@ public:
   /// \brief
   ///   Sets an instance of IVisUpdateSceneController_cl on this scene to customize the simulation tick handling.
   ///
-  /// By default, no controller is installed. In the reference implementationthis implies that there is a 1:1 ratio between simulation update and rendering,
+  /// By default, no controller is installed. In the reference implementation this implies that there is a 1:1 ratio between simulation update and rendering,
   /// where simulation time step is the actual time passed since the last frame. For fixed time steps, a controller of existing type VFixStepSceneUpdateController can be installed.
   ///
   /// \param pController
@@ -243,10 +256,10 @@ public:
   ///
 
   ///
-  /// @name Scene Loading Status Callbacks
+  /// @name Scene Loading Status Callbacks / Controls
   /// @{
   ///
-  
+
   /// \brief
   ///   Callback that the engine calls to update the progress of LoadWorld
   /// 
@@ -289,6 +302,23 @@ public:
   ///   for various loading processes. See class VProgressStatus.
   virtual VProgressStatus& GetLoadingProgress() = 0;
 
+  /// \brief
+  ///   Request loading the given scene.
+  /// 
+  /// \return
+  ///   True, if the request has been successful.
+  ///
+  /// \param pszSceneName
+  ///   The name of the scene file (.vscene will be added).
+  ///
+  /// \param iAdditionalLoadingFlags
+  ///   Optionally specify additional VSceneLoader flags.
+  ///
+  /// \param bAllowProfileFallback
+  ///   If true LoadScene will try to guess the asset profile to use. By default it will first use the platform specific profile, but it might fall back to 'pcdx9'
+  ///   if there is no platform specific profile, but a pcdx9 profile, and the current platform is compatible with that (regarding texture formats).
+  virtual bool RequestLoadScene(const char* pszSceneName, int iAdditionalLoadingFlags = 0, bool bAllowProfileFallback = true) = 0;
+
   ///
   /// @}
   ///
@@ -311,7 +341,7 @@ public:
   ///   VisBaseEntity_cl *pEntity: Entity that has been created.
   ///
   virtual VisBaseEntity_cl *OnCreateEntity(const char *pszClassName) = 0;  
-  
+
   ///
   /// @}
   ///
@@ -348,7 +378,7 @@ public:
   /// \sa IVisApp_cl::InitEngine
   /// \sa IVisApp_cl::DeInitEngine
   virtual bool IsInitialized() const = 0;
-  
+
   /// \brief
   ///   Callback that the InitEngine function calls AFTER the engine has been initialized
   /// 
@@ -360,7 +390,7 @@ public:
   /// \sa IVisApp_cl::OnInitEngine
   /// \sa IVisApp_cl::OnDeInitEngine
   virtual void OnInitEngine() = 0;
-  
+
   /// \brief
   ///   Callback that the InitEngine function calls BEFORE the engine gets deinitialized
   /// 
@@ -409,7 +439,7 @@ public:
   /// \sa IVisApp_cl::DeInitInput
   virtual bool IsInputInitialized() = 0;
 
-  
+
   ///
   /// @}
   ///
@@ -573,7 +603,7 @@ public:
 protected:
 
   bool              m_bQuit;            ///<whether the application wants to quit
-  
+
   IVisPhysicsModulePtr  m_spPhysicsModule;  ///<smart pointer to the installed physics module
   IVisShaderProviderPtr m_spShaderProvider; ///<smart pointer to the installed shader provider
   IVisUpdateSceneControllerPtr m_spUpdateSceneController;
@@ -588,7 +618,7 @@ typedef VSmartPtr<IVisSceneManager_cl> IVisSceneManagerPtr;
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

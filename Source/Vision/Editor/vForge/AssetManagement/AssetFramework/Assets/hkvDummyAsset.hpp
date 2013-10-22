@@ -39,6 +39,8 @@ public: // public functions
   virtual hkFileSystem::TimeStamp getLastEditTime() const HKV_OVERRIDE;
   virtual void touch() HKV_OVERRIDE;
 
+  hkFileSystem::TimeStamp getDeletionTime() const { return m_deleteTime; }
+
   const char* getAssetType() const { return m_assetType; }
   void setAssetType(const char* assetType) { m_assetType = assetType; }
 
@@ -54,6 +56,8 @@ public: // overrides
 
   virtual void getProperties(hkvPropertyList& properties, hkvProperty::Purpose purpose) const HKV_OVERRIDE;
 
+  virtual void setCommonProperty(const hkvProperty& prop, const hkArray<hkStringPtr>& path, hkUint32 stackIndex, hkvProperty::Purpose purpose) HKV_OVERRIDE;
+
   virtual void getFileProperties(hkvPropertyList& properties, hkvProperty::Purpose purpose) const HKV_OVERRIDE;
   virtual void setFileProperty(const hkvProperty& prop, const hkArray<hkStringPtr>& path, hkUint32 stackIndex, hkvProperty::Purpose purpose) HKV_OVERRIDE;
 
@@ -61,6 +65,7 @@ public: // overrides
   virtual void setSpecificProperty(const hkvProperty& prop, const hkArray<hkStringPtr>& path, hkUint32 stackIndex, hkvProperty::Purpose purpose) HKV_OVERRIDE;
 
 private:
+  hkFileSystem::TimeStamp m_deleteTime;
   hkStringPtr m_assetType;
   hkRefPtr<hkvTrackedFileDummy> m_trackedFileDummy;
   hkvPropertyList m_properties;
@@ -72,7 +77,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

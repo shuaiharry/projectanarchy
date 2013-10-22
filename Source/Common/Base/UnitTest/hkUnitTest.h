@@ -61,7 +61,7 @@
 typedef hkBool (HK_CALL *hkTestReportFunctionType)(hkBool32 cond, const char* desc, const char* file, int line);
 
 /************* PUBLIC *******************/
-#define HK_TEST(CONDITION)  (*hkTestReportFunction)( (CONDITION), #CONDITION, __FILE__, __LINE__)
+#define HK_TEST(CONDITION)  (*hkTestReportFunction)( static_cast<bool>(CONDITION), #CONDITION, __FILE__, __LINE__)
 #define HK_TEST_EQ(A,B) hkTestReportEq((A), (B), #A, #B, __FILE__, __LINE__);
 
 #define HK_TEST2(CONDITION,DESCRIPTION)  do {	\
@@ -227,7 +227,7 @@ public:
 #endif // HK_TEST_UNITTEST_REGISTERTEST_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -11,58 +11,110 @@
 
 #include <Vision/Runtime/EnginePlugins/Havok/HavokBehaviorEnginePlugin/vHavokBehaviorIncludes.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokBehaviorEnginePlugin/vHavokBehaviorResource.hpp>
+#include <Behavior/Behavior/World/hkbWorldListener.h>
 
 class hkbCharacter;
 class AttachedEntity_cl;
 class hkaiCharacter;
 class hkaiBehavior;
 
-class vHavokBehaviorComponent : public IVObjectComponent
+/// \brief
+///   Havok Behavior Component
+///
+class vHavokBehaviorComponent : public IVObjectComponent, public hkbWorldListener
 {
 	public:
 
 		V_DECLARE_SERIAL_DLLEXP(vHavokBehaviorComponent, VHAVOKBEHAVIOR_IMPEXP);
 		V_DECLARE_VARTABLE( vHavokBehaviorComponent, VHAVOKBEHAVIOR_IMPEXP )
 
-			/// This ctor should only set values to null state, no actual init should go here
+    ///
+    /// @name Constructor / Destructor
+    /// @{
+    ///
+
+	  /// This ctor should only set values to null state, no actual init should go here
 		VHAVOKBEHAVIOR_IMPEXP vHavokBehaviorComponent();
 		VHAVOKBEHAVIOR_IMPEXP virtual ~vHavokBehaviorComponent() {}
 
-		VOVERRIDE void SetOwner(VisTypedEngineObject_cl *pOwner);
-		VOVERRIDE BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut);
-		VOVERRIDE VVarChangeRes_e OnVariableValueChanging(VisVariable_cl *pVar, const char * value);
-		VOVERRIDE bool SetVariable(const char * name, const char * value);
-		VOVERRIDE void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
+    ///
+    /// @}
+    ///
 
+		/// Cleans up the state of the blend component and prepares it for the new frame of simulation
+		VHAVOKBEHAVIOR_IMPEXP void OnFrameStart();
+
+    ///
+    /// @name base class overrides
+    /// @{
+    ///
+
+		virtual void SetOwner(VisTypedEngineObject_cl *pOwner) HKV_OVERRIDE;
+		virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut) HKV_OVERRIDE;
+
+		virtual VVarChangeRes_e OnVariableValueChanging(VisVariable_cl *pVar, const char * value) HKV_OVERRIDE;
+		virtual bool SetVariable(const char * name, const char * value) HKV_OVERRIDE;
+		virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value) HKV_OVERRIDE;
 #if defined(WIN32) || defined(_VISION_DOC)
 		VHAVOKBEHAVIOR_IMPEXP virtual void GetVariableAttributes(VisVariable_cl *pVariable, VVariableAttributeInfo &destInfo) HKV_OVERRIDE;
 #endif
 
-		// IVObjectComponent interface
-		void MessageFunction(int id, INT_PTR paramA, INT_PTR paramB) HKV_OVERRIDE;
+		virtual void MessageFunction(int id, INT_PTR paramA, INT_PTR paramB) HKV_OVERRIDE;
 
-		/// Gets called after every Havok step.  Used to sync the Vision transforms
+    ///
+    /// @}
+    ///
+
+    ///
+    /// @name 
+    /// @{
+    ///
+
+    /// \brief
+		///   Gets called after every Havok step. 
+    ///
+    /// Used to sync the Vision transforms.
 		VHAVOKBEHAVIOR_IMPEXP void OnAfterHavokUpdate();
 
-		/// Update the Havok character's transform
+    /// \brief
+		///   Update the Havok character's transform.
 		VHAVOKBEHAVIOR_IMPEXP void UpdateHavokTransformFromVision();
 
-		/// Updates the collision filters on any subsystems of the character that need it
+    /// \brief
+		///   Updates the collision filters on any subsystems of the character that need it.
 		VHAVOKBEHAVIOR_IMPEXP void UpdateCollisionFilters( hkbCharacter* character );
 
-		/// Accessor for entity's owner
+    /// \brief
+		///   Accessor for entity's owner.
 		VHAVOKBEHAVIOR_IMPEXP inline const VisBaseEntity_cl* getEntityOwner() { return m_entityOwner; }
 
-		/// Single step the character.  Used mainly in the tool to update the pose when not simulating
+    /// \brief
+		///   Single step the character.  
+    ///
+    /// Used mainly in the tool to update the pose when not simulating
 		VHAVOKBEHAVIOR_IMPEXP void SingleStepCharacter();
 
-		/// Gets a normalized project path
-		void GetProjectPath( hkStringBuf& projectPath );
+    /// \brief
+		///   Returns a normalized project path.
+		void GetProjectPath(hkStringBuf& projectPath) const;
 
-		/// Set the character's resource
-		void SetResource( vHavokBehaviorResource* resource );
+    /// \brief
+		///   Set the character's resource.
+		void SetResource(vHavokBehaviorResource* resource);
 
-		// --- Lua API Start ---
+    ///
+    /// @}
+    ///
+
+		///
+		/// hkbWorldListener implementation
+		///
+		VOVERRIDE void eventRaisedCallback( hkbCharacter* character, const hkbEvent& event, bool raisedBySdk );
+
+    ///
+    /// @name LUA API
+    /// @{
+    ///
 
 		// Returns behavior character's world-from-model transform
 		VHAVOKBEHAVIOR_IMPEXP const hkQsTransform& GetWorldFromModel() const;
@@ -73,14 +125,14 @@ class vHavokBehaviorComponent : public IVObjectComponent
 		// Sets the value of the selected behavior float variable
 		VHAVOKBEHAVIOR_IMPEXP void SetFloatVar(const char* variableName, float value);
 
+		// Returns the value of the selected behavior float variable
+		VHAVOKBEHAVIOR_IMPEXP float GetFloatVar(const char* variableName);
+
 		// Sets the value of the selected behavior word variable
 		VHAVOKBEHAVIOR_IMPEXP void SetWordVar(const char* variableName, int value);
 
 		// Sets the value of the selected behavior float variable
 		VHAVOKBEHAVIOR_IMPEXP void SetBoolVar(const char* variableName, bool value);
-
-		// Triggers a behavior event
-		VHAVOKBEHAVIOR_IMPEXP void TriggerEvent(const char* eventName);
 
 		// Returns world space transform of the selected bone
 		VHAVOKBEHAVIOR_IMPEXP void GetBoneTransform(const char* boneName, hkvVec3& outPos, hkvMat3& outRot ) const;
@@ -88,68 +140,85 @@ class vHavokBehaviorComponent : public IVObjectComponent
 		/// Initialize this character
 		VHAVOKBEHAVIOR_IMPEXP void InitVisionCharacter( VisBaseEntity_cl* entityOwner );
 
-		// --- Lua API End  ---
+    ///
+    /// @}
+    ///
 
-		/// Serialization / Resource
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE void AssertValid();
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE void Serialize(VArchive &ar);
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE void OnSerialized(VArchive &ar);
+		// Checks the value of the selected behavior bool variable
+		VHAVOKBEHAVIOR_IMPEXP bool GetBoolVar(const char* variableName) const;
+
+		// Triggers a behavior event
+		VHAVOKBEHAVIOR_IMPEXP void TriggerEvent(const char* eventName) const;
+
+		// Registers a behavior event handler
+		VHAVOKBEHAVIOR_IMPEXP void RegisterEventHandler(const char* eventName);
+
+		// Checks if a given event was triggered
+		VHAVOKBEHAVIOR_IMPEXP bool WasEventTriggered(const char* eventName) const;
+
+    ///
+    /// @name Serialization / Resource
+    /// @{
+    ///
+
+		VHAVOKBEHAVIOR_IMPEXP virtual void AssertValid() HKV_OVERRIDE;
+		VHAVOKBEHAVIOR_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+		VHAVOKBEHAVIOR_IMPEXP virtual void OnSerialized(VArchive &ar) HKV_OVERRIDE;
 #ifdef SUPPORTS_SNAPSHOT_CREATION
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE void GetDependencies(VResourceSnapshot &snapshot);
+		VHAVOKBEHAVIOR_IMPEXP virtual void GetDependencies(VResourceSnapshot &snapshot) HKV_OVERRIDE;
 #endif
+
+    ///
+    /// @}
+    ///
 
 	protected:
 
-		/// Updates the anim config and bone index list.  Usually happens after a new mesh is assigned
+    /// \brief
+		///   Updates the anim config and bone index list.  
+    /// Usually happens after a new mesh is assigned
 		void UpdateAnimationAndBoneIndexList();
 
-		// Cleanup
-		void Deinit();
+    /// \brief
+		///   Cleans up the component.
+		void DeInit();
 		
-		/// Update ragdoll driver and character controller driver based on
-		/// values of m_enableRagdoll and m_useBehaviorWorldFromModel.
+    /// \brief
+		///   Update ragdoll driver and character controller driver based on
+		///   values of m_enableRagdoll and m_useBehaviorWorldFromModel.
 		void UpdateBehaviorPhysics();
 
 	public:
 
-		/// The Havok character
-		hkbCharacter* m_character;
+		hkbCharacter* m_character;        ///< The Havok character
 
-		/// Path to behavior project
-		VString m_projectPath;
+		VString m_projectPath;            ///< Path to behavior project
+		VString m_projectName;            ///< Name of the behavior project
+		VString m_characterName;          ///< Name of the character in the project
+		VString m_behaviorName;           ///< Name of the behavior graph
 
-		/// Name of the behavior project
-		VString m_projectName;
-
-		/// Name of the character in the project
-		VString m_characterName;
-
-		/// Name of the behavior graph
-		VString m_behaviorName;
-
-		/// Whether to enable the ragdoll of the character, if one exists
-		BOOL m_enableRagdoll;
-
-		/// Whether to allow Behavior to modify the character's worldFromModel
-		BOOL m_useBehaviorWorldFromModel;
+		BOOL m_enableRagdoll;             ///< Whether to enable the ragdoll of the character, if one exists.
+		BOOL m_useBehaviorWorldFromModel; ///< Whether to allow Behavior to modify the character's worldFromModel
 
 	protected:
 
-		/// Base entity
-		VisBaseEntity_cl* m_entityOwner;
+		VisBaseEntity_cl* m_entityOwner;  ///< Owner entity
+	
+    hkArray< int > m_boneIndexList;   ///< Bone mapping array : index is Havok, value at index is Vision.
+                                      ///< -1 means no Vision bone exists for Havok bone
 
-		/// Bone mapping array : index is Havok, value at index is Vision.
-		// -1 means no Vision bone exists for Havok bone
-		hkArray< int > m_boneIndexList;
+		VSmartPtr<vHavokBehaviorResource> m_resource; ///< Character's resource
 
-		/// Character's resource
-		VSmartPtr<vHavokBehaviorResource> m_resource;
+		// An array showing which events were triggered most recently
+		bool m_isListeningToEvents;
+		hkArray< bool > m_triggeredEvents;
+
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

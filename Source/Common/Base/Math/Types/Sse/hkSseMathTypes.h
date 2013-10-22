@@ -42,7 +42,7 @@
 
 #ifdef HK_PLATFORM_PS4
 #	include <x86intrin.h>
-#elif defined(HK_ARCH_X64) && defined(HK_COMPILER_MSVC) && ( HK_COMPILER_MSVC_VERSION >= 1700)
+#elif defined(HK_ARCH_X64) && defined(HK_COMPILER_MSVC) && ( HK_COMPILER_MSVC_VERSION >= 1600)
 #	include <intrin.h>
 #endif
 
@@ -87,6 +87,7 @@
 
 // storage type for hkVector4 (and thus hkQuaternion)
 typedef __m256d hkQuadDouble64;
+#define HK_QUADDOUBLE_CONSTANT(a, b, c, d)	{a, b, c, d}
 
 #else
 
@@ -123,6 +124,7 @@ struct hkQuadDouble64
 	__m128d xy;
 	__m128d zw;
 };
+#define HK_QUADDOUBLE_CONSTANT(a, b, c, d)	{{a, b}, {c, d}}
 
 #endif
 
@@ -147,6 +149,7 @@ typedef hkQuadDouble64 hkVector4dMask;
 
 // storage type for hkVector4 (and thus hkQuaternion)
 typedef __m128 hkQuadFloat32;
+#define HK_QUADFLOAT_CONSTANT(a, b, c, d)	{a, b, c, d}
 
 // storage type for hkSimdReal
 typedef __m128 hkSingleFloat32;
@@ -159,17 +162,13 @@ typedef __m128 hkVector4fMask;
 // storage type for hkIntVector
 typedef __m128i hkQuadUint;
 typedef __m128i hkSingleInt128;
+#define HK_QUADINT_CONSTANT(a, b, c, d)		{a, b, c, d}
 
+// this causes problems for the optimizer, use for debug checks only
 struct hkQuadUlong
 {
 	__m128i xy;
 	__m128i zw;
-};
-
-struct hkQuadDouble
-{
-	__m128d xy;
-	__m128d zw;
 };
 
 #if defined(HK_COMPILER_GCC) || defined(HK_COMPILER_CLANG) || (defined(_MSC_VER) && (_MSC_VER<1500)) // vs 2005 is missing these
@@ -256,16 +255,10 @@ typedef const hkIntVector& hkIntVectorParameter;
 #define HK_MATH_TYPES_SUPPORTS_FLOAT
 #define HK_MATH_TYPES_SUPPORTS_DOUBLE
 
-// this causes problems for the optimizer, use for debug checks only
-#define HK_QUADFLOAT_CONSTANT(a, b, c, d)	{a, b, c, d}
-#define HK_QUADDOUBLE_CONSTANT(a, b, c, d)	{a, b, c, d}
-#define HK_QUADINT_CONSTANT(a, b, c, d)		{a, b, c, d}
-
-
 #endif // HK_MATH2_SSE_MATH_TYPES_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

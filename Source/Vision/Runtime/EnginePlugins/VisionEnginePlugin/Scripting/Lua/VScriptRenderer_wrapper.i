@@ -24,7 +24,7 @@ public:
 
     IVRendererNode* GetRendererNode(int iIndex = 1)
     {
-      return (iIndex>0 && iIndex <= V_MAX_RENDERER_NODES) ? Vision::Renderer.GetRendererNode(iIndex-1) : 0;
+      return (iIndex>0 && iIndex <= Vision::Renderer.GetRendererNodeCount()) ? Vision::Renderer.GetRendererNode(iIndex-1) : 0;
     }
 
     void SetGlobalAmbientColor(VColorRef ambientColor)
@@ -104,10 +104,14 @@ public:
   IVTimeOfDay GetTimeOfDayHandler();
   
   /// \brief Returns a specified render node. If no renderer node is set the function will return nil.
-  /// \param index [\b Optional] 1 based index (0 in C++) of the required renderer node, limited by V_MAX_RENDERER_NODES, default is 1.
+  /// \param index [\b Optional] 1 based index (0 in C++) of the required renderer node, limited by Renderer:GetRendererNodeCount(), default is 1.
   /// \return The renderer node or nil.
   IVRendererNode GetRendererNode(int index = 1);
 
+  /// \brief Returns the renderer node count.
+  /// \return The renderer node count.
+  int GetRendererNodeCount() const;
+  
   /// @}
   /// @name Utility Functions
   /// @{
@@ -134,7 +138,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

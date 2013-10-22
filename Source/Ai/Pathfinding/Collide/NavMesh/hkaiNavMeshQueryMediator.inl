@@ -66,6 +66,28 @@ inline hkaiNavMeshQueryMediator::GetClosestPointInput::GetClosestPointInput(cons
 	m_position = hkVector4::getConstant<HK_QUADREAL_MAX>();
 }
 
+///////////////////
+
+inline hkaiNavMeshQueryMediator::GetClosestBoundaryEdgeInput::GetClosestBoundaryEdgeInput()
+:	GetClosestPointInput()
+{
+	m_projectionDirection.setZero();
+}
+
+inline hkaiNavMeshQueryMediator::GetClosestBoundaryEdgeInput::GetClosestBoundaryEdgeInput(hkVector4Parameter position, hkSimdRealParameter radius)
+:	GetClosestPointInput(position, radius)
+{
+	m_projectionDirection.setZero();
+}
+
+inline hkaiNavMeshQueryMediator::GetClosestBoundaryEdgeInput::GetClosestBoundaryEdgeInput(const QueryInputBase& base)
+:	GetClosestPointInput(base)
+{
+	m_projectionDirection.setZero();
+}
+
+///////////////////
+
 inline hkaiNavMeshQueryMediator::RaycastInput::RaycastInput(const QueryInputBase& base)
 :	QueryInputBase(base)
 {
@@ -107,7 +129,7 @@ inline hkaiNavMeshQueryMediator::CoherentInput::CoherentInput()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

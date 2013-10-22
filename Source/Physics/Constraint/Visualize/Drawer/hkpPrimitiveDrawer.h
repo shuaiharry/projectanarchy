@@ -21,7 +21,7 @@ class hkpPrimitiveDrawer
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HKP_MEMORY_CLASS_VDB, hkpPrimitiveDrawer );
 
 		hkpPrimitiveDrawer();
-		
+
 			/// Sets the display handler
 		void setDisplayHandler(hkDebugDisplayHandler* displayHandler);
 
@@ -30,7 +30,7 @@ class hkpPrimitiveDrawer
 
 			/// Displays an arrow.
 		void displayArrow (const hkVector4& startPos, const hkVector4& arrowDirection, const hkVector4& perpDirection, hkColor::Argb color, hkReal scale, int id, int tag);
-		
+
 			/// Displays a cone.
 		void displayCone (hkReal cone_angle, const hkVector4& startPos, const hkVector4& coneAaxis, const hkVector4& perpVector, int numSegments, hkColor::Argb color, hkReal coneSize, int id, int tag);
 
@@ -41,7 +41,7 @@ class hkpPrimitiveDrawer
 			/// \param center The position of the center in world space.
 			/// \param normal The axis about which the circle is drawn.
 			/// \param startPerp An orthogonal axis to the normal which defines the start of the sweep.
-		void drawSemiCircle(const hkVector4& center, hkVector4& normal, 
+		void drawSemiCircle(const hkVector4& center, hkVector4& normal,
 							hkVector4& startPerp, hkReal thetaMin, hkReal thetaMax,
 							hkReal radius,int numSegments, hkColor::Argb color, int id, int tag);
 
@@ -54,7 +54,7 @@ class hkpPrimitiveDrawer
 #endif	// HKP_PRIMITIVE_DRAWER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

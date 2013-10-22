@@ -55,7 +55,11 @@ struct VFmodConfig
     iMemoryPoolSize = 0;
 
     // the default value in Fmod is FMOD_DEBUG_LEVEL_LOG | FMOD_DEBUG_LEVEL_ERROR | FMOD_DEBUG_LEVEL_WARNING | FMOD_DEBUG_TYPE_EVENT
+    #if defined(VFMOD_NULL)
+    iDebugLevel = 0;
+    #else
     iDebugLevel = FMOD_DEBUG_LEVEL_ERROR | FMOD_DEBUG_LEVEL_WARNING | FMOD_DEBUG_TYPE_EVENT;
+    #endif
 
     fFmodToVisionScale = 100.0f;
   }
@@ -461,7 +465,7 @@ private:
 #endif // VFMODMANAGER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

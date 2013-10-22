@@ -11,9 +11,9 @@
 #include <Ai/Pathfinding/Astar/SearchState/hkaiSearchState.h>
 
 /// Search state implementation that uses a hash table.
-struct hkaiHashSearchStateBase
+struct hkaiHashSearchState
 {
-	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI_ASTAR, hkaiHashSearchStateBase);
+	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI_ASTAR, hkaiHashSearchState);
 
 	typedef hkReal PathCost;
 	typedef hkUint32 SearchIndex;
@@ -26,8 +26,8 @@ struct hkaiHashSearchStateBase
 	};
 
 
-	HK_FORCE_INLINE hkaiHashSearchStateBase();
-	HK_FORCE_INLINE ~hkaiHashSearchStateBase();
+	HK_FORCE_INLINE hkaiHashSearchState();
+	HK_FORCE_INLINE ~hkaiHashSearchState();
 
 	/// Returns the number of bytes required to store the specified number of nodes
 	HK_FORCE_INLINE static int getMemoryRequirement( int numNodes );
@@ -92,6 +92,12 @@ struct hkaiHashSearchStateBase
 	/// Used during setup when we can't guarantee anything about the cached state
 	HK_FORCE_INLINE void copyCosts_randomAccess( SearchIndex fromId, SearchIndex toId);
 
+	template<typename Heuristic>
+	HK_FORCE_INLINE hkBool32 setStartNode( Heuristic* h, SearchIndex sid, PathCost initialCost = 0 );
+
+	template<typename Heuristic>
+	HK_FORCE_INLINE void setCost( Heuristic* h, SearchIndex sid, PathCost d );
+
 	HK_PAD_ON_SPU( Node* ) m_nodes;
 	HK_PAD_ON_SPU( hkInt16* ) m_hashNext;
 	HK_PAD_ON_SPU( hkInt16* ) m_hashFirst;
@@ -130,25 +136,12 @@ struct hkaiHashSearchStateBase
 	HK_ON_DEBUG(SearchIndex m_searchIndexToClose);
 };
 
-	/// Search state implementation that uses a hash table.
-template<typename Heuristic>
-struct hkaiHashSearchState : public hkaiHashSearchStateBase
-{
-	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI_ASTAR, hkaiHashSearchStateBase);
-	hkaiHashSearchState( Heuristic* h = HK_NULL );
-	HK_FORCE_INLINE void setHeuristic(Heuristic* h);
-	HK_FORCE_INLINE hkBool32 setStartNode( SearchIndex sid, PathCost initialCost = 0 );
-	HK_FORCE_INLINE void setCost( SearchIndex sid, PathCost d );
-
-	HK_PAD_ON_SPU(Heuristic*) m_heuristic;
-};
-
 #include <Ai/Pathfinding/Astar/SearchState/hkaiHashSearchState.inl>
 
 #endif // HKASTAR_SPUSEARCHSTATE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

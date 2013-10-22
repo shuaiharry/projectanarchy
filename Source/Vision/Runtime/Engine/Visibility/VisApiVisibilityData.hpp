@@ -112,10 +112,8 @@ public:
   /// \param iFlags
   ///   Determines the clipping behavior. There are 5 valid combinations:
   ///    \li VIS_LOD_TEST_NONE: No clipping is performed 
-  ///    \li VIS_LOD_TEST_CLIPPOSITION: Clipping is performed relative to clip position (passed to SetClipSettings)
-  ///    \li VIS_LOD_TEST_CLIPPOSITION|VIS_LOD_TEST_APPLYLODSCALING: Additionally applies the context's LOD scaling factor to the distance
-  ///    \li VIS_LOD_TEST_BOUNDINGBOX: Distance is measured against the bounding biox
-  ///    \li VIS_LOD_TEST_BOUNDINGBOX|VIS_LOD_TEST_APPLYLODSCALING: Additionally applies the context's LOD scaling factor to the distance
+  ///    \li VIS_LOD_TEST_CLIPPOSITION: Clipping is performed relative to clip position (passed to SetClipSettings), taking LOD scaling factor into account 
+  ///    \li VIS_LOD_TEST_BOUNDINGBOX: Distance is measured against the bounding biox, taking LOD scaling factor into account 
   inline void SetClipMode(int iFlags=VIS_LOD_TEST_CLIPPOSITION)
   {
     VASSERT_MSG((iFlags&VIS_PERFORM_LODTEST)==iFlags,"Invalid constants passed to this function");
@@ -124,7 +122,7 @@ public:
   }
 
   /// \brief
-  ///   Returns bit constants of type VIS_LOD_TEST_NONE, VIS_LOD_TEST_CLIPPOSITION, VIS_LOD_TEST_BOUNDINGBOX and VIS_LOD_TEST_APPLYLODSCALING. Valid combinations are described in SetClipMode
+  ///   Returns bit constants of type VIS_LOD_TEST_NONE, VIS_LOD_TEST_CLIPPOSITION and VIS_LOD_TEST_BOUNDINGBOX. Valid combinations are described in SetClipMode
   inline int GetClipMode(int iMask = VIS_PERFORM_LODTEST) const
   {
     return m_iPerformTestFlags & iMask;
@@ -157,26 +155,34 @@ public:
     case VIS_LOD_TEST_NONE:
       return false;
     case VIS_LOD_TEST_CLIPPOSITION:
-      fDistSqr = vCameraPos.getDistanceToSquared(m_vClipReference);
-      break;
-    case VIS_LOD_TEST_CLIPPOSITION|VIS_LOD_TEST_APPLYLODSCALING:
       fDistSqr = vCameraPos.getDistanceToSquared(m_vClipReference)*fLODScaleSqr;
       break;
     case VIS_LOD_TEST_BOUNDINGBOX:
-      fDistSqr = m_BoundingBox.getDistanceToSquared(vCameraPos);
-      break;
-    case VIS_LOD_TEST_BOUNDINGBOX|VIS_LOD_TEST_APPLYLODSCALING:
       fDistSqr = m_BoundingBox.getDistanceToSquared(vCameraPos)*fLODScaleSqr;
       break;
     default:
       VASSERT_MSG(false,"Invalid combination of LOD flags");
       return false;
     }
+
+    return IsNearOrFarClipped(fDistSqr);
+  }
+
+  /// \brief
+  ///    Function that performs near/far clipping check based on the given squared distance to the camera
+  ///
+  /// \param fDistSqr
+  ///   squared distance to the camera
+  ///
+  /// \returns
+  ///   true if the object is clipped either by near of far clip distance (if specified)
+  inline bool IsNearOrFarClipped(float fDistSqr) const
+  {
     return ((m_fNearClipDistance>0.f) && (fDistSqr<(m_fNearClipDistance*m_fNearClipDistance))) 
         || ((m_fFarClipDistance>0.f) && (fDistSqr>=(m_fFarClipDistance*m_fFarClipDistance)));
   }
 
-  /// \brief
+    /// \brief
   ///    Helper function to retrieve current distance to a given plane
   ///
   /// \param vCameraPos
@@ -198,15 +204,9 @@ public:
       fDistSqr = 0.0f;
       break;
     case VIS_LOD_TEST_CLIPPOSITION:
-      fDistSqr = vCameraPos.getDistanceToSquared(m_vClipReference);
-      break;
-    case VIS_LOD_TEST_CLIPPOSITION|VIS_LOD_TEST_APPLYLODSCALING:
       fDistSqr = vCameraPos.getDistanceToSquared(m_vClipReference)*fLODScaleSqr;
       break;
     case VIS_LOD_TEST_BOUNDINGBOX:
-      fDistSqr = m_BoundingBox.getDistanceToSquared(vCameraPos);
-      break;
-    case VIS_LOD_TEST_BOUNDINGBOX|VIS_LOD_TEST_APPLYLODSCALING:
       fDistSqr = m_BoundingBox.getDistanceToSquared(vCameraPos)*fLODScaleSqr;
       break;
     default:
@@ -233,7 +233,7 @@ public:
   {
     if ((m_iVisibleMask&iFilterMask)==0 || ((m_iPerformTestFlags&(VIS_EXCLUDED_FROM_VISTEST|VIS_IS_INACTIVE)))!=0)
       return true;
-    return (fLODScaleSqr<0.f) ? false : IsNearOrFarClipped(vCameraPos,fLODScaleSqr);
+    return IsNearOrFarClipped(vCameraPos,fLODScaleSqr);
   }
 
   /// \brief
@@ -258,7 +258,7 @@ protected:
 #endif // VISAPIVISIBILITYDATA_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

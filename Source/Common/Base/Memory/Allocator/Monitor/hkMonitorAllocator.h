@@ -19,8 +19,8 @@ class hkMonitorAllocator : public hkMemoryAllocator
 		hkMonitorAllocator() : m_child(HK_NULL), m_monitorTag(HK_NULL) {}
 		hkMonitorAllocator(hkMemoryAllocator* child, const char* mtag);
 
-		virtual void* blockAlloc( int size );
-		virtual void blockFree( void* p, int size );
+		virtual void* blockAlloc( int size ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int size ) HK_OVERRIDE;
 
 		hkMemoryAllocator* m_child;
 		const char* m_monitorTag;
@@ -29,7 +29,7 @@ class hkMonitorAllocator : public hkMemoryAllocator
 #endif // HKBASE_MONITOR_ALLOCATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

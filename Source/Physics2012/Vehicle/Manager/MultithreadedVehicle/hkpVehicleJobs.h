@@ -45,6 +45,8 @@ struct hkpVehicleJobResults
 	hkVector4 m_groundBodyAngularVel[2];
 	hkpRigidBody* m_groundBodyPtr[2];
 	hkVector4 m_groundBodyImpulses[s_maxNumWheels];
+
+	void applyForcesFromStep( const hkpVehicleInstance& vehicleInstance );
 };
 
 
@@ -97,7 +99,7 @@ public:
 #endif // HK_VEHICLE_JOBS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

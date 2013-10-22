@@ -445,8 +445,10 @@ namespace VisionEditorPlugin.Shapes
     public override void OnAddedToScene()
     {
       base.OnAddedToScene();
+
       if (_iLocalIDLowRes == 0)
         _iLocalIDLowRes = ParentLayer.CreateNewShapeID();
+
       _snappoints = SNAPPOINTLIST_CACHE_INVALID; // force update next time
     }
 
@@ -582,6 +584,35 @@ namespace VisionEditorPlugin.Shapes
 
     #region properties
 
+    // Only allow positive scaling
+    // (Min value of 1e-18 works well with Havok Physics)
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleX
+    {
+      get { return base.ScaleX; }
+      set { base.ScaleX = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleY
+    {
+      get { return base.ScaleY; }
+      set { base.ScaleY = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleZ
+    {
+      get { return base.ScaleZ; }
+      set { base.ScaleZ = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float UniformScaling
+    {
+      get { return base.UniformScaling; }
+      set { base.UniformScaling = value; }
+    }
 
     /// <summary>
     /// Override this property to add support for it. Note that loading/saving is handled through base class already
@@ -1122,7 +1153,7 @@ namespace VisionEditorPlugin.Shapes
     /// <summary>
     /// If specified, the selected lightmap texture will be set on this geometry and override the lightmap calculated through vLux or Beast. This allows for importing pre-generated lightmaps.
     /// </summary>
-    [EditorAttribute(typeof(BitmapBrowserEditor), typeof(UITypeEditor))]
+    [EditorAttribute(typeof(AssetEditor), typeof(UITypeEditor)), AssetDialogFilter(new string[] { "Texture" })]
     [SortedCategory(CAT_STATICLIGHTING, CATORDER_STATICLIGHTING), PropertyOrder(30)]
     [Description("If specified, the selected lightmap texture will be set on this geometry and override the lightmap calculated through vLux or Beast. This allows for importing pre-generated lightmaps.")]
     public string CustomLightmap
@@ -2800,7 +2831,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

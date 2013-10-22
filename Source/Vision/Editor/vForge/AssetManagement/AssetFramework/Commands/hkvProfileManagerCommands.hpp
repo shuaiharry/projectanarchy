@@ -83,23 +83,6 @@ struct hkvProfileCommandGetProfileList
 };
 
 
-struct hkvProfileCommandGetTransformRuleTemplates
-{
-  //TODO:TOC HK_TOC_COMMAND();
-
-  struct Results
-  {
-    //TODO:TOC HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, Results);
-    //TODO:TOC HK_DECLARE_REFLECTION();
-    Results() {}
-
-    const hkArray<hkvTransformRuleTemplate>* m_transformRuleTemplates;
-  };
-
-  ASSETFRAMEWORK_IMPEXP static hkResult execute(Results& results);
-};
-
-
 struct hkvProfileCommandGetActiveProfile
 {
   //TODO:TOC HK_TOC_COMMAND();
@@ -207,52 +190,57 @@ struct hkvProfileCommandGetProfileByName
 
 struct hkvProfileCommandAddTemplate
 {
-  //TODO:TOC HK_TOC_COMMAND();
-
   struct Options
   {
-    //TODO:TOC HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, Options);
-    //TODO:TOC HK_DECLARE_REFLECTION();
     Options() {}
 
+    hkStringPtr m_assetType;       ///< Name of the asset type for which the new template should be added
     hkStringPtr m_newTemplateName; ///< Name of the new template
   };
 
-  ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts);
+  struct Results
+  {
+    Results() {}
+
+    hkUint32 m_newTemplateIndex;
+  };
+
+  ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts, Results& results);
 };
 
 
 struct hkvProfileCommandDuplicateTemplate
 {
-  //TODO:TOC HK_TOC_COMMAND();
-
   struct Options
   {
-    //TODO:TOC HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, Options);
-    //TODO:TOC HK_DECLARE_REFLECTION();
     Options() {}
 
+    hkStringPtr m_assetType;       ///< Name of the asset type for which the new template should be added
     unsigned int m_templateIndex;
     hkStringPtr m_newTemplateName;
   };
 
-  ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts);
+  struct Results
+  {
+    Results() {}
+
+    hkUint32 m_newTemplateIndex;
+  };
+
+  ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts, Results& results);
 };
 
 
 struct hkvProfileCommandDeleteTemplate
 {
-  //TODO:TOC HK_TOC_COMMAND();
-
   struct Options
   {
-    //TODO:TOC HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, Options);
-    //TODO:TOC HK_DECLARE_REFLECTION();
     Options() :
       m_deleteTemplateIndex(HKV_INVALID_INDEX), m_replaceTemplateIndex(HKV_INVALID_INDEX) {}
-    Options(hkUint32 deleteTemplateIndex, hkUint32 replaceTemplateIndex) :
-      m_deleteTemplateIndex(deleteTemplateIndex), m_replaceTemplateIndex(replaceTemplateIndex) {}
+    Options(const char* assetType, hkUint32 deleteTemplateIndex, hkUint32 replaceTemplateIndex) :
+      m_assetType(assetType), m_deleteTemplateIndex(deleteTemplateIndex), m_replaceTemplateIndex(replaceTemplateIndex) {}
 
+    hkStringPtr m_assetType;         ///< Name of the asset type for which the new template should be added
     hkUint32 m_deleteTemplateIndex;
     hkUint32 m_replaceTemplateIndex;
   };
@@ -261,10 +249,34 @@ struct hkvProfileCommandDeleteTemplate
 };
 
 
+struct hkvProfileCommandRenameTemplate
+{
+  struct Options
+  {
+    Options()
+      : m_renameTemplateIndex(HKV_INVALID_INDEX) {}
+    Options(const char* assetType, hkUint32 renameTemplateIndex, const char* newTemplateName)
+      : m_assetType(assetType), m_renameTemplateIndex(renameTemplateIndex), m_newTemplateName(newTemplateName) {}
+
+  hkStringPtr m_assetType;         ///< Name of the asset type for which the new template should be added
+  hkUint32 m_renameTemplateIndex;
+  hkStringPtr m_newTemplateName;
+  };
+
+  struct Results
+  {
+    Results() {}
+
+    hkUint32 m_newTemplateIndex;
+  };
+
+  ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts, Results& results);
+};
+
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

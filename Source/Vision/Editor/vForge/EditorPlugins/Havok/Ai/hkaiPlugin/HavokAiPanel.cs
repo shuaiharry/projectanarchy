@@ -155,7 +155,7 @@ namespace HavokAiPanelDialogs
 
         HavokNavMeshGlobalSettingsDictionary serializedSettingsCollection =
           (HavokNavMeshGlobalSettingsDictionary)e.CustomSceneObjects.FindObject("HavokAiEditorPlugin.EditorPlugin", typeof(HavokNavMeshGlobalSettingsDictionary));
-        if (serializedSettingsCollection != null)
+        if (serializedSettingsCollection != null && serializedSettingsCollection.Count > 0) // ignore empty settings collection
         {
           // replace with serialized copy.
           m_settingsDictionary = serializedSettingsCollection;
@@ -182,7 +182,7 @@ namespace HavokAiPanelDialogs
       // Also apply to engine directly if running.
       if (EditorManager.InPlayingMode)
       {
-        HavokAiManaged.ManagedModule.SetConnectToPhysicsWorld(settings.ConnectToPhysics);
+        HavokAiManaged.ManagedModule.SetConnectToPhysicsWorld(settings.ConnectToPhysics, false);
       }
       this.GlobalSettings_PropertyGridEx1.Refresh();
     }
@@ -365,7 +365,7 @@ namespace HavokAiPanelDialogs
 
             if (EditorManager.InPlayingMode && WantPhysicsConnection())
             {
-                HavokAiManaged.ManagedModule.SetConnectToPhysicsWorld(true);
+                HavokAiManaged.ManagedModule.SetConnectToPhysicsWorld(true, false);
             }
         }
 
@@ -408,7 +408,10 @@ namespace HavokAiPanelDialogs
       {
         recursivelyAddShapes(shape.ChildCollection, ref shapesOut);
 
-        if (shape is StaticMeshShape || shape is EntityShape || shape is TerrainShape
+        if (shape is StaticMeshShape || shape is EntityShape || shape is TerrainShape 
+#if !HK_ANARCHY
+            || shape is DecorationGroupShape
+#endif
 #if USE_SPEEDTREE
             || shape is SpeedTree5GroupShape
             || shape is Speedtree6GroupShape
@@ -742,7 +745,9 @@ namespace HavokAiPanelDialogs
     public void UpdateSettingsToolStrip()
     {
       bool bHasSelection = GlobalSettings_ListView.SelectedItems != null && GlobalSettings_ListView.SelectedItems.Count > 0;
-      DeletedButton.Enabled = bHasSelection;
+
+      int numElementsAfterDeletion = GlobalSettings_ListView.Items.Count - GlobalSettings_ListView.SelectedItems.Count;
+      DeletedButton.Enabled = bHasSelection && numElementsAfterDeletion >= 1; // not allowed to delete last element
       CopySettingsButton.Enabled = bHasSelection;
       ExportSelectedSettingsButton.Enabled = bHasSelection;
       SetAsDefaultButton.Enabled = bHasSelection;
@@ -884,6 +889,7 @@ namespace HavokAiPanelDialogs
     public void DeleteGlobalSettings(string[] settingsNames, bool bUndoable)
     {
       System.Diagnostics.Debug.Assert(m_settingsDictionary != null && settingsNames.Length > 0);
+      System.Diagnostics.Debug.Assert(m_settingsDictionary.Count - settingsNames.Length >= 1);  // after deletion there should be at least one element left
 
       if (bUndoable)
       {
@@ -966,7 +972,7 @@ namespace HavokAiPanelDialogs
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -213,6 +213,18 @@ HK_FORCE_INLINE const hkVector4Comparison hkIntVector::greaterEqualS32(hkIntVect
 }
 
 
+HK_FORCE_INLINE const hkVector4fComparison hkIntVector::equalS32(hkIntVectorParameter b) const
+{
+	const hkInt32* HK_RESTRICT sa = reinterpret_cast<const hkInt32*>(m_quad.u32);
+	const hkInt32* HK_RESTRICT sb = reinterpret_cast<const hkInt32*>(b.m_quad.u32);
+	hkVector4fComparison cmp;
+	cmp.m_mask =(sa[0] == sb[0] ? hkVector4ComparisonMask::MASK_X : hkVector4ComparisonMask::MASK_NONE) |
+				(sa[1] == sb[1] ? hkVector4ComparisonMask::MASK_Y : hkVector4ComparisonMask::MASK_NONE) |
+				(sa[2] == sb[2] ? hkVector4ComparisonMask::MASK_Z : hkVector4ComparisonMask::MASK_NONE) |
+				(sa[3] == sb[3] ? hkVector4ComparisonMask::MASK_W : hkVector4ComparisonMask::MASK_NONE);
+	return cmp;
+}
+
 HK_FORCE_INLINE void hkIntVector::setOr(hkIntVectorParameter a, hkIntVectorParameter b)
 {
 	const hkUint32* HK_RESTRICT qa = a.m_quad.u32;
@@ -1267,58 +1279,152 @@ HK_FORCE_INLINE void hkIntVector::setConvertF32toS32(hkVector4dParameter vIn)
 	qu[3] = hkMath::hkToIntFast( vIn(3) );
 }
 
-template <int N>
-HK_FORCE_INLINE void hkIntVector::loadNotAligned(const hkUint32* p)
-{
-	HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK;
-	hkMemUtil::memCpy<sizeof(hkUint32)>(&m_quad, p, N*sizeof(hkUint32));
-	HK_ON_DEBUG( { for(int i=N; i<4; ++i) m_quad.u32[i] = 0xffffffff; } );
-}
+//
+// Load Operations
+//
 
-template <int N>
-HK_FORCE_INLINE void hkIntVector::storeNotAligned(hkUint32* p) const
+namespace hkIntVector_AdvancedInterface
 {
-	HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK;
-	hkMemUtil::memCpy<sizeof(hkUint32)>(p, &m_quad, N*sizeof(hkUint32));
-}
+	template <int N, hkMathIoMode IoMode>
+	struct unrollU32_load { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+		HK_INT_VECTOR_NOT_IMPLEMENTED;
+	} };
 
-template <>
-HK_FORCE_INLINE void hkIntVector::load<4>(const hkUint32* p)
-{
+	template <int N>
+	struct unrollU32_load<N, HK_IO_BYTE_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+		hkMemUtil::memCpy<sizeof(hkUint8)>(&self, p, N*sizeof(hkUint32));
+		HK_ON_DEBUG( { for(int i=N; i<4; ++i) self.u32[i] = HK_INT_VECTOR_DEBUG_FILL_VALUE; } );
+	} };
+
+	template <int N>
+	struct unrollU32_load<N, HK_IO_NATIVE_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & (sizeof(hkUint32)-1) ) == 0, "pointer must be aligned to native size of hkUint32.");
+		unrollU32_load<N, HK_IO_BYTE_ALIGNED>::apply(self,p);
+	} };
+
+	template <int N>
+	struct unrollU32_load<N, HK_IO_SIMD_ALIGNED> { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
 #if !defined(HK_PLATFORM_CTR) && !defined(HK_PLATFORM_ANDROID)  && !(defined(HK_PLATFORM_IOS) && (HK_CONFIG_SIMD != HK_CONFIG_SIMD_ENABLED)) && !defined(HK_ALIGN_RELAX_CHECKS)
-	HK_MATH_ASSERT(0x70aae483, ((hkUlong)p & 0xf) == 0, "pointer for hkIntVector::load<4> must be 16-byte aligned");
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
+#endif		
+		switch(N)
+		{
+		case 4:
+			hkMemUtil::memCpyOneAligned<4*sizeof(hkUint32), 16>(&self, p);
+			break;
+		default:
+			unrollU32_load<N, HK_IO_BYTE_ALIGNED>::apply(self,p);
+			break;
+		}
+	} };
+
+	template <int N>
+	struct unrollU32_load<N, HK_IO_NOT_CACHED> { HK_FORCE_INLINE static void apply(hkQuadUint& self, const hkUint32* HK_RESTRICT p)
+	{
+#if !defined(HK_PLATFORM_CTR) && !defined(HK_PLATFORM_ANDROID)  && !(defined(HK_PLATFORM_IOS) && (HK_CONFIG_SIMD != HK_CONFIG_SIMD_ENABLED)) && !defined(HK_ALIGN_RELAX_CHECKS)
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
 #endif
-	hkMemUtil::memCpyOneAligned<4*sizeof(hkUint32), 16>(&m_quad, p);
+		unrollU32_load<N, HK_IO_SIMD_ALIGNED>::apply(self,p);
+	} };
+
+}
+
+template <int N, hkMathIoMode IO>
+HK_FORCE_INLINE void hkIntVector::load(const hkUint32* p)
+{
+	HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_load<N,IO>::apply(m_quad, p);
 }
 
 template <int N>
 HK_FORCE_INLINE void hkIntVector::load(const hkUint32* p)
 {
-#if !defined(HK_PLATFORM_CTR) && !(defined(HK_PLATFORM_IOS) && HK_CONFIG_SIMD != HK_CONFIG_SIMD_ENABLED) && !defined(HK_ALIGN_RELAX_CHECKS)
-	HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4))-1) ) == 0, "p must be aligned.");
-#endif
-	loadNotAligned<N>(p);
-}
-
-//
-//	Store to an aligned address
-
-template <>
-HK_FORCE_INLINE void hkIntVector::store<4>(hkUint32* p) const
-{
-#if !defined(HK_PLATFORM_CTR) && !(defined(HK_PLATFORM_IOS) && (HK_CONFIG_SIMD != HK_CONFIG_SIMD_ENABLED)) && !defined(HK_ALIGN_RELAX_CHECKS)
-	HK_MATH_ASSERT(0x70aae483, ((hkUlong)p & 0xf) == 0, "pointer for hkIntVector::store<4> must be 16-byte aligned");
-#endif
-	hkMemUtil::memCpyOneAligned<4*sizeof(hkUint32), 16>(p, &m_quad);
+	HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_load<N,HK_IO_SIMD_ALIGNED>::apply(m_quad, p);
 }
 
 template <int N>
+HK_FORCE_INLINE void hkIntVector::loadNotAligned(const hkUint32* p)
+{
+	HK_INT_VECTOR_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_load<N,HK_IO_BYTE_ALIGNED>::apply(m_quad, p);
+}
+
+//
+// Store Operations
+//
+
+namespace hkIntVector_AdvancedInterface
+{
+	template <int N, hkMathIoMode IoMode>
+	struct unrollU32_store { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		HK_INT_VECTOR_NOT_IMPLEMENTED;
+	} };
+
+	template <int N>
+	struct unrollU32_store<N, HK_IO_BYTE_ALIGNED> { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		hkMemUtil::memCpy<sizeof(hkUint8)>(p, &self, N*sizeof(hkUint32));
+	} };
+
+	template <int N>
+	struct unrollU32_store<N, HK_IO_NATIVE_ALIGNED> { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & (sizeof(hkUint32)-1) ) == 0, "pointer must be aligned to native size of hkUint32.");
+		unrollU32_store<N, HK_IO_BYTE_ALIGNED>::apply(self,p);
+	} };
+
+	template <int N>
+	struct unrollU32_store<N, HK_IO_SIMD_ALIGNED> { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+#if !defined(HK_PLATFORM_CTR) && !defined(HK_PLATFORM_ANDROID)  && !(defined(HK_PLATFORM_IOS) && (HK_CONFIG_SIMD != HK_CONFIG_SIMD_ENABLED)) && !defined(HK_ALIGN_RELAX_CHECKS)
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
+#endif
+		switch(N)
+		{
+		case 4:
+			hkMemUtil::memCpyOneAligned<4*sizeof(hkUint32), 16>(p, &self);
+			break;
+		default:
+			unrollU32_store<N, HK_IO_BYTE_ALIGNED>::apply(self,p);
+			break;
+		}
+	} };
+
+	template <int N>
+	struct unrollU32_store<N, HK_IO_NOT_CACHED> { HK_FORCE_INLINE static void apply(const hkQuadUint& self, hkUint32* HK_RESTRICT p)
+	{
+		HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4) )-1) ) == 0, "pointer must be aligned for SIMD.");
+		unrollU32_store<N, HK_IO_SIMD_ALIGNED>::apply(self,p);
+	} };
+
+} // namespace 
+
+
+template <int N, hkMathIoMode IO> 
 HK_FORCE_INLINE void hkIntVector::store(hkUint32* p) const
 {
-#if !defined(HK_PLATFORM_CTR) && !(defined(HK_PLATFORM_IOS) && HK_CONFIG_SIMD != HK_CONFIG_SIMD_ENABLED) && !defined(HK_ALIGN_RELAX_CHECKS)
-	HK_MATH_ASSERT(0x70aae483, ( ((hkUlong)p) & ((sizeof(hkUint32)*(N!=3?N:4))-1) ) == 0, "p must be aligned.");
-#endif
-	storeNotAligned<N>(p);
+	HK_VECTOR4f_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_store<N,IO>::apply(m_quad, p);
+}
+
+template <int N> 
+HK_FORCE_INLINE void hkIntVector::store(hkUint32* p) const
+{
+	HK_VECTOR4f_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_store<N,HK_IO_SIMD_ALIGNED>::apply(m_quad, p);
+}
+
+template <int N> 
+HK_FORCE_INLINE void hkIntVector::storeNotAligned(hkUint32* p) const
+{
+	HK_VECTOR4f_UNSUPPORTED_LENGTH_CHECK;
+	hkIntVector_AdvancedInterface::unrollU32_store<N,HK_IO_BYTE_ALIGNED>::apply(m_quad, p);
 }
 
 
@@ -1353,6 +1459,32 @@ HK_FORCE_INLINE int hkIntVector::getComponentAtVectorMax(hkVector4dParameter v) 
 	const hkInt32* HK_RESTRICT qu = reinterpret_cast<const hkInt32*>(m_quad.u32);
 
 	const int vmax = v.getIndexOfMaxComponent<4>();
+
+	return qu[vmax];
+}
+
+HK_FORCE_INLINE int hkIntVector::getFirstComponentAtVectorMax(hkVector4fParameter v) const
+{
+	const hkInt32* HK_RESTRICT qu = reinterpret_cast<const hkInt32*>(m_quad.u32);
+
+	hkVector4f ma; ma.setHorizontalMax<4>( v );
+	const hkVector4fComparison isMax = v.greaterEqual(ma);
+	HK_ON_DEBUG(const int mask = isMax.getMask();)
+	HK_MATH_ASSERT(0x2842fb1, mask > 0, "inconsistent max value of self");
+	int vmax = isMax.getIndexOfFirstComponentSet();
+
+	return qu[vmax];
+}
+
+HK_FORCE_INLINE int hkIntVector::getFirstComponentAtVectorMax(hkVector4dParameter v) const
+{
+	const hkInt32* HK_RESTRICT qu = reinterpret_cast<const hkInt32*>(m_quad.u32);
+
+	hkVector4d ma; ma.setHorizontalMax<4>( v );
+	const hkVector4dComparison isMax = v.greaterEqual(ma);
+	HK_ON_DEBUG(const int mask = isMax.getMask();)
+	HK_MATH_ASSERT(0x2842fb1, mask > 0, "inconsistent max value of self");
+	int vmax = isMax.getIndexOfFirstComponentSet();
 
 	return qu[vmax];
 }
@@ -1908,7 +2040,7 @@ template <int N> HK_FORCE_INLINE int hkIntVector::getIndexOfMinComponent() const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

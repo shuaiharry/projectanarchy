@@ -186,6 +186,12 @@ class hkVector4d
 		/// Set self to the vector \a a with each component multiplied by \a r. ( self = a*r )
 		HK_FORCE_INLINE void setMul(hkSimdDouble64Parameter r, hkVector4dParameter a);
 
+		/// Set self to the component-wise sum of \a a and \a b. ( self = a+b )
+		HK_FORCE_INLINE void setAdd(hkVector4dParameter a, hkSimdDouble64Parameter b);
+
+		/// Set self to the component-wise difference of \a a and \a b. ( self = a-b )
+		HK_FORCE_INLINE void setSub(hkVector4dParameter a, hkSimdDouble64Parameter b);
+
 		/// Set self to the component-wise reciprocal of \a v. ( self = 1/v ).
 		/// Accuracy: 23 bit, divide-by-0 not checked
 		HK_FORCE_INLINE void setReciprocal(hkVector4dParameter v);
@@ -973,7 +979,7 @@ class hkVector4d
 #endif //HK_MATH_VECTOR4d_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

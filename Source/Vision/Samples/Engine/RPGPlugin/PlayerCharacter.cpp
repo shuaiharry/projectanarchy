@@ -207,92 +207,11 @@ void RPG_PlayerCharacter::ServerTick(float const deltaTime)
     audioListener->SetOrientation(Vision::Camera.GetMainCamera()->GetOrientation());
   }
 
-  if (IsFeigningDeath())
-  {
-    m_stats.SetHealth(0); // health should never be <0
-
-    // have we completed our dying animation and waited the desired duration?
-    float const deathTime = Vision::GetTimer()->GetTime() - m_timeOfDeath;
-
-    VASSERT(m_havokBehavior);
-    if (deathTime >= m_feignDeathDuration 
-      && m_havokBehavior 
-      && !RPG_VisionHavokBehaviorHelper::BehaviorGetVarNamed<bool>(*m_havokBehavior, "Dying"))
-    {
-      // restore full health and mana
-      m_stats.SetHealth(m_stats.GetHealthMax());
-      m_stats.SetMana(m_stats.GetManaMax());
-
-      // put the player back on the navmesh if necessary
-      if (!IsOnNavMesh())
-      {
-        hkvVec3 respawnPosition(0.0f, 0.0f, 0.0f);
-        // @todo: finding a respawn point on the navmesh is not 100% reliable - 
-        // it can put the player in locations from which he'll just fall back out, 
-        // or from which he isn't guaranteed to be able to path back to the play-space. 
-        // For now, the safest option is to put him back to his last known good starting point.
-
-        // try to find the closest point on the navmesh
-        //if (GetAiController()->GetClosestPointOnNavMesh(GetPosition(), 1000.f, respawnPosition))
-        //{
-        //  Teleport(respawnPosition);
-        //}
-        //else
-        //{
-          // if we were unable to find a point on the navmesh, return the player to his initial spawn location
-          RPG_LevelInfo* levelInfo = RPG_GameManager::s_instance.GetLevelInfo();
-          RPG_PlayerSpawnPoint* initialSpawnPoint = NULL;
-          if(levelInfo)
-          {
-            initialSpawnPoint = levelInfo->GetInitialPlayerSpawnPoint();
-          }
-          if(initialSpawnPoint)
-          {
-            respawnPosition = initialSpawnPoint->GetPosition();
-          }
-        //}
-        Teleport(respawnPosition);
-      }
-
-      // restore the character's default equipment
-      SetUpDefaultEquipment();
-
-      // play the respawn animation and effect
-      m_havokBehavior->SetBoolVar("Respawning", true);
-      GetActionHandler().PerformAction(AT_Spawn, true);
-
-      // done feigning death.
-      m_feigningDeath = false;
-    }
-  }
-  else
-  {
-    RPG_Character::ServerTick(deltaTime);
-  }
-}
-
-void RPG_PlayerCharacter::Die()
-{
-  if (!IsFeigningDeath())
-  {
-    VASSERT(m_havokBehavior);
-    if(m_havokBehavior)
-    {
-      m_havokBehavior->SetBoolVar("Dying", true);  // tell the behavior component to execute the death event. Dying resets to false when the death anim is complete.
-    }
-
-    StopAllPersistentCharacterEffects();
-    SetWeaponTrailEnabledForEquippedWeapon(false);
-    DetachEquipmentOnDeath();
-    CreateCharacterEffect(FX_Die);
-    m_stats.SetHealth(0);
-    m_feigningDeath = true;
-    m_timeOfDeath = Vision::GetTimer()->GetTime();
-  }
+  RPG_Character::ServerTick(deltaTime);
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

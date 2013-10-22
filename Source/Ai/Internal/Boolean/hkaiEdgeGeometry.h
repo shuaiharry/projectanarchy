@@ -8,8 +8,6 @@
 #ifndef HKAI_EDGE_GEOMETRY_H
 #define HKAI_EDGE_GEOMETRY_H
 
-#include <Common/Base/Types/Color/hkColor.h>
-
 extern const class hkClass hkaiEdgeGeometryFaceClass;
 
 extern const class hkClass hkaiEdgeGeometryEdgeClass;
@@ -92,6 +90,7 @@ class hkaiEdgeGeometry : public hkReferencedObject
             EdgeData m_data;                ///< User data associate with the edge.
         };
 
+			/// Face type flags.
 		enum FaceFlagBits
 		{
 			FLAGS_NONE,
@@ -217,7 +216,7 @@ class hkaiEdgeGeometry : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

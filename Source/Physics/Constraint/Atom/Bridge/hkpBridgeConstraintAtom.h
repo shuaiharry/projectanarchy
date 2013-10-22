@@ -19,7 +19,7 @@ class hkpConstraintData;
 typedef void (HK_CALL *hkpConstraintAtomBuildJacobianFunc) ( hkpConstraintData* m_constraintData, const hkpConstraintQueryIn &in, hkpConstraintQueryOut &out );
 
 
-/// Special atom used to implement a custom atomic constraint that generates its Jacobians calling the buildJacobian() 
+/// Special atom used to implement a custom atomic constraint that generates its Jacobians calling the buildJacobian()
 /// function in the hkpConstraintData member.
 struct hkpBridgeConstraintAtom : public hkpConstraintAtom
 {
@@ -82,7 +82,7 @@ struct hkpBridgeAtoms
 		int getSizeOfAllAtoms() const { return hkGetByteOffsetInt(this, &m_bridgeAtom+1); }
 
 	public:
-		
+
 		HK_ALIGN_REAL(hkpBridgeConstraintAtom m_bridgeAtom);
 };
 
@@ -90,7 +90,7 @@ struct hkpBridgeAtoms
 #endif // HKP_BRIDGE_CONSTRAINT_ATOM_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -51,8 +51,8 @@ int  g_iCurrentMap;           // the current map number
 #define MAP_1         "Room.vscene"
 #define MAP_2         "Crossing.vscene"
 
-#define MAP_ICON_1    "Serialization\\map01.tex"
-#define MAP_ICON_2    "Serialization\\map02.tex"
+#define MAP_ICON_1    "Serialization\\map01.dds"
+#define MAP_ICON_2    "Serialization\\map02.dds"
 #define MAP_DATA_DIR  "Maps"VFILE_STR_SEPARATOR"SciFi"
 const char* g_pszMaps[2]      = { MAP_1, MAP_2 };
 const char* g_pszMapIcons[2]  = { MAP_ICON_1, MAP_ICON_2 };
@@ -72,7 +72,7 @@ const char* g_pszMapIcons[2]  = { MAP_ICON_1, MAP_ICON_2 };
 //
 // screen masks
 //
-#define SAVESLOT_FILE "Serialization\\slot%01i.tex"
+#define SAVESLOT_FILE "Serialization\\slot%01i.dds"
 #define SAVESLOT_COL_ERROR VColorRef(255,128,128,255)
 #define SAVESLOT_COL_LOAD  VColorRef(128,255,128,255)
 #define SAVESLOT_COL_SAVE  VColorRef(255,255,128,255)
@@ -90,14 +90,23 @@ float g_fInfoTime = 0.0f;
 
 static const VColorRef g_iOverlayColor(255,255,255,190);
 
+// Currently on OpenGL ES 2.0 per default mip-maps are generated via glGenerateMipmap() when the corresponding texture resource
+// does not contain mip-maps. However this may will fail on some devices (e.g. HTC One S). Therefore for OpenGL ES 2.0 all GUI
+// textures are loaded explicitly without generating mip-maps.
+#ifdef _VR_GLES2
+#define TEXTURE_LOADING_FLAGS VTM_FLAG_NO_MIPMAPS
+#else
+#define TEXTURE_LOADING_FLAGS 0
+#endif
+
 //
 ////////////////////////////////////////////////////////////////////////////////////
 
 // sample flags
 #if defined(_VISION_MOBILE) || defined( HK_ANARCHY )
-  int iSampleFlags = VSAMPLE_INIT_DEFAULTS | VSAMPLE_FORCEMOBILEMODE;
+  uint64 iSampleFlags = VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_FORCEMOBILEMODE;
 #else
-  int iSampleFlags = VSAMPLE_INIT_DEFAULTS;
+  uint64 iSampleFlags = VSampleFlags::VSAMPLE_INIT_DEFAULTS;
 #endif
 
 //
@@ -142,7 +151,7 @@ public:
 #endif
 
     // screenmask for the slot number
-    m_spSlotNumMask = new VisScreenMask_cl(pszSlotFile);
+    m_spSlotNumMask = new VisScreenMask_cl(pszSlotFile, TEXTURE_LOADING_FLAGS);
     m_spSlotNumMask->SetPos( fPosX, fSlotPosY );
     m_spSlotNumMask->SetTransparency(VIS_TRANSP_ALPHA);
     m_spSlotNumMask->SetColor(g_iOverlayColor);
@@ -150,7 +159,7 @@ public:
     m_spSlotNumMask->SetVisible(FALSE);
   
     // screenmask for either "No Preview" or "Free"
-    m_spBackgroundMask = new VisScreenMask_cl("Serialization\\NoPreview.tex");
+    m_spBackgroundMask = new VisScreenMask_cl("Serialization\\NoPreview.dds", TEXTURE_LOADING_FLAGS);
     m_spBackgroundMask->SetPos( fPosX, fThumbnailPosY );
     m_spBackgroundMask->SetTargetSize(128.f,96.f);
     m_spBackgroundMask->SetTransparency(VIS_TRANSP_ALPHA);
@@ -197,17 +206,17 @@ public:
       sprintf(pszPreviewFileName, SAVEGAME_PREVIEW, m_iSlotIndex + 1);
       if (Vision::File.Exists(pszPreviewFileName))
       {
-        m_spPreviewMask->LoadFromFile(pszPreviewFileName);
+        m_spPreviewMask->LoadFromFile(pszPreviewFileName, TEXTURE_LOADING_FLAGS);
         bShowPreview = TRUE;
       }
       else
       {
-        m_spBackgroundMask->LoadFromFile("Serialization\\NoPreview.tex");
+        m_spBackgroundMask->LoadFromFile("Serialization\\NoPreview.dds", TEXTURE_LOADING_FLAGS);
       }
     }
     else
     {
-      m_spBackgroundMask->LoadFromFile("Serialization\\Free.tex");
+      m_spBackgroundMask->LoadFromFile("Serialization\\Free.dds", TEXTURE_LOADING_FLAGS);
     }
     // target size gets reset in LoadFromFile 
     m_spBackgroundMask->SetTargetSize(128.f,96.f);
@@ -235,7 +244,7 @@ public:
   {
     const int w = Vision::Video.GetXRes();
     const int h = Vision::Video.GetYRes();
-    
+
     unsigned char *pTempBuffer = new unsigned char [w*h*3];
     char pszPreviewFileName[FS_MAX_PATH];
     sprintf(pszPreviewFileName, SAVEGAME_PREVIEW, m_iSlotIndex + 1);
@@ -243,23 +252,6 @@ public:
     // write the screen buffer to memory buffer
     if (Vision::Game.WriteScreenToBuffer(0,0,w,h,(UBYTE *)pTempBuffer))
     {
-      // first, flip buffer vertically and swap red<->blue channel
-      for (int y=0;y<(h/2);y++)
-      {
-        unsigned char *pRow1 = &pTempBuffer[y*w*3];
-        unsigned char *pRow2 = &pTempBuffer[(h-y-1)*w*3];
-        for (int x=0;x<w;x++, pRow1+=3,pRow2+=3)
-        {
-          unsigned char tmp[3] = {pRow1[0],pRow1[1],pRow1[2]};
-          pRow1[0] = pRow2[2];
-          pRow1[1] = pRow2[1];
-          pRow1[2] = pRow2[0];
-          pRow2[0] = tmp[2];
-          pRow2[1] = tmp[1];
-          pRow2[2] = tmp[0];
-        }
-      }
-
       // use VTEX to scale and save the image
       Image_cl image;
       ImageMap_cl colorMap(w,h,24, (UBYTE*)pTempBuffer);
@@ -383,7 +375,7 @@ void LoadMap(int iMap, BOOL bLoadEntities)
   int h = Vision::Video.GetYRes();
 
   // set up "current map" screen mask
-  g_spMap = new VisScreenMask_cl(g_pszMapIcons[iMap]);
+  g_spMap = new VisScreenMask_cl(g_pszMapIcons[iMap], TEXTURE_LOADING_FLAGS);
   g_spMap->SetPos( w - 48.f - 8.f, (float)h - 48.f - 8.f );
   g_spMap->SetTransparency(VIS_TRANSP_ALPHA);
   g_spMap->SetColor(g_iOverlayColor);
@@ -539,7 +531,7 @@ VBool SaveGame(int iNum)
       }
     }
   }
-  
+
   // do full serialization of entities
   for (i = 0; i < iNumOfAllEntities; i++)
   {
@@ -556,7 +548,7 @@ VBool SaveGame(int iNum)
       }
     }
   }
-  
+
   // store end tag - useful to verify a valid archive
   ar << ARCHIVE_END_TAG;
 
@@ -772,13 +764,13 @@ VISION_INIT
 
   // Create and init an application
   spApp = new VisSampleApp();
-  if (!spApp->InitSample(MAP_DATA_DIR /*DataDir*/, NULL /*SampleScene*/, iSampleFlags&~VSAMPLE_HAVOKLOGO))
+  if (!spApp->InitSample(MAP_DATA_DIR /*DataDir*/, NULL /*SampleScene*/, iSampleFlags & ~VSampleFlags::VSAMPLE_HAVOKLOGO))
     return false;
 
 #if defined( _VISION_MOBILE )
   VString outputDir;
 
-#if defined( _VISION_ANDROID )
+#if defined( _VISION_ANDROID ) || defined( _VISION_TIZEN )
   outputDir = VisSampleApp::GetCacheDirectory();
 
   // On Android, we have to re-set our output directory to be the SDCard one
@@ -1045,7 +1037,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
   int iResY = Vision::Video.GetYRes();
   int iWidth, iHeight;
 
-  g_spSaveIcon = new VisScreenMask_cl( SAVE_ICON );
+  g_spSaveIcon = new VisScreenMask_cl(SAVE_ICON, TEXTURE_LOADING_FLAGS);
   g_spSaveIcon->GetTextureSize( iWidth, iHeight );
   g_spSaveIcon->SetPos( 8.0f, iResY - iHeight - 8.0f );
   g_spSaveIcon->SetTransparency( VIS_TRANSP_ALPHA );
@@ -1061,21 +1053,21 @@ VISION_SAMPLEAPP_AFTER_LOADING
 
   // finally, add in those info overlays
   int iWidth2, iHeight2;
-  g_spHoldToSave = new VisScreenMask_cl( HTTS_IMAGE );
+  g_spHoldToSave = new VisScreenMask_cl(HTTS_IMAGE, TEXTURE_LOADING_FLAGS);
   g_spHoldToSave->GetTextureSize( iWidth2, iHeight2 );
   g_spHoldToSave->SetPos( 4.0f, iResY - iHeight - iHeight2 - 12.0f );
   g_spHoldToSave->SetTransparency( VIS_TRANSP_ALPHA );
   g_spHoldToSave->SetColor( g_iOverlayColor );
   g_spHoldToSave->SetVisible( TRUE );
 
-  g_spTouchToLoad = new VisScreenMask_cl( TTL_IMAGE );
+  g_spTouchToLoad = new VisScreenMask_cl(TTL_IMAGE, TEXTURE_LOADING_FLAGS);
   g_spTouchToLoad->GetTextureSize( iWidth2, iHeight2 );
   g_spTouchToLoad->SetPos( iResX - iWidth2 - 140.0f, 264.0f - ( iHeight2 / 2 ) );
   g_spTouchToLoad->SetTransparency( VIS_TRANSP_ALPHA );
   g_spTouchToLoad->SetColor( g_iOverlayColor );
   g_spTouchToLoad->SetVisible( TRUE );
 
-  g_spChangeLevel = new VisScreenMask_cl( CL_IMAGE );
+  g_spChangeLevel = new VisScreenMask_cl(CL_IMAGE, TEXTURE_LOADING_FLAGS);
   g_spChangeLevel->GetTextureSize( iWidth2, iHeight2 );
   g_spChangeLevel->SetPos( iResX - iWidth2 - 60.0f, iResY - iHeight2 - 60.0f );
   g_spChangeLevel->SetTransparency( VIS_TRANSP_ALPHA );
@@ -1199,7 +1191,7 @@ VISION_DEINIT
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

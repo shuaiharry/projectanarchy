@@ -84,16 +84,26 @@
 // SDK version 2013.1: Moved global unit scaling from VIEW to _V3D chunk
 #define SCENE_FILE_VERSION16          16
 
+// SDK version 2013.2: UpdateSceneController + Timer + Physics Time Stepping serialization.
+#define SCENE_FILE_VERSION17          17
+
+// SDK version 2013.2: DefaultGlobalAmbientColor
+#define SCENE_FILE_VERSION18          18
+
+// SDK version 2013.2: Coordinate system
+#define SCENE_FILE_VERSION19          19
+
 // IMPORTANT! Do not forget to enhance the SceneVersion test in the 
 // engine tests if you increase the scene version number
-#define SCENE_FILE_CURRENT_VERSION    SCENE_FILE_VERSION16
+#define SCENE_FILE_CURRENT_VERSION    SCENE_FILE_VERSION19
 
 
 // local fog- chunk versioning
 #define VSCENE_FOG_VERSION_0          0
 #define VSCENE_FOG_VERSION_1          1
 #define VSCENE_FOG_VERSION_2          2 // added possibility to toggle sky-masking for fog rendering
-#define VSCENE_FOG_CURRENT_VERSION    VSCENE_FOG_VERSION_2
+#define VSCENE_FOG_VERSION_3          3 // added virtual sky depth used to virtually place the sky in front of the far plane
+#define VSCENE_FOG_CURRENT_VERSION    VSCENE_FOG_VERSION_3
 
 
 /// \brief
@@ -114,6 +124,7 @@ public:
     LF_ForceMobileMode        = V_BIT(1), ///< Forces the loader to use a VisionMobileShaderProvider and a simple Lightgrid, regardless of what is set in the vscene file.
     LF_UsePrewarming          = V_BIT(2), ///< Prewarms all resources by rendering every mesh once with the assigned shader which which forces the graphics driver to create its internal objects. This prevents stuttering after scene loading.
     LF_UseInterleavedLoading  = V_BIT(3) | LF_UseStreamingIfExists, ///< Does not load the whole scene at once but only a certain amount of chunks per frame. You have to call IsFinished periodically to advance the scene file loading. Also enables LF_UseStreamingIfExists.
+    LF_LoadTimeStepSettings   = V_BIT(4),  ///< Time Stepping settings are loaded by default. Omit this flag if time stepping settings should always be set manually.
     
     LF_PlatformDefault = 
 #ifdef NEEDS_SCENE_STREAMING
@@ -122,7 +133,7 @@ public:
 #ifdef NEEDS_SCENE_PREWARMING
     LF_UsePrewarming |
 #endif
-    0
+    LF_LoadTimeStepSettings
   };
 
   ///
@@ -376,6 +387,7 @@ private:
   bool m_bForceMobileMode;
   bool m_bUsePrewarming;
   bool m_bInterleavedLoading;
+  bool m_bLoadTimeStepSettings;
   int m_iNextPrewarmIndexStaticGeometry;
   int m_iNextPrewarmIndexEntities;
 
@@ -415,7 +427,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

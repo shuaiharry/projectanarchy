@@ -525,7 +525,7 @@ public:
   inline void AddTask(VThreadedTask *pTask, int iPriority);
   void RemoveTask(VThreadedTask *pTask);
   void SignalIdle(VManagedThread *pThread);
-  VThreadedTask *GetNextTask(VManagedThread *pThread, bool bReverse);
+  VThreadedTask *GetNextTask(VManagedThread *pThread);
 
   static VISION_THREADLOCAL_DECL(VManagedThread*, s_pCurrentThread);
 
@@ -535,6 +535,7 @@ public:
 
 private:
   friend class VManagedThread;
+  friend class VThreadedTask;
 
   unsigned int CreateManagedThread();
   unsigned int GetTotalNumTasks();
@@ -572,7 +573,6 @@ private:
 
   volatile int m_iStackSizePerThread;
   volatile bool m_bIsWaiting;
-  volatile bool m_bOrderReversed;
 
   bool m_bIsInitialized;
   
@@ -583,7 +583,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

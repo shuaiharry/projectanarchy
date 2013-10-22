@@ -43,10 +43,49 @@ class hkbBoneIndexArray : public hkbBindable
 
 };
 
+/*
+<todo.jg this has problems with managed class generation :(
+class hkbBoneIndexArrayRef : public hkRefPtr<hkbBoneIndexArray>
+{
+public:
+
+	hkbBoneIndexArrayRef() : hkRefPtr<hkbBoneIndexArray>() {}
+	hkbBoneIndexArrayRef(hkbBoneIndexArray* otherArray)
+	{
+		assign( otherArray );
+	}
+
+	void operator =(hkbBoneIndexArray* otherArray)
+	{
+		assign( otherArray );
+	}
+
+protected:
+
+	void assign( hkbBoneIndexArray* otherArray )
+	{
+		if ( otherArray != HK_NULL && otherArray->hasBindings())
+		{
+			// if there are bindings we need a deep copy
+			setAndDontIncrementRefCount( new hkbBoneIndexArray( *otherArray ) );
+		}
+		else
+		{
+			// if there are no bindings (or we are null) we can do a shallow copy / normal assignment
+			hkRefPtr<hkbBoneIndexArray>::operator =( otherArray );
+		}
+	}
+
+public:
+
+	hkbBoneIndexArrayRef( hkFinishLoadedObjectFlag flag ) : hkRefPtr<hkbBoneIndexArray>(flag) {}
+};
+*/
+
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

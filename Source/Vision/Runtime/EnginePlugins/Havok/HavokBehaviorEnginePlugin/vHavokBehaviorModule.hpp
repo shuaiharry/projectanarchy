@@ -36,7 +36,10 @@ public:
 	virtual void step( hkReal timestep ) HK_OVERRIDE;
 };
 
-
+/// 
+/// \brief
+///   Module responsible for the behavior simulation.
+///
 class vHavokBehaviorModule : public IVisCallbackHandler_cl
 {
 	public:
@@ -44,48 +47,76 @@ class vHavokBehaviorModule : public IVisCallbackHandler_cl
 		friend class vHavokBehaviorComponent;
 		friend class vHavokBehaviorOnUpdateSceneFinishedHandler_cl;
 
+    ///
+    /// @name Constructor / Destructor
+    /// @{
+    ///
+
 		vHavokBehaviorModule();
 
-		/// Destructor
 		VHAVOKBEHAVIOR_IMPEXP virtual ~vHavokBehaviorModule();
 
-		// should be called at plugin initialization time
+    ///
+    /// @}
+    ///
+
+    /// \brief
+		///   Should be called at plugin initialization time.
 		VHAVOKBEHAVIOR_IMPEXP void OneTimeInit();
 
-		// should be called at plugin de-initialization time
+    /// \brief
+		///   Should be called at plugin de-initialization time.
 		VHAVOKBEHAVIOR_IMPEXP void OneTimeDeInit();
 
-		// implements IVisCallbackHandler_cl
-		VHAVOKBEHAVIOR_IMPEXP VOVERRIDE void OnHandleCallback( IVisCallbackDataObject_cl* pData );
+    /// \brief
+		///   IVisCallbackHandler_cl implementation.
+		VHAVOKBEHAVIOR_IMPEXP virtual void OnHandleCallback(IVisCallbackDataObject_cl* pData) HKV_OVERRIDE;
 
 		VHAVOKBEHAVIOR_IMPEXP static vHavokBehaviorModule* GetInstance();
 		
-		/// Add a character to the world
+    /// \brief
+		///   Add a character to the world.
 		VHAVOKBEHAVIOR_IMPEXP hkbCharacter* addCharacter( vHavokBehaviorComponent* character );
 
-		/// Remove a character from the world
+    /// \brief
+		///   Remove a character from the world.
 		VHAVOKBEHAVIOR_IMPEXP void removeCharacter( vHavokBehaviorComponent* character );
 
-		/// Step the behavior world (including physics)
+    /// \brief
+		///   Step the behavior world (including physics).
 		VHAVOKBEHAVIOR_IMPEXP void stepModule();
 
-		/// Update properties if editor settings have changed
+    /// \brief
+		///   Update properties if editor settings have changed.
 		VHAVOKBEHAVIOR_IMPEXP void checkEditorModeChanged();
 
-		/// Returns the project asset manager associated with the behavior module
+    /// \brief
+		///   Returns the project asset manager associated with the behavior module.
 		hkbProjectAssetManager* GetProjectAssetManager() const;
 
-		/// Accessors
+    ///
+		/// @name Accessors
+    /// @{
+    ///
+
 		inline hkbWorld* getBehaviorWorld() { return m_behaviorWorld; }
 		inline hkbAssetLoader* getAssetLoader() { return m_assetLoader; }
 		inline bool shouldStepWorld() { return m_stepWorld; }
 		inline const hkArray<vHavokBehaviorComponent*>& getCharacters() { return m_visionCharacters; }
 
+    ///
+    /// @}
+    ///
+
 	private:
-		/// Updates the pose of the entity
+		/// Cleans up the state of the blend components and prepares them for the new frame of simulation
+		void OnFrameStart();
+
+    /// \brief
+		///   Updates the pose of the entity.
 		void UpdatePose();
 
-		void InitWorld( vHavokPhysicsModule* physicsModule );
+		void InitWorld(vHavokPhysicsModule* physicsModule);
 
 		void DeInitWorld();
 
@@ -120,7 +151,7 @@ class vHavokBehaviorModule : public IVisCallbackHandler_cl
 		vHavokPhysicsStepper* m_physicsStepper;
 
 	protected:
-			/// One global instance of our manager
+	  /// One global instance of our manager
 		static vHavokBehaviorModule g_GlobalManager;
 };
 
@@ -131,7 +162,7 @@ void EnsureHavokBehaviorScriptRegistration();
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

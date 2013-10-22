@@ -27,7 +27,7 @@
 class SimpleSkeletalAnimatedObject_cl : public VisBaseEntity_cl
 {
 public:
-V_DECLARE_SERIAL( SimpleSkeletalAnimatedObject_cl, )
+  V_DECLARE_SERIAL( SimpleSkeletalAnimatedObject_cl, )
   IMPLEMENT_OBJ_CLASS(SimpleSkeletalAnimatedObject_cl);
 
   enum SampleMode_e
@@ -49,7 +49,7 @@ V_DECLARE_SERIAL( SimpleSkeletalAnimatedObject_cl, )
 
   // Sample Configuration
   void SetMode(SampleMode_e newMode);
-  SampleMode_e GetMode() const { return sampleMode; }
+  SampleMode_e GetMode() const { return m_eSampleMode; }
 
   // Public Accessor Functions
   VisAnimNormalizeMixerNode_cl *GetNormalizeMixerNode() const { return m_spNormalizeMixerNode; }
@@ -65,9 +65,10 @@ V_DECLARE_SERIAL( SimpleSkeletalAnimatedObject_cl, )
   void SetBlendWalkToRun(bool bDirection);
 
   // VisBaseEntity_cl overrides
-  VOVERRIDE void InitFunction();
-  VOVERRIDE void ThinkFunction();
-  VOVERRIDE void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB);
+  virtual void InitFunction() HKV_OVERRIDE;
+  virtual void DeInitFunction() HKV_OVERRIDE;
+  virtual void ThinkFunction() HKV_OVERRIDE;
+  virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB) HKV_OVERRIDE;
 
 protected:
   // sample mode functions
@@ -92,16 +93,16 @@ protected:
   int m_iNeckBoneIndex;
   int m_iMixerInputWalk, m_iMixerInputRun;
 
-  VString sHighlightedBoneName;
-  float fBoneHighlightDuration;
-  int ANIMEVENT_FOOTSTEP_LEFT;
-  int ANIMEVENT_FOOTSTEP_RIGHT;
+  VString m_sHighlightedBoneName;
+  float m_fBoneHighlightDuration;
+  int m_iAnimEventFootStepLeft;
+  int m_iAnimEventFootStepRight;
 
-  SampleMode_e sampleMode;
+  SampleMode_e m_eSampleMode;
 
   // lookat specific
-  VisBaseEntity_cl *pLookAtTarget;
-  float fLookAtRotationPhase;
+  VisBaseEntity_cl *m_pLookAtTarget;
+  float m_fLookAtRotationPhase;
   hkvMat3 m_RelativeHeadOrientation;
   hkvQuat m_CurrentNeckRotation;
 };
@@ -109,7 +110,7 @@ protected:
 #endif //__VISION_SIMPLESKELETALANIMATEDOBJECT_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

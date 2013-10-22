@@ -8,10 +8,6 @@
 
 /// \file vHavokShapeFactory.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKSHAPEFACTORY_HPP_INCLUDED
 #define VHAVOKSHAPEFACTORY_HPP_INCLUDED
 
@@ -55,7 +51,6 @@ public:
   /// @}
   ///
 
-
   ///
   /// @name Havok Shape Creation
   /// @{
@@ -63,7 +58,7 @@ public:
 
   /// 
   /// \brief
-  ///   Enumeration of Havok shape creation flags
+  ///   Enumeration of Havok Physics shape creation flags
   ///
   enum VShapeCreationFlags_e
   {
@@ -75,65 +70,65 @@ public:
 
   /// 
   /// \brief
-  ///   Factory function to create a Havok shape based on a convex hull (hkvConvexVerticesShape).
+  ///   Factory function to create a Havok Physics shape based on a convex hull (hkvConvexVerticesShape).
   /// 
-  /// This function takes the vertices data of the given mesh, respectively the corresponding collision mesh,
-  /// and creates a convex geometry which is used for the Havok shape representation. This shape gets cached 
-  /// respective to the mesh's file name and the scaling of this shape.
+  /// This function takes the vertex data of the given mesh including the corresponding collision mesh
+  /// and creates a convex geometry which is used for the Havok Physics shape representation. This shape gets cached 
+  /// on disk relative to the mesh's file name, also taking the scaling into account.
   ///
   /// \param pMesh
   ///   Input: Pointer to the mesh.
   ///
   /// \param vScale
-  ///   Input: Scaling vector for the Havok convex shape.
+  ///   Input: Scaling vector for the Havok Physics convex shape.
   ///
   /// \param szShapeCacheId
-  ///   Output: ID string of corresponding shape into the cache table (points to memory in cache table), if shape could be retrieved.
+  ///   Output: ID string of corresponding shape into the cache table (points to memory in cache table).
+  ///   NULL if shape could not be retrieved.
   ///
   /// \param iCreationFlags
   ///   Input: Bit mask for multiple VShapeCreationFlags_e flags.
   ///
   /// \returns
-  ///   Pointer to Havok shape based on a convex hull.
+  ///   Pointer to Havok Physics shape based on a convex hull.
   /// 
-  VHAVOK_IMPEXP static hkRefNew<hkpShape> CreateConvexHullShapeFromMesh(VBaseMesh* pMesh, const hkvVec3& vScale, const char **szShapeCacheId, 
-                                                                        int iCreationFlags = VShapeCreationFlags_CACHE_SHAPE | VShapeCreationFlags_USE_VCOLMESH);
-
+  VHAVOK_IMPEXP static hkRefNew<hkpShape> CreateConvexHullShapeFromMesh(VBaseMesh* pMesh, const hkvVec3& vScale, 
+    const char **szShapeCacheId, int iCreationFlags = (VShapeCreationFlags_CACHE_SHAPE | VShapeCreationFlags_USE_VCOLMESH));
 
   /// 
   /// \brief
-  ///   Factory function to create a Havok shape based on the given mesh data (hkvBvCompressedMeshShape).
+  ///   Factory function to create a Havok Physics shape based on the given mesh data (hkvBvCompressedMeshShape).
   /// 
-  /// This function takes the geometry data of the given mesh, respectively the corresponding collision mesh,
-  /// and creates a Havok mesh shape. This shape gets cached respective to the mesh's file name, scaling, collision behavior
-  /// and welding type.
+  /// This function takes the geometry data of the given mesh including the corresponding collision mesh
+  /// and creates a Havok Physics mesh shape. This shape gets cached 
+  /// on disk relative to the mesh's file name, also taking the scaling, collision behavior and welding type into account.
   ///
   /// \param pMesh
   ///   Input: Pointer to the mesh.
   ///
   /// \param vScale
-  ///   Input: Scaling vector for the Havok mesh shape.
+  ///   Input: Scaling vector for the Havok Physics mesh shape.
   ///
   /// \param szShapeCacheId
-  ///   Output: ID string of corresponding shape into the cache table (points to memory in cache table), if shape could be retrieved.
+  ///   Output: ID string of corresponding shape for the cache table (points to memory in cache table), 
+  ///   if shape could be retrieved.
   ///
   /// \param iCreationFlags
-  ///   Input: Bit mask for multiple VShapeCreationFlags_e flags.
+  ///   Input: Bit mask for VShapeCreationFlags_e flags.
   ///
   /// \param eWeldingType
   ///   Input: Specifies the welding type. 
   ///      
   /// \returns
-  ///   Pointer to Havok shape based on the given mesh data.
+  ///   Pointer to Havok Physics shape based on the given mesh data.
   /// 
-  VHAVOK_IMPEXP static hkRefNew<hkpShape> CreateShapeFromMesh(VBaseMesh* pMesh, const hkvVec3& vScale, const char **szShapeCacheId, 
-                                                              int iCreationFlags = VShapeCreationFlags_CACHE_SHAPE | VShapeCreationFlags_USE_VCOLMESH, 
-                                                              VisWeldingType_e eWeldingType=VIS_WELDING_TYPE_NONE);
-
+  VHAVOK_IMPEXP static hkRefNew<hkpShape> CreateShapeFromMesh(VBaseMesh* pMesh, const hkvVec3& vScale, 
+    const char **szShapeCacheId, int iCreationFlags = (VShapeCreationFlags_CACHE_SHAPE | VShapeCreationFlags_USE_VCOLMESH), 
+    VisWeldingType_e eWeldingType=VIS_WELDING_TYPE_NONE);
 
   /// 
   /// \brief
-  ///   Factory function to create a Havok shape based on a Havok BvCompressedMesh Shape (hkvBvCompressedMeshShape).
+  ///   Factory function to create a Havok Physics shape based on a Havok BvCompressedMesh Shape (hkvBvCompressedMeshShape).
   /// 
   /// \param meshInstances
   ///   Input: Collection of static meshes the hkvBvCompressedMeshShape gets created for.
@@ -142,25 +137,27 @@ public:
   ///   Input: Bit mask for multiple VShapeCreationFlags_e flags.
   ///
   /// \param szShapeCacheId
-  ///   Output: ID string of corresponding shape into the cache table (points to memory in cache table), if shape could be retrieved.
+  ///   Output: ID string of corresponding shape into the cache table (points to memory in cache table), 
+  ///   if shape could be retrieved.
   ///
   /// \returns
-  ///   Pointer to Havok shape based on hkvBvCompressedMeshShape.
+  ///   Pointer to Havok Physics shape based on hkvBvCompressedMeshShape.
   /// 
-  VHAVOK_IMPEXP static hkRefNew<hkpShape> CreateShapeFromStaticMeshInstances(const VisStaticMeshInstCollection &meshInstances, int iCreationFlags, const char **szShapeCacheId);
+  VHAVOK_IMPEXP static hkRefNew<hkpShape> CreateShapeFromStaticMeshInstances(
+    const VisStaticMeshInstCollection &meshInstances, int iCreationFlags, const char **szShapeCacheId);
 
-#ifdef SUPPORTS_TERRAIN
+#if defined(SUPPORTS_TERRAIN)
 
   /// 
   /// \brief
-  ///   Factory function to create a Havok shape based on Havok Heightfield Shape (hkvSampledHeightfield). 
-  ///   It can optionally be wrapped in a Triangle sampler so that collisions are exact.
+  ///   Factory function to create a Havok Physics shape based on a height field Shape (hkvSampledHeightfield). 
+  ///   It can optionally be wrapped by a triangle sampler so that collisions are exact.
   /// 
   /// \param terrain
-  ///   Terrain sector the the Havok Heightfield shape gets created for.
+  ///   Terrain sector which will be represented by the Havok Physics height field shape.
   ///
   /// \returns
-  ///   Pointer to Havok shape.
+  ///   Pointer to Havok Physics shape.
   /// 
   VHAVOK_IMPEXP static hkpShape* CreateShapeFromTerrain(const VTerrainSector &terrain);
 
@@ -170,35 +167,34 @@ public:
   /// @}
   ///
 
-
   ///
-  /// @name Havok Shape Caching
+  /// @name Havok Physics Shape Caching
   /// @{
   ///
  
   /// 
   /// \brief
-  ///   Adds a Havok shape with the given string ID to the cache table.
+  ///   Adds a Havok Physics shape with the given string ID to the cache table.
   /// 
-  /// When adding a shape to the cache we increment the reference count by 1 so we
-  /// always keep a reference to the shape even all rigid bodies that reference this 
-  /// shape were removed. Therefore we don't need to create a shape multiple times
-  /// when it has been added once.
+  /// When adding a shape to the cache the reference count is incremented by 1. This way, 
+  /// a reference to the shape is always kept even after all rigid bodies that reference it 
+  /// have been removed. This way shapes don't have to be created multiple times, once they
+  /// are added.
   ///
   /// \param szShapeId
   ///   ID string for the shape to be added.
   /// 
   /// \param pShape
-  ///   Pointer to Havok shape to be cached.
+  ///   Pointer to Havok Physics shape to be cached.
   /// 
   /// \return
-  ///   ID string of added shape (points to memory in cache table).
+  ///   ID string of shape (points to memory in cache table).
   /// 
   static const char* AddShape(const char *szShapeId, hkpShape *pShape);
 
   /// 
   /// \brief
-  ///   Removes a single shape from the cache if nothing references it.
+  ///   Removes a single shape from the cache if there is no other reference to it.
   /// 
   /// \param szShapeId
   ///   The ID of the shape to remove.
@@ -209,36 +205,36 @@ public:
   /// \brief
   ///   Purges all cached shapes.
   /// 
-  /// When adding a shape to the cache we increment the reference count by 1 so we
-  /// always keep a reference to the shape even all rigid bodies that reference this 
-  /// shape were removed. Therefore we don't need to create a shape multiple times
-  /// when it has been added once.
+  /// When clearing the cache, the reference of the shape factory to all cached shapes
+  /// is released and the internal table is cleared.
   ///
-  /// When clearing the cache we check whether all shapes have a reference count 
-  /// of 1, meaning all rigid bodies removed their reference from this shape and only the
-  /// cache keeps one single reference. This is the proper behavior. 
+  /// \return
+  ///   Returns TRUE if no other references to the shapes exist. It is advised to ensure
+  ///   that this is always the case when this function is called.
+  ///
+  /// \sa AddShape
   ///
   static bool ClearCache();
 
   /// 
   /// \brief
-  ///   Finds a Havok shape in the cache table.
+  ///   Finds a Havok Physics shape in the cache table.
   /// 
   /// \param szShapeId
-  ///   Input: ID string of the shape to be found.
+  ///   Input: ID string of the collision shape to be found.
   /// 
   /// \param szShapeCacheId
-  ///   Output (optional): ID string of cached shape (points to memory in cache table), if shape was found.
+  ///   Output (optional): ID string of cached shape (points to memory in cache table).
+  ///   Is \c NULL if shape was not found.
   /// 
   /// \return
-  ///   hkpShape* : Pointer to Havok shape, or NULL if shape could not be found.
+  ///   hkpShape* : Pointer to Havok shape, or \c NULL if shape could not be found.
   ///
   static hkpShape* FindShape(const char *szShapeId, const char **szShapeCacheId=NULL);
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Helper
@@ -247,110 +243,111 @@ public:
 
   /// 
   /// \brief
-  ///   Gets the pivot offset of the bounding box in regard to the models pivot
+  ///   Gets the pivot offset of the bounding box relative to the mesh's pivot.
   ///   
   /// \param pMesh
   ///   Pointer to the mesh.
   ///
   /// \param vScaleEntity
-  ///   Scaling of the instance the model is applied to. The scaling is considered
-  ///   in the computation of the pivot offset.
+  ///   Scaling of the mesh instance.
   ///
   /// \returns
-  ///   Pivot offset vector (unscaled: in Vision space)
+  ///   Pivot offset vector (in Vision units).
   /// 
   static hkvVec3 GetPivotOffset(const VDynamicMesh *pMesh, const hkvVec3& vScaleEntity);
 
   /// 
   /// \brief
-  ///   Gets the pivot offset of the bounding box in regard to the models pivot
+  ///   Gets the pivot offset of the bounding box relative to the mesh's pivot.
   ///   
   /// \param pMesh
   ///   Pointer to the mesh.
   ///
   /// \param fUniformScaleEntity
-  ///   Uniform scaling of the instance the model is applied to. The scaling is considered
-  ///   in the computation of the pivot offset.
+  ///   Uniform scaling of the mesh instance.
   ///
   /// \returns
-  ///   Pivot offset vector (unscaled: in Vision space)
+  ///   Pivot offset vector (in Vision units).
   /// 
   static hkvVec3 GetPivotOffset(const VDynamicMesh *pMesh, float fUniformScaleEntity);
 
   /// 
   /// \brief
-  ///   Gets the ID for a convex shape.
+  ///   Returns the ID for a convex shape.
   ///   
   /// \param szIDString
-  ///   Pointer to a char array of size at least 512 bytes.
+  ///   Pointer to a char array with a size of at least 512 bytes.
   ///
   /// \param szMeshName
   ///   Mesh name to use.
   ///
   /// \param vScale
-  ///   Scale to use.
+  ///   Scale of the mesh instance.
   ///
   /// \param bShrinkByCvxRadius
-  ///   Specifies whether convex shape is shrinked by convex radius so that it's surface is as close as possible to the graphical one.
+  ///   Specifies whether convex shape is shrunken by convex radius so that its surface 
+  ///   is as close as possible to the graphical representation.
   /// 
-  static void GetIDStringForConvexShape(char *szIDString, const char *szMeshName, const hkvVec3& vScale, bool bShrinkByCvxRadius);
+  static void GetIDStringForConvexShape(char *szIDString, const char *szMeshName, const hkvVec3& vScale, 
+    bool bShrinkByCvxRadius);
 
   /// 
   /// \brief
-  ///   Gets the ID for a mesh shape.
+  ///   Returns the ID for a convex shape.
   ///   
   /// \param szIDString
-  ///   Pointer to a char array of size at least 512 bytes.
+  ///   Pointer to a char array with a size of at least 512 bytes.
   ///
   /// \param szMeshName
   ///   Mesh name to use.
   ///
   /// \param vScale
-  ///   Scale to use.
+  ///   Scale of the mesh instance.
   ///
   /// \param eCollisionBehavior
-  ///   Describes the collision behavior.
+  ///   Determines the collision behavior.
   ///
   /// \param eWeldingType
   ///   Specifies the type of welding. 
   ///
-  static void GetIDStringForMeshShape(char *szIDString, const char *szMeshName, const hkvVec3& vScale, VisStaticMeshInstance_cl::VisCollisionBehavior_e eCollisionBehavior,
-                                      VisWeldingType_e eWeldingType);
+  static void GetIDStringForMeshShape(char *szIDString, const char *szMeshName, const hkvVec3& vScale, 
+    VisStaticMeshInstance_cl::VisCollisionBehavior_e eCollisionBehavior, VisWeldingType_e eWeldingType);
 
   /// 
   /// \brief
-  ///   Builds a hkGeometry from the specified sub mesh of a collision mesh.
+  ///   Builds a hkGeometry instance from the specified sub mesh of a collision mesh.
   /// 
   /// \param pColMesh
-  ///   Collision mesh to which the sub mesh belongs from which geometry should be build.
+  ///   The collision mesh containing to the sub mesh, from which to build the geometry.
   /// 
   /// \param iSubmeshIndex
-  ///   Index of a sub mesh within collision mesh from which geometry should be build.  
+  ///   Index of the sub mesh within the collision mesh  
   ///   
   /// \param transform
-  ///   Transformation matrix that should be applied to hkGeometry.
+  ///   Transformation matrix applied to the hkGeometry object.
   ///
   /// \param bConvex
-  ///   Specifies whether hkGeometry will be used for convex or mesh shapes.
+  ///   Specifies whether the hkGeometry object will be used for convex or mesh shapes.
   /// 
-  /// \param geom
-  ///   Reference to a hkGeometry to which the results are written.
+  /// \param [out] geom 
+  ///   Reference to a hkGeometry object which receives the results.
   ///
-  static void BuildGeomFromCollisionMesh(const IVCollisionMesh *pColMesh, int iSubmeshIndex, const hkvMat4 &transform, 
-                                         bool bConvex, hkGeometry& geom);
+  static void BuildGeomFromCollisionMesh(const IVCollisionMesh *pColMesh, int iSubmeshIndex, 
+    const hkvMat4 &transform, bool bConvex, hkGeometry& geom);
 
   /// \brief
-  ///   Extract the non-uniform scaling from a full transformation matrix.
+  ///   Extracts the non-uniform scaling from a full transformation matrix.
   static void ExtractScaling(const hkvMat4 &mat, hkvVec3& destScaling);  
   
   /// \brief
-  ///   Creates a convex hull shape for specified static mesh instances.
-  static hkpShape* CreateConvexShapeFromStaticMeshInstances(const VisStaticMeshInstCollection &meshInstances, hkvMat4 &transform, bool shrinkByCvxRadius);
+  ///   Creates a convex hull shape for the given static mesh instances.
+  static hkpShape* CreateConvexShapeFromStaticMeshInstances(const VisStaticMeshInstCollection &meshInstances, 
+    hkvMat4 &transform, bool shrinkByCvxRadius);
 
   /// \brief
-  ///   Creates a mesh shape for specified static mesh instances.
-  static hkpShape* CreateMeshShapeFromStaticMeshInstances(const VisStaticMeshInstCollection &meshInstances, hkvMat4 &transform, 
-                                                          bool bAllowPerTriCollisionInfo, VisWeldingType_e eWeldingType);
+  ///   Creates a mesh shape for the given static mesh instances.
+  static hkpShape* CreateMeshShapeFromStaticMeshInstances(const VisStaticMeshInstCollection &meshInstances, 
+    hkvMat4 &transform, bool bAllowPerTriCollisionInfo, VisWeldingType_e eWeldingType);
   
 #ifdef SUPPORTS_SNAPSHOT_CREATION
 
@@ -359,7 +356,7 @@ public:
   static void GetHktDependencies(VResourceSnapshot &snapshot, VisStaticMeshInstance_cl *pMeshInstance);
 
   /// \brief
-  ///   Gets HKT file dependencies of a entity for precaching in a resource snapshot.
+  ///   Gets HKT file dependencies of an entity for precaching in a resource snapshot.
   static void GetHktDependencies(VResourceSnapshot &snapshot, VisBaseEntity_cl *pEntity);
 
   /// \brief
@@ -374,13 +371,12 @@ public:
 
 private:
   static vHavokShapeCache *m_pShapeCacheTable;  ///< Cached shapes stored in hash map.
- 
 };
 
 #endif // VHAVOKSHAPEFACTORY_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -68,11 +68,13 @@ class hkbGetHandleOnBoneModifier : public hkbModifier
 		hkInt16 m_ragdollBoneIndex;	//+default(-1)
 									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL")
 									//+hk.Description("The bone in the ragdoll skeleton that you want a handle to. You should set either this or m_animationBoneIndex, but not both.")
+									//+hk.Ui(group="Referenced Ragdoll Bone",label="Referenced Bone Index")
 
 			/// The bone in the animation skeleton that you want a handle to.
 		hkInt16 m_animationBoneIndex;	//+default(-1)
 										//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
 										//+hk.Description("The bone in the animation skeleton that you want a handle to. You should set either this or m_ragdollBoneIndex, but not both.")
+										//+hk.Ui(group="Referenced Animation Bone",label="Referenced Bone Index")
 	public:
 
 		hkbGetHandleOnBoneModifier( hkFinishLoadedObjectFlag flag );
@@ -82,7 +84,7 @@ class hkbGetHandleOnBoneModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

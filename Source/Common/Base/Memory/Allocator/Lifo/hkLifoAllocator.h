@@ -30,24 +30,24 @@ class hkLifoAllocator : public hkMemoryAllocator
 			/// during operations: [slabAllocator, largeAllocator, internalAllocator]
 		void quit(hkMemoryAllocator* allocators[3] = HK_NULL);
 
-		virtual void* blockAlloc( int numBytes );
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
 
 			/// Inline equivalent of blockAlloc
 		HK_FORCE_INLINE void* fastBlockAlloc(int numBytes);
 
-		virtual void blockFree( void* p, int numBytes );
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
 
 			/// Inline equivalent of blockFree
 		HK_FORCE_INLINE void fastBlockFree(void* p, int numBytes);
 
-		virtual void* bufAlloc( int& reqNumBytesInOut );
-		virtual void bufFree( void* p, int numBytes );
-		virtual void* bufRealloc( void* pold, int oldNumBytes, int& reqNumBytesInOut );
+		virtual void* bufAlloc( int& reqNumBytesInOut ) HK_OVERRIDE;
+		virtual void bufFree( void* p, int numBytes ) HK_OVERRIDE;
+		virtual void* bufRealloc( void* pold, int oldNumBytes, int& reqNumBytesInOut ) HK_OVERRIDE;
 
-		virtual void getMemoryStatistics( MemoryStatistics& u ) {}
-		virtual int getAllocatedSize(const void* obj, int nbytes) {return nbytes; }
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE {}
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE {return nbytes; }
 
-		hkBool32 isEmpty() const;
+		bool isEmpty() const;
 
 			/// number of large + slab allocations
 		int numExternalAllocations() const;
@@ -94,7 +94,7 @@ class hkLifoAllocator : public hkMemoryAllocator
 #endif // HK_BASE_LIFO_ALLOCATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

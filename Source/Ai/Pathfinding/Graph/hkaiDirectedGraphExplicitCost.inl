@@ -7,23 +7,30 @@
  */
 
 
-inline hkaiDirectedGraphExplicitCost::hkaiDirectedGraphExplicitCost()
-{
-}
-
 inline void hkaiDirectedGraphExplicitCost::init(const hkaiDirectedGraphExplicitCost* gConst)
 {
 	// Do a const cast here - we never actually modify the pointers, but hkArray::setDataUserFree doesn't know that
 	hkaiDirectedGraphExplicitCost* g = const_cast<hkaiDirectedGraphExplicitCost*> (gConst);	
-	init( g->m_positions.begin(), g->m_nodes.begin(), g->m_edges.begin(), g->m_nodes.getSize(), g->m_edges.getSize());
+	init( g->m_positions.begin(), g->m_nodes.begin(), g->m_edges.begin(), g->m_nodes.getSize(), g->m_edges.getSize(), 
+		g->m_nodeData.begin(), g->m_edgeData.begin(), g->m_nodeDataStriding, g->m_edgeDataStriding);
 }
 
-inline void hkaiDirectedGraphExplicitCost::init(Position* pos, Node* nodes, Edge* edges, int numNodes, int numEdges)
+inline void hkaiDirectedGraphExplicitCost::init(Position* pos, Node* nodes, Edge* edges, int numNodes, int numEdges, NodeData* nodeData, EdgeData* edgeData, int nodeStride, int edgeStride)
 {
 	HK_ASSERT(0x542e5ea6, m_positions.isEmpty() && m_nodes.isEmpty() && m_edges.isEmpty());
 	m_positions.setDataUserFree(pos, numNodes, numNodes);
 	m_nodes.setDataUserFree(nodes, numNodes, numNodes);
 	m_edges.setDataUserFree(edges, numEdges, numEdges);
+
+	if(nodeStride > 0)
+		m_nodeData.setDataUserFree(nodeData, numNodes*nodeStride, numNodes*nodeStride);
+	else
+		m_nodeData.clear();
+
+	if(edgeStride > 0)
+		m_edgeData.setDataUserFree(edgeData, numEdges*edgeStride, numEdges*edgeStride);
+	else
+		m_edgeData.clear();
 }
 
 inline void hkaiDirectedGraphExplicitCost::clearAndDeallocate()
@@ -43,7 +50,17 @@ inline const hkaiDirectedGraphExplicitCost::Node& hkaiDirectedGraphExplicitCost:
 	return m_nodes[a];
 }
 
+inline hkaiDirectedGraphExplicitCost::Node& hkaiDirectedGraphExplicitCost::getNode( SearchIndex a )
+{
+	return m_nodes[a];
+}
+
 inline const hkaiDirectedGraphExplicitCost::Edge&  hkaiDirectedGraphExplicitCost::getEdge( EdgeIndex e ) const
+{
+	return m_edges[e];
+}
+
+inline hkaiDirectedGraphExplicitCost::Edge&  hkaiDirectedGraphExplicitCost::getEdge( EdgeIndex e )
 {
 	return m_edges[e];
 }
@@ -97,8 +114,28 @@ HK_FORCE_INLINE hkBool32 hkaiDirectedGraphExplicitCost::Edge::isUserEdge() const
 	return m_flags.anyIsSet( EDGE_IS_USER );
 }
 
+HK_FORCE_INLINE const hkaiDirectedGraphExplicitCost::EdgeData* hkaiDirectedGraphExplicitCost::getEdgeDataPtr( EdgeIndex eIdx ) const
+{
+	return m_edgeDataStriding ? m_edgeData.begin()  + eIdx*m_edgeDataStriding : HK_NULL;
+}
+
+HK_FORCE_INLINE       hkaiDirectedGraphExplicitCost::EdgeData* hkaiDirectedGraphExplicitCost::getEdgeDataPtr( EdgeIndex eIdx )
+{
+	return m_edgeDataStriding ? m_edgeData.begin()  + eIdx*m_edgeDataStriding : HK_NULL;
+}
+
+HK_FORCE_INLINE const hkaiDirectedGraphExplicitCost::NodeData* hkaiDirectedGraphExplicitCost::getNodeDataPtr( NodeIndex nIdx ) const
+{
+	return m_nodeDataStriding ? m_nodeData.begin()  + nIdx*m_nodeDataStriding : HK_NULL;
+}
+
+HK_FORCE_INLINE       hkaiDirectedGraphExplicitCost::NodeData* hkaiDirectedGraphExplicitCost::getNodeDataPtr( NodeIndex nIdx )
+{
+	return m_nodeDataStriding ? m_nodeData.begin()  + nIdx*m_nodeDataStriding : HK_NULL;
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

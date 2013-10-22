@@ -13,8 +13,9 @@
 
 /// The derived reference counted class for a SIMD based implementation of weighted vertex deformation.
 /// This deformer requires that the input buffers' deformable
-/// members (pos, normals) be aligned as a hkVector4 (16byte aligned as it is 128bit)
+/// members (pos, normals) be aligned for hkVector4 SIMD processing
 /// and for faster operation make sure that the outputs are aligned as well.
+/// Note this deformer only processes 3-component vectors.
 /// N.B. It is important to note that these deformers are here to be used by Havok's demos but are not production quality.
 /// It is assumed that deforming will be done most commonly by your graphics engine, usually in hardware on GPUs or VUs.
 /// That hardware deformation is usually performed at the same time as per vertex lighting operations, so Havok cannot
@@ -31,7 +32,7 @@ class hkaSimdMorphingDeformer : public hkReferencedObject, public hkaMorphingDef
 			/// Bind the buffers.
 			/// The output buffer should be preallocated.
 			/// Returns false if the deformer does not support the input or output buffer format.
-			/// The input and output buffers must be appropriately aligned (16 byte)
+			/// The input buffers must be appropriately aligned for SIMD, the output buffer should be.
 		hkBool bind( const hkaVertexDeformerInput& input, const hkxVertexBuffer* inputBuffer1, const hkxVertexBuffer* inputBuffer2,  hkxVertexBuffer* outputBuffer );
 
 			/// Interpolate the input buffers into the output buffer.
@@ -40,45 +41,16 @@ class hkaSimdMorphingDeformer : public hkReferencedObject, public hkaMorphingDef
 
 	private:
 
-		void deformAligned( hkReal delta );
+		template <hkMathIoMode OUTPUTMODE>
 		void deformAlignedInput( hkReal delta );
 
-		struct hkaSimdBinding
-		{
-			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_ANIM_RUNTIME, hkaSimdMorphingDeformer::hkaSimdBinding );
-
-			// Input buffer 1
-			const hkVector4* m_i1PosBase;
-			const hkVector4* m_i1NormBase;
-			const hkVector4* m_i1BinormBase;
-			const hkVector4* m_i1TangentBase;
-			hkUint8 m_i1Stride;
-
-			// Input Buffer 2
-			const hkVector4* m_i2PosBase;
-			const hkVector4* m_i2NormBase;
-			const hkVector4* m_i2BinormBase;
-			const hkVector4* m_i2TangentBase;
-			hkUint8 m_i2Stride;
-
-			// Output Buffer
-			hkReal* m_oPosBase;
-			hkReal* m_oNormBase;
-			hkReal* m_oBinormBase;
-			hkReal* m_oTangentBase;
-			hkUint8 m_oStride;
-
-			hkUint32 m_numVerts;
-		};
-
-		struct hkaSimdBinding m_binding;
-		hkBool m_outputAligned;
+		bool m_outputBufferIsAligned;
 };
 
 #endif // HK_SIMD_MORPHING_DEFORMER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

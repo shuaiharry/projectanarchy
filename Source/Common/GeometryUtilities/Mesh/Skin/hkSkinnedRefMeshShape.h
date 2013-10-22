@@ -17,6 +17,8 @@ extern const hkClass hkSkinnedRefMeshShapeClass;
 	/// Mesh shape that references a sub-set of the bones in a hkSkinnedMeshShape
 class hkSkinnedRefMeshShape : public hkMeshShape
 {
+	//+version(1)
+
 	public:
 
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_SCENE_DATA);
@@ -47,8 +49,8 @@ class hkSkinnedRefMeshShape : public hkMeshShape
 			/// Returns the array of bones
 		HK_FORCE_INLINE const hkArray<short>& getBones() const				{ return m_bones; }
 
-			/// Returns the array of transforms
-		HK_FORCE_INLINE const hkArray<hkQTransform>& getTransforms() const	{ return m_localFromRootTransforms; }
+			/// Returns the array of transforms (to get the number of transforms call getBones().getSize())
+		HK_FORCE_INLINE const hkQTransform* getTransforms() const			{ return reinterpret_cast<const hkQTransform*>(m_localFromRootTransforms.begin()); }
 
 			/// Creates a compound mesh by merging all the given Vision meshes
 		static hkSkinnedRefMeshShape* HK_CALL create(const hkMeshShape*const* shapes, const hkQTransform* transforms, int numShapes);
@@ -82,8 +84,8 @@ class hkSkinnedRefMeshShape : public hkMeshShape
 			/// The sub-set of bones we're referencing
 		hkArray<short> m_bones;
 
-			/// The array of bone matrices that transform from root skin to current shape local space
-		hkArray<hkQTransform> m_localFromRootTransforms;
+			/// The array of bone matrices that transform from root skin to current shape local space (array of hkQTransform)
+		hkArray<hkVector4> m_localFromRootTransforms;
 
 			/// The name
 		hkStringPtr m_name;
@@ -92,7 +94,7 @@ class hkSkinnedRefMeshShape : public hkMeshShape
 #endif	//	HK_SKINNED_REF_MESH_SHAPE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

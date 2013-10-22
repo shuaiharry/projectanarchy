@@ -227,9 +227,11 @@ VTransitionDef* VTransitionSet::GetTransitionDef(VisAnimSequence_cl *pTargetSequ
 {
   VASSERT(pTargetSequence);
   const VTransitionPair_t *pPair = m_pTransitionPairs;
-  for (int i=0;i<m_iTargetCount;i++,pPair++)
-    if (pPair->pTargetSequence==pTargetSequence)
+  for (int i = 0; i < m_iTargetCount; i++, pPair++)
+  {
+    if (pPair->pTargetSequence == pTargetSequence)
       return pPair->pTransition;
+  }
   return NULL;
 }
 
@@ -698,7 +700,7 @@ VisAnimSequence_cl* VTransitionTable::DeserializeBlendSequence(VArchive &ar, cha
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

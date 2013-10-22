@@ -356,8 +356,8 @@ void vHavokCableConstraintChainRenderer::Serialize(VArchive &ar)
 
 // ----------------------------------------------------------------------------
 START_VAR_TABLE(vHavokCableConstraintChainRenderer, vHavokConstraintChainRendererBase, "vHavok constraint chain renderer (renders the whole chain as a cable)", VFORGE_HIDECLASS, "Havok Constraint Chain Renderer (Cable)")
-  DEFINE_VAR_INT(vHavokCableConstraintChainRenderer, VerticesPerRing, "Number of vertices in each of the rings that form the cable's outline.", "8", 0, NULL);
-  DEFINE_VAR_INT(vHavokCableConstraintChainRenderer, RingsPerLink, "Number of vertex rings defining the cable's outline for each chain link.", "2", 0, NULL);
+  DEFINE_VAR_INT(vHavokCableConstraintChainRenderer, VerticesPerRing, "Number of vertices in each of the rings that form the cable's outline.", "8", 0, "Clamp(3, 50)");
+  DEFINE_VAR_INT(vHavokCableConstraintChainRenderer, RingsPerLink, "Number of vertex rings defining the cable's outline for each chain link.", "2", 0, "Clamp(1, 50)");
   DEFINE_VAR_VSTRING(vHavokCableConstraintChainRenderer, ModelFile, "Model file from which the material definition for the cable's surface is taken", "", 0, 0, "assetpicker(Model)");
   DEFINE_VAR_BOOL(vHavokCableConstraintChainRenderer, CastDynamicShadows, "Determine if a dynamic shadow should be rendered for the cable", "FALSE", 0, NULL);
 END_VAR_TABLE
@@ -481,7 +481,7 @@ void vHavokCableConstraintChainEntity::ThinkFunction()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

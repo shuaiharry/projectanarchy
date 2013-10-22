@@ -225,6 +225,7 @@ namespace TerrainEditorPlugin.Dialogs
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.ShowInTaskbar = false;
       this.Name = "ImportSplitTexturesDlg";
       this.Text = "Import per Sector Textures";
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

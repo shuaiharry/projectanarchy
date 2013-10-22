@@ -299,20 +299,7 @@ public:
   ///   Compares two strings (case sensitive).
   inline bool operator !=(const char* str) const
   { 
-    if(str && m_pString) 
-      return strcmp(str, m_pString) != 0;
-
-    return (str != m_pString); ///< this covers the case, both are NULL pointers
-  }
-
-  /// \brief
-  ///   Compares two strings (case sensitive).
-  inline bool operator !=(char* str) const
-  { 
-    if(str && m_pString)
-      return strcmp(str, m_pString) != 0;
-
-    return (str!=m_pString); ///< this covers the case, both are NULL pointers
+    return !(*this == str);
   }
 
   /// \brief
@@ -1607,7 +1594,7 @@ VArchive& operator << (VArchive& ar, VStaticString<iSize>& obj)
 #endif  //VISION_VSTRING_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

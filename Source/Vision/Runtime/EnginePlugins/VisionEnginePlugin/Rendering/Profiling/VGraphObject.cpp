@@ -16,7 +16,7 @@ extern VModule g_VisionEngineModule;
 
 VGraphObject::VGraphObject(VGraphProps &props)
 {
-  Vision::Callbacks.OnUpdateSceneBegin += this;
+  Vision::Callbacks.OnFrameUpdatePreRender += this;
   Vision::Callbacks.OnVideoChanged += this;
   m_iManagerIndex = VGraphManager::GlobalManager().AddInstance(this); 
   VASSERT(props.iResolution > 0 && props.fMaxValue > props.fMinValue);
@@ -33,7 +33,7 @@ VGraphObject::~VGraphObject()
   m_spBackgroundMask = NULL;
   m_spMeshBufferObject = NULL;   
   m_spMeshBuffer = NULL;
-  Vision::Callbacks.OnUpdateSceneBegin -= this;
+  Vision::Callbacks.OnFrameUpdatePreRender -= this;
   Vision::Callbacks.OnVideoChanged -= this;
   VGraphManager::GlobalManager().RemoveInstance(m_iManagerIndex);
 }
@@ -235,7 +235,7 @@ void VGraphObject::SetVisible(bool bVisible)
 
 void VGraphObject::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
-  if (pData->m_pSender == &Vision::Callbacks.OnUpdateSceneBegin)
+  if (pData->m_pSender == &Vision::Callbacks.OnFrameUpdatePreRender)
   {
     // print text for legend and min-/ max-values
     if (m_bVisible)
@@ -293,7 +293,7 @@ void VGraphObject::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

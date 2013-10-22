@@ -18,6 +18,8 @@
 
 #include <Ai/Pathfinding/Astar/OpenSet/hkaiHeapOpenSet.h>
 
+struct hkaiSearchMemoryInfo;
+
 	/// Utility for performing A* searches on a nav mesh.
 	/// This is used by hkaiPathfindingUtility and the multithreaded jobs; it is recommended that you use those instead of
 	/// using this directly.
@@ -29,7 +31,7 @@ struct hkaiNavMeshSearch
 	typedef hkaiDirectedGraphVisitor ClusterGraph;
 
 	typedef struct hkaiHierarchicalNavMeshHeuristic Heuristic;
-	typedef hkaiHashSearchState<Heuristic> SearchState;
+	typedef hkaiHashSearchState SearchState;
 
 	typedef hkaiHeapOpenSet OpenSet;
 
@@ -44,22 +46,6 @@ struct hkaiNavMeshSearch
 		GOAL_PREFETCH
 	};
 
-		/// Memory initialization information
-	struct MemInfo
-	{
-		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiNavMeshSearch::MemInfo);
-		char* m_openSetStorage;
-		char* m_searchStateStorage;
-		int   m_openSetSize; // size in bytes
-		int   m_searchStateSize; // size in bytes
-
-		inline void setEmpty();
-		inline void init( hkArray<char>& openSetArray, hkArray<char>& searchStateArray );
-#ifndef HK_PLATFORM_SPU
-		inline void init( hkArray<char>::Temp& openSetArray, hkArray<char>::Temp& searchStateArray );
-#endif
-	};
-
 		/// Start point and goal information
 	struct StartGoalInfo
 	{
@@ -72,21 +58,16 @@ struct hkaiNavMeshSearch
 	};
 	
 
-	hkaiNavMeshSearch( const MemInfo& memInfo, const MemInfo& hierarchyMemInfo )
-	:	m_openset(memInfo.m_openSetStorage, memInfo.m_openSetSize),
-		m_heuristic(hierarchyMemInfo.m_openSetStorage, hierarchyMemInfo.m_openSetSize,
-						hierarchyMemInfo.m_searchStateStorage, hierarchyMemInfo.m_searchStateSize)
-	{
-	}
+	hkaiNavMeshSearch( const hkaiSearchMemoryInfo& memInfo, const hkaiSearchMemoryInfo& hierarchyMemInfo );
 
 		/// Initialize the search
-	void init(Graph* graph, const MemInfo& memInfo, const hkaiAgentTraversalInfo& agentInfo, const StartGoalInfo& goalInfo, bool isHierarchical);
-
-		/// Initialize the search state
-	void initState();
-
-
-	hkReal getCostForFace(hkaiNavMesh::FaceIndex faceIndex);
+	void init(Graph* graph, const hkaiAgentTraversalInfo& agentInfo, const StartGoalInfo& goalInfo, bool isHierarchical);
+	
+	inline hkReal getCost(int nid)
+	{
+		m_state.nextNode( nid );
+		return m_state.getCost(nid);
+	}
 
 protected:
 	HK_FORCE_INLINE const hkaiNavMesh::Face& getFace( hkaiPackedKey faceKey );
@@ -127,7 +108,7 @@ public:
 #endif // HK_AI_NAV_MESH_SEARCH_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

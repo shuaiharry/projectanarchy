@@ -981,7 +981,10 @@ protected:
 
   /// \brief
   ///   Traversal Protocol: Remove portal.
-  inline void ProtocolRemovePortal(VisPortal_cl *pPortal) { m_TraversalProtocol[m_iTraversalProtocolSize++] = VIS_TRAVERSALPROTOCOL_REMOVEPORTAL; }
+  inline void ProtocolRemovePortal(VisPortal_cl *pPortal) 
+  { 
+    m_TraversalProtocol[m_iTraversalProtocolSize++] = VIS_TRAVERSALPROTOCOL_REMOVEPORTAL;
+  }
 
 
   /// \brief
@@ -1098,6 +1101,49 @@ protected:
     VLODHysteresisManager* m_pLODHysteresisManager;
   #endif //SUPPORTS_LOD_HYSTERESIS_THRESHOLDING
 
+  #if defined(WIN32)
+    // Internal code for dissolve feature in simulation package
+    template <typename, typename> friend class DissolveFadingHandler;
+    friend class VDissolveCollector;
+
+    /// \brief
+    ///   State class that contains the current and last LOD level index next to the current near and far clip plane distance for a single entity.
+    class VLODState
+    {
+    public:
+      VLODState() :
+        m_iLastLODLevel(0xffff),
+        m_iCurLODLevel(0xffff),
+        m_fNear(0.0f),
+        m_fFar(0.0f)
+      {}
+
+      unsigned short m_iLastLODLevel; ///< LOD level in last frame (0xffff when instance was not visible in last frame)
+      unsigned short m_iCurLODLevel;  ///< LOD level in current frame (0xffff when instance is not visible in current frame)
+      float m_fNear;                  ///< Near clip plane distance for current frame
+      float m_fFar;                   ///< Far clip plane distance for current frame
+    };
+
+    /// \brief
+    ///   Returns the LOD state of the entity with the given index
+    ///
+    /// \param iIndex
+    ///   Index of the entity instance
+    ///
+    /// \return
+    ///   Current LOD state of the entity
+    ///
+    /// \sa VisBaseEntity_cl::GetNumber
+    VLODState& GetLODState(int iIndex)
+    {
+      m_EntityLODStates.EnsureSize(iIndex + 1);
+      return m_EntityLODStates.GetDataPtr()[iIndex];
+    }
+
+    DynObjArray_cl<VLODState> m_EntityLODStates;  ///< Collection that contains the LOD states for all entities that are handled by this collector
+    int m_iEntityPlaneFlagsMask;                  ///< Mask that is applied in visibility frustum test (e.g. used to mask out far-clipping test)
+  #endif
+
   // temp memory used inside the recursion (can't make it global because of MT and can't put it on the stack
   // because recursion depth might become too deep.)
   hkvVec3 vPos, vDir;
@@ -1191,7 +1237,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

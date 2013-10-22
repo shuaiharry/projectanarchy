@@ -75,6 +75,8 @@ template<
 		//void markClosed(SearchIndex nid)
 	typename ParentType,
 		//void setParent(SearchIndex nid, SearchIndex parentId)
+	typename HeuristicType,
+		//Cost getHeuristic(SearchIndex nid)
 	typename PathCostType,
 		//Cost getCost(SearchIndex nid) const
 		//void setCost(SearchIndex nid, CostId c);
@@ -93,6 +95,7 @@ static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
 	OpenSetType& openset,
 	FlagsType& flags,
 	ParentType& parent,
+	HeuristicType& heuristic,
 	PathCostType& pathCost,
 	ListenerType& listener );
 
@@ -102,6 +105,7 @@ template<
 	typename OpenSetType,
 	typename FlagsType,
 	typename ParentType,
+	typename HeuristicType,
 	typename PathCostType
 	>
 static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
@@ -110,26 +114,15 @@ static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
 	OpenSetType& openset,
 	FlagsType& flags,
 	ParentType& parent,
+	HeuristicType& heuristic,
 	PathCostType& pathCost );
-
-template<
-	typename GraphType,
-	typename EdgeCostType,
-	typename OpenSetType,
-	typename AllStateType
-	>
-static typename OpenSetType::SearchIndex hkaiAstarSearchIteration(
-	GraphType& graph,
-	EdgeCostType& edgeCost,
-	OpenSetType& openset,
-	AllStateType& allState );
 
 #include <Ai/Pathfinding/Astar/hkaiAstar.inl>
 
 #endif // HKAI_ASTAR_SEARCH_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

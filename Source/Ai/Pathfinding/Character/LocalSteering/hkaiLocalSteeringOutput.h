@@ -9,6 +9,7 @@
 #ifndef HKAI_LOCAL_STEERING_OUTPUT_H
 #define HKAI_LOCAL_STEERING_OUTPUT_H
 
+	/// Output information from local steering.
 struct hkaiLocalSteeringOutput
 {
 	hkVector4 m_forwardAndResult; // m_result encoded into W as int
@@ -29,7 +30,7 @@ struct hkaiLocalSteeringOutput
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

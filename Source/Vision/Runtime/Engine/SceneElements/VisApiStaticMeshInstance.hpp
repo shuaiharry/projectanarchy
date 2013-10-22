@@ -577,7 +577,7 @@ inline void VisStaticMeshInstance_cl::SetDefaultClipSettings(const hkvVec3* pCli
   {
     VisStaticSubmesh_cl *pSM = m_pSubmeshInstances[i].GetSubmesh();
     VBaseGeometryInfo &data = pSM->GetGeometryInfo();
-    if (data.m_fFarClipDistance>data.m_fNearClipDistance)
+    if (data.m_fFarClipDistance>0.f || data.m_fNearClipDistance>0.f)
     {
       hkvVec3 vOfs = data.m_vClipReference;
       if (pClipRefOffset) 
@@ -604,7 +604,7 @@ inline void VisStaticMeshInstance_cl::SetVisibleBitmask(unsigned int iMask)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

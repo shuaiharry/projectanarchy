@@ -11,11 +11,13 @@
 #ifndef VTYPED_OBJECT_REFERENCE_HPP
 #define VTYPED_OBJECT_REFERENCE_HPP
 
+#include <Vision/Runtime/Base/System/VCallbacks.hpp>
+
   /// \class  VTypedObjectReference
   ///
   /// \brief  Data type to hold an object reference and a valid type for objects hold by this data type. 
   ///
-  class VTypedObjectReference
+  class VTypedObjectReference : public IVisCallbackHandler_cl
   {
 
     public:
@@ -43,6 +45,12 @@
       ///
       VBASE_IMPEXP VTypedObjectReference(VTypedObject* pObject, VType* pType);
 
+      /// \brief copy constructor
+      VBASE_IMPEXP VTypedObjectReference(VTypedObjectReference& rh);
+
+      /// \brief destructor
+      VBASE_IMPEXP ~VTypedObjectReference();
+
       /// \fn VBASE_IMPEXP bool CanAssign(VType* pType)
       ///
       /// \brief  
@@ -65,6 +73,8 @@
       /// \return 
       ///   true if it is a valid type of object to assign to this reference, false if not. 
       VBASE_IMPEXP bool CanAssign(VTypedObject* pObject);
+
+      VBASE_IMPEXP virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE;
 
       /// \fn inline VType* GetAllowedType() const
       ///
@@ -207,7 +217,7 @@
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

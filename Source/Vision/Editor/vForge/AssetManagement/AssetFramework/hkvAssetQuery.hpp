@@ -77,6 +77,9 @@ public:
   ASSETFRAMEWORK_IMPEXP void setStringQuery(const char* stringQuery);
   ASSETFRAMEWORK_IMPEXP const char* getStringQuery() const;
 
+  // Failed Asset Query
+  ASSETFRAMEWORK_IMPEXP void setShowOnlyFailedAssets(bool showFailed);
+  ASSETFRAMEWORK_IMPEXP bool shouldShowOnlyFailedAssets() const;
 
   // Queries
   ASSETFRAMEWORK_IMPEXP void evaluateQuery();
@@ -150,7 +153,9 @@ private:
   hkvAssetTags m_tags;
   // Name
   hkStringPtr m_stringQuery;
-  
+  // Failed Assets
+  bool m_showOnlyFailedAssets;
+
   // Library view
   hkvAsset::RefPtr m_persistentAsset;
   hkUint32 m_persistentAssetIndexInView;
@@ -168,7 +173,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -25,15 +25,15 @@ class hkTempDetectAllocator : public hkMemoryAllocator
 
 		void advanceFrame();
 
-		virtual void* blockAlloc( int size );
-		virtual void blockFree( void* p, int size );
+		virtual void* blockAlloc( int size ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int size ) HK_OVERRIDE;
 
-		virtual void* bufAlloc( int& reqNumInOut );
-		virtual void bufFree( void* p, int numElem );
-		virtual void* bufRealloc( void* pold, int oldNum, int& reqNumInOut );
+		virtual void* bufAlloc( int& reqNumInOut ) HK_OVERRIDE;
+		virtual void bufFree( void* p, int numElem ) HK_OVERRIDE;
+		virtual void* bufRealloc( void* pold, int oldNum, int& reqNumInOut ) HK_OVERRIDE;
 
-		virtual void getMemoryStatistics( MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
 	protected:
 
@@ -79,7 +79,7 @@ class hkTempDetectAllocator : public hkMemoryAllocator
 #endif // HKBASE_hkTempDetectAllocator_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

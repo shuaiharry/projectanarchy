@@ -14,7 +14,6 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokFileStreamAccess.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokCharacterController.hpp>
 
-
 #include <Common/Base/System/Io/Reader/Buffered/hkBufferedStreamReader.h>
 #include <Common/Base/System/Io/IStream/hkIStream.h>
 #include <Common/Serialize/Util/hkSerializeUtil.h>
@@ -35,7 +34,6 @@ vHavokRagdoll::vHavokRagdoll()
   , m_bInitialized(false)
   , m_bAddedToPhysicsWorld(false)
   , m_spFinalSkeletalResultRagdoll(NULL)
-  , m_spAnimConfig(NULL)
   , m_bEnabled(TRUE)
   , m_sFileResourceName()
   , m_bDebugRenderingEnabled(FALSE)
@@ -155,10 +153,9 @@ void vHavokRagdoll::MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB)
   {
     const char *szPropertyName = reinterpret_cast<const char*>(iParamA);
     VisBaseEntity_cl* pOwnerEntity = static_cast<VisBaseEntity_cl*>(GetOwner());
-
     
     // Recreate the rag doll in case the scaling gets changed within vForge
-    if (strcmp(szPropertyName, "Scaling") == 0 || strcmp(szPropertyName, "ModelFile") == 0)
+    if (strcmp(szPropertyName, "Scaling") == 0)
       RecreateRagdoll();
 
     // Only check for these properties if the rigid bodies are added to the world
@@ -168,9 +165,12 @@ void vHavokRagdoll::MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB)
 
     // Reposition the rigid bodies if position / orientation changes
     if (strcmp(szPropertyName, "Position") == 0 || strcmp(szPropertyName, "Orientation") == 0)
-      CopyBoneTransformationToRigidBodies(pOwnerEntity->GetAnimConfig());
-
-    return;
+      ApplyCurrentBoneConfiguration();
+  }
+  else if (iID == VIS_MSG_ENTITY_MESHCHANGED)
+  {
+    // Ragdoll mapping has to be re-initialized.
+    RecreateRagdoll();
   }
 }
 
@@ -324,21 +324,22 @@ void vHavokRagdoll::AddToPhysicsWorld()
   VDynamicMesh* pDynamicMesh = pOwnerEntity->GetMesh();
   VASSERT(pDynamicMesh != NULL);
 
-  // Make sure there is an animation config
+  // Set animation config.
   if (pOwnerEntity->GetAnimConfig() == NULL)
   {
     VisAnimFinalSkeletalResult_cl* pRagdollAnimRes = NULL;
-    m_spAnimConfig = VisAnimConfig_cl::CreateSkeletalConfig(pDynamicMesh, &pRagdollAnimRes);
+    VisAnimConfig_cl* pAnimConfig = VisAnimConfig_cl::CreateSkeletalConfig(pDynamicMesh, &pRagdollAnimRes);
     m_spFinalSkeletalResultRagdoll = pRagdollAnimRes;
 
     // Set the new rag doll animation config
-    pOwnerEntity->SetAnimConfig(m_spAnimConfig);
+    pOwnerEntity->SetAnimConfig(pAnimConfig);
   }
   else
   {
     // Re-use existing animation config and increase reference count.
-    m_spAnimConfig = pOwnerEntity->GetAnimConfig();
-    m_spFinalSkeletalResultRagdoll = m_spAnimConfig->GetFinalResult();
+    VisAnimConfig_cl* pAnimConfig = pOwnerEntity->GetAnimConfig();
+    m_spFinalSkeletalResultRagdoll = pAnimConfig->GetFinalResult();
+
     if (m_spFinalSkeletalResultRagdoll == NULL)
     {
       Vision::Error.Warning("Havok Ragdoll Component: Animation config is incompatible.");
@@ -347,13 +348,15 @@ void vHavokRagdoll::AddToPhysicsWorld()
   }
 
   // Set rigid body configuration
-  CopyBoneTransformationToRigidBodies(m_spAnimConfig);
+  ApplyCurrentBoneConfiguration();
 
   // re-apply to bones (just for double-checking, remove for final version)
   //CopyRigidBodyTransformationToBones();
 
   // See if we have a character controller in order to apply velocity.
-  vHavokCharacterController* pCharacterController = pOwnerEntity->Components().GetComponentOfType<vHavokCharacterController>();
+  vHavokCharacterController* pCharacterController = 
+    pOwnerEntity->Components().GetComponentOfType<vHavokCharacterController>();
+
   if (pCharacterController != NULL && pCharacterController->GetCharacterProxy() != NULL)
   {
     const hkVector4 vVelocityHk = pCharacterController->GetCharacterProxy()->getLinearVelocity();
@@ -404,19 +407,6 @@ void vHavokRagdoll::RemoveFromPhysicsWorld()
   }
   m_pPhysicsWorld->unmarkForWrite();
   m_bAddedToPhysicsWorld = false;
-
-  // Release animation config
-  if (m_spAnimConfig != NULL)
-  {
-    // If owner is NULL, it must have been destroyed
-    // If reference count is 2. Only the component and the entity are referencing it.
-    if (pOwnerEntity != NULL && m_spAnimConfig.GetPtr()->GetRefCount() <= 2)
-    {
-      VASSERT(m_spAnimConfig.GetPtr()->GetRefCount() == 2);
-      pOwnerEntity->SetAnimConfig(NULL);
-    }
-    m_spAnimConfig = NULL;
-  }
 
   // Reset custom bone transformations
   m_spFinalSkeletalResultRagdoll->ResetCustomBones();
@@ -684,7 +674,8 @@ bool vHavokRagdoll::ComputeTransformMapping()
 
   // Convert to Havok transform.
   hkTransform hkRootBoneObjectTransform;
-  vHavokConversionUtils::VisMatVecToPhysTransform( rootBoneObjectTransform.getRotationalPart(), rootBoneObjectTransform.getTranslation(), hkRootBoneObjectTransform);
+  vHavokConversionUtils::VisMatVecToPhysTransform(rootBoneObjectTransform.getRotationalPart(), 
+    rootBoneObjectTransform.getTranslation(), hkRootBoneObjectTransform);
 
   // Compute inverse
   hkTransform hkRootBoneObjectTransformInv;
@@ -695,6 +686,7 @@ bool vHavokRagdoll::ComputeTransformMapping()
   // is accounted for (Y -> Z for instance on Vision Maya export..).
   // rigid body transform
   const hkTransform& rootRbTransform = m_rigidBodies[0].pRigidBody->getTransform(); 
+
   // Compute inverse
   hkTransform rootRbTransformInv;
   rootRbTransformInv.setInverse(rootRbTransform);
@@ -738,8 +730,8 @@ bool vHavokRagdoll::ComputeTransformMapping()
 
       // Convert to Havok transform
       hkTransform hkTposeObject;
-      vHavokConversionUtils::VisMatVecToPhysTransform(boneMatObject.getRotationalPart(), boneMatObject.getTranslation(), 
-         hkTposeObject);
+      vHavokConversionUtils::VisMatVecToPhysTransform(boneMatObject.getRotationalPart(), 
+        boneMatObject.getTranslation(), hkTposeObject);
 
       // Make relative to t-pose
       hkTransform boneTposInRootBoneSpace; 
@@ -799,18 +791,24 @@ bool vHavokRagdoll::BakeScalingIntoRigidBodies()
 
 //-----------------------------------------------------------------------------------
 
-void vHavokRagdoll::CopyBoneTransformationToRigidBodies(VisAnimConfig_cl* pAnimConfig)
+void vHavokRagdoll::CopyBoneTransformationToRigidBodies(const VisSkeletalAnimResult_cl* pObjectSpacePose)
 {
   VisBaseEntity_cl* pOwnerEntity = GetOwnerEntity();
-
-  // Get current animation result
-  VASSERT_MSG(pAnimConfig, "No animation config set");
-  const VisSkeletalAnimResult_cl* pObjectSpacePose = pAnimConfig->GetCurrentObjectSpaceResult();
-
   const hkvMat4 entityTransform(pOwnerEntity->GetRotationMatrix(), pOwnerEntity->GetPosition());
 
   if (m_bAddedToPhysicsWorld)
     m_pPhysicsWorld->markForWrite();
+
+  // Save initial local space transformation of the root bone when the ragdoll was activated.
+  // This is used to make sure that the ragdoll component does not teleport the entity to the root bone's
+  // position on activation.
+  const hkvVec3& vTranslation = pObjectSpacePose->GetBoneTranslation(m_iMappedRootBoneIdx);
+  const hkvQuat& qRotation = pObjectSpacePose->GetBoneRotation(m_iMappedRootBoneIdx);
+  hkTransform rootTransform;
+  vHavokConversionUtils::VisMatVecToPhysTransform(qRotation.getAsMat3(), vTranslation * m_fScaling, rootTransform);
+  hkTransform rootTransformInv;
+  rootTransformInv.setInverse(rootTransform);
+  memcpy(&m_initialRootTransformStorage, &rootTransformInv, sizeof(hkTransform));
 
   // Position the rigid bodies
   for (int iRigidBodyIdx = 0; iRigidBodyIdx < m_rigidBodies.getSize(); iRigidBodyIdx++)
@@ -825,8 +823,8 @@ void vHavokRagdoll::CopyBoneTransformationToRigidBodies(VisAnimConfig_cl* pAnimC
     hkvMat4 boneWorldTransform = entityTransform.multiply(boneObjTransform);
 
     hkTransform boneHkWorldTransform;
-    vHavokConversionUtils::VisMatVecToPhysTransform(boneWorldTransform.getRotationalPart(), boneWorldTransform.getTranslation(), 
-       boneHkWorldTransform);
+    vHavokConversionUtils::VisMatVecToPhysTransform(boneWorldTransform.getRotationalPart(), 
+      boneWorldTransform.getTranslation(), boneHkWorldTransform);
  
     // The inverse of rbInfo.relTransform only has to be computed when initializing 
     // the rigid body placement here.
@@ -854,15 +852,25 @@ void vHavokRagdoll::CopyRigidBodyTransformationToBones()
     m_pPhysicsWorld->markForRead();
 
   // Root (just generally in same space as rag doll)
-  const hkTransform& rootHkWorldTransform = m_rigidBodies[0].pRigidBody->getTransform();
-  hkTransform rootHkWorldTransformInv; 
+  hkTransform rootHkWorldTransform;
+
+  {
+    // Nullify initial root bone transformation to the rootHkWorldTransform to ensure that the entity's transformation stays
+    // the same at the moment when the ragdoll is activated.
+    hkTransform rootTransformInv;
+    memcpy(&rootTransformInv, &m_initialRootTransformStorage, sizeof(hkTransform));
+    rootHkWorldTransform.setMul(m_rigidBodies[0].pRigidBody->getTransform(), rootTransformInv);
+  }
+
+  hkTransform rootHkWorldTransformInv;
   rootHkWorldTransformInv.setInverse(rootHkWorldTransform);
 
   VisBaseEntity_cl* pOwnerEntity = static_cast<VisBaseEntity_cl*>(GetOwner());
+
   VDynamicMesh* pDynamicMesh = pOwnerEntity->GetMesh();
-  VASSERT(pDynamicMesh);
+  VASSERT(pDynamicMesh != NULL);
   const VisSkeleton_cl* pSkeleton = pDynamicMesh->GetSkeleton();
-  VASSERT(pSkeleton);
+  VASSERT(pSkeleton != NULL);
 
   // Assume the skeleton stored in a way that always references back along array.
   const float fInvScaling = 1.f / m_fScaling;
@@ -883,8 +891,8 @@ void vHavokRagdoll::CopyRigidBodyTransformationToBones()
 
     hkvQuat boneRot;
     vHavokConversionUtils::HkQuatToVisQuat(boneHkRot, boneRot);
-	hkvVec3 boneTranslation;
-	vHavokConversionUtils::PhysVecToVisVecWorld(boneHkObjTransform.getTranslation(), boneTranslation );
+    hkvVec3 boneTranslation;
+    vHavokConversionUtils::PhysVecToVisVecWorld(boneHkObjTransform.getTranslation(), boneTranslation );
     boneTranslation *= fInvScaling;
 
     m_spFinalSkeletalResultRagdoll->SetCustomBoneRotation(
@@ -920,7 +928,9 @@ void vHavokRagdoll::CopyRigidBodyTransformationToBones()
     parentRotMat = parentRotMat.multiply(boneRotMat);
 
     // set rotational and translational part on the bone
-    parentRot.setFromMat3(parentRotMat.getRotationalPart()); 
+    parentRot.setFromMat3(parentRotMat.getRotationalPart());
+    parentRot.normalize(); // Normalize due to precision issues.
+
     m_spFinalSkeletalResultRagdoll->SetCustomBoneRotation( 
       iBoneIdx, parentRot, VIS_REPLACE_BONE | VIS_OBJECT_SPACE);
     m_spFinalSkeletalResultRagdoll->SetCustomBoneTranslation(
@@ -974,6 +984,7 @@ void vHavokRagdoll::GetObjectSpaceBone(int iBoneIdx,
 }
 
 //-----------------------------------------------------------------------------------
+// Debug Rendering
 
 void vHavokRagdoll::SetDebugRendering(BOOL bEnable)
 {
@@ -1085,6 +1096,35 @@ void vHavokRagdoll::UpdateDebugGeometry() const
 
 //-----------------------------------------------------------------------------------
 
+void vHavokRagdoll::ApplyCurrentBoneConfiguration()
+{
+  if (!IsInitialized())
+    return;
+
+  VisBaseEntity_cl* pOwnerEntity = GetOwnerEntity();
+
+  if (pOwnerEntity->GetAnimConfig() != NULL)
+  {
+    const VisSkeletalAnimResult_cl* pObjectSpacePose = 
+      pOwnerEntity->GetAnimConfig()->GetCurrentObjectSpaceResult();
+
+    CopyBoneTransformationToRigidBodies(pObjectSpacePose);
+  }
+  else
+  {
+    VASSERT(pOwnerEntity->GetMesh() != NULL &&
+      pOwnerEntity->GetMesh()->GetSkeleton() != NULL);
+
+    // use initial pose if no animation config is available
+    VisSkeletalAnimResult_cl objectSpacePose(pOwnerEntity->GetMesh()->GetSkeleton());
+    VisAnimFinalSkeletalResult_cl::OverwriteResultWithInitialPose(&objectSpacePose);
+
+    CopyBoneTransformationToRigidBodies(&objectSpacePose);
+  }
+}
+
+//-----------------------------------------------------------------------------------
+
 int vHavokRagdoll::GetRigidBodyIndex(const char* szBodyName) const 
 {
   int index = -1;
@@ -1159,7 +1199,7 @@ END_VAR_TABLE
 //-----------------------------------------------------------------------------------
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

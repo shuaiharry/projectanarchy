@@ -9,6 +9,8 @@
 #ifndef GUI_SYSTEM_HPP_INCLUDED
 #define GUI_SYSTEM_HPP_INCLUDED
 
+#if defined(EMULATE_DEVICE) || !defined(WIN32) || defined(_VISION_WINRT)
+
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/GUI/VMenuIncludes.hpp>
 
 class SceneViewerMainMenu;
@@ -27,28 +29,35 @@ public:
 
   void ToggleView(VisBaseEntity_cl * pCamera);
   bool IsLoadNewScene() {return m_bLoadNewScene;}
+  bool IsRefreshSceneListSet() { return m_bRefreshSceneList; }
   void ResetLoadNewScene() {m_bLoadNewScene=false;}
+  void ResetRefreshSceneList() { m_bRefreshSceneList = false; }
   const char *GetScenePath() const {return ( m_pSceneList->GetSelectedItem() != NULL ) ? ( m_pSceneList->GetSelectedItem()->m_sTooltipText.AsChar() ) : NULL; }
 
 protected:
-  V_DECLARE_SERIAL_DLLEXP( SceneViewerMainMenu, GUI_IMPEXP )
+  #define EMPTY
+  V_DECLARE_SERIAL( SceneViewerMainMenu, EMPTY )
   VOVERRIDE void Serialize( VArchive &ar ) {}
 
   bool m_bButtonBHit;
   bool m_bButtonXHit;
 
   bool m_bLoadNewScene;
+  bool m_bRefreshSceneList;
   VListControl *m_pSceneList;
   VPushButton* m_pLoadButton;
   VPushButton* m_pContinueButton;
+  VPushButton* m_pRefreshButton;
 
   VisBaseEntity_cl* m_pCamera;
 };
 
+#endif
+
 #endif // GUI_SYSTEM_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

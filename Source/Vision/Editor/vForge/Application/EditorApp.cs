@@ -60,6 +60,7 @@ namespace Editor
       // set the asset profile first because everything from here on already needs file access
       ManagedBase.AssetHelper.SetAssetProfile("vForge", "vForge");
       ManagedBase.AssetHelper.AddVariantKey("vForge");
+      ManagedBase.AssetHelper.AddVariantKey("android-default");
 
       // add the default shapes from the editor
       EditorManager.ShapeCreatorPlugins.Add(new GroupCreator());
@@ -212,8 +213,8 @@ namespace Editor
       }
       set
       {
-        EditorManager.EngineManager.MaterialProviderList = null;  // do this before engine intance are created
         EditorManager.Scene = value;
+        EditorManager.EngineManager.ClearMaterialProviderList();  // do this before engine instances are created
 
         // the following is important to load the V3D
         if (value!=null)
@@ -480,7 +481,7 @@ namespace Editor
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

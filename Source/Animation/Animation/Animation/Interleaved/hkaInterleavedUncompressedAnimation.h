@@ -51,6 +51,9 @@ class hkaInterleavedUncompressedAnimation : public hkaAnimation
 			/// Transform all samples of a given track by premultiplication with a (bone) transform
 		void transformTrack(int track, const hkQsTransform& transform);
 		
+			/// Return the memory required for this animation
+		virtual int getSizeInBytes() const HK_OVERRIDE;
+
 			/// Returns the number of original samples / frames of animation
 		virtual int getNumOriginalFrames() const HK_OVERRIDE;
 
@@ -86,7 +89,7 @@ class hkaInterleavedUncompressedAnimation : public hkaAnimation
 #endif // HKANIMATION_ANIMATION_INTERLEAVED_HKINTERLEAVEDANIMATION_HKCLASS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -60,6 +60,11 @@ class hkaiDefaultAstarCostModifier : public hkaiAstarCostModifier
 			/// Returns the modified cost of walking through the pair of cells (and through the edge)
 		virtual hkSimdReal getModifiedCost( const NavVolumeGetModifiedCostCallbackContext& context ) const HK_OVERRIDE;
 
+		virtual hkSimdReal getModifiedCost( const DirectedGraphGetModifiedCostCallbackContext& context ) const HK_OVERRIDE
+		{
+			return hkaiAstarCostModifier::getModifiedCost(context);
+		}
+
 
 	public:
 
@@ -72,7 +77,7 @@ class hkaiDefaultAstarCostModifier : public hkaiAstarCostModifier
 #endif // HK_AI_DEFAULT_NAV_MESH_COST_MODIFIER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -14,13 +14,13 @@
 // - The corresponding reflection database (reflection.db) is deleted
 // - The --force-output or --force-rebuild option is added to the pre-build generateReflection.py execution
 
-HK_STRUCT(hkpVehicleFrictionDescription)
+HK_CLASS(hkpVehicleFrictionDescription)
 HK_STRUCT(hkpVehicleFrictionDescriptionAxisDescription)
 HK_STRUCT(hkpVehicleFrictionStatus)
 HK_STRUCT(hkpVehicleFrictionStatusAxisStatus)
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

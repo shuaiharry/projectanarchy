@@ -5,7 +5,8 @@
  * Product and Trade Secret source code contains trade secrets of Havok. Havok Software (C) Copyright 1999-2013 Telekinesys Research Limited t/a Havok. All Rights Reserved. Use of this software is subject to the terms of an end user license agreement.
  *
  */
-//HK_REFLECTION_PARSER_EXCLUDE_FILE
+#ifndef HK_MATHHEADER_ALIASES_H
+#define HK_MATHHEADER_ALIASES_H
 
 #include <Common/Base/Math/Matrix/hkMatrixDecomposition.h>
 #include <Common/Base/Math/Matrix/hkMatrix6.h>
@@ -121,8 +122,10 @@
 #	define HK_MASK_TO_VECTOR(x) (hkQuadReal)x
 # endif
 
+# endif //HK_MATHHEADER_ALIASES_H
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

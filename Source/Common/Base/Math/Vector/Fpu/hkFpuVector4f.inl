@@ -94,12 +94,30 @@ HK_FORCE_INLINE void hkVector4f::setAdd(hkVector4fParameter v0, hkVector4fParame
 	m_quad.v[3] = v0.m_quad.v[3] + v1.m_quad.v[3];
 }
 
+HK_FORCE_INLINE void hkVector4f::setAdd(hkVector4fParameter v0, hkSimdFloat32Parameter v1)
+{
+	const hkFloat32 r = v1.getReal();
+	m_quad.v[0] = v0.m_quad.v[0] + r;
+	m_quad.v[1] = v0.m_quad.v[1] + r;
+	m_quad.v[2] = v0.m_quad.v[2] + r;
+	m_quad.v[3] = v0.m_quad.v[3] + r;
+}
+
 HK_FORCE_INLINE void hkVector4f::setSub(hkVector4fParameter v0, hkVector4fParameter v1)
 {
 	m_quad.v[0] = v0.m_quad.v[0] - v1.m_quad.v[0];
 	m_quad.v[1] = v0.m_quad.v[1] - v1.m_quad.v[1];
 	m_quad.v[2] = v0.m_quad.v[2] - v1.m_quad.v[2];
 	m_quad.v[3] = v0.m_quad.v[3] - v1.m_quad.v[3];
+}
+
+HK_FORCE_INLINE void hkVector4f::setSub(hkVector4fParameter v0, hkSimdFloat32Parameter v1)
+{
+	const hkFloat32 r = v1.getReal();
+	m_quad.v[0] = v0.m_quad.v[0] - r;
+	m_quad.v[1] = v0.m_quad.v[1] - r;
+	m_quad.v[2] = v0.m_quad.v[2] - r;
+	m_quad.v[3] = v0.m_quad.v[3] - r;
 }
 
 HK_FORCE_INLINE void hkVector4f::setMul(hkVector4fParameter v0, hkVector4fParameter v1)
@@ -1768,7 +1786,7 @@ HK_FORCE_INLINE void hkVector4f::store(hkFloat16* p) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

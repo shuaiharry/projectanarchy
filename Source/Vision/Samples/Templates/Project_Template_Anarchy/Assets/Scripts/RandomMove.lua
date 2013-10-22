@@ -4,26 +4,26 @@
 local count =0;
 
 function OnCreate(self)
-	 VisionMessage.Add("STARTED", color(255,0,0));
+  Debug:PrintLine("STARTED");
   -- object-local variable for keeping the elapsed time
   self.time_elapsed = 0
 end
 
 function OnThink(self)
   -- update the elapsed time variable
-  self.time_elapsed = self.time_elapsed + VisionTimer.GetTimeDelta()
+  self.time_elapsed = self.time_elapsed + Timer:GetTimeDiff()
 
   if (self.time_elapsed >= 0.5) then
     -- get the current entity position
     local oldPos = self:GetPosition()
 
     -- create new random x and y positions
-    local newX = VisionGame.GetNormalizedRandNeg() * 200
-    local newY = VisionGame.GetNormalizedRandNeg() * 200
+    local newX = Util:GetRandFloatSym(200)
+    local newY = Util:GetRandFloatSym(200)
 
     -- create a new vector with the new x,y positions and the old z position and
     -- assign it to the entity
-    local newPos = vector3(newX, newY, oldPos.z)
+    local newPos = Vision.hkvVec3(newX, newY, oldPos.z)
     self:SetPosition(newPos)
 
     -- reset the elapsed time variable

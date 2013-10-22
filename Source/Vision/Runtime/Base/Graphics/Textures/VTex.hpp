@@ -261,7 +261,7 @@ public:
   VTEX_EXPFUNC RETVAL SaveBMP(IVFileOutStream* pOut);
 
   // This function saves the first colormap frame in this object to the TGA file with the name in imgFilename.
-  VTEX_EXPFUNC RETVAL SaveTGA(IVFileOutStream* pOut);
+  VTEX_EXPFUNC RETVAL SaveTGA(IVFileOutStream* pOut, bool bRunLengthEncoding = false);
 
   // This function saves the first colormap frame in this object to uncompressed DDS format. Either 24 bit or 32 bit if alpha is specified
   VTEX_EXPFUNC RETVAL SaveUncompressedDDS(IVFileOutStream* pOut);
@@ -300,7 +300,7 @@ public:
   /////////////////////////////////////////////////////////////////////////////////////////
   //Helpers
   /////////////////////////////////////////////////////////////////////////////////////////
-  RETVAL SaveTEX(const char* pszFilename, IVFileStreamManager* pMan = NULL)
+  inline RETVAL SaveTEX(const char* pszFilename, IVFileStreamManager* pMan = NULL)
   {
     if (!pMan) pMan = VBase_GetFileStreamManager();
     IVFileOutStream* pOut = pMan->Create(pszFilename);
@@ -309,7 +309,7 @@ public:
     return res;
   }
 
-  RETVAL SaveTEX(const char* pszFilename, BOOL genMipMaps, BOOL sprite, BOOL texMorphing, BOOL animStartStatus, IVFileStreamManager* pMan = NULL)
+  inline RETVAL SaveTEX(const char* pszFilename, BOOL genMipMaps, BOOL sprite, BOOL texMorphing, BOOL animStartStatus, IVFileStreamManager* pMan = NULL)
   {
     if (!pMan) pMan = VBase_GetFileStreamManager();
     IVFileOutStream* pOut = pMan->Create(pszFilename);
@@ -318,7 +318,7 @@ public:
     return res;
   }
 
-  RETVAL SaveJPEG(const char* pszFilename, int jpegQuality = 75, IVFileStreamManager* pMan = NULL)
+  inline RETVAL SaveJPEG(const char* pszFilename, int jpegQuality = 75, IVFileStreamManager* pMan = NULL)
   {
     if (!pMan) pMan = VBase_GetFileStreamManager();
     IVFileOutStream* pOut = pMan->Create(pszFilename);
@@ -327,27 +327,25 @@ public:
     return res;
   }
 
-  RETVAL SaveBMP(const char* pszFilename, IVFileStreamManager* pMan = NULL)
+  inline RETVAL SaveBMP(const char* pszFilename, IVFileStreamManager* pMan = NULL)
   {
     if (!pMan) pMan = VBase_GetFileStreamManager();
     IVFileOutStream* pOut = pMan->Create(pszFilename);
     int res = SaveBMP( pOut );
     if (pOut) pOut->Close();
     return res;
-
   }
 
-  RETVAL SaveTGA(const char* pszFilename, IVFileStreamManager* pMan = NULL)
+  inline RETVAL SaveTGA(const char* pszFilename, IVFileStreamManager* pMan = NULL, bool bRunLengthEncoding = false)
   {
     if (!pMan) pMan = VBase_GetFileStreamManager();
     IVFileOutStream* pOut = pMan->Create(pszFilename);
-    int res = SaveTGA( pOut );
+    int res = SaveTGA( pOut, bRunLengthEncoding );
     if (pOut) pOut->Close();
     return res;
-
   }
 
-  RETVAL SaveUncompressedDDS(const char* pszFilename, IVFileStreamManager* pMan = NULL)
+  inline RETVAL SaveUncompressedDDS(const char* pszFilename, IVFileStreamManager* pMan = NULL)
   {
     if (!pMan) pMan = VBase_GetFileStreamManager();
     IVFileOutStream* pOut = pMan->Create(pszFilename);
@@ -356,17 +354,16 @@ public:
     return res;    
   }
 
-  RETVAL Save8BitPalettedDDS(const char* pszFilename, bool bNormalize, IVFileStreamManager* pMan = NULL)
+  inline RETVAL Save8BitPalettedDDS(const char* pszFilename, bool bNormalize, IVFileStreamManager* pMan = NULL)
   {
     if (!pMan) pMan = VBase_GetFileStreamManager();
     IVFileOutStream* pOut = pMan->Create(pszFilename);
     int res = Save8BitPalettedDDS( pOut, bNormalize );
     if (pOut) pOut->Close();
     return res;
-
   }
 
-  RETVAL Save8BitPalettedTGA(const char* pszFilename, bool bNormalize, IVFileStreamManager* pMan = NULL)
+  inline RETVAL Save8BitPalettedTGA(const char* pszFilename, bool bNormalize, IVFileStreamManager* pMan = NULL)
   {
     if (!pMan) pMan = VBase_GetFileStreamManager();
     IVFileOutStream* pOut = pMan->Create(pszFilename);
@@ -377,18 +374,18 @@ public:
   }
 
   // saves the image to known format according to file extension (bmp, tga, dds, ...)
-  RETVAL Save(const char* pszFilename, IVFileStreamManager* pMan = NULL)
+  inline RETVAL Save(const char* pszFilename, IVFileStreamManager* pMan = NULL)
   {
     char szExt[FS_MAX_FILE];
     if (!VFileHelper::GetExtension(szExt,pszFilename))
       return VTEX_ERR_FILETYPENOTSUPPORTED;
 
-    if (!_stricmp(szExt,"bmp"))  return SaveBMP(pszFilename,pMan);
-    if (!_stricmp(szExt,"tga"))  return SaveTGA(pszFilename,pMan);
-    if (!_stricmp(szExt,"dds"))  return SaveUncompressedDDS(pszFilename,pMan);
-    if (!_stricmp(szExt,"jpg"))  return SaveJPEG(pszFilename,75,pMan);
-    if (!_stricmp(szExt,"jpeg")) return SaveJPEG(pszFilename,75,pMan);
-    if (!_stricmp(szExt,"tex"))  return SaveTEX(pszFilename,pMan);
+    if (!_stricmp(szExt,"bmp"))  return SaveBMP(pszFilename, pMan);
+    if (!_stricmp(szExt,"tga"))  return SaveTGA(pszFilename, pMan);
+    if (!_stricmp(szExt,"dds"))  return SaveUncompressedDDS(pszFilename, pMan);
+    if (!_stricmp(szExt,"jpg"))  return SaveJPEG(pszFilename, 75, pMan);
+    if (!_stricmp(szExt,"jpeg")) return SaveJPEG(pszFilename, 75, pMan);
+    if (!_stricmp(szExt,"tex"))  return SaveTEX(pszFilename, pMan);
     return VTEX_ERR_FILETYPENOTSUPPORTED;
   }
 
@@ -654,6 +651,12 @@ private:
   // frees all rawmap pointers
   void FreeRawMapData ();
 
+  // used when saving TGA files; writes one run length encoded row; pData must point to the row in question
+  static void WriteRunLengthEncodedRow(IVFileOutStream* pOut, unsigned char bpp, unsigned short width, UBYTE* pData);
+  // determines if the next packet to write to a TGA file is a RLE (true) one or a RAW (false) one
+  static bool DeterminePacketType(UBYTE* pData, unsigned char bpp, unsigned short width, unsigned short pos);
+  // determines the length of the following packet
+  static unsigned short DeterminePacketLength(UBYTE* pData, unsigned char bpp, unsigned short width, unsigned short pos, bool bRLE);
 
 private:
   friend class DDSLoader_cl;          ///< raw loaders must be friends
@@ -779,7 +782,7 @@ namespace VTex
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

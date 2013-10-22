@@ -47,18 +47,18 @@ public:
 			///
 		void quit();
 
-		virtual void* blockAlloc( int numBytes );
-		virtual void blockFree( void* p, int numBytes );
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
 
 		hkBool32 isOk( const void* p, int size ) const;
 
-		virtual void getMemoryStatistics( MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
 		void setScrubValues(hkUint32 bodyValue, hkUint32 freeValue);
 
 		struct Allocation { const void* address; int size; };
-		Allocation getUnderlyingAllocation(const void* obj, int nbytes);
+		Allocation getUnderlyingAllocation(const void* obj, int nbytes) const;
 
 	protected:
 
@@ -71,7 +71,7 @@ public:
 #endif // HKBASE_hkPaddedAllocator_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

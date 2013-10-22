@@ -9,9 +9,8 @@
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/VisionEnginePluginPCH.h>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/VScriptIncludes.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/Components/VAnimationComponent.hpp>
-#include <Vision/Runtime/Base/System/Memory/VMemDbg.hpp>
 
-VAnimationComponent::VAnimationComponent(int iComponentFlags /* = VIS_OBJECTCOMPONENTFLAG_NONE */) :
+VAnimationComponent::VAnimationComponent(int iComponentFlags /* = VIS_OBJECTCOMPONENTFLAG_NOSERIALIZE */) :
   IVObjectComponent(0, iComponentFlags),
   m_pAnimCtrl(NULL),
   m_sCurrentAnim()
@@ -22,23 +21,39 @@ VAnimationComponent::~VAnimationComponent()
 {
 }
 
-bool VAnimationComponent::Play(const char * szAnimationName, bool bLoop /* = true */, const char * szEndEventName /* = NULL */, bool bEndEventOnce /* = true */)
+void VAnimationComponent::SetOwner(VisTypedEngineObject_cl *pOwner)
 {
-  if(m_pAnimCtrl) m_pAnimCtrl->RemoveEventListener(m_pOwner);
+  if (pOwner == NULL)
+  {
+    if (m_pAnimCtrl)
+      m_pAnimCtrl->RemoveEventListener(GetOwner());
+  }
 
-  //we know, that the owner is at least a VisBaseEntity_cl,
-  //since the component is only attachable to VisBaseEntity_cl or inherited classes
+  IVObjectComponent::SetOwner(pOwner);
+}
+
+bool VAnimationComponent::Play(const char * szAnimationName, bool bLoop, const char * szEndEventName, bool bEndEventOnce)
+{
+  if (GetOwner() == NULL)
+    return false;
+
+  if(m_pAnimCtrl != NULL) 
+    m_pAnimCtrl->RemoveEventListener(m_pOwner);
+
+  // we know, that the owner is at least a VisBaseEntity_cl,
+  // since the component is only attachable to VisBaseEntity_cl or inherited classes
   m_pAnimCtrl = VisAnimConfig_cl::StartSkeletalAnimation((VisBaseEntity_cl *)m_pOwner, szAnimationName, bLoop ? VANIMCTRL_LOOP : VSKELANIMCTRL_DEFAULTS);
 
-  //fall back for vertex animations
-  if(m_pAnimCtrl==NULL)
+  // fall back for vertex animations
+  if(m_pAnimCtrl == NULL)
   {
     m_pAnimCtrl = VisAnimConfig_cl::StartVertexAnimation((VisBaseEntity_cl *)m_pOwner, szAnimationName, bLoop ? VANIMCTRL_LOOP : VVERTANIMCTRL_DEFAULTS);
 
-    if(!m_pAnimCtrl) return false;
+    if(m_pAnimCtrl == NULL) 
+      return false;
   }
 
-  //register event if specified
+  // register event if specified
   if(szEndEventName)
     AddEndEvent(szEndEventName, bEndEventOnce);
 
@@ -108,7 +123,7 @@ bool VAnimationComponent::Pause()
 
 bool VAnimationComponent::AddAnimationSequence(const char * szAnimSequence)
 {
-  if(szAnimSequence==NULL) return false;
+  if (szAnimSequence == NULL || GetOwner() == NULL) return false;
 
   VDynamicMesh * pMesh = ((VisBaseEntity_cl *)m_pOwner)->GetMesh();
   if(pMesh==NULL)
@@ -242,7 +257,7 @@ START_VAR_TABLE(VAnimationComponent, IVObjectComponent, "LUA Animation component
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

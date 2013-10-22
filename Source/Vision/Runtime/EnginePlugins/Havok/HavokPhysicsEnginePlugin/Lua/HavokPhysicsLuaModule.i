@@ -94,41 +94,6 @@ static const int QUALITY_KEYFRAMED_REPORTING;
 %}
 */
 
-%native(Cast_vRigidBody_to_IVObjectComponent) int PhysicsLuaModule_Cast_vRigidBody_to_IVObjectComponent(lua_State *L);
-%{
-	int PhysicsLuaModule_Cast_vRigidBody_to_IVObjectComponent(lua_State *L)
-	{
-		int SWIG_arg = 0;
-		vHavokRigidBody *arg1 = (vHavokRigidBody *) 0 ;
-		IVObjectComponent *result = 0 ;
-  
-		SWIG_check_num_args("Cast_vRigidBody_to_IVObjectComponent",1,1)
-		if ( !SWIG_isptrtype(L, 1) )
-		{
-			SWIG_fail_arg("Cast_vRigidBody_to_IVObjectComponent", 1, "vHavokRigidBody *");
-		}
-  
-		if ( !SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1, SWIGTYPE_p_vHavokRigidBody,0)))
-		{
-			SWIG_fail_ptr("Cast_vRigidBody_to_IVObjectComponent", 1, SWIGTYPE_p_vHavokRigidBody);
-		}
-  
-		result = (IVObjectComponent*)(arg1);
-		SWIG_NewPointerObj(L, result, SWIGTYPE_p_IVObjectComponent, 0);
-		SWIG_arg++; 
-		return SWIG_arg;
-		
-		if ( 0 )
-		{
-			SWIG_fail;
-		}
-  
-	fail:
-		lua_error(L);
-		return SWIG_arg;
-	}
-%}
-
 %native(EnableVisualDebugger) int PhysicsLuaModule_EnableVisualDebugger(lua_State *L);
 %{
   int PhysicsLuaModule_EnableVisualDebugger(lua_State *L) {
@@ -140,6 +105,38 @@ static const int QUALITY_KEYFRAMED_REPORTING;
         ((vHavokPhysicsModule*)Vision::GetApplication()->GetPhysicsModule())->SetEnabledVisualDebugger(bEnable);
     } 
     return 0;
+  }
+%}
+
+%native(EnableError) float PhysicsLuaModule_EnableError(lua_State *L);
+%{
+  int PhysicsLuaModule_EnableError(lua_State *L) 
+  {
+    DECLARE_ARGS_OK
+	  GET_ARG(1, const char *, errorString);
+    GET_ARG(2, bool, enableError);
+
+    hkError& error = hkError::getInstance();
+
+    if(errorString!=NULL && errorString[0]!=NULL)
+    {
+      int errorId;
+      if(sscanf(errorString, "%x", &errorId)==1)
+      {
+        hkError& error = hkError::getInstance();
+			  error.setEnabled( errorId, enableError );
+        lua_pushboolean(L, error.isEnabled( errorId )==enableError);
+      }
+      else
+      {
+        lua_pushboolean(L, false);
+      }
+    }
+    else
+    {
+      lua_pushboolean(L, false);
+    }
+	  return 1;
   }
 %}
 
@@ -272,6 +269,22 @@ public:
   /// @name Static Module Functions
   /// @{
   
+  /// \brief Disable a specific erro or warning.
+  /// \note  Be careful! If Havok raises an assert then it usually means that something
+  ///        is fundamentally wrong. Disabling an assert may well let you continue development
+  ///        but should only be done as a short term measure. You should ensure that you
+  ///        address the underlying cause of the assert.
+  /// \param identifier The id of the error/warning as hex string starting with "0x".
+  /// \param enable Enable or disabe the specified error or warning.
+  /// \returns true when succeeded to change the error/warning to the desried state, otherwise false.
+  /// \par Example
+  ///   \code
+  ///     function OnAfterSceneLoaded(self)
+  ///       Physics.EnableError("0x44444444", false)
+  ///     end
+  ///   \endcode
+  static boolean EnableError(string identifier, boolean enable)
+
   /// \brief Setup possibility to attach the Havok visual debugger.
   /// \param enable Enable or disabe the visual debugger.
   /// \par Example

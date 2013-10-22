@@ -32,14 +32,14 @@ public:
 
   const char* getSourceFile() const { return m_sourceFile; }
   const char* getTargetFile() const { return m_targetFile; }
-  const hkArray<hkvTransformationMessage>& getMessages() const { return m_messages; }
+  const hkArray<hkvAssetLogMessage>& getMessages() const { return m_messages; }
 
 protected:
-  void addMessage(const hkvTransformationMessage& message) { m_messages.pushBack(message); }
+  void addMessage(const hkvAssetLogMessage& message) { m_messages.pushBack(message); }
   void setTargetFile(const char* targetFile) { m_targetFile = targetFile; }
 
 private:
-  hkArray<hkvTransformationMessage> m_messages;
+  hkArray<hkvAssetLogMessage> m_messages;
   hkStringPtr m_sourceFile;
   hkStringPtr m_targetFile;
 };
@@ -48,7 +48,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -15,9 +15,9 @@
 // Forward declarations
 class vHavokConstraintChain;
 
-
 /// \brief
-///   Adpater class used to provide rendering data for vHavokConstraintChain objects.
+///   Adapter class used to provide rendering data for vHavokConstraintChain objects.
+///
 class vHavokConstraintChainRenderingData : public IVPathRenderingData
 {
 public:
@@ -32,42 +32,53 @@ public:
 public:
   /// \brief
   ///   Sets the object instance containing the rendering data
+  ///
   /// \param pObject
   ///   Typed Object that contains the path data.
+  ///
   /// \return
-  ///   Whether the set object is compatible with this adapter.
-  VHAVOK_IMPEXP VOVERRIDE bool SetPathObject(VTypedObject* pObject) HKV_OVERRIDE;
+  ///   Returns whether the set object is compatible with this adapter.
+  ///
+  VHAVOK_IMPEXP virtual bool SetPathObject(VTypedObject* pObject) HKV_OVERRIDE;
 
   /// \brief
-  ///   Indicates whether this instance contains valid rending data.
+  ///   Indicates whether this instance contains valid rendering data.
+  ///
   /// \return
-  ///   Whether this instance contains valid rending data.
-  VHAVOK_IMPEXP VOVERRIDE bool IsValid() const HKV_OVERRIDE;
+  ///   Whether this instance contains valid rendering data
+  ///
+  VHAVOK_IMPEXP virtual bool IsValid() const HKV_OVERRIDE;
 
   /// \brief
   ///   Returns the diameter of the path.
-  VHAVOK_IMPEXP VOVERRIDE float GetDiameter() const HKV_OVERRIDE;
+  ///
+  VHAVOK_IMPEXP virtual float GetDiameter() const HKV_OVERRIDE;
 
   /// \brief
   ///   Returns the length of each link of the path.
-  VHAVOK_IMPEXP VOVERRIDE float GetLinkLength() const HKV_OVERRIDE;
+  ///
+  VHAVOK_IMPEXP virtual float GetLinkLength() const HKV_OVERRIDE;
 
   /// \brief
   ///   Returns the gap between the links of the path.
-  VHAVOK_IMPEXP VOVERRIDE float GetLinkGap() const HKV_OVERRIDE;
+  ///
+  VHAVOK_IMPEXP virtual float GetLinkGap() const HKV_OVERRIDE;
 
   /// \brief
   ///   Returns the number of links of this path.
-  VHAVOK_IMPEXP VOVERRIDE unsigned int GetNumLinks() const HKV_OVERRIDE;
+  ///
+  VHAVOK_IMPEXP virtual unsigned int GetNumLinks() const HKV_OVERRIDE;
 
   /// \brief
   ///   Returns the amount (in world units) by which the last path link is 
-  ///   shorter or longer than required. The value is negative if the link
-  ///   is longer, and positive if the link is shorter.
-  VHAVOK_IMPEXP VOVERRIDE float GetLastLinkExtra() const HKV_OVERRIDE;
+  ///   shorter or longer than required. 
+  ///
+  /// The value is negative if the link is longer, and positive if the link is shorter.
+  VHAVOK_IMPEXP virtual float GetLastLinkExtra() const HKV_OVERRIDE;
 
   /// \brief
   ///   Inquires the transformation of the specified link in world space.
+  ///
   /// \param iIndex
   ///   index of the link whose transformation to get
   /// \param mRotation
@@ -78,11 +89,14 @@ public:
   ///   \c true if a valid transformation could be determined, \c false 
   ///   if not. In the latter case, the contents of mRotation and vTranslation
   ///   are undefined.
-  VHAVOK_IMPEXP VOVERRIDE bool GetLinkTransform(unsigned int iIndex, hkvMat3& mRotation, hkvVec3& vTranslation) const HKV_OVERRIDE;
+  ///
+  VHAVOK_IMPEXP virtual bool GetLinkTransform(unsigned int iIndex, hkvMat3& mRotation, 
+    hkvVec3& vTranslation) const HKV_OVERRIDE;
 
   /// \brief
   ///   Inquires the transformation of all links in world space, optionally
   ///   removing the roll values or reversing the link order.
+  ///
   /// \param pRotations
   ///   pointer to an array of rotation matrices. This array must be allocated
   ///   by the caller and be at least of the size returned by GetNumLinks().
@@ -90,30 +104,33 @@ public:
   ///   pointer to an array of translation vectors. This array must be allocated
   ///   by the caller and be at least of the size returned by GetNumLinks().
   /// \param bRemoveRoll
-  ///   whether to remove the roll component in the output transforms
+  ///   Determines whether to remove the roll component in the output transforms.
   /// \param bReverseOrder
-  ///   whether to output the link transforms in reverse order, and with a yaw
-  ///   of 180 degrees applied
-  VHAVOK_IMPEXP VOVERRIDE void GetLinkTransforms(hkvMat3* pRotations, hkvVec3* pTranslations, bool bRemoveRoll, bool bReverseOrder) const HKV_OVERRIDE;
+  ///   Determines whether to output the link transforms in reverse order, with a 
+  ///   yaw offset of 180 degrees applied.
+  ///
+  VHAVOK_IMPEXP virtual void GetLinkTransforms(hkvMat3* pRotations, hkvVec3* pTranslations, 
+    bool bRemoveRoll, bool bReverseOrder) const HKV_OVERRIDE;
+
+  V_DECLARE_SERIAL_DLLEXP(vHavokConstraintChainRenderingData, VHAVOK_IMPEXP)
 
 protected:
   /// \brief
   ///   Gets called after all components of the owner object are attached and initialized.
+  ///
   /// \param pOwner
   ///   Owner object that contains the path data.
-  VHAVOK_IMPEXP VOVERRIDE void Init(VisTypedEngineObject_cl* pOwner) HKV_OVERRIDE;
-
-public:
-  V_DECLARE_SERIAL_DLLEXP(vHavokConstraintChainRenderingData, VHAVOK_IMPEXP)
+  ///
+  VHAVOK_IMPEXP virtual void Init(VisTypedEngineObject_cl* pOwner) HKV_OVERRIDE;
 
 protected:
   vHavokConstraintChain* m_spPathObject;
 };
 
-#endif //V_HAVOK_CONSTRAINT_CHAIN_RENDERING_DATA_HPP_INCLUDED
+#endif // V_HAVOK_CONSTRAINT_CHAIN_RENDERING_DATA_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

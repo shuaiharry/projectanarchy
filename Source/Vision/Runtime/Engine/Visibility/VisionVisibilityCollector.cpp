@@ -72,8 +72,11 @@ VisVisibilityStreamConfig_t defaultVisStreamConfig;
 
 VisionVisibilityCollector_cl::VisionVisibilityCollector_cl(VisSceneElementTypes_e eSceneElementTypes)
   : IVisVisibilityCollector_cl(), m_VisibleVisibilityZones(64,256), m_EntityFlags(256, 0), m_VisObjectFlags(256, 0), m_LightFlags(64, 0), m_VisibilityZoneVisitedFlags(32,0), m_VisibilityZoneFlags(32,0),
-  m_TraversalProtocol(64, 128),
+  m_TraversalProtocol(64, 128), m_iTraversalProtocolSize(0),
   m_StreamConfigs(1, defaultVisStreamConfig), targetPortal((hkvVec3*) &tempMem1[0],(hkvPlane*) &tempMem2[0], sizeof(tempMem1)/sizeof(hkvPlane))
+#if defined(WIN32)
+  ,m_EntityLODStates(2048, VLODState()), m_iEntityPlaneFlagsMask(-1)
+#endif
 {
   m_pVisibleEntities = new VisEntityCollection_cl(256, 256);
   m_pVisiblePrimaryOpaquePassEntities = new VisEntityCollection_cl(256, 256);
@@ -305,6 +308,7 @@ void VisionVisibilityCollector_cl::PerformVisibilityDetermination(int iFilterBit
 
   m_iFilterBitmask = iFilterBitmask;
   m_bUseCameraBBox = false;
+  m_iTraversalProtocolSize = 0;
 
   if (m_pOverrideFrustum)
   {
@@ -382,9 +386,6 @@ void VisionVisibilityCollector_cl::PerformVisibilityDetermination(int iFilterBit
       VASSERT(pStartZone != NULL);
     }
   }
-
-  if (m_iBehaviorFlags&VIS_VISCOLLECTOR_USEZONEOCCLUSIONQUERY && m_pOQContext != NULL)
-    m_iTraversalProtocolSize = 0;
 
   // Perform (recursive) scene traversal
   TraverseScene(pStartZone);
@@ -891,7 +892,6 @@ void VisionVisibilityCollector_cl::PostProcessVisibilityResults()
       {
         pFlags[iGeomInstanceIndex>>3]|=(char)(1<<(iGeomInstanceIndex&7));
         VisSurface_cl* pSurface = pInst->GetSurface();
-        VASSERT_MSG(pSurface != NULL, "static geometry instance without surface");
         if(pSurface)
         {
           VPassType_e ePassType = pSurface->GetResolvedPassType();
@@ -1378,9 +1378,12 @@ void VisionVisibilityCollector_cl::CollectVisibleSceneElements(VisVisibilityZone
     vCameraPos = m_pSourceObject->GetPosition();
     vCameraDir = m_pSourceObject->GetDirection();
   }
-  const bool bConsiderFarClip = (m_iContextRenderFlags&VIS_RENDERCONTEXT_FLAG_NO_FARCLIP)==0;
-  float fLODScaleSqr = bConsiderFarClip ? 1.f : -1.f;  // fLODScaleSqr<0.f turns off testing in IsClipped
-  if (bConsiderFarClip && m_pLODContext!=NULL)
+
+  if ((m_iContextRenderFlags & VIS_RENDERCONTEXT_FLAG_NO_FARCLIP) != 0)
+    iPlaneFlags &= ~V_BIT(1); // frustum check will ignore far clipping plane test
+
+  float fLODScaleSqr = 1.0f;
+  if (m_pLODContext!=NULL)
     fLODScaleSqr = m_pLODContext->GetLODDistanceScaling() * m_pLODContext->GetLODDistanceScaling();
 
   int i;
@@ -1569,14 +1572,32 @@ void VisionVisibilityCollector_cl::CollectEntities(VisVisibilityZone_cl* pZone, 
   m_pVisibleEntities->EnsureSize(m_pVisibleEntities->GetNumEntries() + iNumEntitiesInNode);
   VisBaseEntity_cl **pDataInNode = pZone->GetEntities()->GetDataPtr();
 
+  #if defined(WIN32)
+    // needed for dissolve feature in simulation package (so only needed in windows version)
+    iPlaneFlags &= m_iEntityPlaneFlagsMask;
+  #endif
+
   for (int i=0; i<iNumEntitiesInNode; i++, pDataInNode++)
   {
     VisBaseEntity_cl *pEntity = *pDataInNode;
 
+    #if defined(WIN32)
+      // needed for dissolve feature in simulation package (so only needed in windows version)
+      VLODState& lodState(GetLODState(pEntity->GetNumber()));
+    
+      lodState.m_iLastLODLevel = lodState.m_iCurLODLevel;
+      lodState.m_iCurLODLevel = 0xffff;
+    #endif
+    
     if (!pEntity->GetMesh())
       continue;
 
-    if (pEntity->IsClipped(m_iFilterBitmask, vCameraPos, fLODScaleSqr)) 
+    // perform near/far clipping for entities manual since always the position must be checked for entites and never the bounding box
+    if ((pEntity->GetVisibleBitmask() & m_iFilterBitmask) == 0 || pEntity->GetClipMode(VIS_EXCLUDED_FROM_VISTEST|VIS_IS_INACTIVE))
+      continue;
+
+    float fDistSqr = (vCameraPos - pEntity->GetPosition()).getLengthSquared() * fLODScaleSqr;
+    if (pEntity->IsNearOrFarClipped(fDistSqr))
       continue;
 
     if (eClipResult != VIS_CLIPPINGRESULT_UNCHANGED)
@@ -1680,17 +1701,176 @@ void VisionVisibilityCollector_cl::CollectEntities_LODHysteresis(VisVisibilityZo
   m_pVisibleEntities->EnsureSize(m_pVisibleEntities->GetNumEntries() + iNumEntitiesInNode);
   VisBaseEntity_cl **pDataInNode = pZone->GetEntities()->GetDataPtr();
 
+  #if defined(WIN32)
+    // needed for dissolve feature in simulation package (so only needed in windows version)
+    iPlaneFlags &= m_iEntityPlaneFlagsMask;
+  #endif
+
   for (int i=0; i<iNumEntitiesInNode; i++, pDataInNode++)
   {
     VisBaseEntity_cl *pEntity = *pDataInNode;
 
-    if (!pEntity->GetMesh())
+    #if defined(WIN32)
+      // needed for dissolve feature in simulation package (so only needed in windows version)
+      VLODState& lodState(GetLODState(pEntity->GetNumber()));
+
+      lodState.m_iLastLODLevel = lodState.m_iCurLODLevel;
+      lodState.m_iCurLODLevel = 0xffff;
+    #endif
+
+    if ((pEntity->GetVisibleBitmask() & m_iFilterBitmask) == 0 || pEntity->GetClipMode(VIS_EXCLUDED_FROM_VISTEST | VIS_IS_INACTIVE))
       continue;
 
-    IVLODHysteresisComponent* pComp = (IVLODHysteresisComponent*)pEntity->Components().GetComponentOfBaseType(IVLODHysteresisComponent::GetClassTypeId());
-    int iLODLevel = (pComp != NULL)? pComp->GetLODLevel() : 0;
-    if (m_pLODHysteresisManager->IsClipped(VLHT_ENTITIES, pEntity->GetNumber(), iLODLevel, pEntity, m_iFilterBitmask, vCameraPos, fLODScaleSqr))
+    VBaseMesh* pMesh = pEntity->GetMesh();
+    if (pMesh == NULL)
       continue;
+
+    const float fDistSqr = (vCameraPos - pEntity->GetPosition()).getLengthSquared() * fLODScaleSqr;
+
+    if (pMesh->ContainsClipDistance() && pMesh->GetGeometryInfoCount() > 0 && fLODScaleSqr >= 0.0f)
+    {
+      VLODHysteresisStates_e eState = m_pLODHysteresisManager->GetHysteresisState(VLHT_ENTITIES, pEntity->GetNumber());
+
+      if (eState == VLHS_UNINITIALIZED)
+      {
+        // This entity is check first time - determine initial LOD level
+        if ((pEntity->GetVisibleBitmask() & m_iFilterBitmask) == 0 || pEntity->GetClipMode(VIS_EXCLUDED_FROM_VISTEST | VIS_IS_INACTIVE))
+          continue;
+
+        bool bVis = false;
+        const int iSubmeshCount = pMesh->GetSubmeshCount();
+        for (int j = 0; j < iSubmeshCount; j++)
+        {
+          VBaseSubmesh* pSubmesh = pMesh->GetBaseSubmesh(j);
+          VBaseGeometryInfo& pGeoInfo(pSubmesh->GetGeometryInfo());
+          if (pGeoInfo.m_iLODIndex >= 0)
+          {
+            float fNear = pGeoInfo.m_fNearClipDistance;
+            float fFar = pGeoInfo.m_fFarClipDistance + VLODHysteresisManager::GetThreshold(VLHT_ENTITIES);
+
+            const VBaseGeometryInfo &geomInfo(pSubmesh->GetGeometryInfo());
+            if (!geomInfo.IsNearOrFarClipped(fDistSqr))
+            {
+              m_pLODHysteresisManager->SetStateValue(VLHT_ENTITIES, pEntity->GetNumber(),
+                                                     VLHS_IN_BETWEEN_NEAR_FAR | (pGeoInfo.m_iLODIndex << VLODHysteresisManager::LOD_LEVEL_SHIFT),
+                                                     fNear, fFar);
+              bVis = true;
+              break;
+            }
+          }
+        }
+
+        if (!bVis)
+          continue; // not visible right now
+      }
+      else
+      {
+        int iLODLevel = m_pLODHysteresisManager->GetLODLevel(VLHT_ENTITIES, pEntity->GetNumber());
+recheck:
+        bool bRecheck = false;
+        const VLODHysteresisManager::NearFarPlaneSetting& nearFarSetting(m_pLODHysteresisManager->GetNearFarSetting(VLHT_ENTITIES, pEntity->GetNumber()));
+        int iClipStatus = VLODHysteresisManager::GetClipStatus(fDistSqr, nearFarSetting.fNearPlane, nearFarSetting.fFarPlane);
+
+        if (iClipStatus == 0)
+        {
+          // no clip - do nothing
+        }
+        else if (iClipStatus == +1)
+        {
+          // near clip
+          if (iLODLevel > 0) // sanity check
+          {
+            iLODLevel--;
+            bRecheck = true;
+            float fNear = 0.0f;
+            float fFar = 0.0f;
+            bool bFound = false;
+            const int iSubmeshCount = pMesh->GetSubmeshCount();
+            for (int j = 0; j < iSubmeshCount; j++)
+            {
+              VBaseSubmesh* pSubmesh = pMesh->GetBaseSubmesh(j);
+              VBaseGeometryInfo& pGeoInfo(pSubmesh->GetGeometryInfo());
+              if (pGeoInfo.m_iLODIndex == iLODLevel)
+              {
+                fNear = pGeoInfo.m_fNearClipDistance;
+                fFar = pGeoInfo.m_fFarClipDistance;
+                bFound = true;
+                break;
+              }
+            }
+
+            if (!bFound)
+            {
+              m_pLODHysteresisManager->SetStateValue(VLHT_ENTITIES, pEntity->GetNumber(), VLHS_UNINITIALIZED);
+              continue;
+            }
+
+            m_pLODHysteresisManager->SetStateValue(VLHT_ENTITIES, pEntity->GetNumber(),
+                                                   VLHS_IN_BETWEEN_NEAR_FAR | (iLODLevel << VLODHysteresisManager::LOD_LEVEL_SHIFT) | V_BIT(VLODHysteresisManager::VIS_CURR_FRAME_SHIFT),
+                                                   fNear, fFar + VLODHysteresisManager::GetThreshold(VLHT_ENTITIES));
+          }
+          else
+          {
+            Vision::Error.Warning("CollectEntities_LODHysteresis: Sanity check not passed");
+          }
+        }
+        else /*if (iClipStatus == -1)*/
+        {
+          // far clip
+          iLODLevel++;
+          bRecheck = true;
+          float fNear = 0.0f;
+          float fFar = 0.0f;
+          bool bFound = false;
+          const int iSubmeshCount = pMesh->GetSubmeshCount();
+          for (int j = 0; j < iSubmeshCount; j++)
+          {
+            VBaseSubmesh* pSubmesh = pMesh->GetBaseSubmesh(j);
+            VBaseGeometryInfo& pGeoInfo(pSubmesh->GetGeometryInfo());
+            if (pGeoInfo.m_iLODIndex == iLODLevel)
+            {
+              fNear = pGeoInfo.m_fNearClipDistance;
+              fFar = pGeoInfo.m_fFarClipDistance;
+              bFound = true;
+              break;
+            }
+          }
+
+          if (!bFound)
+          {
+            m_pLODHysteresisManager->SetStateValue(VLHT_ENTITIES, pEntity->GetNumber(), VLHS_UNINITIALIZED);
+#if defined(WIN32)
+            if (m_iEntityPlaneFlagsMask != -1)
+            {
+              // hack to allow LOD far clip fading when dissolve feature is enabled
+              m_pVisibleEntities->AppendEntryFast((VisBaseEntity_cl *)pEntity);
+            }
+#endif
+            continue;
+          }
+
+          m_pLODHysteresisManager->SetStateValue(VLHT_ENTITIES, pEntity->GetNumber(),
+                                                 VLHS_IN_BETWEEN_NEAR_FAR | (iLODLevel << VLODHysteresisManager::LOD_LEVEL_SHIFT) | V_BIT(VLODHysteresisManager::VIS_CURR_FRAME_SHIFT),
+                                                 fNear, fFar + VLODHysteresisManager::GetThreshold(VLHT_ENTITIES));
+        }
+
+        if (bRecheck)
+          goto recheck;
+      }
+    }
+    else if ((pEntity->m_iEntityFlags & VISENTFLAG_LOD_COMPONENT_ATTACHED) != 0)
+    {
+      IVLODHysteresisComponent* pComp = (IVLODHysteresisComponent*)pEntity->Components().GetComponentOfBaseType(IVLODHysteresisComponent::GetClassTypeId());
+      int iLODLevel = (pComp != NULL)? pComp->GetLODLevel() : 0;
+
+      if (m_pLODHysteresisManager->IsClipped(VLHT_ENTITIES, pEntity->GetNumber(), iLODLevel, pEntity, m_iFilterBitmask, vCameraPos, fLODScaleSqr))
+        continue;
+    }
+    else
+    {
+      if (pEntity->IsNearOrFarClipped(fDistSqr)) 
+        continue;
+    }
 
     if (eClipResult != VIS_CLIPPINGRESULT_UNCHANGED)
     {
@@ -1838,7 +2018,7 @@ IVisVisibilityCollectorComponent_cl::~IVisVisibilityCollectorComponent_cl()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

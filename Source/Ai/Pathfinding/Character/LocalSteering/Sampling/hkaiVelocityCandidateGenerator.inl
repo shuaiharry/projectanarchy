@@ -51,8 +51,7 @@ HK_FORCE_INLINE void hkaiVelocityCandidateGenerator::generateProgressScores(
 	wallScores.addMul(rightFactors, wallRight);
 	wallScores.mul(hkSimdReal_2);
 
-	hkVector4 wallPenaltyV; wallPenaltyV.setAll(wallPenalty);
-	wallScores.sub(wallPenaltyV);
+	wallScores.setSub(wallScores, wallPenalty);
 	scores.setMax(mainScores, wallScores);
 	
 	// velocity laziness
@@ -98,7 +97,7 @@ HK_FORCE_INLINE void hkaiVelocityCandidateGenerator::getRawBlockFactors(int bloc
 	hkSimdReal scale = hkSimdReal::getConstant<HK_QUADREAL_INV_127>();
 
 	hkIntVector bytes;
-	bytes.loadNotAligned<2>((hkUint32*)(m_template + (blockIdx << 3)));
+	bytes.load<2, HK_IO_NATIVE_ALIGNED>((hkUint32*)(m_template + (blockIdx << 3)));
 
 	hkIntVector shorts;
 	shorts.setCombineHead8To16(zero, bytes);
@@ -134,7 +133,7 @@ HK_FORCE_INLINE void hkaiVelocityCandidateGenerator::getPrev(hkVector4 & prevOut
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

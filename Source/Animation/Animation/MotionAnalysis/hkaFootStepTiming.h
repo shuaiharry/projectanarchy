@@ -19,59 +19,59 @@ public:
 	hkaFootStepTiming();
 
 	/// Initialize from an expanded animation
-	hkaFootStepTiming( const hkArrayBase< hkBool >& isDown, hkReal duration );
+	hkaFootStepTiming( const hkArrayBase< hkBool >& isDown, hkSimdRealParameter duration );
 
 	/// Initialize
-	void init( const hkArrayBase< hkBool >& isDown, hkReal duration );
+	void init( const hkArrayBase< hkBool >& isDown, hkSimdRealParameter duration );
 
 	/// \return The time that the foot first contacts the ground
-	hkReal getDownTime() const;
+	hkSimdReal getDownTime() const;
 	
 	/// \return The time that the foot first lifts from the ground
-	hkReal getUpTime() const;
+	hkSimdReal getUpTime() const;
 
 	/// \return The midpoint for the foot down
-	hkReal getMidDownTime() const;
+	hkSimdReal getMidDownTime() const;
 
 	/// \return The midpoint for the foot down
-	hkReal getMidUpTime() const;
+	hkSimdReal getMidUpTime() const;
 
 	/// \return The length of time that the foot is down
-	hkReal getDownDuration() const;
+	hkSimdReal getDownDuration() const;
 
 	/// \return The length of time that the foot is up
-	hkReal getUpDuration() const;
+	hkSimdReal getUpDuration() const;
 
 	/// \return True if the foot is down at the specified time
-	bool isDown( hkReal time ) const;
+	bool isDown( hkSimdRealParameter time ) const;
 
 	/// \return True if the foot is up at the specified time
-	bool isUp( hkReal time ) const;
+	bool isUp( hkSimdRealParameter time ) const;
 
 	/// \return The midpoint in time between two events, takes wrapping into account
-	hkReal getMidpoint( hkReal first, hkReal last ) const;
+	hkSimdReal getMidpoint( hkSimdRealParameter first, hkSimdRealParameter last ) const;
 
 
 	/// Set the time that the foot strikes the ground
-	inline void setDownTime( hkReal time ) { m_downTime = time; }
+	inline void setDownTime( hkSimdRealParameter time ) { m_downTime = time; }
 
 	/// Set the time that the foot releases from the ground
-	inline void setUpTime( hkReal time ) { m_upTime = time; }
+	inline void setUpTime( hkSimdRealParameter time ) { m_upTime = time; }
 
 	/// Set the total duration of the cycle
-	inline void setDuration( hkReal time ) { m_duration = time; }
+	inline void setDuration( hkSimdRealParameter time ) { m_duration = time; }
 
 private:
 
-	hkReal m_downTime;
-	hkReal m_upTime;
-	hkReal m_duration;
+	hkSimdReal m_downTime;
+	hkSimdReal m_upTime;
+	hkSimdReal m_duration;
 };
 
 #endif // HK_FOOTSTEP_TIMING_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

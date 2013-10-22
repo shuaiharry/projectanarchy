@@ -16,13 +16,19 @@ inline const hkVector4& hkContactPoint::getNormal() const
 	return m_separatingNormal; 
 }
 
-inline hkVector4& hkContactPoint::getPosition()
-{ 
-	return m_position; 
+#if defined(HK_CONTACT_POINT_NAN_CHECKS)
+static void hkContactPoint_infassert(hkVector4Parameter v)
+{
+	HK_ASSERT(0x99999999,v.isOk<3>());
+//	HK_REPORT("v "<<v(0)<<" "<<v(1)<<" "<<v(2));
 }
+#else
+#define hkContactPoint_infassert(x)
+#endif
 
 inline void hkContactPoint::setPosition( const hkVector4& position )
-{	
+{
+	hkContactPoint_infassert(position);
 	m_position = position; 
 }
 
@@ -32,25 +38,22 @@ inline const hkVector4& hkContactPoint::getSeparatingNormal() const
 	return m_separatingNormal; 
 }
 
-inline hkVector4& hkContactPoint::getSeparatingNormal()
-{ 
-	return m_separatingNormal; 
-}
-
-
 inline void hkContactPoint::setSeparatingNormal( const hkVector4& normal, hkReal dist )
 {
+	hkContactPoint_infassert(normal);
 	m_separatingNormal = normal;
 	m_separatingNormal(3) = dist;
 }
 
 inline void hkContactPoint::setSeparatingNormal( hkVector4Parameter normal, hkSimdRealParameter dist )
 {
+	hkContactPoint_infassert(normal);
 	m_separatingNormal.setXYZ_W(normal,dist);
 }
 
 inline void hkContactPoint::setSeparatingNormal( const hkVector4& separatingNormal )
 {
+	hkContactPoint_infassert(separatingNormal);
 	m_separatingNormal = separatingNormal;
 }
 
@@ -80,6 +83,8 @@ inline void hkContactPoint::setDistanceSimdReal(hkSimdRealParameter newValue)
 
 inline void hkContactPoint::set( const hkVector4& position, const hkVector4& normal, hkReal dist )
 { 
+	hkContactPoint_infassert(position);
+	hkContactPoint_infassert(normal);
 	m_position = position; 
 	m_separatingNormal = normal;
 	m_separatingNormal(3) = dist; 
@@ -90,20 +95,24 @@ inline void hkContactPoint::set( const hkVector4& position, const hkVector4& nor
 
 inline void hkContactPoint::setPositionNormalAndDistance(hkVector4Parameter position, hkVector4Parameter normal, hkSimdRealParameter dist)
 {
+	hkContactPoint_infassert(position);
+	hkContactPoint_infassert(normal);
 	m_position = position; 
 	m_separatingNormal.setXYZ_W(normal, dist);
 }
 
 inline void hkContactPoint::setNormalOnly( const hkVector4& normal )
 { 
+	hkContactPoint_infassert(normal);
 	m_separatingNormal.setXYZ( normal );
 }
 
 inline void hkContactPoint::setFlipped( const hkContactPoint& point )
 {
-	hkVector4 dist; dist.setBroadcast<3>( point.m_separatingNormal ); 
-	m_position.setAddMul( point.m_position, point.m_separatingNormal, dist );
+	m_position.setAddMul( point.m_position, point.m_separatingNormal, point.m_separatingNormal.getComponent<3>() );
+	hkContactPoint_infassert(m_position);
 	m_separatingNormal.setNeg<3>( point.m_separatingNormal );
+	hkContactPoint_infassert(m_separatingNormal);
 }
 
 inline void hkContactPoint::flip()
@@ -112,7 +121,7 @@ inline void hkContactPoint::flip()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

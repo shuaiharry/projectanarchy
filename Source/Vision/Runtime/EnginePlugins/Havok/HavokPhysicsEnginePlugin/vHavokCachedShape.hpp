@@ -8,10 +8,6 @@
 
 /// \file vHavokCachedShape.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKCACHEDSHAPE_HPP_INCLUDED
 #define VHAVOKCACHEDSHAPE_HPP_INCLUDED
 
@@ -36,16 +32,16 @@ public:
   ///
 
   /// \brief
-  ///   Saves hkvConvexVerticeShape to HKT file. 
+  ///   Saves hkvConvexVerticesShape to a HKT file. 
   ///
   /// \param pMesh
-  ///   Pointer to the mesh for which shape was created.
+  ///   Pointer to the mesh for which the shape was created.
   /// 
   /// \param vScale
   ///   Scale of the corresponding mesh.
   /// 
   /// \param bShrinkToFit
-  ///   Specifies whether convex shape is shrinked by convex radius so that it's surface is as close as possible to the graphical one.
+  ///   Specifies whether convex shape is shrunken by convex radius so that its surface is as close as possible to the graphical one.
   /// 
   /// \param pShape
   ///   Pointer to the shape to save.
@@ -55,7 +51,7 @@ public:
   ///   Saves hkvBvCompressedMeshShape to HKT file. 
   ///
   /// \param pMesh
-  ///   Pointer to the mesh for which shape was created.
+  ///   Pointer to the mesh for which the shape was created.
   /// 
   /// \param vScale
   ///   Scale of the corresponding mesh.
@@ -73,10 +69,10 @@ public:
 
 #ifdef SUPPORTS_TERRAIN
   /// \brief
-  ///   Saves a terrain sector related shape to HKT file.
+  ///   Saves a terrain sector related shape to a HKT file.
   ///
   /// \param pSector
-  ///   Pointer to the terrain sector for which shape was created.
+  ///   Pointer to the terrain sector for which the shape was created.
   /// 
   /// \param pShape
   ///   Pointer to the shape to save.
@@ -86,7 +82,6 @@ public:
   ///
   /// @}
   ///
-
 
   ///
   /// @name Loading
@@ -103,10 +98,10 @@ public:
   ///   Scale of the corresponding mesh.
   /// 
   /// \param bShrinkToFit
-  ///   Specifies whether convex shape is shrinked by convex radius so that it's surface is as close as possible to the graphical one.
+  ///   Specifies whether convex shape is shrunken by convex radius so that its surface is as close as possible to the graphical one.
   /// 
   /// \returns 
-  ///   Pointer to loaded shape if succeeded, otherwise NULL.
+  ///   Pointer to loaded shape if successful, NULL otherwise.
   static hkvConvexVerticesShape* LoadConvexShape(VBaseMesh *pMesh, const hkvVec3& vScale, bool bShrinkToFit);
 
   /// \brief
@@ -125,7 +120,7 @@ public:
   ///   Welding type.
   ///
   /// \returns 
-  ///   Pointer to loaded shape if succeeded, otherwise NULL.
+  ///   Pointer to loaded shape if successful, NULL otherwise.
   static hkvBvCompressedMeshShape* LoadMeshShape(VBaseMesh *pMesh, const hkvVec3& vScale, VisStaticMeshInstance_cl::VisCollisionBehavior_e eCollisionBehavior, 
                                                  VisWeldingType_e eWeldingType);
 
@@ -137,14 +132,13 @@ public:
   ///   Pointer to the terrain sector for which shape was created.
   /// 
   /// \returns 
-  ///   Pointer to loaded shape if succeeded, otherwise NULL.
+  ///   Pointer to loaded shape if successful, NULL otherwise.
   static hkpShape* LoadTerrainSectorShape(const VTerrainSector *pSector);
 #endif
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Configuration
@@ -176,7 +170,6 @@ public:
   /// @}
   ///
 
-
   ///
   /// @name Path helpers 
   /// @{
@@ -188,13 +181,14 @@ public:
 
   /// \brief
   ///   Gets path to a mesh shape.
-  VHAVOK_IMPEXP static void GetMeshShapePath(VStaticString<FS_MAX_PATH>& szInOut, const hkvVec3& vScale, VisStaticMeshInstance_cl::VisCollisionBehavior_e eCollisionBehavior, 
-                                             VisWeldingType_e eWeldingType);
+  VHAVOK_IMPEXP static void GetMeshShapePath(VStaticString<FS_MAX_PATH>& szInOut, const hkvVec3& vScale, 
+    VisStaticMeshInstance_cl::VisCollisionBehavior_e eCollisionBehavior, VisWeldingType_e eWeldingType);
 
 #ifdef SUPPORTS_TERRAIN
   /// \brief
   ///   Gets path to a terrain sector shape.
-  VHAVOK_IMPEXP static void GetTerrainSectorShapePath(VStaticString<FS_MAX_PATH>& szInOut, VTerrainSector::VPhysicsType_e ePhysicsType, bool bHasHoles);
+  VHAVOK_IMPEXP static void GetTerrainSectorShapePath(VStaticString<FS_MAX_PATH>& szInOut, 
+    VTerrainSector::VPhysicsType_e ePhysicsType, bool bHasHoles);
 #endif
 
   ///
@@ -217,7 +211,7 @@ private:
 #endif // VHAVOKCACHEDSHAPE_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

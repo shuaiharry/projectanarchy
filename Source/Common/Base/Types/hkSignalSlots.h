@@ -9,6 +9,8 @@
 #ifndef HK_SIGNAL_SLOTS_H
 #define HK_SIGNAL_SLOTS_H
 
+#include <Common/Base/Types/hkPtrAndInt.h>
+
 // Compile time configuration.
 // By default, enable debugging and tracking only when HK_DEBUG is defined.
 #if defined(HK_DEBUG) && !defined(HK_PLATFORM_SPU)
@@ -35,17 +37,25 @@ struct hkSlot
 {
 	//+hk.MemoryTracker(ignore=True)
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, hkSlot);
-	
-	HK_FORCE_INLINE				hkSlot(hkSlot*& slots, void* object, const char* name) : m_next(slots), m_object(object) { slots = this; HK_SIGNAL_SET_NAME(this, name); }
+
+	typedef hkPtrAndInt<hkSlot> SlotList;
+
+	HK_FORCE_INLINE	hkSlot(SlotList& slots, void* object, const char* name) : m_next(slots.getPtr()), m_object(object)
+	{
+		// Replaces the head of the list with this slot preserving the in-use flag.
+		slots.setPtr(this);
+		HK_SIGNAL_SET_NAME(this, name); 
+	}
 	HK_FORCE_INLINE virtual		~hkSlot()					{ HK_SIGNAL_CLR_NAME(this); }
-	HK_FORCE_INLINE void		unsubscribe()				{ reinterpret_cast<hkUlong&>(m_next) |= 1; }
-	HK_FORCE_INLINE hkBool32	hasNoSubscription() const	{ return (hkBool32)(reinterpret_cast<hkUlong>(m_next) & 1); }
-	HK_FORCE_INLINE hkSlot*		getNext() const				{ return hkClearBits(m_next, 1); }
+	HK_FORCE_INLINE void		unsubscribe()				{ m_next.setInt(1); }
+	HK_FORCE_INLINE hkBool32	hasNoSubscription() const	{ return (hkBool32)m_next.getInt(); }
+	HK_FORCE_INLINE hkSlot*		getNext() const				{ return m_next.getPtr(); }
 	HK_FORCE_INLINE const char*	getName() const				{ return reinterpret_cast<const char*>(HK_SIGNAL_GET_NAME(this)); }
 	virtual hkBool32			matchMethod(const void* methodData, int methodLength) const=0;
 
-	mutable hkSlot*	m_next;
-	void*			m_object;
+	/// The last bit is set when the slot is unsubscribed.
+	mutable SlotList	m_next;
+	void*				m_object;
 };
 
 /// Abstract signal.
@@ -54,12 +64,15 @@ struct hkSignal
 	//+hk.MemoryTracker(ignore=True)
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, hkSlot);
 
+	typedef hkPtrAndInt<hkSlot> SlotList;
+
 	#ifndef HK_PLATFORM_SPU
-	
-	HK_FORCE_INLINE				hkSignal(const char* name) : m_slots(HK_NULL)	{ hkSignal::beginTrack(this); HK_SIGNAL_SET_NAME(this, name); }
-	HK_FORCE_INLINE				~hkSignal()										{ hkSignal::endTrack(this); destroy(); HK_SIGNAL_CLR_NAME(this); }
-	HK_FORCE_INLINE const char*	getName() const									{ return reinterpret_cast<const char*>(HK_SIGNAL_GET_NAME(this)); }
-	HK_FORCE_INLINE bool		hasSubscriptions()								{ return m_slots != HK_NULL; }
+
+	HK_FORCE_INLINE				hkSignal(const char* name)	{ hkSignal::beginTrack(this); HK_SIGNAL_SET_NAME(this, name); }
+	HK_FORCE_INLINE				~hkSignal()					{ hkSignal::endTrack(this); destroy(); HK_SIGNAL_CLR_NAME(this); }
+	HK_FORCE_INLINE const char*	getName() const				{ return reinterpret_cast<const char*>(HK_SIGNAL_GET_NAME(this)); }
+	HK_FORCE_INLINE	hkSlot*		getSlots() const			{ return m_slots.getPtr(); }
+	HK_FORCE_INLINE bool		hasSubscriptions()			{ return getSlots() != HK_NULL; }
 	int							getNumSubscriptions() const;
 	void						unsubscribeAll(void* object);
 	hkBool						unsubscribeInternal(void* object, const void* method, int length);
@@ -85,7 +98,9 @@ struct hkSignal
 	HK_FORCE_INLINE				hkSignal(const char*) {}
 	#endif
 
-	mutable hkSlot*	m_slots;
+	/// The last bit of this is set when the list is in-use (while the signal is being fired to the slots)
+	/// and reset when the list is free to be modified.
+	mutable SlotList m_slots;
 
 private:
 	hkSignal(const hkSignal&) {}
@@ -222,7 +237,7 @@ private:
 #endif // HK_SIGNAL_SLOTS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

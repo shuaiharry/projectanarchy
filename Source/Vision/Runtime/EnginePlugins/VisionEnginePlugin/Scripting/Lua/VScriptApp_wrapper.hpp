@@ -27,8 +27,7 @@ public:
 
   bool LoadScene(const char * szFileName)
   {
-    VSceneLoader loader;
-    return loader.LoadScene(szFileName);
+    return Vision::GetApplication()->RequestLoadScene( szFileName );
   }
 
   void UnloadScene()
@@ -53,35 +52,37 @@ public:
   
   const char * GetPlatformName()
   {
-    #if defined(_VISION_PS3)
-	    return "PS3";
-  	#elif defined(_VISION_PSP2)
-  	  return "PSVITA";
-  	#elif defined(_VISION_XENON)
-  	  return "XBOX360";
-  	#elif defined(_VISION_ANDROID)
-  	  return "ANDROID";
-  	#elif defined(_VISION_IOS)
-  	  return "IOS";
-  	#elif defined(_VISION_WIIU)
-  	  return "WIIU";
-  	#elif defined(_VISION_POSIX)
-  	  return "POSIX";
-  	#elif defined(_VR_DX9)
-   	  #if defined(_WIN32)
-   	    return "WIN32DX9";
-   	  #else
-   	    return "WIN64DX9";
-   	  #endif
-  	#elif defined(_VR_DX11)
-  	  #if defined(_WIN32)
-  	    return "WIN32DX11";
-  	  #else
-  	    return "WIN64DX11";
-  	  #endif
-  	#else
-  	  return "UNDEFINED";
-  	#endif
+#if defined(_VISION_PS3)
+    return "PS3";
+#elif defined(_VISION_PSP2)
+    return "PSVITA";
+#elif defined(_VISION_XENON)
+    return "XBOX360";
+#elif defined(_VISION_ANDROID)
+    return "ANDROID";
+#elif defined(_VISION_IOS)
+    return "IOS";
+#elif defined(_VISION_WIIU)
+    return "WIIU";
+#elif defined(_VISION_TIZEN)
+    return "TIZEN";
+#elif defined(_VISION_POSIX)
+    return "POSIX";
+#elif defined(_VR_DX9)
+  #if defined(_WIN32)
+    return "WIN32DX9";
+  #else
+    return "WIN64DX9";
+  #endif
+#elif defined(_VR_DX11)
+  #if defined(_WIN32)
+    return "WIN32DX11";
+  #else
+    return "WIN64DX11";
+  #endif
+#else
+    return "UNDEFINED";
+#endif
   }
 
   static bool LoadScript(lua_State *L, const char * szFileName) 
@@ -110,7 +111,7 @@ public:
 #endif // __VSCRIPTAPP_WRAPPER_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

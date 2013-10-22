@@ -15,6 +15,26 @@
 #include <Vision/Runtime/Engine/System/VisApiMain.hpp>
 
 
+class VisCoordinateSystem_cl;
+
+/// \brief
+///   Base class for defining a customized map projection in Vision
+class IVProjection : public VisTypedEngineObject_cl
+{
+public:
+  /// \brief
+  ///   Creates a coordinate system object for this map projection
+  ///
+  /// \sa VisCoordinateSystem_cl
+  VISION_APIFUNC virtual VisCoordinateSystem_cl *CreateCoordinateSystem() const { return 0; }
+
+#ifndef _VISION_DOC
+  VISION_APIFUNC virtual void Serialize( VArchive &ar ) { };
+  V_DECLARE_SERIAL_DLLEXP( IVProjection, VISION_APIDATA );
+  V_DECLARE_VARTABLE( IVProjection, VISION_APIDATA );
+#endif
+};
+
 /// \brief
 ///   Base class for defining a customized coordinate system in Vision
 /// 
@@ -24,13 +44,13 @@
 ///
 /// Note that this does not alter anything about the rendering system, matrices, or Vision objects.
 /// Rather, plugins are expected to use information about the systems basis to implement coordinate system agnostic algorithms.
-class VISION_APIFUNC VisCoordinateSystem_cl
+class VisCoordinateSystem_cl : public VRefCounter
 {
 public:
 
-  VisCoordinateSystem_cl() {}
+  VISION_APIFUNC VisCoordinateSystem_cl() {}
 
-  virtual ~VisCoordinateSystem_cl() {}
+  VISION_APIFUNC virtual ~VisCoordinateSystem_cl() {}
 
   /// \brief
   ///   Query an accurate world position for an object
@@ -55,14 +75,14 @@ public:
   /// 
   /// \param[out] basisVectors
   ///   The basis
-  virtual void GetBasisVectors( hkvVec3d const& worldPosition, hkvMat3& basisVectors ) const = 0;
+  VISION_APIFUNC virtual void GetBasisVectors( hkvVec3d const& worldPosition, hkvMat3& basisVectors ) const = 0;
 
   /// \brief
   ///   Return a coherent, planar position for an object of the form (planarX, planarY, altitudeAboveBaseSurface)
   /// 
   /// Return a coordinate of the form (planarX, planarY, planarZ), where planarX and planarY describe planar coordinates for object,
   /// referenced to the current global pivot.  planarZ provides altitude above the systems surface.  For example, in a spherical system
-  /// with radius r, a given world space position could look like:
+  /// with radius r, a given worldspace position could look like:
   ///
   /// x = (sin(theta)sin(phi) * (r + viewerAltitude)) - pivotX;
   /// y = (cos(theta)sin(phi) * (r + viewerAltitude)) - pivotY;
@@ -85,7 +105,7 @@ public:
   ///
   /// \param[out] localFrame
   ///   The local frame described above
-  virtual void GetInLocalFrame( hkvVec3d const& worldPosition, hkvVec3& localFrame ) const = 0;
+  VISION_APIFUNC virtual void GetInLocalFrame( hkvVec3d const& worldPosition, hkvVec3& localFrame ) const = 0;
 
   /// \brief
   ///   Return a 4x4 matrix for converting from a local frame to the world space.
@@ -97,7 +117,7 @@ public:
   ///   The matrix.
   ///
   /// \sa VisCoordinateSystem_cl::GetInLocalFrame
-  virtual void GetLocalFrameInversionMatrix( hkvVec3d const& worldPosition, hkvMat4& invLocalFrame ) const = 0;
+  VISION_APIFUNC virtual void GetLocalFrameInversionMatrix( hkvVec3d const& worldPosition, hkvMat4& invLocalFrame ) const = 0;
 
   /// \brief
   ///   Return a 4x4 matrix for converting from world space to local frame.
@@ -109,7 +129,7 @@ public:
   ///   The matrix.
   ///
   /// \sa VisCoordinateSystem_cl::GetInLocalFrame
-  virtual void GetLocalFrameMatrix( hkvVec3d const& worldPosition, hkvMat4& localFrame ) const = 0;
+  VISION_APIFUNC virtual void GetLocalFrameMatrix( hkvVec3d const& worldPosition, hkvMat4& localFrame ) const = 0;
 
   /// \brief
   ///   Return a fourth degree polynomial to describe the falloff of the base surface at a given location
@@ -138,7 +158,7 @@ public:
   ///
   /// \param[out] coefficients
   ///   The resulting coefficients
-  virtual void GetEllipticalPolynomialCoefficients( hkvVec3d const& observerPosition, double viewingDistance, hkvVec4& coefficients ) const = 0;
+  VISION_APIFUNC virtual void GetEllipticalPolynomialCoefficients( hkvVec3d const& observerPosition, double viewingDistance, hkvVec4& coefficients ) const = 0;
 
   /// \brief
   ///   Return the cosine of the angle between a viewer and the horizon of the system
@@ -148,7 +168,7 @@ public:
   ///
   /// \return 
   ///   cos(gamma) where gamma is the angle between the viewer and the horizon
-  virtual float GetCosineHorizon( hkvVec3d const& observerPosition ) const = 0;
+  VISION_APIFUNC virtual float GetCosineHorizon( hkvVec3d const& observerPosition ) const = 0;
 
   /// \brief
   ///   Sets a scene reference position
@@ -162,12 +182,23 @@ public:
   ///
   /// \param refPos
   ///   The scene reference position to be used.
-  virtual void SetSceneReferencePosition(const hkvVec3d& refPos) = 0;
+  VISION_APIFUNC virtual void SetSceneReferencePosition(const hkvVec3d& refPos) = 0;
 
   /// \brief
   ///   Get the scene reference position if applicable for a coordinate system
-  virtual void GetSceneReferencePosition(hkvVec3d& referencePosition) const = 0;
+  VISION_APIFUNC virtual void GetSceneReferencePosition(hkvVec3d& referencePosition) const = 0;
 
+  /// \brief
+  ///   Project a coordinate from the input system to the system defined by IVProjection
+  VISION_APIFUNC virtual void ProjectCoordinate( hkvVec3d const& inputCoordinate, hkvVec3d& cartesianCoordinate ) = 0;
+
+  /// \brief
+  ///   Unproject a coordinate from the system defined by IVProjection to the unprojected type
+  VISION_APIFUNC virtual void UnprojectCoordinate( hkvVec3d const& cartesianCoordinate, hkvVec3d& outputCoordinate ) = 0;
+
+  /// \brief
+  ///   Returns the projection object
+  virtual const IVProjection *GetProjection() const = 0;
 private:
 
 };
@@ -180,9 +211,9 @@ class VisDefaultCoordinateSystem : public VisCoordinateSystem_cl
 {
 public:
 
-  VisDefaultCoordinateSystem();
+  VISION_APIFUNC VisDefaultCoordinateSystem();
 
-  virtual ~VisDefaultCoordinateSystem();
+  VISION_APIFUNC virtual ~VisDefaultCoordinateSystem();
 
   /// \brief
   ///   Query the world space position of an object
@@ -289,6 +320,17 @@ public:
   ///   Get the scene reference position if applicable for a coordinate system
   virtual void GetSceneReferencePosition(hkvVec3d& referencePosition) const;
 
+  virtual void ProjectCoordinate( hkvVec3d const& inputCoordinate, hkvVec3d& cartesianCoordinate ) HKV_OVERRIDE;
+
+  virtual void UnprojectCoordinate( hkvVec3d const& cartesianCoordinate, hkvVec3d& outputCoordinate ) HKV_OVERRIDE;
+
+  /// \brief
+  ///   Returns the projection object
+  virtual const IVProjection *GetProjection() const HKV_OVERRIDE
+  {
+    return NULL;
+  }
+
 private:
 
   hkvVec3d m_vReferencePosition;
@@ -377,7 +419,7 @@ public:
   /// way for short distances.  E.g., SetLocalFrame(GetLocalFrame() + hkvVec3( 0, 0, -1 )) would
   /// move the object down 1 world space unit regardless of the world's up vector.
   ///
-  /// If there is no associated object, it will just update the approximated world space coordinate.
+  /// If there is no associated object, it will just update the approximated worldspace coordinate.
   /// Else, it will update the position of the object.
   ///
   /// \param[in] lf 
@@ -387,7 +429,7 @@ public:
   /// \brief
   ///   Set a world space coordinate.
   ///
-  /// If there is no associated object, it will just update the approximated world space coordinate.
+  /// If there is no associated object, it will just update the approximated worldspace coordinate.
   /// Else, it will update the position of the object.
   ///
   /// \param[in] ws 
@@ -605,8 +647,8 @@ private:
   ///   Called by Vision::DeInitWorld to deinitialize the world 
   void DeInitWorld();
 
-  VisCoordinateSystem_cl* m_pExternalCoordinateSystem;
-  VisCoordinateSystem_cl* m_pDefaultCoordinateSystem;
+  VSmartPtr<VisCoordinateSystem_cl> m_spExternalCoordinateSystem;
+  VSmartPtr<VisCoordinateSystem_cl> m_spDefaultCoordinateSystem;
 
   IVSkyPtr m_spCurrentSky;
 
@@ -619,7 +661,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

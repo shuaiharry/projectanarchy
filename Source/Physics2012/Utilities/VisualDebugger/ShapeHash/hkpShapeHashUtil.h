@@ -9,7 +9,7 @@
 #ifndef HK_SHAPE_HASH_UTIL_H
 #define HK_SHAPE_HASH_UTIL_H
 
-#include <Physics2012/Utilities/VisualDebugger/ShapeHash/hkCrc64StreamWriter.h>
+#include <Common/Base/System/Io/Writer/Crc/hkCrcStreamWriter.h>
 
 #include <Physics2012/Collide/Shape/hkpShapeType.h>
 
@@ -138,7 +138,7 @@ HK_SINGLETON_SPECIALIZATION_DECL(hkpUserShapeHashUtil);
 #endif // HK_SHAPE_HASH_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

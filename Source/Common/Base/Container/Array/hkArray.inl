@@ -88,7 +88,7 @@ HK_FORCE_INLINE hkResult hkArrayBase<T>::_reserve(hkMemoryAllocator& alloc, int 
 template <typename T>
 HK_FORCE_INLINE void hkArrayBase<T>::clear()
 {
-	hkArrayUtil::destruct(m_data, m_size, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(m_data, m_size, typename hkTrait::IsPodType<T>::type());
 	m_size = 0;
 }
 
@@ -115,7 +115,7 @@ HK_FORCE_INLINE hkArrayBase<T>::hkArrayBase()
 }
 
 template <typename T>
-HK_FORCE_INLINE hkArrayBase<T>& hkArrayBase<T>::copyFromArray(hkMemoryAllocator& alloc, const hkArrayBase<T>& a, hkTypeIsPod)
+HK_FORCE_INLINE hkArrayBase<T>& hkArrayBase<T>::copyFromArray(hkMemoryAllocator& alloc, const hkArrayBase<T>& a, hkTrait::TypeIsPod)
 {
 	if( getCapacity() < a.getSize() )
 	{
@@ -133,16 +133,16 @@ HK_FORCE_INLINE hkArrayBase<T>& hkArrayBase<T>::copyFromArray(hkMemoryAllocator&
 }
 
 template <typename T>
-HK_FORCE_INLINE hkArrayBase<T>& hkArrayBase<T>::copyFromArray(hkMemoryAllocator& alloc, const hkArrayBase<T>& a, hkTypeIsClass)
+HK_FORCE_INLINE hkArrayBase<T>& hkArrayBase<T>::copyFromArray(hkMemoryAllocator& alloc, const hkArrayBase<T>& a, hkTrait::TypeIsClass)
 {
 	int oldSize = m_size;
 	int newSize = a.getSize();
 	int copiedSize = newSize > oldSize ? oldSize : newSize;
 
 	_reserve(alloc, newSize); // ensure space
-	hkArrayUtil::destruct(m_data + newSize, oldSize - newSize, hkTypeIsClass()); // destruct items past the size of a, if any
+	hkArrayUtil::destruct(m_data + newSize, oldSize - newSize, hkTrait::TypeIsClass()); // destruct items past the size of a, if any
 	copy(m_data, a.m_data, copiedSize); // copy objects into the 'live' part of this array
-	hkArrayUtil::constructWithArray(m_data + copiedSize, newSize - copiedSize, a.m_data + copiedSize, hkTypeIsClass()); // and construct the rest
+	hkArrayUtil::constructWithArray(m_data + copiedSize, newSize - copiedSize, a.m_data + copiedSize, hkTrait::TypeIsClass()); // and construct the rest
 	m_size = newSize;
 	return *this;
 }
@@ -160,7 +160,7 @@ HK_FORCE_INLINE hkArrayBase<T>::hkArrayBase(T* ptr, int size, int capacity)
 template <typename T>
 HK_FORCE_INLINE hkArrayBase<T>::~hkArrayBase()
 {
-	HK_ASSERT2(0x1129f768, hkIsPodType<T>::result || m_size==0, "Non-POD array elements not destructed");
+	HK_ASSERT2(0x1129f768, hkTrait::IsPodType<T>::result || m_size==0, "Non-POD array elements not destructed");
 	HK_ASSERT2(0x1129f769, m_capacityAndFlags&DONT_DEALLOCATE_FLAG, "Array memory not freed");
 }
 
@@ -170,7 +170,16 @@ HK_FORCE_INLINE void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& allo
 	clear();
 	if( (m_capacityAndFlags & DONT_DEALLOCATE_FLAG) == 0 )
 	{
-		alloc._bufFree<T>( const_cast<typename hkRemoveConst<T>::type*>(m_data), getCapacity() ); // this is needed since hkArray<const struct> is allowed
+		const int SIZE_ELEM = hkSizeOfTypeOrVoid<T>::val;
+		int numBytes = getCapacity() * SIZE_ELEM;
+		void* dataPtr = const_cast<typename hkTrait::RemoveConst<T>::type*>(m_data);
+#if defined(HK_PLATFORM_PPU)
+		if ( m_capacityAndFlags & ALLOCATED_FROM_SPU )
+		{
+			numBytes = hkMemoryRouterSpuUtil::getAllocatedSize(dataPtr, numBytes);
+		}
+#endif
+		alloc.bufFree(dataPtr, numBytes);
 	}
 	m_data = HK_NULL;
 	m_capacityAndFlags = DONT_DEALLOCATE_FLAG;
@@ -191,10 +200,9 @@ HK_FORCE_INLINE void hkArrayBase<T>::_optimizeCapacity( hkMemoryAllocator& alloc
 template <typename T>
 HK_FORCE_INLINE void hkArrayBase<T>::removeAt(int index)
 {
-
 	HK_ASSERT(0x63bab20a, index >= 0 && index < m_size);
 
-	hkArrayUtil::destruct(&m_data[index], 1, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(&m_data[index], 1, typename hkTrait::IsPodType<T>::type());
 	m_size--;
 	if( m_size != index )
 	{
@@ -207,7 +215,7 @@ HK_FORCE_INLINE void hkArrayBase<T>::removeAtAndCopy(int index)
 {
 	HK_ASSERT(0x453a6437, index >= 0 && index < m_size);
 
-	hkArrayUtil::destruct(&m_data[index], 1, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(&m_data[index], 1, typename hkTrait::IsPodType<T>::type());
 	m_size--;
 	hkMemUtil::memCpy<HK_ALIGN_OF(T)>(m_data + index, m_data + index + 1, (m_size-index)*sizeof(T));
 }
@@ -218,7 +226,7 @@ HK_FORCE_INLINE void hkArrayBase<T>::removeAtAndCopy(int index, int numToRemove)
 	HK_ASSERT(0x453a6436, numToRemove > 0);
 	HK_ASSERT(0x453a6437, index >= 0 && ((index + numToRemove) <= m_size) );
 
-	hkArrayUtil::destruct(m_data + index, numToRemove, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(m_data + index, numToRemove, typename hkTrait::IsPodType<T>::type());
 	m_size -= numToRemove;
 	hkMemUtil::memCpy<HK_ALIGN_OF(T)>(m_data + index, m_data + index + numToRemove, (m_size-index)*sizeof(T));
 }
@@ -257,7 +265,7 @@ template <typename T>
 HK_FORCE_INLINE void hkArrayBase<T>::popBack( int numToRemove )
 {
 	HK_ASSERT(0x5b57310e, m_size >= numToRemove );
-	hkArrayUtil::destruct(m_data + m_size - numToRemove, numToRemove, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(m_data + m_size - numToRemove, numToRemove, typename hkTrait::IsPodType<T>::type());
 	m_size -= numToRemove;
 }
 
@@ -269,7 +277,7 @@ HK_FORCE_INLINE void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T
 		HK_ASSERT2( 0x76e453e4, ! ( ( &t >= m_data ) && ( &t < (m_data + m_size) ) ), "hkArrayBase::pushBack can't push back element of same array during resize" );
 		hkArrayUtil::_reserveMore(alloc, this, sizeof(T));
 	}
-	hkArrayUtil::constructWithCopy<T>(m_data + m_size, 1, t, typename hkIsPodType<T>::type());
+	hkArrayUtil::constructWithCopy<T>(m_data + m_size, 1, t, typename hkTrait::IsPodType<T>::type());
 	m_size++;
 }
 
@@ -277,7 +285,7 @@ template <typename T>
 HK_FORCE_INLINE void hkArrayBase<T>::pushBackUnchecked(const T& t)
 {
 	HK_ASSERT(0x3a2b4abb, m_size < getCapacity());
-	hkArrayUtil::constructWithCopy<T>(m_data + m_size, 1, t, typename hkIsPodType<T>::type());
+	hkArrayUtil::constructWithCopy<T>(m_data + m_size, 1, t, typename hkTrait::IsPodType<T>::type());
 	m_size++;
 }
 
@@ -287,7 +295,7 @@ HK_FORCE_INLINE hkBool hkArrayBase<T>::tryPushBack(const T& t)
 {
 	if( m_size < getCapacity() )
 	{
-		hkArrayUtil::constructWithCopy(m_data + m_size, 1, t, typename hkIsPodType<T>::type());
+		hkArrayUtil::constructWithCopy(m_data + m_size, 1, t, typename hkTrait::IsPodType<T>::type());
 		m_size++;
 		return true;
 	}
@@ -301,8 +309,8 @@ template <typename T>
 HK_FORCE_INLINE void hkArrayBase<T>::_setSize(hkMemoryAllocator& alloc, int n)
 {
 	_reserve(alloc, n);
-	hkArrayUtil::destruct(m_data + n, m_size - n, typename hkIsPodType<T>::type());
-	hkArrayUtil::construct(m_data + m_size, n - m_size, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(m_data + n, m_size - n, typename hkTrait::IsPodType<T>::type());
+	hkArrayUtil::construct(m_data + m_size, n - m_size, typename hkTrait::IsPodType<T>::type());
 	m_size = n;
 }
 
@@ -310,8 +318,8 @@ template <typename T>
 HK_FORCE_INLINE void hkArrayBase<T>::_setSize(hkMemoryAllocator& alloc, int n, const T& fill)
 {
 	_reserve(alloc, n);
-	hkArrayUtil::destruct(m_data + n, m_size - n, typename hkIsPodType<T>::type());
-	hkArrayUtil::constructWithCopy(m_data + m_size, n - m_size, fill, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(m_data + n, m_size - n, typename hkTrait::IsPodType<T>::type());
+	hkArrayUtil::constructWithCopy(m_data + m_size, n - m_size, fill, typename hkTrait::IsPodType<T>::type());
 	m_size = n;
 }
 
@@ -321,8 +329,8 @@ HK_FORCE_INLINE hkResult hkArrayBase<T>::_trySetSize(hkMemoryAllocator& alloc, i
 	hkResult res = _reserve(alloc, n);
 	if (res == HK_SUCCESS)
 	{
-		hkArrayUtil::destruct(m_data + n, m_size - n, typename hkIsPodType<T>::type());
-		hkArrayUtil::construct(m_data + m_size, n - m_size, typename hkIsPodType<T>::type());
+		hkArrayUtil::destruct(m_data + n, m_size - n, typename hkTrait::IsPodType<T>::type());
+		hkArrayUtil::construct(m_data + m_size, n - m_size, typename hkTrait::IsPodType<T>::type());
 		m_size = n;
 	}
 	return res;
@@ -333,8 +341,8 @@ template <typename T>
 HK_FORCE_INLINE void hkArrayBase<T>::setSizeUnchecked(int n)
 {
 	HK_ASSERT(0x39192e68, n <= getCapacity());
-	hkArrayUtil::destruct(m_data + n, m_size - n, typename hkIsPodType<T>::type());
-	hkArrayUtil::construct(m_data + m_size, n - m_size, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(m_data + n, m_size - n, typename hkTrait::IsPodType<T>::type());
+	hkArrayUtil::construct(m_data + m_size, n - m_size, typename hkTrait::IsPodType<T>::type());
 	m_size = n;
 }
 
@@ -343,7 +351,7 @@ HK_FORCE_INLINE T* hkArrayBase<T>::_expandBy( hkMemoryAllocator& alloc, int n )
 {
 	int oldsize = m_size;
 	_reserve(alloc, m_size + n);
-	hkArrayUtil::construct(m_data + m_size, n, typename hkIsPodType<T>::type());
+	hkArrayUtil::construct(m_data + m_size, n, typename hkTrait::IsPodType<T>::type());
 	m_size += n;
 	return m_data+oldsize;
 }
@@ -355,7 +363,7 @@ HK_FORCE_INLINE T& hkArrayBase<T>::_expandOne(hkMemoryAllocator& alloc)
 	{
 		hkArrayUtil::_reserveMore( alloc, this, sizeof(T) );
 	}
-	hkArrayUtil::construct(m_data + m_size, 1, typename hkIsPodType<T>::type());
+	hkArrayUtil::construct(m_data + m_size, 1, typename hkTrait::IsPodType<T>::type());
 	return m_data[m_size++];
 }
 
@@ -365,7 +373,7 @@ HK_FORCE_INLINE T* hkArrayBase<T>::expandByUnchecked( int n )
 	HK_ASSERT(0x5b7a4705, n >= 0 && m_size+n <= getCapacity() );
 	int oldsize = m_size;
 	m_size =  oldsize + n;
-	hkArrayUtil::construct(m_data + oldsize, m_size - oldsize, typename hkIsPodType<T>::type());
+	hkArrayUtil::construct(m_data + oldsize, m_size - oldsize, typename hkTrait::IsPodType<T>::type());
 	return m_data+oldsize;
 }
 
@@ -381,9 +389,9 @@ void hkArrayBase<T>::_spliceInto(hkMemoryAllocator& alloc, int index, int numdel
 		// note double copy from [i:end] not a problem in practice
 		_reserve(alloc, newsize);
 	}
-	hkArrayUtil::destruct(m_data + index, numdel, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct(m_data + index, numdel, typename hkTrait::IsPodType<T>::type());
 	hkMemUtil::memMove(m_data + index + numtoinsert, m_data + index + numdel, numtomove*sizeof(T));
-	hkArrayUtil::constructWithArray(m_data + index, numtoinsert, p, typename hkIsPodType<T>::type());
+	hkArrayUtil::constructWithArray(m_data + index, numtoinsert, p, typename hkTrait::IsPodType<T>::type());
 	m_size = newsize;
 }
 
@@ -401,7 +409,7 @@ void hkArrayBase<T>::_append(hkMemoryAllocator& alloc, const T* a, int numtoinse
 	{
 		_reserve(alloc, newsize);
 	}
-	hkArrayUtil::constructWithArray(m_data + m_size, numtoinsert, a, typename hkIsPodType<T>::type());
+	hkArrayUtil::constructWithArray(m_data + m_size, numtoinsert, a, typename hkTrait::IsPodType<T>::type());
 	m_size = newsize;
 }
 
@@ -418,7 +426,7 @@ HK_FORCE_INLINE T* hkArrayBase<T>::_expandAt(hkMemoryAllocator& alloc, int index
 		_reserve(alloc, newsize);
 	}
 	hkMemUtil::memMove(m_data + index + numtoinsert, m_data + index, numtomove*sizeof(T));
-	hkArrayUtil::construct(m_data + index, numtoinsert, typename hkIsPodType<T>::type());
+	hkArrayUtil::construct(m_data + index, numtoinsert, typename hkTrait::IsPodType<T>::type());
 	m_size = newsize;
 	return m_data + index;
 }
@@ -448,7 +456,7 @@ HK_FORCE_INLINE void hkArrayBase<T>::removeAllAndCopy(const T& t)
 		}
 		else
 		{
-			hkArrayUtil::destruct( m_data + source, 1, typename hkIsPodType<T>::type() );
+			hkArrayUtil::destruct( m_data + source, 1, typename hkTrait::IsPodType<T>::type() );
 			--m_size;
 		}
 	}
@@ -489,7 +497,7 @@ void hkArrayBase<T>::_setDataUnchecked(T *ptr, int size, int capacityAndFlags)
 
 
 template <typename T>
-void hkArrayBase<T>::_setData(T *ptr, int size, int capacityAndFlags, hkTypeIsPod)
+void hkArrayBase<T>::_setData(T *ptr, int size, int capacityAndFlags, hkTrait::TypeIsPod)
 {
 	hkArrayBase<T>::_setDataUnchecked(ptr, size, capacityAndFlags);
 }
@@ -505,7 +513,7 @@ void hkArrayBase<T>::setDataAutoFree(T* ptr, int size, int capacity)
 {
 	HK_ASSERT(0x23483be5, size >= 0 );
 	HK_ASSERT(0x23483be5, size <= capacity);
-	hkArrayBase<T>::_setData(ptr, size, capacity, typename hkIsPodType<T>::type());
+	hkArrayBase<T>::_setData(ptr, size, capacity, typename hkTrait::IsPodType<T>::type());
 }
 
 template <typename T>
@@ -513,7 +521,7 @@ void hkArrayBase<T>::setDataUserFree(T* ptr, int size, int capacity)
 {
 	HK_ASSERT(0x23483be5, size >= 0 );
 	HK_ASSERT(0x23483be5, size <= capacity);
-	hkArrayBase<T>::_setData(ptr, size, capacity | DONT_DEALLOCATE_FLAG, typename hkIsPodType<typename hkRemoveConst<T>::type>::type());
+	hkArrayBase<T>::_setData(ptr, size, capacity | DONT_DEALLOCATE_FLAG, typename hkTrait::IsPodType<typename hkTrait::RemoveConst<T>::type>::type());
 }
 
 //
@@ -535,7 +543,7 @@ HK_FORCE_INLINE hkArray<T,Allocator>::hkArray(int n)
 	T* p = n ? a._bufAlloc<T>(n) : HK_NULL;
 	int cap = n ? n : hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
 	hkArrayBase<T>::_setDataUnchecked( p, size, cap);
-	hkArrayUtil::construct( p, size, typename hkIsPodType<T>::type());
+	hkArrayUtil::construct( p, size, typename hkTrait::IsPodType<T>::type());
 }
 
 template <typename T, typename Allocator>
@@ -547,7 +555,7 @@ HK_FORCE_INLINE hkArray<T,Allocator>::hkArray(int n, const T& t)
 	T* p = n ? a._bufAlloc<T>(n) : HK_NULL;
 	int cap = n ? n : hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
 	hkArrayBase<T>::_setDataUnchecked( p, size, cap);
-	hkArrayUtil::constructWithCopy( p, size, t, typename hkIsPodType<T>::type());
+	hkArrayUtil::constructWithCopy( p, size, t, typename hkTrait::IsPodType<T>::type());
 }
 
 template <typename T, typename Allocator>
@@ -560,20 +568,20 @@ HK_FORCE_INLINE hkArray<T,Allocator>::hkArray(const hkArray<T,Allocator>& arr)
 	T* p = n ? a._bufAlloc<T>(n) : HK_NULL;
 	int cap = n ? n : hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
 	hkArrayBase<T>::_setDataUnchecked( p, size, cap);
-	hkArrayUtil::constructWithArray( p, size, arr.m_data, typename hkIsPodType<T>::type());
+	hkArrayUtil::constructWithArray( p, size, arr.m_data, typename hkTrait::IsPodType<T>::type());
 }
 
 template <typename T, typename Allocator>
 HK_FORCE_INLINE hkArray<T, Allocator>& hkArray<T, Allocator>::operator= (const hkArrayBase<T>& a)
 {
-	hkArrayBase<T>::copyFromArray(Allocator().get(this), a, typename hkIsPodType<T>::type());
+	hkArrayBase<T>::copyFromArray(Allocator().get(this), a, typename hkTrait::IsPodType<T>::type());
 	return *this;
 }
 
 template <typename T, typename Allocator>
 HK_FORCE_INLINE hkArray<T, Allocator>& hkArray<T, Allocator>::operator= (const hkArray<T,Allocator>& a)
 {
-	hkArrayBase<T>::copyFromArray(Allocator().get(this), a, typename hkIsPodType<T>::type());
+	hkArrayBase<T>::copyFromArray(Allocator().get(this), a, typename hkTrait::IsPodType<T>::type());
 	return *this;
 }
 
@@ -689,7 +697,7 @@ int hkInplaceArrayAligned16<T,N>::stillInplaceUsingMask() const
 #undef HK_COMPUTE_OPTIMIZED_CAPACITY
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

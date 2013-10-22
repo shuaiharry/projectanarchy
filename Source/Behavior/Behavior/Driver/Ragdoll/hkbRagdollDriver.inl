@@ -45,26 +45,28 @@ HK_FORCE_INLINE const hkQsTransform* hkbRagdollDriver::getRagdollPoseWS()
 	return m_ragdollPoseWS;	
 }
 
-HK_FORCE_INLINE void hkbRagdollDriver::extractRagdollPose(	const hkbContext& context,
+HK_FORCE_INLINE void hkbRagdollDriver::extractRagdollPose(
+	const hkbContext& context,
 	hkbGeneratorOutput& inOut,
 	bool computeWorldFromModel,
 	int poseMatchingBone0,
 	int poseMatchingBone1,
 	int poseMatchingBone2 )
 {
-	extractRagdollPoseInternal( context, 
-								inOut, 
-								0.0f, 
-								0.0f, 
-								false,
-								computeWorldFromModel, 
-								poseMatchingBone0, 
-								poseMatchingBone1, 
-								poseMatchingBone2 );
+	extractRagdollPoseInternal(
+		context, 
+		inOut, 
+		0.0f, 
+		0.0f, 
+		false,
+		computeWorldFromModel, 
+		poseMatchingBone0, 
+		poseMatchingBone1, 
+		poseMatchingBone2 );
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

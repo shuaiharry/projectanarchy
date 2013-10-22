@@ -58,10 +58,21 @@ namespace hkSerializeUtil
 
 		};
 
-		void set( ErrorID i, const char* msg ) { id = i; defaultMessage = msg; }
-			/// Error id. Default is ErrorDetails::ERROR_NOT_FOUND.
+			/// Logs an error inside the ErrorDetails.
+			/// This function will not override the current error ID if it isn't ERRORID_NONE.
+			/// The first error raised (the lowest level one) is always going to be the more interesting one.
+		void raiseError( ErrorID i, const char* msg ) 
+		{
+			if(id == ERRORID_NONE)
+			{
+				id = i; 
+				defaultMessage = msg; 
+			}
+		}
+
+			/// Error id. Default is ErrorDetails::ERRORID_NONE.
 		hkEnum<ErrorID, hkInt32> id;
-			/// Detailed error message, if error id is not ErrorDetails::ERROR_NOT_FOUND.
+			/// Detailed error message, if error id is not ErrorDetails::ERRORID_NONE.
 		hkStringPtr defaultMessage;
 	};
 
@@ -204,15 +215,6 @@ namespace hkSerializeUtil
 		/// a value for userListener.
 	hkResult HK_CALL saveTagfile( const void* object, const hkClass& klass, hkStreamWriter* writer, hkPackfileWriter::AddObjectListener* userListener=HK_NULL, SaveOptions options=SAVE_DEFAULT );
 
-		/// Save a given data object in tagfile form using provided writer.
-		/// Returns HK_SUCCESS if successful.
-		/// Note that the text format (binary==false) is only for debugging and cannot be loaded.
-	hkResult HK_CALL saveTagfile( const hkDataObject& object, hkStreamWriter* writer, SaveOptions options=SAVE_DEFAULT );
-
-		/// Save with the default options in the default file format (currently tagfile)
-	hkResult HK_CALL save( const hkDataObject& object, hkStreamWriter* writer, SaveOptions options=SAVE_DEFAULT );
-
-		/// Save with the default options in the default file format (currently tagfile)
 	hkResult HK_CALL save( const void* object, const hkClass& klass, hkStreamWriter* writer, SaveOptions options=SAVE_DEFAULT );
 
 		/// Shortcut to save an object with out having to specify the hkClass.
@@ -241,6 +243,7 @@ namespace hkSerializeUtil
 		/// Information returned by detectFormat.
 	struct FormatDetails
 	{
+
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(0, FormatDetails);
 			/// The type of the file
 		hkEnum<FormatType,hkInt32> m_formatType;
@@ -252,12 +255,14 @@ namespace hkSerializeUtil
 		hkStructureLayout::LayoutRules m_layoutRules;
 	};
 
+
 		/// Detect the type of a packfile stream.
-	hkEnum<FormatType,hkInt32> HK_CALL detectFormat( hkStreamReader* reader );
+	hkEnum<FormatType,hkInt32> HK_CALL detectFormat( hkStreamReader* reader, ErrorDetails* errorOut=HK_NULL );
 
 		/// Extract some information from the file header.
 		/// See FormatDetails for the available information.
-	void HK_CALL detectFormat( hkStreamReader* reader, FormatDetails& detailsOut );
+	void HK_CALL detectFormat(const char* filename, FormatDetails& detailsOut, ErrorDetails* errorOut=HK_NULL);
+	void HK_CALL detectFormat( hkStreamReader* reader, FormatDetails& detailsOut, ErrorDetails* errorOut=HK_NULL );
 
 		/// Is the stream a tagfile, XML packfile or binary packfile for the current platform?
 	hkBool32 HK_CALL isLoadable(hkStreamReader* sr);
@@ -268,7 +273,7 @@ namespace hkSerializeUtil
 #endif // HK_SERIALIZE_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

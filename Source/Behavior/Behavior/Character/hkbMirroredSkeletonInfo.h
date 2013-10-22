@@ -28,7 +28,7 @@ class hkbMirroredSkeletonInfo : public hkReferencedObject
 		hkVector4 m_mirrorAxis; //+default(1,0,0,0)+hkb.RoleAttribute("ROLE_DEFAULT","FLAG_NORMALIZED")
 
 		/// The paired bones (the array index is a bone index and the value is the mapped bone index).
-		hkArray<hkInt16> m_bonePairMap; //+hkb.RoleAttribute("ROLE_BONE_INDEX_MAP")
+		hkArray<hkInt16> m_bonePairMap;
 
 		/// The paired partitions (the array index is a partition index and the value is the mapped partition index).
 		hkArray<hkInt16> m_partitionPairMap;
@@ -45,7 +45,7 @@ class hkbMirroredSkeletonInfo : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

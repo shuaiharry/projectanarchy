@@ -93,13 +93,15 @@ class hkbTwistModifier : public hkbModifier
 
 			/// Index of the first bone in the chain.  This bone must be closer to the root than endBoneIndex.
 		hkInt16 m_startBoneIndex;	//+default(-1)
-									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
+									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
 									//+hk.Description("The first bone in the chain.  This bone must be closer to the root than endBoneIndex.")
+									//+hk.Ui(group="Twist Bones")
 
 			/// Index of the last bone in the chain.  This bone must be farther from the root than startBoneIndex.
 		hkInt16 m_endBoneIndex; //+default(-1)
-								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
+								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
 								//+hk.Description("The last bone in the chain.  This bone must be farther from the root than startBoneIndex.")
+								//+hk.Ui(group="Twist Bones")
 
 			/// Twist angle per bone increased via LINEAR or RAMPED method.
 		hkEnum< SetAngleMethod, hkInt8 > m_setAngleMethod;	//+default(0)
@@ -138,7 +140,7 @@ class hkbTwistModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

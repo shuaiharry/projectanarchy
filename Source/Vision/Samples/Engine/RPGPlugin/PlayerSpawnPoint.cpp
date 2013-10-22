@@ -38,6 +38,11 @@ void RPG_PlayerSpawnPoint::Initialize()
     Vision::Editor.SetVariableInEditor(this, "ObjectKey", s_playerSpawnKey, false, false);
 #endif	
   }
+}
+
+void RPG_PlayerSpawnPoint::PostInitialize()
+{
+  RPG_SpawnPoint::PostInitialize();
 
   if(!Vision::Editor.IsPlayingTheGame() && 
      RPG_GameManager::s_instance.GetLevelInfo() &&
@@ -48,13 +53,8 @@ void RPG_PlayerSpawnPoint::Initialize()
   }
 }
 
-void RPG_PlayerSpawnPoint::PostInitialize()
-{
-  RPG_SpawnPoint::PostInitialize();
-}
-
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -16,6 +16,11 @@ HK_FORCE_INLINE hkInt32 hkaReferencePoseAnimation::getNumFloatSlots() const
 	return m_skeleton->m_floatSlots.getSize();
 }
 
+HK_FORCE_INLINE int hkaReferencePoseAnimation::getSizeInBytes() const
+{
+	return sizeof( hkaReferencePoseAnimation );
+}
+
 HK_FORCE_INLINE int hkaReferencePoseAnimation::getNumOriginalFrames() const
 {
 	// Reference pose always only has one frame
@@ -38,7 +43,7 @@ HK_FORCE_INLINE void hkaReferencePoseAnimation::setSkeleton( const hkaSkeleton* 
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

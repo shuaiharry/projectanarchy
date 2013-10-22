@@ -27,7 +27,7 @@ class hkpConvexVerticesConnectivity;
 	/// required for certain algorithms, but not for most use cases.
 class hkpConvexVerticesShape : public hkpConvexShape
 {
-	//+version(4)
+	//+version(6)
 
 	public:
 
@@ -166,7 +166,7 @@ class hkpConvexVerticesShape : public hkpConvexShape
 		hkVector4 m_aabbCenter;
 
 			/// The vertices, packed in a transposed format
-		hkArray<hkFourTransposedPoints> m_rotatedVertices;
+		hkArray<hkFourTransposedPoints> m_rotatedVertices; //+overridetype(hkArray<hkMatrix3>)
 		hkInt32 m_numVertices;
 
 			// Internal flag indicating whether the vertices reside in SPU memory.
@@ -186,7 +186,7 @@ class hkpConvexVerticesShape : public hkpConvexShape
 #endif // HKP_CONVEX_VERTICES_SHAPE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

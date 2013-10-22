@@ -130,6 +130,7 @@ VString VSceneLoader::s_sLastLoadedScene;
 VSceneLoader::VSceneLoader() 
   : m_bUsePrewarming(false)
   , m_bInterleavedLoading(false)
+  , m_bLoadTimeStepSettings(true)
   , m_iNextPrewarmIndexStaticGeometry(0)
   , m_iNextPrewarmIndexEntities(0)
 #ifdef _VR_GLES2
@@ -212,6 +213,7 @@ bool VSceneLoader::LoadScene(const char *szFilename, int iLoadingFlags)
   m_bForceMobileMode = (iLoadingFlags & LF_ForceMobileMode) != 0;
   m_bUsePrewarming = (iLoadingFlags & LF_UsePrewarming) != 0;
   m_bInterleavedLoading = (iLoadingFlags & LF_UseInterleavedLoading) != 0;
+  m_bLoadTimeStepSettings = (iLoadingFlags & LF_LoadTimeStepSettings) != 0;
 
   if (iLoadingFlags & LF_UseStreamingIfExists)
   {
@@ -786,7 +788,6 @@ bool VSceneLoader::ReadShapeChunk()
    
   // remove renderer node so that no renderer node is set during de-serialization
   Vision::Renderer.SetRendererNode(0, NULL);
-  Vision::Renderer.SetGlobalAmbientColor(hkvVec4::ZeroVector ());
 
   IVRendererNode *pRenderer = NULL;
   if (m_iSceneVersion>=SCENE_FILE_VERSION10)
@@ -837,9 +838,93 @@ bool VSceneLoader::ReadShapeChunk()
     
   }
 
+  // #18: DefaultGlobalAmbientColor
+  if (m_iSceneVersion >= SCENE_FILE_VERSION18)
+  {
+    hkvVec4 vDefaultGlobalAmbientColor;
+    ar >> vDefaultGlobalAmbientColor;
+    Vision::Renderer.SetDefaultGlobalAmbientColor(vDefaultGlobalAmbientColor);
+  }
+
   // #15: Serialize global LOD Hysteresis settings
   if (m_iSceneVersion>=SCENE_FILE_VERSION15)
     VLODHysteresisManager::SerializeX(ar);
+
+  // #16: Serialize coordinate system settings
+  if (m_iSceneVersion>=SCENE_FILE_VERSION19)
+  {
+    IVProjection *pProj;
+    //pProj = (IVProjection *)IVProjection::DeSerializeObjectReference(ar);
+    ar >> pProj;
+
+    //this is a work around, the reference point is stored in the v3d chunk which is *always* deserialized into a default coordinate system
+    //before the shape chunk... but the projection is in the shape chunk
+    //so we read the current reference position if any and pass it onto the new coordinate system (if any)
+    hkvVec3d currentReferencePoint = hkvVec3d::ZeroVector();
+
+    if( Vision::World.GetCoordinateSystem() )
+    {
+      Vision::World.GetCoordinateSystem()->GetSceneReferencePosition(currentReferencePoint);
+    }
+
+    if (pProj)
+    {
+      Vision::World.SetCoordinateSystem(pProj->CreateCoordinateSystem());
+    }
+    else
+    {
+      Vision::World.SetCoordinateSystem(new VisDefaultCoordinateSystem());
+    }
+
+    Vision::World.GetCoordinateSystem()->SetSceneReferencePosition(currentReferencePoint);
+  }
+
+  // #17: Update Scene Controller
+  if (m_iSceneVersion >= SCENE_FILE_VERSION17 && (m_eExportFlags & VExport_TimeStepping) != 0)
+  {
+    // Scene Update Controller
+    IVisUpdateSceneController_cl* pUpdateSceneController = NULL;
+    ar.ReadObject(pUpdateSceneController);
+    if (m_bLoadTimeStepSettings)
+    {
+      Vision::GetApplication()->SetSceneUpdateController(pUpdateSceneController);
+    }
+    else
+    {
+      V_SAFE_DELETE(pUpdateSceneController);
+    }
+    VASSERT_MSG(pUpdateSceneController == NULL, 
+      "Fixed Time Stepping Import from vscene is not supported right now. Please re-export the scene");
+
+    // Timer
+    const float fCurrentTime = Vision::GetTimer()->GetTime();
+
+    IVTimer* pTimer = NULL;
+    ar.ReadObject(pTimer);
+    if (m_bLoadTimeStepSettings)
+    {
+      Vision::SetTimer(pTimer);
+      Vision::GetTimer()->SetTime(fCurrentTime); // Make sure time is the same.
+    }
+    else
+    {
+      V_SAFE_DELETE(pTimer);
+    }
+    VASSERT_MSG(pTimer == NULL, 
+      "Fixed Time Stepping Import from vscene is not supported right now. Please re-export the scene");
+
+    // Physics time step
+    int iPhysicsTicksPerSecond, iPhysicsMaxTicksPerFrame;
+    ar >> iPhysicsTicksPerSecond;
+    ar >> iPhysicsMaxTicksPerFrame;
+
+    IVisPhysicsModule_cl* pPhysicsModule = Vision::GetApplication()->GetPhysicsModule();
+    if (m_bLoadTimeStepSettings && pPhysicsModule != NULL && 
+      iPhysicsTicksPerSecond != -1 && iPhysicsMaxTicksPerFrame != -1)
+    {
+      pPhysicsModule->SetPhysicsTickCount(iPhysicsTicksPerSecond, iPhysicsMaxTicksPerFrame);
+    }
+  }
 
   // now read all other shapes
   int iObjCount = 0;
@@ -1025,8 +1110,11 @@ bool VSceneLoader::ReadFogChunk()
     ReadFloat(fog.fHeightFogEnd);
     Readbool(fog.bHeightFogAddScattering);
 
-    if(iVersion > VSCENE_FOG_VERSION_1)
+    if (iVersion > VSCENE_FOG_VERSION_1)
       Readbool(fog.bMaskSky);
+
+    if (iVersion > VSCENE_FOG_VERSION_2)
+      ReadFloat(fog.fVirtualSkyDepth);
 
     if (IsInErrorState())
       return false;
@@ -1053,10 +1141,6 @@ bool VSceneLoader::ReadV3DChunk()
   if (m_iSceneVersion>=SCENE_FILE_VERSION4)
     ReadInt(iVers); 
 
-  hkvVec3d worldCoordinateReference(0,0,0);
-  if (iVers>=6)
-    Read(worldCoordinateReference.data,sizeof(double)*3,"qqq"); // version 6
-
   // Moved here from VIEW chunk
   if(m_iSceneVersion >= SCENE_FILE_VERSION16)
   {
@@ -1067,6 +1151,12 @@ bool VSceneLoader::ReadV3DChunk()
       m_fUnitScaling=1.f; // default	
 
       Vision::World.SetGlobalUnitScaling(m_fUnitScaling);
+  }
+
+  hkvVec3d worldCoordinateReference(0,0,0);
+  if (iVers>=6)
+  {
+    Read(worldCoordinateReference.data,sizeof(double)*3,"qqq"); // version 6
   }
 
 
@@ -1100,15 +1190,8 @@ bool VSceneLoader::ReadV3DChunk()
     eSRGBMode = (VSRGBMode)iMode;
   }
 
-  IVisApp_cl *pApp = Vision::GetApplication();
-  IVisSceneManager_cl *pSceneManager = Vision::GetSceneManager();
-
   // load world+lightgrid only makes the first 20%
   LOADINGPROGRESS.PushRange(0.f,15.f);
-  
-//   int iFlags = LOADWORLDFLAGS_STANDARD|LOADWORLDFLAGS_NO_VISIBILITY;
-//   Vision::World.L oadWorldEx(szV3DFilename[0] ? szV3DFilename:NULL, iFlags); // NULL loads an empty map
-//   VASSERT(szV3DFilename[0] || pSceneManager->GetNumVisibilityZones() == 0);
 
   // Make sure this is off for normal scene loading behavior
   bool bPrevSetting = Vision::Renderer.GetCreateVisibilityForEmptyWorld();
@@ -1314,15 +1397,19 @@ BOOL VSceneLoader::OnStartChunk(CHUNKIDTYPE chunkID, int iChunkLen)
   // parse scene elements
   if (chunkID=='_V3D')
     return ReadV3DChunk();
+
   if (chunkID=='_SKY')
   {
     Vision::Message.Add("Warning: Please re-export scene due to sky changes");
     return TRUE; //VisSky_cl::SerializeSkyConfig(*this);  DEPRECATED, now in shapes chunk
   }
+
   if (chunkID=='VIEW')
     return ReadViewChunk();
+
   if (chunkID=='_FOG')
     return ReadFogChunk();
+
   if (chunkID=='EMBD')
     return ReadEmbeddedFileChunk();
 
@@ -1392,7 +1479,7 @@ close_and_return:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

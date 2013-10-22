@@ -85,12 +85,23 @@ HKV_FORCE_INLINE void hkvBoundingSphere::expandToInclude (const hkvBoundingSpher
 
 HKV_FORCE_INLINE void hkvBoundingSphere::expandToInclude (const hkvAlignedBBox& rhs)
 {
-  // TODO (Jan, Christopher): More efficient check
+  // compute the min and max extends of the AABB relative to the sphere (sphere center is the new origin)
+  const hkvVec3 vDiffMax = rhs.m_vMax - m_vCenter;
+  const hkvVec3 vDiffMin = rhs.m_vMin - m_vCenter;
 
-  hkvVec3 vCorners[8];
-  rhs.getCorners (vCorners);
+  // compute the absolute distance to each AABB extrema, per axis
+  const hkvVec3 vDiffMaxAbs(hkvMath::Abs(vDiffMax.x), hkvMath::Abs(vDiffMax.y), hkvMath::Abs(vDiffMax.z));
+  const hkvVec3 vDiffMinAbs(hkvMath::Abs(vDiffMin.x), hkvMath::Abs(vDiffMin.y), hkvMath::Abs(vDiffMin.z));
 
-  expandToInclude (vCorners, 8);
+  // take the maximum distance for each axis, to compute the point that is the farthest away from the sphere
+  hkvVec3 vMostDistantPoint;
+  vMostDistantPoint.setMax(vDiffMinAbs, vDiffMaxAbs);
+
+  const float fLenSQR = vMostDistantPoint.getLengthSquared();
+  if (fLenSQR > m_fRadius * m_fRadius)
+    m_fRadius = hkvMath::sqrt(fLenSQR);
+
+
 }
 
 HKV_FORCE_INLINE void hkvBoundingSphere::transformFromOrigin (const hkvMat4& mTransform)
@@ -196,12 +207,21 @@ HKV_FORCE_INLINE bool hkvBoundingSphere::contains (const hkvVec3* HKV_RESTRICT p
 
 HKV_FORCE_INLINE bool hkvBoundingSphere::contains (const hkvAlignedBBox& rhs) const
 {
-  // TODO (Jan, Christopher): More efficient check
+  // compute the min and max extends of the AABB relative to the sphere (sphere center is the new origin)
+  const hkvVec3 vDiffMax = rhs.m_vMax - m_vCenter;
+  const hkvVec3 vDiffMin = rhs.m_vMin - m_vCenter;
 
-  hkvVec3 vCorners[8];
-  rhs.getCorners (vCorners);
+  // compute the absolute distance to each AABB extrema, per axis
+  const hkvVec3 vDiffMaxAbs(hkvMath::Abs(vDiffMax.x), hkvMath::Abs(vDiffMax.y), hkvMath::Abs(vDiffMax.z));
+  const hkvVec3 vDiffMinAbs(hkvMath::Abs(vDiffMin.x), hkvMath::Abs(vDiffMin.y), hkvMath::Abs(vDiffMin.z));
 
-  return contains (vCorners, 8);
+  // take the maximum distance for each axis, to compute the point that is the farthest away from the sphere
+  hkvVec3 vMostDistantPoint;
+  vMostDistantPoint.setMax(vDiffMinAbs, vDiffMaxAbs);
+
+  // if the squared length of that point is still smaller than the sphere radius, it is inside the sphere
+  // and thus the whole AABB is inside the sphere
+  return vMostDistantPoint.getLengthSquared() <= m_fRadius * m_fRadius;
 }
 
 HKV_FORCE_INLINE bool hkvBoundingSphere::contains (const hkvBoundingSphere& rhs) const
@@ -334,7 +354,7 @@ HKV_FORCE_INLINE bool operator!= (const hkvBoundingSphere& lhs, const hkvBoundin
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

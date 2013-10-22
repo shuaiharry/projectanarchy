@@ -17,7 +17,7 @@ class hkaiDirectedGraphInstance : public hkReferencedObject
 {
 public:
 	//+vtable(true)
-	//+version(0)
+	//+version(1)
 	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_ASTAR);
 	HK_DECLARE_REFLECTION();
 
@@ -26,6 +26,8 @@ public:
 	typedef hkaiDirectedGraphExplicitCost::EdgeIndex EdgeIndex;
 	typedef hkaiDirectedGraphExplicitCost::NodeIndex NodeIndex;
 	typedef hkaiDirectedGraphExplicitCost::EdgeCost EdgeCost;
+	typedef hkaiDirectedGraphExplicitCost::EdgeData EdgeData;
+	typedef hkaiDirectedGraphExplicitCost::Node Node;
 	typedef hkaiDirectedGraphExplicitCost::Edge Edge;
 
 	hkaiDirectedGraphInstance();
@@ -49,10 +51,19 @@ public:
 	HK_FORCE_INLINE void getPosition(NodeIndex pid, hkVector4& posOut) const;
 	HK_FORCE_INLINE void getLocalPosition(NodeIndex pid, hkVector4& posOut) const;
 
+#ifndef HK_PLATFORM_SPU
+	inline const hkaiDirectedGraphExplicitCost::NodeData* getNodeDataPtr( NodeIndex nIdx ) const;
+	inline const hkaiDirectedGraphExplicitCost::EdgeData* getEdgeDataPtr( EdgeIndex eIdx ) const;
+	HK_FORCE_INLINE int getEdgeDataStriding( ) const { return m_edgeDataStriding; }
+	HK_FORCE_INLINE int getNodeDataStriding( ) const { return m_nodeDataStriding; }
+#endif
+
 	HK_FORCE_INLINE const hkTransform& getTransform() const;
 	HK_FORCE_INLINE void setTransform( const hkTransform& t);
 
 	HK_FORCE_INLINE hkaiPackedKey getOppositeNodeKeyForEdge( const hkaiDirectedGraphExplicitCost::Edge& edge ) const;
+	HK_FORCE_INLINE hkaiPackedKey getOppositeNodeKeyForEdge( const hkaiDirectedGraphExplicitCost::EdgeIndex eIdx) const;
+
 
 	HK_FORCE_INLINE void getInstancedNode( NodeIndex n, hkaiDirectedGraphExplicitCost::Node& node ) const;
 	HK_FORCE_INLINE hkaiDirectedGraphExplicitCost::Node& getWritableInstancedNode( NodeIndex n );
@@ -60,6 +71,7 @@ public:
 
 		/// Returns a pointer to the node, or HK_NULL if it was not previously instanced
 	HK_FORCE_INLINE hkaiDirectedGraphExplicitCost::Node* getInstancedNodePtr( NodeIndex n );
+	HK_FORCE_INLINE const hkaiDirectedGraphExplicitCost::Node* getInstancedNodePtr( NodeIndex n ) const;
 
 		/// Get the unique section ID for this graph instance.
 	HK_FORCE_INLINE hkaiSectionUid getSectionUid() const;
@@ -72,6 +84,17 @@ public:
 
 	void validate() const;
 
+		/// Updates cached pointers (e.g. if node/edge striding changes)
+	void updateInternalPointers( );
+
+	//
+	// Read-only accessors to the arrays
+	//
+	const hkArray<int>& getNodeMap() const { return m_nodeMap; }
+	const hkArray<Node>& getInstanceNodes() const { return m_instancedNodes; }
+	const hkArray<Edge>& getOwnedEdges() const {return m_ownedEdges; }
+	const hkArray<EdgeData>& getOwnedEdgeData() const { return m_ownedEdgeData; }
+	const hkArray<int>& getUserEdgeCount() const { return m_userEdgeCount; }
 
 #ifndef HK_PLATFORM_SPU
 
@@ -86,7 +109,7 @@ private:
 
 	inline void setOriginalPointers( const hkaiDirectedGraphExplicitCost* graph);
 
-	hkaiDirectedGraphExplicitCost::Edge* addEdgeForNode( NodeIndex n );
+	hkaiDirectedGraphExplicitCost::Edge* addEdgeForNode( NodeIndex n, hkaiDirectedGraphExplicitCost::EdgeData** edgeDataPtrOut = HK_NULL );
 	void removeOwnedEdgeForNode( NodeIndex n, EdgeIndex e );
 		/// Returns the start index of the new block.
 	hkaiDirectedGraphExplicitCost::EdgeIndex expandEdgesBy(int n );
@@ -95,7 +118,7 @@ private:
 	void addFreeBlock( EdgeIndex blockStart, int blockSize );
 	EdgeIndex findFreeBlock( int blockSize );
 
-	friend class hkaiHierarchyUtils;
+	friend class hkaiGraphUtils;
 	friend class hkaiStreamingManager;
 	friend class hkaiStreamingCollection;
 #endif
@@ -106,14 +129,20 @@ protected:
 	// Pointers to the original graph data, and their respective sizes.
 	//
 
-	const hkaiDirectedGraphExplicitCost::Node*	m_originalNodes;		//+nosave
-	int											m_numOriginalNodes;		//+nosave
+	const hkaiDirectedGraphExplicitCost::Node*		m_originalNodes;		//+nosave
+	int												m_numOriginalNodes;		//+nosave
 
-	const hkaiDirectedGraphExplicitCost::Edge*	m_originalEdges;		//+nosave
-	int											m_numOriginalEdges;		//+nosave
+	const hkaiDirectedGraphExplicitCost::Edge*		m_originalEdges;		//+nosave
+	int												m_numOriginalEdges;		//+nosave
 
-	const hkVector4*							m_originalPositions;	//+nosave
+	const hkVector4*								m_originalPositions;	//+nosave
 	// Note that numOriginalPositions is the same m_numOriginalNodes 
+
+	const hkaiDirectedGraphExplicitCost::NodeData*	m_originalNodeData;		//+nosave
+	int												m_nodeDataStriding;		//+nosave
+
+	const hkaiDirectedGraphExplicitCost::EdgeData*	m_originalEdgeData;		//+nosave
+	int												m_edgeDataStriding;		//+nosave
 
 		/// Unique section ID of this graph.
 	hkaiSectionUid m_sectionUid; //+default( HKAI_INVALID_SECTION_UID );
@@ -126,6 +155,10 @@ protected:
 	hkArray<int>									m_nodeMap;
 	hkArray<hkaiDirectedGraphExplicitCost::Node>	m_instancedNodes;
 	hkArray<hkaiDirectedGraphExplicitCost::Edge>	m_ownedEdges;
+
+		/// User data for owned edges.
+		/// Same size as m_ownedEdges.
+	hkArray<hkaiDirectedGraphExplicitCost::EdgeData> m_ownedEdgeData;
 
 		/// The "reference count" for graph edges which correspond to user edges in the nav mesh.
 		/// Same size as m_ownedEdges.
@@ -172,24 +205,10 @@ struct hkaiSpuDirectedGraphAccessor
 	typedef hkaiDirectedGraphExplicitCost::Edge Edge;
 	typedef hkaiDirectedGraphExplicitCost::EdgeIndex EdgeIndex;
 	typedef hkaiDirectedGraphExplicitCost::NodeIndex NodeIndex;
+	typedef hkaiDirectedGraphExplicitCost::PaddedNode PaddedNode;
 	typedef hkVector4 Position;
 
 	HK_FORCE_INLINE hkaiSpuDirectedGraphAccessor();
-
-	/// same as hkaiDirectedGraphExplicitCost::Node, but with padded members. Only used on SPU.
-	struct PaddedNode
-	{
-		hkPadSpu<int> m_startEdgeIndex;
-		hkPadSpu<int> m_numEdges;
-
-		PaddedNode() {}
-
-		PaddedNode(const hkaiDirectedGraphExplicitCost::Node& unpadded)
-		{
-			m_startEdgeIndex = unpadded.m_startEdgeIndex;
-			m_numEdges       = unpadded.m_numEdges;
-		}
-	};
 
 	void init(const hkaiDirectedGraphInstance* mainMemGraph);
 	void setSection( /*const hkaiStreamingCollection::InstanceInfo* */ const void* infoMainMem, hkaiRuntimeIndex sectionId );
@@ -242,7 +261,7 @@ typedef hkaiDirectedGraphInstance hkaiDirectedGraphAccessor;
 #endif // HKAI_DIRECTED_GRAPH_INSTANCE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

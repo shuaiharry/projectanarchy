@@ -433,7 +433,7 @@ public:
   /// 
   /// \return
   ///   Nothing.
-  void SetSkeleton(VisSkeleton_cl* pSkeleton);
+  VISION_APIFUNC void SetSkeleton(VisSkeleton_cl* pSkeleton);
 
 
   inline hkvVec4* GetTranslationListPtr() const { return m_pTranslationList; }
@@ -484,7 +484,7 @@ private:
   bool *m_bpScalingValidList;                 ///< tells for every bone if there is a scaling factor
 
   hkvVec4* m_pTranslationList;                ///< one translation per bone
-  hkvQuat *m_pRotationList;          ///< one rotation per bone
+  hkvQuat *m_pRotationList;                   ///< one rotation per bone
   hkvVec4* m_pScalingList;                    ///< one scale per bone   //TODO hkvVec3 instead?
 
   hkvMat4*  m_pCachedTransforms;              ///<Cached transforms if we have a skinnig result with scaling
@@ -509,7 +509,7 @@ private:
 #endif //VIS_ANIM_RESULT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

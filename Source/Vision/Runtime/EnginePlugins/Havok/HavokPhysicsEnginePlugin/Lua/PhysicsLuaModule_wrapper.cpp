@@ -1639,25 +1639,24 @@ SWIG_Lua_dostring(lua_State *L, const char* str) {
 #define SWIGTYPE_p___int64 swig_types[5]
 #define SWIGTYPE_p_char swig_types[6]
 #define SWIGTYPE_p_float swig_types[7]
-#define SWIGTYPE_p_hkReal swig_types[8]
-#define SWIGTYPE_p_hkvVec3 swig_types[9]
-#define SWIGTYPE_p_int swig_types[10]
-#define SWIGTYPE_p_long swig_types[11]
-#define SWIGTYPE_p_p_char swig_types[12]
-#define SWIGTYPE_p_p_unsigned_long swig_types[13]
-#define SWIGTYPE_p_short swig_types[14]
-#define SWIGTYPE_p_signed___int64 swig_types[15]
-#define SWIGTYPE_p_signed_char swig_types[16]
-#define SWIGTYPE_p_unsigned___int64 swig_types[17]
-#define SWIGTYPE_p_unsigned_char swig_types[18]
-#define SWIGTYPE_p_unsigned_int swig_types[19]
-#define SWIGTYPE_p_unsigned_long swig_types[20]
-#define SWIGTYPE_p_unsigned_short swig_types[21]
-#define SWIGTYPE_p_vHavokCharacterController swig_types[22]
-#define SWIGTYPE_p_vHavokRagdoll swig_types[23]
-#define SWIGTYPE_p_vHavokRigidBody swig_types[24]
-static swig_type_info *swig_types[26];
-static swig_module_info swig_module = {swig_types, 25, 0, 0, 0, 0};
+#define SWIGTYPE_p_hkvVec3 swig_types[8]
+#define SWIGTYPE_p_int swig_types[9]
+#define SWIGTYPE_p_long swig_types[10]
+#define SWIGTYPE_p_p_char swig_types[11]
+#define SWIGTYPE_p_p_unsigned_long swig_types[12]
+#define SWIGTYPE_p_short swig_types[13]
+#define SWIGTYPE_p_signed___int64 swig_types[14]
+#define SWIGTYPE_p_signed_char swig_types[15]
+#define SWIGTYPE_p_unsigned___int64 swig_types[16]
+#define SWIGTYPE_p_unsigned_char swig_types[17]
+#define SWIGTYPE_p_unsigned_int swig_types[18]
+#define SWIGTYPE_p_unsigned_long swig_types[19]
+#define SWIGTYPE_p_unsigned_short swig_types[20]
+#define SWIGTYPE_p_vHavokCharacterController swig_types[21]
+#define SWIGTYPE_p_vHavokRagdoll swig_types[22]
+#define SWIGTYPE_p_vHavokRigidBody swig_types[23]
+static swig_type_info *swig_types[25];
+static swig_module_info swig_module = {swig_types, 24, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -2320,6 +2319,17 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
   }
 
 
+  SWIGINTERN int VisTypedEngineObject_cl_AddTimedValue(lua_State *L)
+  {
+    
+    //insert the class name of the component as parameter #2
+    lua_pushstring(L, "VTimedValueComponent");
+    lua_insert(L, 2);
+    
+    return VisTypedEngineObject_cl_AddComponentOfType(L);
+  }
+
+
   SWIGINTERN int VisTypedEngineObject_cl_AddTransitionStateMachine(lua_State *L)
   {
     
@@ -2337,7 +2347,7 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
     SWIG_CONVERT_POINTER(L, 1, VisTypedEngineObject_cl, pSelf)
 
     //param #2: type name of the component
-    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_AddComponentOfType");
+    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_GetComponentOfType");
     const char * szComponentType = lua_tostring(L, 2);       
     
     //param #3: optional name of the component
@@ -2367,7 +2377,7 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
     SWIG_CONVERT_POINTER(L, 1, VisTypedEngineObject_cl, pSelf)
 
     //param #2: type name of the component
-    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_AddComponentOfType");
+    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_GetComponentOfBaseType");
     const char * szBaseTypeName = lua_tostring(L, 2);       
     
     //param #3: optional name of the component
@@ -2622,12 +2632,12 @@ SWIGINTERN hkvVec3 vHavokCharacterController_GetCurrentLinearVelocity__SWIG_0(vH
       self->GetCurrentLinearVelocity(velocity);
       return velocity;
     }
-SWIGINTERN hkReal vHavokCharacterController_PerformSweep(vHavokCharacterController *self,hkvVec3 const &vDir,float fDistance){
+SWIGINTERN float vHavokCharacterController_PerformSweep(vHavokCharacterController *self,hkvVec3 const &vDir,float fDistance){
       vHavokSweepResult result;
       int iNumHits = ((vHavokPhysicsModule*)Vision::GetApplication()->GetPhysicsModule())->PerformSweep(&result, 1, self, vDir, fDistance);
       if(iNumHits > 0)
-        return result.m_fDistance; // return distance of first hit 
-      return hkReal(-1);
+        return (float)result.m_fDistance; // return distance of first hit 
+      return -1.0f;
     }
 SWIGINTERN bool vHavokCharacterController_DropToFloor__SWIG_0(vHavokCharacterController *self,float fDistance=10000.0){
       return ((vHavokPhysicsModule*)Vision::GetApplication()->GetPhysicsModule())->DropToFloor(self, fDistance);
@@ -2707,12 +2717,12 @@ SWIGINTERN bool vHavokRigidBody_InitFromFile__SWIG_0(vHavokRigidBody *self,char 
 SWIGINTERN void vHavokRigidBody_SetMotionType(vHavokRigidBody *self,int iType){
   	  self->SetMotionType((hkpMotion::MotionType)iType);
   	}
-SWIGINTERN hkReal vHavokRigidBody_PerformSweep(vHavokRigidBody *self,hkvVec3 const &vDir,float fDistance){
+SWIGINTERN float vHavokRigidBody_PerformSweep(vHavokRigidBody *self,hkvVec3 const &vDir,float fDistance){
       vHavokSweepResult result;
       int iNumHits = ((vHavokPhysicsModule*)Vision::GetApplication()->GetPhysicsModule())->PerformSweep(&result, 1, self, vDir, fDistance);
       if(iNumHits > 0)
-        return result.m_fDistance; // return distance of first hit 
-      return hkReal(-1);
+        return (float)result.m_fDistance; // return distance of first hit 
+      return -1.0f;
     }
 SWIGINTERN bool vHavokRigidBody_DropToFloor__SWIG_0(vHavokRigidBody *self,float fDistance=10000.0){
       return ((vHavokPhysicsModule*)Vision::GetApplication()->GetPhysicsModule())->DropToFloor(self, fDistance);
@@ -2736,39 +2746,6 @@ SWIGINTERN vHavokRagdoll *vHavokRagdoll_Cast(VTypedObject *pObject){
     return NULL;
   }
 
-	int PhysicsLuaModule_Cast_vRigidBody_to_IVObjectComponent(lua_State *L)
-	{
-		int SWIG_arg = 0;
-		vHavokRigidBody *arg1 = (vHavokRigidBody *) 0 ;
-		IVObjectComponent *result = 0 ;
-  
-		SWIG_check_num_args("Cast_vRigidBody_to_IVObjectComponent",1,1)
-		if ( !SWIG_isptrtype(L, 1) )
-		{
-			SWIG_fail_arg("Cast_vRigidBody_to_IVObjectComponent", 1, "vHavokRigidBody *");
-		}
-  
-		if ( !SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1, SWIGTYPE_p_vHavokRigidBody,0)))
-		{
-			SWIG_fail_ptr("Cast_vRigidBody_to_IVObjectComponent", 1, SWIGTYPE_p_vHavokRigidBody);
-		}
-  
-		result = (IVObjectComponent*)(arg1);
-		SWIG_NewPointerObj(L, result, SWIGTYPE_p_IVObjectComponent, 0);
-		SWIG_arg++; 
-		return SWIG_arg;
-		
-		if ( 0 )
-		{
-			SWIG_fail;
-		}
-  
-	fail:
-		lua_error(L);
-		return SWIG_arg;
-	}
-
-
   int PhysicsLuaModule_EnableVisualDebugger(lua_State *L) {
     if(lua_isboolean(L,-1))
     {
@@ -2778,6 +2755,36 @@ SWIGINTERN vHavokRagdoll *vHavokRagdoll_Cast(VTypedObject *pObject){
         ((vHavokPhysicsModule*)Vision::GetApplication()->GetPhysicsModule())->SetEnabledVisualDebugger(bEnable);
     } 
     return 0;
+  }
+
+
+  int PhysicsLuaModule_EnableError(lua_State *L) 
+  {
+    DECLARE_ARGS_OK
+	  GET_ARG(1, const char *, errorString);
+    GET_ARG(2, bool, enableError);
+
+    hkError& error = hkError::getInstance();
+
+    if(errorString!=NULL && errorString[0]!=NULL)
+    {
+      int errorId;
+      if(sscanf(errorString, "%x", &errorId)==1)
+      {
+        hkError& error = hkError::getInstance();
+			  error.setEnabled( errorId, enableError );
+        lua_pushboolean(L, error.isEnabled( errorId )==enableError);
+      }
+      else
+      {
+        lua_pushboolean(L, false);
+      }
+    }
+    else
+    {
+      lua_pushboolean(L, false);
+    }
+	  return 1;
   }
 
 
@@ -4357,6 +4364,7 @@ static swig_lua_method swig_VisTypedEngineObject_cl_methods[] = {
     { "AddTriggerTarget",VisTypedEngineObject_cl_AddTriggerTarget},
     { "AddTriggerSource",VisTypedEngineObject_cl_AddTriggerSource},
     { "AddTransitionStateMachine",VisTypedEngineObject_cl_AddTransitionStateMachine},
+    { "AddTimedValue",VisTypedEngineObject_cl_AddTimedValue},
     { "AddComponentOfType",VisTypedEngineObject_cl_AddComponentOfType},
     { "AddAnimation",VisTypedEngineObject_cl_AddAnimation},
     {"GetComponentCount", _wrap_VisTypedEngineObject_cl_GetComponentCount}, 
@@ -5173,7 +5181,7 @@ static int _wrap_vHavokCharacterController_PerformSweep(lua_State* L) {
   vHavokCharacterController *arg1 = (vHavokCharacterController *) 0 ;
   hkvVec3 *arg2 = 0 ;
   float arg3 ;
-  hkReal result;
+  float result;
   
   SWIG_check_num_args("PerformSweep",3,3)
   if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("PerformSweep",1,"vHavokCharacterController *");
@@ -5190,11 +5198,8 @@ static int _wrap_vHavokCharacterController_PerformSweep(lua_State* L) {
   }
   
   arg3 = (float)lua_tonumber(L, 3);
-  result = vHavokCharacterController_PerformSweep(arg1,(hkvVec3 const &)*arg2,arg3);
-  {
-    hkReal * resultptr = new hkReal((const hkReal &) result);
-    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_hkReal,1); SWIG_arg++;
-  }
+  result = (float)vHavokCharacterController_PerformSweep(arg1,(hkvVec3 const &)*arg2,arg3);
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
   return SWIG_arg;
   
   if(0) SWIG_fail;
@@ -8189,7 +8194,7 @@ static int _wrap_vHavokRigidBody_PerformSweep(lua_State* L) {
   vHavokRigidBody *arg1 = (vHavokRigidBody *) 0 ;
   hkvVec3 *arg2 = 0 ;
   float arg3 ;
-  hkReal result;
+  float result;
   
   SWIG_check_num_args("PerformSweep",3,3)
   if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("PerformSweep",1,"vHavokRigidBody *");
@@ -8206,11 +8211,8 @@ static int _wrap_vHavokRigidBody_PerformSweep(lua_State* L) {
   }
   
   arg3 = (float)lua_tonumber(L, 3);
-  result = vHavokRigidBody_PerformSweep(arg1,(hkvVec3 const &)*arg2,arg3);
-  {
-    hkReal * resultptr = new hkReal((const hkReal &) result);
-    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_hkReal,1); SWIG_arg++;
-  }
+  result = (float)vHavokRigidBody_PerformSweep(arg1,(hkvVec3 const &)*arg2,arg3);
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
   return SWIG_arg;
   
   if(0) SWIG_fail;
@@ -9123,6 +9125,29 @@ fail:
 }
 
 
+static int _wrap_vHavokRagdoll_ApplyCurrentBoneConfiguration(lua_State* L) {
+  int SWIG_arg = 0;
+  vHavokRagdoll *arg1 = (vHavokRagdoll *) 0 ;
+  
+  SWIG_check_num_args("ApplyCurrentBoneConfiguration",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("ApplyCurrentBoneConfiguration",1,"vHavokRagdoll *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_vHavokRagdoll,0))){
+    SWIG_fail_ptr("vHavokRagdoll_ApplyCurrentBoneConfiguration",1,SWIGTYPE_p_vHavokRagdoll);
+  }
+  
+  (arg1)->ApplyCurrentBoneConfiguration();
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_vHavokRagdoll_GetRigidBodyIndex(lua_State* L) {
   int SWIG_arg = 0;
   vHavokRagdoll *arg1 = (vHavokRagdoll *) 0 ;
@@ -9257,6 +9282,7 @@ static swig_lua_method swig_vHavokRagdoll_methods[] = {
     {"SetDebugColor", _wrap_vHavokRagdoll_SetDebugColor}, 
     {"GetRagdollCollisionFile", _wrap_vHavokRagdoll_GetRagdollCollisionFile}, 
     {"SetRagdollCollisionFile", _wrap_vHavokRagdoll_SetRagdollCollisionFile}, 
+    {"ApplyCurrentBoneConfiguration", _wrap_vHavokRagdoll_ApplyCurrentBoneConfiguration}, 
     {"GetRigidBodyIndex", _wrap_vHavokRagdoll_GetRigidBodyIndex}, 
     {"ApplyForceToRigidBody", _wrap_vHavokRagdoll_ApplyForceToRigidBody}, 
     {"ApplyLinearImpulseToRigidBody", _wrap_vHavokRagdoll_ApplyLinearImpulseToRigidBody}, 
@@ -9278,8 +9304,8 @@ static const struct luaL_reg swig_commands[] = {
     { "vHavokCharacterController_Cast", _wrap_vHavokCharacterController_Cast},
     { "vHavokRigidBody_Cast", _wrap_vHavokRigidBody_Cast},
     { "vHavokRagdoll_Cast", _wrap_vHavokRagdoll_Cast},
-    { "Cast_vRigidBody_to_IVObjectComponent",PhysicsLuaModule_Cast_vRigidBody_to_IVObjectComponent},
     { "EnableVisualDebugger",PhysicsLuaModule_EnableVisualDebugger},
+    { "EnableError",PhysicsLuaModule_EnableError},
     { "GetHavokToVisionScale",PhysicsLuaModule_GetHavokToVisionScale},
     { "SetHavokToVisionScale",PhysicsLuaModule_SetHavokToVisionScale},
     { "SetGravity",PhysicsLuaModule_SetGravity},
@@ -9367,7 +9393,6 @@ static swig_type_info _swigt__p_VisTypedEngineObject_cl = {"_p_VisTypedEngineObj
 static swig_type_info _swigt__p___int64 = {"_p___int64", "__int64 *|LONGLONG *|LONG64 *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "CHAR *|TCHAR *|char *|CCHAR *|SBYTE *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_float = {"_p_float", "FLOAT *|float *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_hkReal = {"_p_hkReal", "hkReal *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_hkvVec3 = {"_p_hkvVec3", "hkvVec3 *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_int = {"_p_int", "BOOL *|INT32 *|VBool *|int *|INT *|INT_PTR *|LONG32 *|SINT *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_long = {"_p_long", "SHANDLE_PTR *|LONG_PTR *|LONG *|HRESULT *|RETVAL *|long *|SLONG *|SSIZE_T *", 0, 0, (void*)0, 0};
@@ -9394,7 +9419,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p___int64,
   &_swigt__p_char,
   &_swigt__p_float,
-  &_swigt__p_hkReal,
   &_swigt__p_hkvVec3,
   &_swigt__p_int,
   &_swigt__p_long,
@@ -9421,7 +9445,6 @@ static swig_cast_info _swigc__p_VisTypedEngineObject_cl[] = {  {&_swigt__p_IVObj
 static swig_cast_info _swigc__p___int64[] = {  {&_swigt__p___int64, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_float[] = {  {&_swigt__p_float, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_hkReal[] = {  {&_swigt__p_hkReal, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_hkvVec3[] = {  {&_swigt__p_hkvVec3, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_long[] = {  {&_swigt__p_long, 0, 0, 0},{0, 0, 0, 0}};
@@ -9448,7 +9471,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p___int64,
   _swigc__p_char,
   _swigc__p_float,
-  _swigc__p_hkReal,
   _swigc__p_hkvVec3,
   _swigc__p_int,
   _swigc__p_long,

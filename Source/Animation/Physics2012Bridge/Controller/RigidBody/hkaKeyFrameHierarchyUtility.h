@@ -134,18 +134,18 @@ class hkaKeyFrameHierarchyUtility
 
 				// These useful defaults are appropriate in most circumstances
 			ControlData() :
-				m_hierarchyGain(0.17f),
-				m_velocityDamping(0.0f),
-				m_accelerationGain(1.0f),
-				m_velocityGain(0.6f),
-				m_positionGain(0.05f),
-				m_positionMaxLinearVelocity(1.4f),
-				m_positionMaxAngularVelocity(1.8f),
-				m_snapGain(0.1f),
-				m_snapMaxLinearVelocity(0.3f),
-				m_snapMaxAngularVelocity(0.3f),
-				m_snapMaxLinearDistance(0.03f),
-				m_snapMaxAngularDistance(0.1f) {}
+				m_hierarchyGain(hkReal(0.17f)),
+				m_velocityDamping(0),
+				m_accelerationGain(1),
+				m_velocityGain(hkReal(0.6f)),
+				m_positionGain(hkReal(0.05f)),
+				m_positionMaxLinearVelocity(hkReal(1.4f)),
+				m_positionMaxAngularVelocity(hkReal(1.8f)),
+				m_snapGain(hkReal(0.1f)),
+				m_snapMaxLinearVelocity(hkReal(0.3f)),
+				m_snapMaxAngularVelocity(hkReal(0.3f)),
+				m_snapMaxLinearDistance(hkReal(0.03f)),
+				m_snapMaxAngularDistance(hkReal(0.1f)) {}
 
 			hkBool isValid() const;
 
@@ -233,7 +233,7 @@ class hkaKeyFrameHierarchyUtility
 #endif // HK_KEYFRAME_HIERARCHY_UTILITY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

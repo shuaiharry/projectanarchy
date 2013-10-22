@@ -60,43 +60,14 @@ private:
 
   //@{
   // Input handling
-  void MapInputTriggers();
-  void HandleInput(RPG_Character* characterEntity);
-  void HandleInputRelease(RPG_Character* characterEntity);
   bool GetClosestPointOnNavMeshUnderCursor(hkVector4& point, hkVector4 const& searchPoint);
   bool GetFirstAttackableEntityUnderCursor(RPG_DamageableEntity*& attackableEntity, hkvVec3& fallbackTargetPoint, RPG_BaseEntity const *const characterEntity);
-  //@}
-
-  //@{
-  // Player Actions
-  bool TrySpendMana(RPG_Character* characterEntity, int const manaCost);
-
-  void ExecuteMoveOrMeleeAttack(RPG_Character* characterEntity);
-  void RequestMove(RPG_Character* characterEntity, bool spawnDestinationEffect);
-  void TrySpawnSelectDestinationEffect( hkvVec3 vHitPoint );
-  void TryMeleeAttack(RPG_Character* characterEntity, RPG_DamageableEntity * const targetEntity);
-  void ContinueMeleeAttack(RPG_Character* characterEntity, RPG_DamageableEntity * const targetEntity);
-  void ReleaseMeleeAttack(RPG_Character* characterEntity);
-
-  void ExecuteOrContinueRangedAttack(RPG_Character* characterEntity);
-  void ExecuteRangedAttack(RPG_Character* characterEntity, RPG_DamageableEntity* attackableEntity, hkvVec3 const& targetPoint);
-  void ContinueRangedAttack(RPG_Character* characterEntity);
-  void ReleaseRangedAttack(RPG_Character* characterEntity);
-
-  void ExecutePowerAttack(RPG_Character* characterEntity);
-  void ExecuteAoeAttack(RPG_Character* characterEntity);
-  //void ExecuteSpecialAction(RPG_Character* characterEntity, int const actionSlot);
   //@}
 
   //@{
   // Cheats
   void CheatToggleUnlimitedHealth();
   void CheatToggleUnlimitedMana();
-  //@}
-
-  //@{
-  // Testing
-  void PlayTestEffect();
   //@}
 
   void InitInputMap();
@@ -113,26 +84,18 @@ private:
   float m_selectDestinationVFXInterval;           ///< Minimum time between select destination effect spawns
   float m_lastSelectDestinationVFXTime;           ///< Last time a select destination effect was played
 
-  // @todo: inputs should be mapped to an array to allow their status to be updated and recorded consistently.
-  bool m_wasDown_PlayerMoveOrMelee;  // @todo: @hack: until we set up a proper input array, we're just describing the state of LMouse.
-  bool m_wasDown_PlayerRangedAttack;
-  float m_wasPressedTime; // @todo: @temp: timer for delay in case player uses multi touch where the character should not move immediately
-
 #if defined(SUPPORTS_MULTITOUCH)
 
   IVMultiTouchInput* m_touchInput;
 
 #endif
-  VisBaseEntity_cl* m_lastTargetEntity;  ///< Last entity on whom this user tried to perform an action
-  hkvVec3 m_lastTargetPoint;  ///< Last position at which this user tried to perform an action
 
-  bool m_debugUI;
 };
 
 #endif  // RPG_PLUGIN_PLAYER_UI_DIALOG_H__
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

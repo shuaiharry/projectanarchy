@@ -16,6 +16,7 @@ class hkpEntity;
 class hkpWorld;
 class hkaiSilhouetteGenerator;
 class hkaiObstacleGenerator;
+class hkBitField;
 
 /// This class marshals data between A.I. and Physics systems. It attaches as a listener to a physics world (hkpWorld)
 /// and adds/removes AI data when objects are added / removed from the world.
@@ -69,7 +70,7 @@ public:
 	//
 
 		/// Marks the Physics world for read if m_markPhysicsWorldForReadDuringStep is true.
-	virtual void preSilhouetteStepCallback( const class hkaiWorld* world, hkaiWorld::StepThreading threading, const class hkBitField* sectionsToStep ) HK_OVERRIDE;
+	virtual void preSilhouetteStepCallback( const class hkaiWorld* world, hkaiWorld::StepThreading threading, const hkBitField* sectionsToStep ) HK_OVERRIDE;
 
 		/// Unmarks the Physics world for read if m_markPhysicsWorldForReadDuringStep is true.
 	virtual void postStepCallback(class hkaiWorld* world, const hkArrayBase<class hkaiBehavior*>& behaviors) HK_OVERRIDE;
@@ -89,7 +90,7 @@ protected:
 #endif	// HKAI_PHYSICS_WORLD_LISTENER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

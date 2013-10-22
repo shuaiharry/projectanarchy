@@ -22,6 +22,7 @@
 #include <Physics2012/Vehicle/VelocityDamper/hkpVehicleVelocityDamper.h>
 
 #include <Physics2012/Vehicle/hkpVehicleData.h>
+#include <Physics2012/Vehicle/Simulation/Default/hkpVehicleDefaultSimulation.h>
 
 extern const class hkClass hkpVehicleInstanceWheelInfoClass;
 
@@ -31,7 +32,6 @@ struct hkpVehicleFrictionSolverParams;
 struct hkpVehicleFrictionSolverAxleParams;
 class hkpVelocityAccumulator;
 class hkStepInfo;
-struct hkpVehicleJobResults;
 
 /// This is the main class for a vehicle - it is a container for all the
 /// runtime data the vehicle needs, and also contains pointers to all the
@@ -42,7 +42,7 @@ struct hkpVehicleJobResults;
 /// as an action. See the VehicleApi demos for examples of usage.
 class hkpVehicleInstance : public hkpUnaryAction
 {
-    //+version(1)
+	//+version(2)
 	public:
 
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_VEHICLE);
@@ -148,11 +148,8 @@ class hkpVehicleInstance : public hkpUnaryAction
 			/// This should be called before wheel collision detection.
 		void updateBeforeCollisionDetection();
 
-			/// Apply the calculated forces to the chassis and bodies in contact with the wheels
-		void applyForcesFromStep( hkpVehicleJobResults& vehicleResults );
-
 			/// Update and simulate the vehicle given the collision information.
-		void stepVehicleUsingWheelCollideOutput( const hkStepInfo& stepInfo, const hkpVehicleWheelCollide::CollisionDetectionWheelOutput* cdInfo, hkpVehicleJobResults& vehicleResults );		
+		void stepVehicleUsingWheelCollideOutput( const hkStepInfo& stepInfo, const hkpVehicleWheelCollide::CollisionDetectionWheelOutput* cdInfo );		
 
 			/// Clone functionality from hkpAction. Will make a new vehicle instance
 			/// sharing as much data as it can.
@@ -211,10 +208,10 @@ class hkpVehicleInstance : public hkpUnaryAction
 			/// by the simulation step.
 		void updateComponents( const hkStepInfo& stepInfo, const hkpVehicleWheelCollide::CollisionDetectionWheelOutput* cdInfo, hkpVehicleAerodynamics::AerodynamicsDragOutput& aerodynamicsDragInfo, hkArray<hkReal>& suspensionForceAtWheel, hkArray<hkReal>& totalLinearForceAtWheel );
 
-			/// Calculate and apply forces to the chassis and the rigid bodies the vehicle is riding on.
-		void simulateVehicle( const hkStepInfo& stepInfo, const hkpVehicleAerodynamics::AerodynamicsDragOutput& aerodynamicsDragInfo, const hkArray<hkReal>& suspensionForceAtWheel, const hkArray<hkReal>& totalLinearForceAtWheel, hkpVehicleJobResults& vehicleResults );		
-
-	protected:
+		/// Calculate and apply forces to the chassis and the rigid bodies the vehicle is riding on.
+		/// If last parameter is set NULL, then the result forces are applied in the same simulation call
+		/// otherwise, if we provide a valid hkpVehicleJobResults object, they are saved in there and aren't applied (used for multithreading)
+		void simulateVehicle( const hkStepInfo& stepInfo, const hkpVehicleAerodynamics::AerodynamicsDragOutput& aerodynamicsDragInfo, const hkArray<hkReal>& suspensionForceAtWheel, const hkArray<hkReal>& totalLinearForceAtWheel, hkpVehicleJobResults* vehicleJobResults=HK_NULL );
 
 		// These methods update the state of the components prior to simulation.
 		
@@ -287,14 +284,14 @@ class hkpVehicleInstance : public hkpUnaryAction
 			/// The list of external vehicle controllers.
 		class hkpVehicleVelocityDamper* m_velocityDamper;
 	
+			/// Calculate and apply forces to the chassis and the RBs the vehicle is colliding with
+		class hkpVehicleSimulation* m_vehicleSimulation; //+default(HK_NULL)
+
 			/// The WheelInfo class holds all wheel information generated externally (from the
 			/// physics engine) such as each wheel's ground contact, sliding state, forces,
 			/// contact friction etc.
 		hkArray<struct WheelInfo> m_wheelsInfo;
 
-		struct hkpVehicleFrictionStatus m_frictionStatus;
-
-		
 		//
 		// Variables used by the components to cache data.
 		// This is slightly ugly, but necessary until it is possible until a 
@@ -338,7 +335,15 @@ class hkpVehicleInstance : public hkpUnaryAction
 			/// world.
 		void setChassis ( class hkpRigidBody* chassis );
 	
-		hkpVehicleInstance( hkFinishLoadedObjectFlag f ) : hkpUnaryAction(f), m_wheelsInfo(f), m_frictionStatus(f), m_isFixed(f), m_wheelsSteeringAngle(f) { }
+	hkpVehicleInstance( hkFinishLoadedObjectFlag f ) : hkpUnaryAction(f), m_wheelsInfo(f), m_isFixed(f), m_wheelsSteeringAngle(f)
+	{
+		// Can't set this up in a patch
+		if (f.m_finishing && m_vehicleSimulation == HK_NULL)
+		{
+			m_vehicleSimulation = new hkpVehicleDefaultSimulation();
+			m_vehicleSimulation->init(this);
+		}
+	}
 };
 
 #include <Physics2012/Vehicle/hkpVehicleInstance.inl>
@@ -346,7 +351,7 @@ class hkpVehicleInstance : public hkpUnaryAction
 #endif // HK_VEHICLE_INSTANCE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

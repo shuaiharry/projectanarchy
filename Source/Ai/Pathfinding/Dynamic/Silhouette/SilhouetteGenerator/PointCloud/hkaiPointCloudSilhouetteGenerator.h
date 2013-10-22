@@ -95,6 +95,7 @@ class hkaiPointCloudSilhouetteGenerator : public hkaiSilhouetteGenerator
 			/// Copy points to the pointsOutArray, applying the localTransform
 		virtual void getPoints(const hkQTransform& localTransform, hkArray<hkVector4>::Temp& pointsOut) const;
 
+#ifndef HK_PLATFORM_SPU
 			/// Set m_localPoints. The input points are copied to m_localPoints and m_localAabb is updated.
 		inline void setLocalPoints(const hkArrayBase<hkVector4>& points);
 
@@ -108,6 +109,7 @@ class hkaiPointCloudSilhouetteGenerator : public hkaiSilhouetteGenerator
 			/// of the generator, and it is up to the user to deallocate it later.
 			/// Internally, this calls hkArrayBase::setDataUserFree. See the notes there for more information.
 		inline void setLocalPointDataUserFree( const hkVector4* pointData, int numPoints );
+#endif
 
 			/// Get local points
 		inline const hkArray<hkVector4>& getLocalPoints() const;
@@ -136,6 +138,7 @@ class hkaiPointCloudSilhouetteGenerator : public hkaiSilhouetteGenerator
 		inline int getNumChildSilhouettes( ) const;
 		inline int getSizeOfChildSilhouette(int i) const;
 
+			/// Flag values for m_flags.
 		enum PointCloudFlagBits
 		{
 			/// User has called setLocalPoints()
@@ -143,6 +146,11 @@ class hkaiPointCloudSilhouetteGenerator : public hkaiSilhouetteGenerator
 		};
 
 	protected:
+
+#ifndef HK_PLATFORM_SPU
+			/// Recomputes cached AABB and sets the m_localPointsChanged flag.
+		inline void updatedLocalPoints();
+#endif
 		
 			/// AABB of the local-space points
 		hkAabb m_localAabb;
@@ -175,7 +183,7 @@ class hkaiPointCloudSilhouetteGenerator : public hkaiSilhouetteGenerator
 #endif // HK_POINTCLOUD_SILHOUETTE_GENERATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

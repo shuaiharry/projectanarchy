@@ -17,65 +17,20 @@
 
 RPG_HavokBehaviorWorldListener RPG_HavokBehaviorWorldListener::s_instance;
 
-RPG_HavokBehaviorWorldListener::RPG_HavokBehaviorWorldListener() :
-  m_BehaviorEventNotificationQueueSize(0)
+RPG_HavokBehaviorWorldListener::RPG_HavokBehaviorWorldListener()
 {
-}
-
-void RPG_HavokBehaviorWorldListener::SendEnqueuedNotifications()
-{
-  for (unsigned int i = 0; i < m_BehaviorEventNotificationQueueSize; i++)
-  {
-    RPG_HavokBehaviorEventInfo const& info = m_BehaviorEventNotificationQueue[i];
-    {
-      // Get entity from character behavior user data
-      vHavokBehaviorComponent *behaviorComponent = (vHavokBehaviorComponent *)info.m_character->m_userData;
-      VASSERT(behaviorComponent);
-      if (behaviorComponent)
-      {
-        VisTypedEngineObject_cl *pCompOwner = behaviorComponent->GetOwner();
-        if (pCompOwner)
-        {
-          // TODO: Differentiate event payloads (sounds, particles, etc. though, the particle one does not have name property)
-          const hkClass* payloadClass = hkBuiltinTypeRegistry::getInstance().getVtableClassRegistry()->getClassFromVirtualInstance( info.m_event.getPayload() );
-          if (payloadClass && payloadClass->equals(&hkbNamedEventPayloadClass))
-          {
-            const hkbNamedEventPayload* payload = static_cast< const hkbNamedEventPayload* >( info.m_event.getPayload() );
-            if (payload->m_name)
-            {
-              pCompOwner->TriggerScriptEvent("OnHavokBehaviorEvent", "*s", payload->m_name.cString()); 
-
-              if (pCompOwner->IsOfType(V_RUNTIME_CLASS(RPG_Character)))
-              {
-                RPG_Character* pCharacter = static_cast<RPG_Character*>(pCompOwner);
-                VString payloadName(payload->m_name.cString());
-                pCharacter->OnHavokBehaviorEvent(payloadName);
-              }
-            }
-          } 
-        }
-      }
-    }
-  }
-
-  m_BehaviorEventNotificationQueue.Resize(0);
-  m_BehaviorEventNotificationQueueSize = 0;
 }
 
 void RPG_HavokBehaviorWorldListener::eventRaisedCallback( hkbCharacter* character, const hkbEvent& behaviorEvent, bool raisedBySdk )
 {
-  if (behaviorEvent.getPayload() == HK_NULL)
-    return;
-
-  RPG_HavokBehaviorEventInfo& info = m_BehaviorEventNotificationQueue[m_BehaviorEventNotificationQueueSize++];
-  {
-    info.m_character = character;
-    info.m_event = behaviorEvent;
-  }
+  vHavokBehaviorComponent *behaviorComponent = (vHavokBehaviorComponent*)(character->m_userData);
+  VASSERT(behaviorComponent);
+  if(behaviorComponent)
+    Vision::Game.SendMsg(behaviorComponent->GetOwner(), RPG_VisionUserMessages::kHavokAnimationEvent, (INT_PTR)&behaviorEvent, raisedBySdk ? 1 : 0);
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

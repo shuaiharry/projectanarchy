@@ -41,6 +41,15 @@ namespace hkAlgorithm
 		x = y;
 		y = t;
 	}
+
+	/// swap SIMD aligned elements
+	template<typename T>
+	HK_FORCE_INLINE void HK_CALL swapAlignedReal(T& x, T& y)
+	{
+		HK_ALIGN_REAL( T t ) = x;
+		x = y;
+		y = t;
+	}
 			
 	/// use to change endian-ness. Swaps the bytes pointed to by start.
 	HK_FORCE_INLINE void swapBytes(void* start, int count)
@@ -110,15 +119,24 @@ namespace hkAlgorithm
 	template <typename K, typename T, typename L>
 	static HK_FORCE_INLINE int HK_CALL findInsertionIndex(const K& key, const T* items, int numItems, L cmpLess)
 	{
-		int	i=0, j = numItems-1;
-		while(j > i)
+		int low = 0, high = numItems;
+		while ( low < high )
 		{
-			const int m = (i+j) >> 1;
-			if(cmpLess(items[m] , key)) i = m + 1; else j = m;
+			const int mid = (low + high) >> 1;
+			if ( cmpLess(items[mid], key) )
+			{
+				low = mid + 1;
+			}
+			else if ( cmpLess(key, items[mid]) )
+			{
+				high = mid;
+			}
+			else
+			{
+				return mid;
+			}
 		}
-
-		HK_ASSERT(0x318b4c19, (!i && !numItems) || ((i < numItems) && cmpLess(key, items[i])) );
-		return i;
+		return low;
 	}
 
 	/// Binary search, returns the index of the key in the array or -1 if not found.
@@ -381,7 +399,7 @@ namespace hkAlgorithm
 #endif // HKBASE_HKALGORITHM_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

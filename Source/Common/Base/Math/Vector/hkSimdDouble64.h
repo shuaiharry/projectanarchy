@@ -170,6 +170,10 @@ public:
 	/// Note that if \a a is NAN, the result will be \a maxVal.
 	HK_FORCE_INLINE void setClamped( hkSimdDouble64Parameter a, hkSimdDouble64Parameter minVal, hkSimdDouble64Parameter maxVal );
 
+	/// Set self to \a a clamped between zero and one. ( self = min( 1, max(a, 0) ) ).
+	/// Note that if \a a is NAN, the result will be one.
+	HK_FORCE_INLINE void setClampedZeroOne( hkSimdDouble64Parameter a );
+
 	/// Set self to the absolute value of \a a. ( self = abs(a) )
 	HK_FORCE_INLINE void setAbs(  hkSimdDouble64Parameter a );
 
@@ -638,7 +642,7 @@ HK_FORCE_INLINE bool operator>=( hkDouble64 a, hkSimdDouble64Parameter b)
 #endif //HK_MATH_SIMDDOUBLE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

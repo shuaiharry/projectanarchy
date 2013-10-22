@@ -520,6 +520,13 @@ public:
   }
 
   /// \brief
+  ///   Destructor. Cleans up the memory if allocated.
+  inline ~VMemoryTempBuffer()
+  {
+    FreeBuffer();
+  }
+
+  /// \brief
   ///   Makes sure there is enough capacity for iRequiredSize bytes. It uses the static memory if
   ///   possible.
   inline void* EnsureCapacity(int iRequiredSize, bool bPreserveContent = false)
@@ -566,11 +573,25 @@ public:
 
   /// \brief
   ///   Returns a pointer to the current buffer.
-  inline void* GetBuffer() const { return m_pBuffer; }
+  inline void* GetBuffer() const 
+  { 
+    return m_pBuffer; 
+  }
+
+  /// \brief 
+  ///   Returns a pointer to the current buffer with the specified type.
+  template<class BufferType>
+  inline BufferType* GetAs() const
+  {
+    return static_cast<BufferType*>(m_pBuffer);
+  }
 
   /// \brief
   ///   Returns a pointer to the current buffer as a char pointer. This is just the casted version of GetBuffer()
-  inline char* AsChar() const { return (char*) m_pBuffer; }
+  inline char* AsChar() const 
+  { 
+    return static_cast<char*>(m_pBuffer); 
+  }
 
   /// \brief
   ///   Helper function to read a binary string from a stream. It tries to use the static memory
@@ -646,16 +667,9 @@ public:
     if (iLen<0)
       return NULL;
     EnsureCapacity(iLen+1);
-    ((char *)m_pBuffer)[iLen] = 0;
+    ((char *)m_pBuffer)[iLen] = '\0';
     cfile.Read(m_pBuffer,iLen);
     return (char *)m_pBuffer;
-  }
-
-  /// \brief
-  ///   Destructor. Cleans up the memory if allocated.
-  inline ~VMemoryTempBuffer()
-  {
-    FreeBuffer();
   }
 
   /// \brief
@@ -663,6 +677,18 @@ public:
   inline bool HasAllocatedMemory() const
   {
     return m_pBuffer != m_StaticBuffer;
+  }
+
+  /// \brief
+  ///   Returns the amount of memory available when calling GetBuffer().
+  ///
+  /// This is either the static or the allocated size.
+  inline int GetBufferSize() const
+  {
+    if (HasAllocatedMemory())
+      return m_iAllocatedSize;
+    else
+      return iStaticSize;
   }
 
   /// \brief
@@ -687,7 +713,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

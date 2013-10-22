@@ -32,16 +32,19 @@ class hkpBoxBoxManifold
 
 		void removePoint( int index );
 
-		inline int getNumPoints();
+		HK_FORCE_INLINE int getNumPoints() const;
 
-		inline hkpFeatureContactPoint& operator[]( int index );
+		HK_FORCE_INLINE hkpFeatureContactPoint& operator[]( int index );
 
-		inline hkBool findInManifold( const hkpFeatureContactPoint& fcp );
+		HK_FORCE_INLINE bool findInManifold( const hkpFeatureContactPoint& fcp ) const;
 
-		inline hkBool isComplete();
-		inline void setComplete( hkBool complete );
+		HK_FORCE_INLINE bool isComplete() const;
+		HK_FORCE_INLINE void setComplete( bool complete );
 		
-		inline hkBool hasNoPointsLeft();
+		HK_FORCE_INLINE bool hasNoPointsLeft() const;
+		HK_FORCE_INLINE hkBool32 isNormalInitialized() const;
+		HK_FORCE_INLINE void setNormalInitialized();
+		HK_FORCE_INLINE void clearNormalInitialized();
 
 	public:
 		hkpFeatureContactPoint m_contactPoints[HK_BOXBOX_MANIFOLD_MAX_POINTS];
@@ -49,12 +52,11 @@ class hkpBoxBoxManifold
 		hkUchar  m_faceVertexFeatureCount;
 		hkUchar  m_numPoints;
 		
-		hkBool m_isComplete;  // a complete manifold is one where no new points can be added via small rotations.
-		hkBool m_manifoldNormalInitialized;
+		bool m_isComplete;  // a complete manifold is one where no new points can be added via small rotations.
 
 		hkUint32 m_manifoldNormalB;
 
-		hkVector4 m_manifoldNormalA;
+		hkVector4 m_manifoldNormalA; // .w is initialized flag
 };
 
 
@@ -64,7 +66,7 @@ class hkpBoxBoxManifold
 #endif // HK_COLLIDE2_FEATURE_MANIFOLD_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

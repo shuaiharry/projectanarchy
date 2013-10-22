@@ -221,6 +221,8 @@
       // 
       // ColorGradingToolDlg
       // 
+      this.ShowInTaskbar = false;
+      this.MinimizeBox = false;
       this.AcceptButton = this.button_Close;
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;

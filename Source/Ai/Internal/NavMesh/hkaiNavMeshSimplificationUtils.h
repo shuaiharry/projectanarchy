@@ -27,7 +27,7 @@ class hkaiNavMeshSimplificationUtils
 			/// These generally improve the quality of the mesh, but increase the final data size by roughly m_vertexFraction.
 		struct ExtraVertexSettings
 		{
-				//+version(3)
+				//+version(4)
 			HK_DECLARE_REFLECTION();
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, ExtraVertexSettings);
 
@@ -42,6 +42,7 @@ class hkaiNavMeshSimplificationUtils
 				/// Turn off extra vertex creation
 			void disable();
 
+				/// How the number of extra vertices is determined.
 			enum VertexSelectionMethod
 			{
 					/// The number of vertices added will be proportional to the area (in meters^2) of the partition.
@@ -69,7 +70,8 @@ class hkaiNavMeshSimplificationUtils
 			hkReal m_areaFraction;	//+default(.000125f)
 									//+hk.RangeReal(absmin=0.0, softmax=1.0)
 
-				/// Additional vertices will only be considered for partitions greater than this area.
+				/// When using PROPORTIONAL_TO_VERTICES, additional vertices will only be considered for partitions
+				/// greater than this area. This is ignored when using PROPORTIONAL_TO_AREA.
 			hkReal m_minPartitionArea; //+default(1000.0f)
 										//+hk.RangeReal(absmin=0.0, softmax=10000.0)
 
@@ -84,11 +86,18 @@ class hkaiNavMeshSimplificationUtils
 				/// Whether or not to automatically split long boundary edges.
 			hkBool m_addVerticesOnBoundaryEdges; //+default(true)
 
+				/// Whether or not to automatically split long edges between partitions.
+			hkBool m_addVerticesOnPartitionBorders; //+default(true)
+
 				/// If m_addVerticesOnBoundaryEdges is enabled, boundary edges over this length will be split
 				/// into smaller segments.
 			hkReal m_boundaryEdgeSplitLength; //+default(50.0f)
 
-				/// Tolerance for determining if a user vertex (m_userVertices) is on a boundary edge.
+				/// If m_addVerticesOnPartitionBorders is enabled, partition border edges over this length will be split
+				/// into smaller segments.
+			hkReal m_partitionBordersSplitLength; //+default(50.0f)
+
+				/// Tolerance for determining if a user vertex (m_userVertices) is on a boundary or partition border edge.
 			hkReal m_userVertexOnBoundaryTolerance; //+default(1e-3f)
 
 				/// Manually placed vertices. These will be added to the mesh before any random vertices.
@@ -98,14 +107,12 @@ class hkaiNavMeshSimplificationUtils
 		/// This input structure holds the settings used to control the amount of simplification applied to a nav mesh
 		struct Settings
 		{
-			//+version(12)
+			//+version(13)
 			HK_DECLARE_REFLECTION();
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, Settings);
 
 			Settings();
-			Settings(hkFinishLoadedObjectFlag f)
-				: m_extraVertexSettings(f)
-				{}
+			Settings(hkFinishLoadedObjectFlag f);
 
 				/// Sets the simplification values to avoid almost all simplification.
 				/// This is often used to avoid simplifying borders when setting up streaming.
@@ -190,9 +197,18 @@ class hkaiNavMeshSimplificationUtils
 				/// The maximum allowable vertical distance a vertex that is used by a boundary edge can be moved by when merging shared vertices
 			hkReal m_maxBoundaryVertexVerticalError;	//+default(1.f)
 
+				/// Whether or not to merge edges by length when doing convex merging (Hertel-Mehlhorn). This usually gives nicer looking results.
 			hkBool m_mergeLongestEdgesFirst; //+default(true);
 
+				/// Settings for the addition of extra vertices.
 			ExtraVertexSettings m_extraVertexSettings;
+
+				/// If this flag is set, the input data to simplification (Settings, unsimplified nav mesh, and raycaster information) will be serialized out.
+			hkBool m_saveInputSnapshot;
+
+				/// Base filename of the saved input snapshot. 
+			hkStringPtr m_snapshotFilename;
+
 		};
 
 			/// Sequence of nav mesh edges that lie on the border between two partitions
@@ -202,6 +218,7 @@ class hkaiNavMeshSimplificationUtils
 			Segment() {}
 			Segment(const Segment& s) : m_materialSettingsIndex(s.m_materialSettingsIndex), m_partitionIdA(s.m_partitionIdA), m_partitionIdB(s.m_partitionIdB) { m_boundary = s.m_boundary; m_indices = s.m_indices; }
 
+			bool isOK() const { return m_indices.isEmpty() || m_indices.getSize() == m_boundary.getSize() + 1; }
 			int m_materialSettingsIndex;	// -1 if global settings should be used instead
 			int m_partitionIdA;
 			int m_partitionIdB;				// -1 if this is an external boundary run
@@ -222,6 +239,7 @@ class hkaiNavMeshSimplificationUtils
 			}
 		};
 
+			/// Return values for hkaiNavMeshSimplificationUtils::simplifyNavMesh().
 		enum SimplificationResult
 		{
 			/// Simplification was stopped by the user
@@ -252,13 +270,15 @@ class hkaiNavMeshSimplificationUtils
 		static hkResult HK_CALL setMaterialSettingsIndices( const hkaiNavMeshGenerationSettings& settings, const hkaiNavMesh& mesh, const hkArray<int>& numFacesInPartition, const hkArray<hkaiNavMesh::FaceIndex>& partitions, hkArray<Segment>& segmentsInOut );
 
 		/// Simplifies an array of Segment objects by removing (and moving) vertices
-		static hkResult HK_CALL simplifySegments( const hkaiNavMeshGenerationSettings& settings, hkArray<hkVector4>& verticesInOut, hkArray<Segment>& segmentsInOut, const hkaiNavMesh& navMesh, const hkBitField& unremovableVertices, const hkArray<int>* partitionDir = HK_NULL, hkaiNavMeshGenerationProgressCallback* callbacks = HK_NULL );
+		static hkResult HK_CALL simplifySegments( const hkaiNavMeshGenerationSettings& settings, hkArray<hkVector4>& verticesInOut, hkArray<Segment>& segmentsInOut, hkArray<int>& segmentToOppositeMap, const hkaiNavMesh& navMesh, const hkBitField& unremovableVertices, const hkArray<int>* partitionDir = HK_NULL, hkaiNavMeshGenerationProgressCallback* callbacks = HK_NULL );
+
+		static hkResult HK_CALL addVerticesBetweenSegments( const hkaiNavMeshGenerationSettings& settings, hkArray<hkVector4>& verticesInOut, hkArray<Segment>& segmentsInOut, const hkArrayBase<int>& segmentToOppositeMap, const hkaiNavMesh& navMesh, hkBitField& userVertexOnBoundary, hkArray<int>& oppositeEdges);
 
 		// Converts all segments into triangles.
-		static hkResult HK_CALL triangulatePartitions( const hkaiNavMeshGenerationSettings& settings, bool wallClimbing, const hkaiNavMesh& originalNavMesh, hkaiNavMesh& navMeshOut, const hkArray<Segment>& segments, const hkArrayBase<hkaiNavMesh::FaceIndex>& partitions, 	const hkArrayBase<int>& numFacesInPartition, const hkArrayBase<int>& partitionDir, hkArray<int>& faceToPartitionMap, const hkBitField& edgeIsBoundary, const hkArrayBase<hkUint32>& faceData );
+		static hkResult HK_CALL triangulatePartitions( const hkaiNavMeshGenerationSettings& settings, bool wallClimbing, const hkaiNavMesh& originalNavMesh, hkaiNavMesh& navMeshOut, const hkArray<Segment>& segments, const hkArrayBase<hkaiNavMesh::FaceIndex>& partitions, 	const hkArrayBase<int>& numFacesInPartition, const hkArrayBase<int>& partitionDir, hkArray<int>& faceToPartitionMap, const hkBitField& edgeIsBoundary, hkBitField& userVertexOnBoundary, const hkArrayBase<hkUint32>& faceData );
 
 		/// Converts a single partition (defined by one or more segments) into a list of triangles
-		static hkResult HK_CALL triangulatePartition( const hkaiNavMeshSimplificationUtils::ExtraVertexSettings& extraVertSettings, const hkaiNavMesh& originalMesh, hkArray<hkVector4>& vertices, const hkArray<Segment>& segments, const hkArray<int>::Temp& partitionSegments, const hkArray<const hkaiNavMesh::FaceIndex>& facesInPartition, hkVector4Parameter up, hkArray<int>::Temp& triangleIndicesOut, hkArray<int>::Temp& sharedEdgesOut, const hkBitField& edgeIsBoundary, hkReferencedObject* globalTriangulatorPtr = HK_NULL, const hkAabb* globalDomainAabb = HK_NULL );
+		static hkResult HK_CALL triangulatePartition( const hkaiNavMeshSimplificationUtils::ExtraVertexSettings& extraVertSettings, const hkaiNavMesh& originalMesh, hkArray<hkVector4>& vertices, const hkArray<Segment>& segments, const hkArray<int>::Temp& partitionSegments, const hkArray<const hkaiNavMesh::FaceIndex>& facesInPartition, hkVector4Parameter up, hkArray<int>::Temp& triangleIndicesOut, hkArray<int>::Temp& sharedEdgesOut, const hkBitField& edgeIsBoundary, hkBitField& userVertexOnBoundary, hkReferencedObject* globalTriangulatorPtr = HK_NULL, const hkAabb* globalDomainAabb = HK_NULL );
 
 		/// Tries to merge coplanar triangles in the nav mesh into convex pieces
 		static hkResult HK_CALL hertelMehlhorn( const hkaiNavMeshGenerationSettings& settings, hkaiNavMesh & mesh, const hkReal* heightErrorOverride = HK_NULL, hkArray<int>* faceToPartitionMapInOut = HK_NULL );
@@ -278,8 +298,10 @@ class hkaiNavMeshSimplificationUtils
 		static hkResult HK_CALL _selectiveMergeSharedVertices( const hkaiNavMeshGenerationSettings& settings, hkaiNavMesh& mesh );
 	
 		/// Find boundary edges which are "removable", e.g small parts of edges that weren't matched.
-		static hkResult HK_CALL _findRemovableBoundaryEdges( const hkaiNavMeshGenerationSettings& settings, const hkaiNavMesh& mesh, const hkaiEdgeGeometryRaycaster* raycaster, hkArray<int>* numEdgesInGroupOut, hkArray<hkaiNavMesh::EdgeIndex>* edgesToRemoveOut, class hkBitField* removeableEdges );
+		static hkResult HK_CALL _findRemovableBoundaryEdges( const hkaiNavMeshGenerationSettings& settings, const hkaiNavMesh& mesh, const hkaiEdgeGeometryRaycaster* raycaster, hkArray<int>* numEdgesInGroupOut, hkArray<hkaiNavMesh::EdgeIndex>* edgesToRemoveOut, hkBitField* removeableEdges );
 
+		/// Determine how to split a long edge
+		static hkResult HK_CALL getEdgeSplitting( hkVector4Parameter vIn0, hkVector4Parameter vIn1, const ExtraVertexSettings& extraVertexSettings, bool isBoundary, hkBitField& userVertexOnBoundary, hkArray<hkVector4>& edgeVertices);
 		
 		/// Internal class used to fit a plane to several points
 		class PlaneFitter : public hkReferencedObject
@@ -308,7 +330,7 @@ class hkaiNavMeshSimplificationUtils
 #endif	// HKAI_NAVIGATION_MESH_SIMPLIFICATION_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

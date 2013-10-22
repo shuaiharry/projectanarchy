@@ -8,13 +8,14 @@
 #ifndef HKAI_NAVIGATION_MESH_GENERATION_TYPES_H
 #define HKAI_NAVIGATION_MESH_GENERATION_TYPES_H
 
-class hkBitField;
 struct hkGeometry;
 class hkaiNavMesh;
+class hkBitField;
 
 	/// Possible results when connecting edges.
 struct hkaiNavMeshGenerationConnectivityResult
 {
+		/// Return values for hkaiNavMeshGenerationUtils::calculateConnectivity().
 	enum ConnectivityResultEnum
 	{
 		EDGES_UNALIGNED_ANGLE_PLANAR,
@@ -70,8 +71,10 @@ struct hkaiNavMeshGenerationOutputs
 	hkaiNavMesh* m_navMesh;
 };
 
+	///
 struct hkaiNavMeshGenerationResult
 {
+		/// Return values for hkaiNavMeshGenerationUtils::generateNavMesh().
 	enum GenerationResultEnum
 	{
 		/// Generation was stopped by the user.
@@ -99,7 +102,7 @@ struct hkaiNavMeshGenerationResult
 #endif // HKAI_NAVIGATION_MESH_GENERATION_TYPES_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

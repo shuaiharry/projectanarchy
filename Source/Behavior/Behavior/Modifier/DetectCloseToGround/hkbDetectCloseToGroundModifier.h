@@ -80,11 +80,13 @@ class hkbDetectCloseToGroundModifier : public hkbModifier
 		hkInt16 m_boneIndex;	//+default(-1)
 								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL")
 								//+hk.Description("The bone used to cast ray for determining the ground height.")
+								//+hk.Ui(group="Ragdoll Raycast Bone",label="Raycast Bone Index")
 
 			/// The bone used to cast ray for determining the ground height.
 		hkInt16 m_animBoneIndex;	//+default(-1)
 									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
 									//+hk.Description("The bone used to cast ray for determining the ground height.")
+									//+hk.Ui(group="Animation Raycast Bone",label="Raycast Bone Index")
 
 	private:
 
@@ -104,7 +106,7 @@ class hkbDetectCloseToGroundModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

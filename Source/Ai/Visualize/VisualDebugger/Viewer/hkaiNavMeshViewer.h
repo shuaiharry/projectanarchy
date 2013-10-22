@@ -135,6 +135,7 @@ class hkaiNavMeshGeometryViewer : public hkaiNavMeshBaseViewer
 			/// Find the index in m_navMeshInfos for the given hkaiNavMeshInstance, or -1 if it's not found.
 		int indexOfInstance( const hkaiNavMeshInstance* instance ) const;
 		
+			/// A block of original faces, and the hash of their flags.
 		struct OriginalFaceBlock
 		{
 				/// The start face index of the block
@@ -302,7 +303,7 @@ class hkaiNavMeshFaceLabelsViewer : public hkaiNavMeshBaseViewer
 #endif  // HKAI_NAV_MESH_VIEWER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

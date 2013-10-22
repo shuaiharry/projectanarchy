@@ -14,6 +14,10 @@
 #include <Ai/Pathfinding/Astar/SearchState/hkaiHashSearchState.h>
 #include <Ai/Pathfinding/NavMesh/Streaming/hkaiStreamingCollection.h>
 
+#include <Ai/Pathfinding/Graph/hkaiAgentTraversalInfo.h>
+#include <Ai/Pathfinding/Astar/CostModifier/hkaiAstarCostModifier.h>
+#include <Ai/Pathfinding/Astar/EdgeFilter/hkaiAstarEdgeFilter.h>
+
 	/// Directed graph A* interface
 struct hkaiDirectedGraphVisitor
 {
@@ -38,7 +42,7 @@ struct hkaiDirectedGraphVisitor
 	};
 #endif
 
-	typedef hkaiHashSearchState< Heuristic > SearchState; 
+	typedef hkaiHashSearchState SearchState; 
 
 	//
 	// Begin hkaiAstar interface
@@ -54,7 +58,7 @@ struct hkaiDirectedGraphVisitor
 	HK_FORCE_INLINE int getMaxNeighborCount( SearchIndex nit ) const;
 	HK_FORCE_INLINE void getNeighbors( SearchIndex nit, hkArrayBase< EdgeKey >& neighbors ) const;
 	HK_FORCE_INLINE SearchIndex edgeTarget( SearchIndex nit, EdgeKey eit ) const;
-	HK_FORCE_INLINE EdgeCost getTotalCost(SearchIndex nit, SearchIndex adj, EdgeKey eit, const EdgeCost costToParent) const;
+	inline EdgeCost getTotalCost(SearchIndex nit, SearchIndex adj, EdgeKey eit, const EdgeCost costToParent) const;
 
 	//
 	// End hkaiAstar interface
@@ -85,6 +89,16 @@ struct hkaiDirectedGraphVisitor
 	// end listener interface
 	//
 
+	HK_FORCE_INLINE void init( 
+		const hkaiStreamingCollection::InstanceInfo* streamingInfo, 
+		const hkaiAstarCostModifier* costModifier,
+		const hkaiAstarEdgeFilter* edgeFilter
+		);
+
+	HK_FORCE_INLINE void setTraversalInfo ( const hkaiAgentTraversalInfo& info );
+
+	HK_FORCE_INLINE void setGoals( const hkaiPackedKey* goalKeys, const hkReal* finalCosts, int numGoals);
+
 	// Streaming collection
 	HK_PAD_ON_SPU( const struct hkaiStreamingCollection::InstanceInfo* ) m_streamingInfo;
 
@@ -99,7 +113,6 @@ struct hkaiDirectedGraphVisitor
 	HK_FORCE_INLINE void setGeneralAccessor(int sectionId);
 	HK_FORCE_INLINE void setOutgoingSectionFromPacked( hkaiPackedKey );
 
-
 	HK_ON_CPU( const hkaiDirectedGraphAccessor* m_incomingGraph; )
 	HK_ON_CPU( const hkaiDirectedGraphAccessor* m_outgoingGraph; )
 	HK_ON_CPU( const hkaiDirectedGraphAccessor* m_generalGraph; )
@@ -107,30 +120,39 @@ struct hkaiDirectedGraphVisitor
 	HK_ON_SPU( hkaiDirectedGraphAccessor m_outgoingAccessor; )
 	HK_ON_SPU( hkaiDirectedGraphAccessor m_generalAccessor; )
 
+	// Don't do these on SPU, since we don't actually support graph queries there.
+#ifndef HK_PLATFORM_SPU
+	const hkaiAstarCostModifier*  m_costModifier;
+	const hkaiAstarEdgeFilter*  m_edgeFilter;
+#endif
+
 		//
 		// Cached information
 		//
 
-#ifdef HK_PLATFORM_SPU
-		typedef hkaiSpuDirectedGraphAccessor::PaddedNode PaddedNode;
-#else
-		typedef hkaiDirectedGraphExplicitCost::Node PaddedNode;
+	hkaiDirectedGraphExplicitCost::PaddedNode m_cachedNode;
+	hkaiDirectedGraphExplicitCost::PaddedNode m_cachedInstanceNode;
+	hkVector4  m_cachedPosition;
 
-#endif
-	PaddedNode m_cachedNode;
-	PaddedNode m_cachedInstanceNode;
+	hkaiAgentTraversalInfo	m_agentInfo;
 
 	SearchState* m_searchState;
 	HK_PAD_ON_SPU( hkaiDirectedGraphExplicitCost::Edge* ) m_currentEdge;
 	HK_PAD_ON_SPU( int ) m_cachedIncomingSectionId; 
 	HK_PAD_ON_SPU( int ) m_cachedOutgoingSectionId; 
 	HK_PAD_ON_SPU( int ) m_cachedGeneralSectionId; 
+	HK_PAD_ON_SPU( hkaiPackedKey ) m_cachedNodeKey; 
+
+	// Goal and final cost information
+	// These are additional costs applied to the corresponding goal nodes.
+	HK_PAD_ON_SPU( const hkaiPackedKey* )	m_goalNodes;
+	HK_PAD_ON_SPU( const hkReal* )			m_finalCosts;
+	HK_PAD_ON_SPU( int )					m_numGoals;
 
 	// need extra due to alignment restrictions on DMA gets
 	HK_ALIGN16( hkaiDirectedGraphExplicitCost::Edge m_localEdges[2*MAX_VERTEX_DEGREE + 2] );
 
 	// Debug info for asserts
-	HK_ON_DEBUG( SearchIndex m_cachedNodeIndex; )
 	HK_ON_DEBUG( hkaiDirectedGraphExplicitCost::Edge* m_localEdgeStart; )
 };
 
@@ -139,7 +161,7 @@ struct hkaiDirectedGraphVisitor
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -6,6 +6,21 @@
  *
  */
 
+
+hkCommand::hkCommand( PrimaryType type, hkUint16 subType, int sizeInBytes)
+{
+#if defined (HK_WANT_DETERMINISM_CHECKS)
+	// Fill memory for determinism.
+	hkString::memSet(this, 0xdead, sizeInBytes);
+	// Remember the actual size for determinism checks.
+	m_determinismSizeInBytes = hkUint16(sizeInBytes);
+#endif
+	m_sizePaddedTo16 = hkUint16(HK_NEXT_MULTIPLE_OF(16,sizeInBytes));
+	m_filterBits = 0;
+	m_primaryType = type;
+	m_secondaryType = subType;
+}
+
 HK_FORCE_INLINE void* hkBlockStreamCommandWriter::allocBuffer( int size )
 {
 	size = HK_NEXT_MULTIPLE_OF( 16, size );
@@ -15,7 +30,7 @@ HK_FORCE_INLINE void* hkBlockStreamCommandWriter::allocBuffer( int size )
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

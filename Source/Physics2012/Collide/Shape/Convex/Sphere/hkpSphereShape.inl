@@ -33,7 +33,7 @@ HK_FORCE_INLINE int hkpSphereShape::getNumCollisionSpheres() const
 
 HK_FORCE_INLINE void hkpSphereShape::getAabb(const hkTransform& localToWorld, hkReal tolerance, hkAabb& out) const
 {
-	hkVector4 tol4; tol4.setAll( tolerance + m_radius );
+	hkSimdReal tol4; tol4.setFromFloat( tolerance + m_radius );
 
 	out.m_min.setSub( localToWorld.getTranslation(), tol4 );
 	out.m_max.setAdd( localToWorld.getTranslation(), tol4 );
@@ -53,7 +53,7 @@ HK_FORCE_INLINE const hkSphere* hkpSphereShape::getCollisionSpheres(hkSphere* sp
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

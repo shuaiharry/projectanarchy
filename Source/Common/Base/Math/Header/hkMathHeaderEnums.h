@@ -5,7 +5,8 @@
  * Product and Trade Secret source code contains trade secrets of Havok. Havok Software (C) Copyright 1999-2013 Telekinesys Research Limited t/a Havok. All Rights Reserved. Use of this software is subject to the terms of an end user license agreement.
  *
  */
-//HK_REFLECTION_PARSER_EXCLUDE_FILE
+#ifndef HKMATH_HEADERENUMS_H
+#define HKMATH_HEADERENUMS_H
 
 /// Permutations of 4-component vectors hkVector4 and hkIntVector
 struct hkVectorPermutation
@@ -207,8 +208,10 @@ enum hkMathSortDir
 	HK_SORT_DESCENDING,
 };
 
+#endif //HKMATH_HEADERENUMS_H
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -40,26 +40,26 @@ class hkCpuThreadPool : public hkThreadPool
 			/// This will also call hkReferencedObject::setLockMode( hkReferencedObject::LOCK_MODE_NONE);
 		~hkCpuThreadPool();
 
-
-		//////////////////////////
+		//
 		// hkThreadPool interface
+		//
 
-		virtual void processWorkLoad(void * workLoad);
+		virtual void processWorkLoad( void* workLoad );
 			
 		virtual void waitForCompletion();
 
-		virtual bool isProcessing();
+		virtual bool isProcessing() const;
 
-		virtual void appendTimerData(  hkArrayBase<hkTimerData>& timerDataOut, hkMemoryAllocator& alloc );
+		virtual void appendTimerData( hkArrayBase<hkTimerData>& timerDataOut, hkMemoryAllocator& alloc );
 
 		virtual void clearTimerData();
 
-		virtual int getNumThreads();
+		virtual int getNumThreads() const;
 
-		virtual void setNumThreads(int numThreads);
+		virtual void setNumThreads( int numThreads );
 
 		virtual void gcThreadMemoryOnNextCompletion();
-		
+
 	protected:
 
 		void addThread();
@@ -96,14 +96,14 @@ class hkCpuThreadPool : public hkThreadPool
 
 				/// Semaphore used to pause a physics thread after it's done its calculations.
 				/// This semaphore is released by the main thread on every simulation step.
-			hkSemaphore m_semaphore;				
+			hkSemaphore m_semaphore;
 
 				// Internal buffer used for collecting timer information
 			char* m_monitorStreamBegin;
 			char* m_monitorStreamEnd;
 
 			hkWorkerThreadContext* m_context;
-		};		
+		};
 
 			/// Data shared by all threads.
 		struct SharedThreadData
@@ -119,14 +119,14 @@ class hkCpuThreadPool : public hkThreadPool
 				WorkerFunction m_workerFunction;
 
 				void* m_workLoad;
-				
+
 					/// Semaphore used to pause the main thread when it waits for threads
 					/// to finish their calculations.
 				hkSemaphore m_workerThreadFinished;
 
 					/// Number of threads.
 				int m_numThreads;
-			
+
 				int m_timerBufferAllocation;
 
 				hkBool m_gcThreadMemoryOnCompletion;
@@ -171,7 +171,6 @@ struct hkCpuThreadPoolCinfo
 	/// Has no effect on other platforms (e.g., posix)
 	int m_stackSize;
 
-
 	/// This is the buffer size allocated in each thread for collecting timer
 	/// information. It defaults to 0, which means timers will be disabled.
 	/// To view timers in the VDB, you need to set this buffer size to a non zero value.
@@ -188,14 +187,14 @@ struct hkCpuThreadPoolCinfo
 	hkArray<int> m_hardwareThreadIds;
 
 	/// The thread name to be passed to hkThread::startThread
-	const char* m_threadName;	
+	const char* m_threadName;
 };
 
 
 #endif // HK_THREAD_POOL_CPU_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

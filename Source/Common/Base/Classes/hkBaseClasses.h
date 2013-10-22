@@ -25,6 +25,9 @@ HK_STRUCT(hkAabbHalf)
 HK_STRUCT(hkAabbUint32)
 HK_STRUCT(hkArrayTypeAttribute)
 HK_STRUCT(hkBitField)
+HK_STRUCT(hkBitFieldBasehkBitFieldStoragehkArrayunsignedinthkContainerHeapAllocator)
+HK_STRUCT(hkBitFieldBasehkOffsetBitFieldStoragehkArrayunsignedinthkContainerHeapAllocator)
+HK_STRUCT(hkBitFieldStoragehkArrayunsignedinthkContainerHeapAllocator)
 HK_STRUCT(hkClass)
 HK_STRUCT(hkClassEnum)
 HK_STRUCT(hkClassEnumItem)
@@ -47,6 +50,8 @@ HK_STRUCT(hkLinkAttribute)
 HK_STRUCT(hkModelerNodeTypeAttribute)
 HK_STRUCT(hkMotionState)
 HK_STRUCT(hkMultiThreadCheck)
+HK_STRUCT(hkOffsetBitField)
+HK_STRUCT(hkOffsetBitFieldStoragehkArrayunsignedinthkContainerHeapAllocator)
 HK_STRUCT(hkPackedVector3)
 HK_STRUCT(hkPackedVector8_3)
 HK_STRUCT(hkPostFinishAttribute)
@@ -81,7 +86,7 @@ HK_STRUCT(hkMonitorStreamStringMapStringMap)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -69,7 +69,7 @@ public:
   ASSETFRAMEWORK_IMPEXP hkUint32 getStoredHash() const;
   ASSETFRAMEWORK_IMPEXP hkFileSystem::TimeStamp getStoredTimeStamp() const;
 
-  ASSETFRAMEWORK_IMPEXP hkvAssetOperationResult updateFileState();
+  ASSETFRAMEWORK_IMPEXP bool checkUpToDate() const;
   ASSETFRAMEWORK_IMPEXP hkvAssetOperationResult updateFileState(hkStreamReader& reader, const hkFileSystem::Entry& fileEntry);
   ASSETFRAMEWORK_IMPEXP void clearStoredFileState();
 
@@ -113,7 +113,7 @@ private:
   void removeFromDependentFiles();
 
 private:
-  hkRefPtr<hkvTrackedDirectory> m_parent;
+  hkvTrackedDirectory* m_parent;
   hkStringPtr m_name;
 
   hkUint32 m_fileHash;
@@ -136,7 +136,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

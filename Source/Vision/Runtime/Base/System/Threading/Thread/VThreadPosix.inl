@@ -45,7 +45,7 @@ bool VThread::SetPriority(VThreadPriority ePriority)
 {
   int posixPriority;
 
-#ifndef _VISION_ANDROID
+#if !defined(_VISION_ANDROID) && !defined(_VISION_TIZEN)
   int prioMin    = sched_get_priority_min(SCHED_OTHER);
   int prioMax    = sched_get_priority_max(SCHED_OTHER);
 #else
@@ -91,7 +91,7 @@ void VThread::Join()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

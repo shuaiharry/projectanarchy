@@ -25,6 +25,8 @@ namespace RPG_VisionHavokConversion
   void HavokToVisionPoint(hkVector4Parameter pointIn, hkvVec3& pointOut);
 
   void HavokToVisionRotation(const hkRotation& rotIn, hkvMat3& matOut);
+
+  float HavokToVisionScalar(hkReal s);
 }
 
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConversionUtils.hpp>
@@ -34,7 +36,7 @@ namespace RPG_VisionHavokConversion
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

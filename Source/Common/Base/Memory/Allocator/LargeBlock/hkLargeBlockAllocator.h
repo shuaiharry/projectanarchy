@@ -224,12 +224,12 @@ class hkLargeBlockAllocator : public hkMemoryAllocator, public hkMemoryAllocator
 				/// m_start may not be the start you passed in if it wasn't aligned.
 			FixedMemoryBlockServer(void* start, int size);
 
-			virtual void* bufAlloc(int& nbytes);
-			virtual void bufFree(void* p, int nbytes);
-			virtual void* blockAlloc(int nbytes) { HK_ASSERT(0x438afc1b, 0); return HK_NULL; }
-			virtual void blockFree(void* p, int nbytes) { HK_ASSERT(0x438afc1b, 0); }
-			virtual int getAllocatedSize(const void* obj, int nbytes) { return nbytes; }
-			virtual void getMemoryStatistics(MemoryStatistics& s);
+			virtual void* bufAlloc(int& nbytes) HK_OVERRIDE;
+			virtual void bufFree(void* p, int nbytes) HK_OVERRIDE;
+			virtual void* blockAlloc(int nbytes) HK_OVERRIDE { HK_ASSERT(0x438afc1b, 0); return HK_NULL; }
+			virtual void blockFree(void* p, int nbytes) HK_OVERRIDE { HK_ASSERT(0x438afc1b, 0); }
+			virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE { return nbytes; }
+			virtual void getMemoryStatistics(MemoryStatistics& s) const HK_OVERRIDE;
 
 			inline bool inUse() { return m_start != HK_NULL; }
 			bool resize(void* data, int oldSize, hk_size_t newSize, hk_size_t& sizeOut);
@@ -282,10 +282,10 @@ class hkLargeBlockAllocator : public hkMemoryAllocator, public hkMemoryAllocator
 		~hkLargeBlockAllocator();
 
 			// hkMemoryAllocator interface
-		virtual void* blockAlloc( int numBytes );
-		virtual void blockFree( void* p, int numBytes );
-		virtual void getMemoryStatistics( MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
 
 			/// hkMemoryAllocator::ExtendedInterface interface
@@ -329,7 +329,7 @@ class hkLargeBlockAllocator : public hkMemoryAllocator, public hkMemoryAllocator
         LimitedMemoryListener* getLimitedMemoryListener() const { return m_limitedListener; }
 
             /// Works out what the largest block available is
-        hk_size_t findLargestBlockSize();
+        hk_size_t findLargestBlockSize() const;
 
             /// Get the top block size
         hk_size_t getTopBlockSize() const { return m_topsize; }
@@ -396,7 +396,7 @@ class hkLargeBlockAllocator : public hkMemoryAllocator, public hkMemoryAllocator
         static const hk_size_t SIZE_T_BITSIZE = (sizeof(hk_size_t) << 3);
 
             /// Returns true if an allocated block looks correctly formed
-        bool _checkUsedAlloc(const void* mem);
+        bool _checkUsedAlloc(const void* mem) const;
 
             /// If called after a successful free should return true
         hkBool _checkFreeChunk( MemChunk* p);
@@ -405,7 +405,7 @@ class hkLargeBlockAllocator : public hkMemoryAllocator, public hkMemoryAllocator
             /// all the blocks how much memory is used
         hk_size_t _calculateUsed() const;
 
-        hk_size_t _findLargestTreeBlockSize(MemTreeChunk* t,hk_size_t largest);
+        hk_size_t _findLargestTreeBlockSize(MemTreeChunk* t,hk_size_t largest) const;
 
         void _markTreeMap(BinIndex i) { m_treemap |= (1<<i); }
         void _clearTreeMap(BinIndex i) { m_treemap &= ~(1<<i); }
@@ -545,7 +545,7 @@ class hkLargeBlockAllocator : public hkMemoryAllocator, public hkMemoryAllocator
 #endif // HK_LARGE_BLOCK_ALLOCATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

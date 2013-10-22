@@ -596,6 +596,7 @@ namespace VisionEditorPlugin.Shapes
       : base(info, context)
     {
       _fileName = info.GetString("_fileName");
+      _fileName = (_fileName != null) ? _fileName.Replace('\\', '/') : null;
       _bEditable = info.GetBoolean("_bEditable");
 
       if (SerializationHelper.HasElement(info, "_ExportAsPrefabInstance"))
@@ -816,6 +817,7 @@ namespace VisionEditorPlugin.Shapes
       }
       set
       {
+        value = (value != null) ? value.Replace('\\', '/') : null;
         if (_fileName == value)
         {
           return;
@@ -1981,8 +1983,6 @@ namespace VisionEditorPlugin.Shapes
       if (ExportHelper.StartPrefabExport(info))
       {
         foreach (ShapeBase shape in shapes)
-          shape.ReassignAllLinksRecursive();
-        foreach (ShapeBase shape in shapes)
           EditorManager.CallShapeOnSceneEventRecursive(shape, sceneEvent);
         foreach (ShapeBase shape in shapes)
           shape.OnExportRecursive(info);
@@ -2020,7 +2020,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

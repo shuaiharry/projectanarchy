@@ -139,6 +139,7 @@ namespace TerrainEditorPlugin.Dialogs
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.ShowInTaskbar = false;
       this.Name = "TerrainCreationDlg";
       this.Text = "Create a new Terrain";
       this.Load += new System.EventHandler(this.TerrainCreationDlg_Load);

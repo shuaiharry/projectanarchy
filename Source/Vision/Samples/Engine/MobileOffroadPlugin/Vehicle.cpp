@@ -201,13 +201,13 @@ void Vehicle::InitPhysics()
 void Vehicle::InitHUD()
 {
   // Speedometer
-  m_speedometer = new VisScreenMask_cl("Textures\\Speed.tga");
+  m_speedometer = new VisScreenMask_cl("Textures\\Speed.tga", VTM_FLAG_DEFAULT_NON_MIPMAPPED);
   m_speedometer->SetTransparency(VIS_TRANSP_ALPHA);
   m_speedometer->SetDepthWrite(FALSE);
   m_speedometer->SetFiltering(TRUE);
 
   // Speedometer's arrow counterpart
-  m_speedometerArrow = new VisScreenMask_cl("Textures\\SpeedArrow.tga");
+  m_speedometerArrow = new VisScreenMask_cl("Textures\\SpeedArrow.tga", VTM_FLAG_DEFAULT_NON_MIPMAPPED);
   m_speedometerArrow->SetTransparency(VIS_TRANSP_ALPHA);
   m_speedometerArrow->SetDepthWrite(FALSE);
   m_speedometerArrow->SetFiltering(TRUE);
@@ -464,7 +464,7 @@ void Vehicle::DeInitSounds()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

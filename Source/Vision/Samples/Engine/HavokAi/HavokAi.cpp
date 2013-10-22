@@ -111,9 +111,9 @@ VISION_INIT
  
 #if defined(_VISION_MOBILE) || defined( HK_ANARCHY )
   Vision::Renderer.SetUseSingleBufferedStaticMeshes(false);
-	if (!spApp->InitSample("HavokAi" /*DataDir*/, "vScenes\\HavokAi" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS | VSAMPLE_FORCEMOBILEMODE ))
+	if (!spApp->InitSample("HavokAi" /*DataDir*/, "vScenes\\HavokAi" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_FORCEMOBILEMODE ))
 #else
-	if (!spApp->InitSample("HavokAi" /*DataDir*/, "vScenes\\HavokAi" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS & ~VSAMPLE_WIIU_DRCDEMO ))
+	if (!spApp->InitSample("HavokAi" /*DataDir*/, "vScenes\\HavokAi" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS & ~VSampleFlags::VSAMPLE_WIIU_DRCDEMO ))
 #endif
 		return false;
 
@@ -282,7 +282,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

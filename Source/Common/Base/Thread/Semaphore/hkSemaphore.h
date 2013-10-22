@@ -19,7 +19,7 @@
 #	include <semaphore.h>
 #endif
 #if (defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_LINUX) || \
-	defined(HK_PLATFORM_LRBXENSIM) || defined(HK_PLATFORM_ANDROID) ) && (HK_CONFIG_THREAD == HK_CONFIG_MULTI_THREADED)
+	defined(HK_PLATFORM_LRBXENSIM) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_TIZEN) ) && (HK_CONFIG_THREAD == HK_CONFIG_MULTI_THREADED)
 #	include <pthread.h>
 #elif defined(HK_PLATFORM_WIIU)
 #	include <cafe/os.h>
@@ -82,7 +82,7 @@ class hkSemaphore
 		SceKernelSema m_semaphore;
 
 #elif (defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_LINUX) || \
-	  defined(HK_PLATFORM_LRB) || defined(HK_PLATFORM_ANDROID)) && (HK_CONFIG_THREAD == HK_CONFIG_MULTI_THREADED)
+	  defined(HK_PLATFORM_LRB) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_TIZEN)) && (HK_CONFIG_THREAD == HK_CONFIG_MULTI_THREADED)
 
 		//Mutex used to simulate the Semaphore
 		struct hkSemaphorePosix
@@ -109,7 +109,7 @@ class hkSemaphore
 #endif // HKBASE_HK_SEMAPHORE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

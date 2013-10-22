@@ -8,6 +8,7 @@
 #ifndef HK_XML_TAGFILE_READER_H
 #define HK_XML_TAGFILE_READER_H
 
+#include <Common/Serialize/Tagfile/Xml/hkXmlTagfileCommon.h>
 #include <Common/Serialize/Tagfile/hkTagfileReader.h>
 
 	/// Write tagfiles in a XML format.
@@ -17,12 +18,16 @@ class hkXmlTagfileReader : public hkTagfileReader
 	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 			/// Save the contents to the given stream.
 		virtual hkDataObject load( hkStreamReader* stream, hkDataWorld& world );
+
+
+			/// Reads an XML tagfile header from buffer.
+		hkResult readHeader(hkStreamReader* stream, hkXmlTagfile::Header& out);
 };
 
 #endif // HK_XML_TAGFILE_READER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -17,7 +17,7 @@
 // demo code, the hkg graphics library etc.
 
 
-#if !(defined(ANDROID_NDK) || defined(ANDROID) || defined(NDK) || defined(__ANDROID_API__))
+#if !(defined(ANDROID_NDK) || defined(ANDROID) || defined(NDK) || defined(__ANDROID_API__) || defined(HK_PLATFORM_TIZEN))
 #include <Common/Base/hkBase.h>
 #endif
 
@@ -190,7 +190,7 @@ class extCriticalSection
 #endif // HKBASE_HKBASEEXT_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

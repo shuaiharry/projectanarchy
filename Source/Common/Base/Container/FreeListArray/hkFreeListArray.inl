@@ -39,7 +39,7 @@ HK_FORCE_INLINE void hkFreeListArray<VALUE_TYPE, INDEX_TYPE, GROWTH, OPERATIONS>
 template < typename VALUE_TYPE, typename INDEX_TYPE, int GROWTH, typename OPERATIONS >
 HK_FORCE_INLINE void hkFreeListArray<VALUE_TYPE, INDEX_TYPE, GROWTH, OPERATIONS>::clear()
 {
-	hkTraitBool<OperationsImplementIsEmpty::VALUE> hasIsEmpty;
+	hkTrait::TraitBool<OperationsImplementIsEmpty::VALUE> hasIsEmpty;
 	_clear(hasIsEmpty);
 }
 
@@ -47,7 +47,7 @@ template < typename VALUE_TYPE, typename INDEX_TYPE, int GROWTH, typename OPERAT
 HK_FORCE_INLINE void hkFreeListArray<VALUE_TYPE, INDEX_TYPE, GROWTH, OPERATIONS>::_clear(CanNotCheckForEmpty notUsed)
 {
 	// Traverse free list keeping track of free elements
-	hkBitField::Stack isElementFree(m_elements.getSize(), 0);	
+	hkLocalBitField isElementFree(m_elements.getSize(), hkBitFieldValue::ZERO);
 	while (m_firstFree != -1)
 	{
 		isElementFree.set(m_firstFree);
@@ -183,7 +183,7 @@ HK_FORCE_INLINE	VALUE_TYPE& hkFreeListArray<VALUE_TYPE, INDEX_TYPE, GROWTH, OPER
 template < typename VALUE_TYPE, typename INDEX_TYPE, int GROWTH, typename OPERATIONS >
 HK_FORCE_INLINE hkBool32 hkFreeListArray<VALUE_TYPE, INDEX_TYPE, GROWTH, OPERATIONS>::isAllocated(INDEX_TYPE index) const
 {
-	hkTraitBool<OperationsImplementIsEmpty::VALUE> hasIsEmpty;
+	hkTrait::TraitBool<OperationsImplementIsEmpty::VALUE> hasIsEmpty;
 	return _isAllocated(index, hasIsEmpty);
 }
 
@@ -210,7 +210,12 @@ template < typename VALUE_TYPE, typename INDEX_TYPE, int GROWTH, typename OPERAT
 HK_FORCE_INLINE hkBool32 hkFreeListArray<VALUE_TYPE, INDEX_TYPE, GROWTH, OPERATIONS>::_isAllocated(INDEX_TYPE index, 
 																								   CanCheckForEmpty notUsed) const
 {
+#if !defined(HK_PLATFORM_SPU)
 	return !OPERATIONS::isEmpty(operator[](index));
+#else
+	const VALUE_TYPE& instance = getAtWithCache( index );
+	return !OPERATIONS::isEmpty( instance );
+#endif
 }
 
 
@@ -273,7 +278,7 @@ HK_FORCE_INLINE	void hkFreeListArray<VALUE_TYPE, INDEX_TYPE, GROWTH, OPERATIONS>
 	while( ++m_index < max )
 	{
 		// Require OPERATIONS::isEmpty() to be implemented, otherwise don't compile
-		if( m_freeListArray._isAllocated( INDEX_TYPE(m_index), hkTraitBool<true>() ) )
+		if( m_freeListArray._isAllocated( INDEX_TYPE(m_index), hkTrait::TraitBool<true>() ) )
 		{
 			return;
 		}
@@ -300,7 +305,7 @@ HK_FORCE_INLINE	const VALUE_TYPE& hkFreeListArray<VALUE_TYPE, INDEX_TYPE, GROWTH
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

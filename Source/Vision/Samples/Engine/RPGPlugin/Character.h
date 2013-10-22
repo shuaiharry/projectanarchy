@@ -8,7 +8,6 @@
 #ifndef RPG_PLUGIN_CHARACTER_H__
 #define RPG_PLUGIN_CHARACTER_H__
 
-#include <Vision/Samples/Engine/RPGPlugin/ActionHandler.h>
 #include <Vision/Samples/Engine/RPGPlugin/Attachment.h>
 #include <Vision/Samples/Engine/RPGPlugin/CharacterActionData.h>
 #include <Vision/Samples/Engine/RPGPlugin/CharacterStats.h>
@@ -63,6 +62,60 @@ enum RPG_CharacterEffect_e
   FX_Count
 };
 
+namespace RPG_CharacterAnimationEvent
+{
+  enum Enum
+  {
+    // Common
+    kTakeControl,
+    kDie,
+
+    kMove,
+    kMoveEnd,
+
+    kMeleeAttack,
+    kMeleeAttackEnd,
+
+    kRangedAttack,
+    kRangedAttackEnd,
+
+    kAoeAttack,
+    kAoeAttackEnd,
+
+    kPowerAttack,
+    kPowerAttackEnd,
+
+    kHeal,
+    kHealEnd,
+
+    // Common timeline
+    kSpawnEffect,
+    kFootStepEffect,
+    kMeleeAttackFire,
+    kRangedAttackFire,
+    kAoeAttackFire,
+    kPowerAttackFire,
+    kHealFire,
+
+    // Non-player
+    kChallenge,
+    kChallengeEnd,
+
+    kNumCharacterAnimationEvents
+  };
+}
+
+namespace RPG_CharacterAnimationVariable
+{
+  enum Enum
+  {
+    // Common
+    kMoveSpeed,
+
+    kNumCharacterAnimationVariables
+  };
+};
+
 /// Character class. Both players and NPC characters should be instantiated with this type
 class RPG_Character : public RPG_DamageableEntity
 {
@@ -70,6 +123,7 @@ public:
   // Constructor needs to be public for FORCE_LINKDYNCLASS on mobile
   RPG_Character();
 
+  // @TODO: make abstract
   virtual VType* GetControllerComponentType() { return NULL; }
 
   // RPG_BaseEntity
@@ -88,8 +142,8 @@ public:
   //@{
   // Update methods
   // TODO - implement both server and client tick
-  virtual void ServerTick(float const deltaTime);
-  //virtual void ClientTick(float const deltaTime);
+  virtual void ServerTick(float deltaTime);
+  //virtual void ClientTick(float deltaTime);
   //@}
 
   void SetVisible(bool visible);
@@ -98,14 +152,7 @@ public:
 
   //@{
   // Local Control Methods
-  RPG_PLUGIN_IMPEXP virtual void SetLocallyControlled(bool locallyControlled);
   virtual bool GetLocallyControlled() const;
-  //@}
-
-  //@{
-  // Actions
-  const RPG_ActionHandler& GetActionHandler() const;
-  RPG_ActionHandler& GetActionHandler();
   //@}
 
   //@{
@@ -128,19 +175,18 @@ public:
 
   //@{
   // Combat
+  void DoMeleeAttack(RPG_DamageableEntity *targetEntity);
+
+  void DoRangedAttack(hkvVec3 const& targetPoint);
+
+  void DoAoeAttack();
+
+  void DoPowerAttack();
+
   virtual int TakeDamage(const int damageAmount, const hkvVec3& impactVelocity = hkvVec3(0,0,0)) HKV_OVERRIDE;
   virtual void ApplyKnockBack(const hkvVec3& knockBackVector, const float duration) HKV_OVERRIDE;
   int AddHealth(const int healthAmount);
   void AddMana(const int manaAmount);
-
-  bool IsAttacking() const;           ///< Is this character doing any attack action at all right now?
-  bool IsDoingSpecialAttack() const;  ///< Is this character doing an attack other than a standard melee or ranged attack?
-
-  bool IsTargetWithinAttackRange(RPG_DamageableEntity* target) const;
-  bool IsTargetWithinAttackRange(const hkvVec3& targetPosition) const;
-  bool IsTargetWithinRange(RPG_DamageableEntity* target, float const range) const;
-  bool IsTargetWithinRange(const hkvVec3& targetPosition, float const range) const;
-  float GetEquippedWeaponRange() const;
 
   virtual void Die();
   bool IsDead() const;
@@ -151,7 +197,10 @@ public:
 
   vHavokBehaviorComponent *GetBehaviorComponent();
   vHavokBehaviorComponent const *GetBehaviorComponent() const;
-  virtual void OnHavokBehaviorEvent(const VString& eventName);
+
+  int GetIdForAnimationEvent(RPG_CharacterAnimationEvent::Enum animationEvent) const { return m_animationEventIds[animationEvent]; }
+  void RaiseAnimationEvent(RPG_CharacterAnimationEvent::Enum animationEvent);
+  void SetAnimationVariable(RPG_CharacterAnimationVariable::Enum animationVariable, float value);
 
   vHavokCharacterController *GetHavokCharacterControllerComponent() { return m_characterController; }
 
@@ -166,10 +215,6 @@ public:
 
   //@{
   // Inventory and inventory-derived values
-  int   GetMinDamage() const;
-  int   GetMaxDamage() const;
-  float GetAttackSpeed() const;
-  float GetDPS() const;
   int   GetArmor() const;
   bool  IsShieldEquipped() const;
   //@}
@@ -186,11 +231,13 @@ public:
 
   //@{
   // Effects
-  void CreateCharacterEffect(RPG_CharacterEffect_e const& effectType);
-  VisParticleEffect_cl* GetPersistentCharacterEffect(RPG_CharacterEffect_e const& effectType) const;
-  void PauseCharacterEffect(RPG_CharacterEffect_e const& effectType);
-  void FinishCharacterEffect(RPG_CharacterEffect_e const& effectType);
-  RPG_EffectDefinition const& GetCharacterEffectDefinition(RPG_CharacterEffect_e const& effectType) const;
+  void CreateCharacterEffect(RPG_CharacterEffect_e effectType);
+  VisParticleEffect_cl *GetPersistentCharacterEffect(RPG_CharacterEffect_e effectType) const;
+  void PauseCharacterEffect(RPG_CharacterEffect_e effectType);
+  void FinishCharacterEffect(RPG_CharacterEffect_e effectType);
+
+  // TODO it is not necessary to store character effect definitions per-instance (though see ActivateCharacterEffectDebugDisplay)
+  RPG_EffectDefinition const& GetCharacterEffectDefinition(RPG_CharacterEffect_e effectType) const { return m_characterEffectDefinitions[effectType]; }
   //@}
 
   //@{
@@ -234,16 +281,20 @@ protected:
   //@}
 
   //@{
-  // Effects
+  // Animation
+  void InitAnimationEventIds();
+  void InitAnimationVariableIds();
+
+  void OnHavokAnimationEvent(hkbEvent const& behaviorEvent, bool raisedBySdk);
+
+  void ProcessAnimationEvents();
+  virtual void OnProcessAnimationEvent(hkbEvent const& behaviorEvent);
+
   void UpdateBehaviorWorldFromModel();
   //@}
 
   // VisTypedEngineObject_cl
   void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB ) HKV_OVERRIDE;
-
-  // VTypedObject
-  VBool WantsDeserializationCallback(const VSerializationContext& context) HKV_OVERRIDE;
-  void OnDeserializationCallback(const VSerializationContext& context) HKV_OVERRIDE;
 
 protected:
   float m_eyeHeight;
@@ -256,8 +307,6 @@ protected:
   float m_knockBackDuration;
   hkvVec3 m_knockBackVector;
 
-  bool m_locallyControlled;				                        ///< whether or not this character is locally controlled
-
   //@{
   // Death
   bool m_dead;                                            ///< is this character dead?
@@ -269,7 +318,6 @@ protected:
 
   //@{
   // Actions
-  RPG_ActionHandler m_actionHandler;                      ///< Handles processing of all Actions
   RPG_CharacterActionData m_actionData;                   ///< Contains information about this character's actions
   //@}
 
@@ -286,7 +334,11 @@ protected:
 
   //@{
   // Behavior animation
+  int m_animationEventIds[RPG_CharacterAnimationEvent::kNumCharacterAnimationEvents];
+  int m_animationVariableIds[RPG_CharacterAnimationVariable::kNumCharacterAnimationVariables];
+
   vHavokBehaviorComponentPtr m_havokBehavior;
+  hkArray<hkbEvent> m_queuedAnimationEvents;
   //@}
 
   //@{
@@ -346,10 +398,18 @@ private:
   V_DECLARE_VARTABLE(RPG_Character, RPG_PLUGIN_IMPEXP);
 };
 
+// TODO find an appropriate place for this
+namespace RPG_CharacterUtil
+{
+  int CalcOutgoingDamage(RPG_Character const *character, float damageMultiplier = 1.0f);
+
+  float CalcImpactSpeed(RPG_Character const *character, float impactSpeedMultiplier = 1.0f);
+}
+
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

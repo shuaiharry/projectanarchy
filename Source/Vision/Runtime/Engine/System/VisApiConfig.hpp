@@ -27,7 +27,7 @@ struct VisResourceConfig_t
   VisResourceConfig_t()
   {
 #if defined(WIN32) && defined(_VR_DX9) // on lost device
-    // restore textures and buffers (only unmanaged)
+    // restore textures and buffers (unmanaged only)
     restoreTexturesOnBackgrounding = true;
     restoreBuffersOnBackgrounding = true;
     restoreShadersOnBackgrounding = false;
@@ -38,7 +38,7 @@ struct VisResourceConfig_t
     restoreBuffersOnBackgrounding = true;
     restoreShadersOnBackgrounding = true;
 
-#elif defined(_VISION_IOS)
+#elif defined(_VISION_IOS) || defined(_VISION_TIZEN)
     // restore textures
     restoreTexturesOnBackgrounding = true;
     restoreBuffersOnBackgrounding = false;
@@ -76,28 +76,9 @@ public:
 
   VisConfig_t()
   {
-    version = 7;                                    
+    version = 8;                                    
     size = sizeof (VisConfig_t);                   
      
-    // visibility  
-    visibilitySubDivideAreas = VIS_ENABLED;             ///<DEPRECATED
-    visibilityMinKdTreeLeafSize = 384;                  ///<DEPRECATED
-    visibilityMaxPrimitivesPerKdTreeNode = 256;         ///<DEPRECATED
-    octreeLeafSize = 4096; 
-
-    // geometry caches
-    maxShadowVertices = 64000; 
-    maxShadowIndices = 128000;
-    
-    // Maximum item count values
-    globalMaxDynamicLights = 220;
-    globalMaxPolygonChunks = 512;                       ///<DEPRECATED
-    globalMaxObjectTypes = 512;                         ///<DEPRECATED
-
-    // adjacency information (required for stencil shadow casting)
-    computeAdjacencyForModels = true;                   ///<DEPRECATED
-    computeAdjacencyForWorld = true;                    ///<DEPRECATED
-
     m_pszAssetProfile = NULL;
   }
   
@@ -105,25 +86,6 @@ public:
   // members
   int version;                                  ///< Structure version, version must be either 3 or 4. the current version is 6 (!)
   int size;                                     ///< Size of this structure.
-   
-  // visibility  
-  HKV_DEPRECATED_2013_2 VIS_CFG_OnOff visibilitySubDivideAreas;       ///<DEPRECATED
-  HKV_DEPRECATED_2013_2 int visibilityMinKdTreeLeafSize;              ///<DEPRECATED
-  HKV_DEPRECATED_2013_2 int visibilityMaxPrimitivesPerKdTreeNode;     ///<DEPRECATED
-  HKV_DEPRECATED_2013_2 int octreeLeafSize;                           ///<DEPRECATED
-
-  // geometry caches
-  HKV_DEPRECATED_2013_2 int maxShadowVertices;                        ///<DEPRECATED
-  HKV_DEPRECATED_2013_2 int maxShadowIndices;                         ///<DEPRECATED
-  
-  // dynamic array sizes, replaces constants in older engine versions
-  int globalMaxDynamicLights;                   ///< maximum number of dynamic lightsources (excluding those in .v3d). default is 200
-  HKV_DEPRECATED_2013_2 int globalMaxPolygonChunks;                   ///< DEPRECATED. Maximum number of polygon chunks. default is 512. you should only increase it when the engine is complaining about the value being too small.
-  HKV_DEPRECATED_2013_2 int globalMaxObjectTypes;                     ///< IGNORED
-
-  // adjacency computation
-  HKV_DEPRECATED_2013_2 bool computeAdjacencyForModels;               ///< DEPRECATED
-  HKV_DEPRECATED_2013_2 bool computeAdjacencyForWorld;                ///< DEPRECATED
 
   // background resource handling
   VisResourceConfig_t resourceConfig;
@@ -136,7 +98,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -85,12 +85,16 @@ HK_FORCE_INLINE void hkVector2f::load( const hkFloat32* p )
 
 HK_FORCE_INLINE void hkVector2f::convertToVector4( hkVector4f& vOut ) const
 {
-	vOut.load<2,HK_IO_NATIVE_ALIGNED>( &x );
+	// You might expect this to be HK_IO_NATIVE_ALIGNED
+	// It's like this to keep the code similar to the double version.
+	// In the double version, IO_NATIVE_ALIGNED needs 8 byte alignment.
+	// However, on many platforms, double is only 4 byte aligned.
+	vOut.load<2,HK_IO_BYTE_ALIGNED>( &x );
 }
 
 HK_FORCE_INLINE void hkVector2f::convertFromVector4( hkVector4fParameter vIn )
 {
-	vIn.store<2,HK_IO_NATIVE_ALIGNED>( &x );
+	vIn.store<2,HK_IO_BYTE_ALIGNED>( &x );
 }
 
 HK_FORCE_INLINE void hkVector2f::setPerp( const hkVector2f& a )
@@ -248,7 +252,7 @@ HK_FORCE_INLINE void HK_CALL hkVector2f::cross(const hkVector2f& vA, const hkVec
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

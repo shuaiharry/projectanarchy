@@ -60,6 +60,7 @@ class hkaiUserEdgeUtils
 		void _getSegmentForAxis( int i, hkVector4& segOutA, hkVector4& segOutB ) const;
 	};
 	
+		/// Which direction the user edge goes.
 	enum UserEdgeDirection
 	{
 			/// User edge is not traversable.
@@ -75,6 +76,7 @@ class hkaiUserEdgeUtils
 		USER_EDGE_BIDIRECTIONAL
 	};
 
+		/// Whether the user edge setups are specified in world space, or instance-local space.
 	enum UserEdgeSetupSpace
 	{
 			/// OBBs are specified in world space
@@ -213,12 +215,14 @@ class hkaiUserEdgeUtils
 	// attempt to handle faces which have been cut.
 	//
 
+		/// Whether the clearance should be reset after adding user edges.
 	enum ClearanceResetMode
 	{
 		RESET_CLEARANCE_CACHE,
 		DONT_RESET_CLEARANCE_CACHE
 	};
 
+		/// Controls the behavior of adding user edges.
 	struct UpdateParameters
 	{
 		HK_FORCE_INLINE UpdateParameters()
@@ -253,6 +257,7 @@ class hkaiUserEdgeUtils
 	// Methods for adding user edges after cutting has occurred.
 	//
 	
+		/// Controls the behavior of updating cut nav meshes.
 	struct CutMeshUpdateParameters : public UpdateParameters
 	{
 		HK_FORCE_INLINE CutMeshUpdateParameters()
@@ -279,6 +284,7 @@ class hkaiUserEdgeUtils
 	// Methods to remove user edges from hkaiNavMeshInstances and hkaiStreamingCollections
 	//
 
+		/// Controls the behavior of removing user edges.
 	struct RemoveParameters
 	{
 		HK_FORCE_INLINE RemoveParameters()
@@ -344,7 +350,7 @@ public:
 #endif // HKAI_USER_EDGE_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

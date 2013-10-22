@@ -111,6 +111,8 @@ int LUA_SetHomeDir (lua_State* state)
       sprintf(szAppDirPath, "%s?assets/%s", VisSampleApp::GetApkDirectory(), &(szHomeDir[2])); 
     #elif defined(_VISION_IOS)
       sprintf(szAppDirPath, "%s/%s", VisSampleApp::GetRootDirectory(), &(szHomeDir[2]));
+    #elif defined(_VISION_TIZEN)
+      sprintf(szAppDirPath, "%s%s", VisSampleApp::GetSDCardDirectory(), &(szHomeDir[2]));
     #endif
     s_sHomeDir = szAppDirPath;
   }
@@ -123,7 +125,7 @@ int LUA_SetHomeDir (lua_State* state)
 }
 
 
-hkvResult LoadSceneConfig (VTargetDevice_e CurPlatform, const char* szSceneConfigFile, VListControl* pList)
+hkvResult LoadSceneConfig (VTargetDevice_e CurPlatform, const char* szExportedScenesConfig, const char* szSceneConfigFile, VListControl* pList)
 {
   s_CurPlatform = CurPlatform;
   s_pSceneList = pList;
@@ -132,6 +134,7 @@ hkvResult LoadSceneConfig (VTargetDevice_e CurPlatform, const char* szSceneConfi
   VisRenderContext_cl::GetMainRenderContext()->GetSize(iWidth, iHeight);
   float fIconSize = hkvMath::floor(hkvMath::clamp(iHeight / 12.0f, 24.0f, 128.0f));
 
+  s_pSceneList->Reset();
   s_pSceneList->SetIconSize(fIconSize, hkvVec2(0.0f));
 
   vLuaScript s;
@@ -139,7 +142,7 @@ hkvResult LoadSceneConfig (VTargetDevice_e CurPlatform, const char* szSceneConfi
   // register all available platforms as bitmasks
   for (hkInt32 i = 0; i < VShaderEnum::g_devices.GetNumEntries (); ++i)
   {
-    VString sDeviceName = VShaderEnum::g_devices.GetNameFromIndex (i);
+    VString sDeviceName = VShaderEnum::g_devices.GetNameFromEnum(i);
 
     // remove all white spaces
     sDeviceName.ReplaceAll (" ", "");
@@ -170,6 +173,11 @@ hkvResult LoadSceneConfig (VTargetDevice_e CurPlatform, const char* szSceneConfi
 
   // this will write the result into s_sMenuScenes
   VString sError;
+  if(szExportedScenesConfig != NULL && Vision::File.Exists(szExportedScenesConfig))
+  {
+    if(!s.ExecuteFile(szExportedScenesConfig, sError))
+      Vision::Error.Warning("Failed to execute error: %s\n", sError.AsChar());
+  }
   if (!s.ExecuteFile (szSceneConfigFile, sError))
     return HKV_FAILURE;
 
@@ -177,7 +185,7 @@ hkvResult LoadSceneConfig (VTargetDevice_e CurPlatform, const char* szSceneConfi
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

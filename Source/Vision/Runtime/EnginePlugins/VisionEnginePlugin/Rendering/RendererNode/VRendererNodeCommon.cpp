@@ -13,17 +13,15 @@
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Postprocessing/VPostProcessScreenMasks.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/RenderingHelpers/BufferResolver.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Postprocessing/VPostProcessTranslucencies.hpp>
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/RenderingHelpers/TimeOfDay.hpp>
 
 V_IMPLEMENT_SERIAL_ABSTRACT(VRendererNodeCommon, IVRendererNode, 0, &g_VisionEngineModule);
-
-#define RENDERERNODEBASE_VERSION_1            1 // Initial version, corresponds to forward version 6 and deferred version 12
-#define RENDERERNODEBASE_VERSION_CURRENT      1
-
 
 VisMeshBufferObjectCollection_cl VRendererNodeCommon::s_MeshBufferObjectCollection(32, 32);
 
 
-VRendererNodeCommon::VRendererNodeCommon() {
+VRendererNodeCommon::VRendererNodeCommon() 
+{
   m_iAutomaticResolveCounter = 0;
   m_pColorBufferResolver = NULL;
   m_uiResolveColorBufferRenderHook = VRH_PRE_TRANSPARENT_PASS_GEOMETRY;
@@ -31,13 +29,17 @@ VRendererNodeCommon::VRendererNodeCommon() {
   m_bPostProcessorAssignmentDirty = false;
   m_pDeinitDuringVideoResize = NULL;
   m_bUsesDirectRenderToFinalTargetContext = false;
+  m_bIsRendererNodeActive = false;
 
   Vision::Callbacks.OnBeforeVideoChanged += this;
   Vision::Callbacks.OnVideoChanged += this;
   Vision::Callbacks.OnEnterForeground += this;
+  Vision::Callbacks.OnUpdateSceneFinished += this;
 }
 
-VRendererNodeCommon::VRendererNodeCommon(VisRenderContext_cl* pTargetContext) : IVRendererNode(pTargetContext) {
+VRendererNodeCommon::VRendererNodeCommon(VisRenderContext_cl* pTargetContext) 
+  : IVRendererNode(pTargetContext) 
+{
   m_iAutomaticResolveCounter = 0;
   m_pColorBufferResolver = NULL;
   m_uiResolveColorBufferRenderHook = VRH_PRE_TRANSPARENT_PASS_GEOMETRY;
@@ -45,14 +47,17 @@ VRendererNodeCommon::VRendererNodeCommon(VisRenderContext_cl* pTargetContext) : 
   m_bPostProcessorAssignmentDirty = false;
   m_pDeinitDuringVideoResize = NULL;
   m_bUsesDirectRenderToFinalTargetContext = false;
+  m_bIsRendererNodeActive = false;
 
   Vision::Callbacks.OnBeforeVideoChanged += this;
   Vision::Callbacks.OnVideoChanged += this;
   Vision::Callbacks.OnEnterForeground += this;
+  Vision::Callbacks.OnUpdateSceneFinished += this;
 }
 
 VRendererNodeCommon::~VRendererNodeCommon()
 {
+  Vision::Callbacks.OnUpdateSceneFinished -= this;
   Vision::Callbacks.OnEnterForeground -= this;
   Vision::Callbacks.OnVideoChanged -= this;
   Vision::Callbacks.OnBeforeVideoChanged -= this;
@@ -72,6 +77,21 @@ bool VRendererNodeCommon::RendersIntoBackBuffer()
   return false;
 }
 
+void VRendererNodeCommon::OnActivate()
+{
+  m_bIsRendererNodeActive = true;
+}
+
+void VRendererNodeCommon::OnDeactivate()
+{
+  m_bIsRendererNodeActive = false;
+}
+
+bool VRendererNodeCommon::IsActive() const
+{
+  return m_bIsRendererNodeActive;
+}
+
 void VRendererNodeCommon::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
   if (pData->m_pSender == &Vision::Callbacks.OnBeforeVideoChanged)
@@ -86,7 +106,7 @@ void VRendererNodeCommon::OnHandleCallback(IVisCallbackDataObject_cl *pData)
     V_SAFE_DELETE(m_pDeinitDuringVideoResize);
   }
 #if defined(WIN32) && defined(_VR_DX9)
-  else if(pData->m_pSender == &Vision::Callbacks.OnEnterForeground)
+  else if (pData->m_pSender == &Vision::Callbacks.OnEnterForeground)
   {
     if(IsInitialized())
     {
@@ -94,6 +114,10 @@ void VRendererNodeCommon::OnHandleCallback(IVisCallbackDataObject_cl *pData)
     }
   }
 #endif
+  else if (pData->m_pSender == &Vision::Callbacks.OnUpdateSceneFinished)
+  {
+    UpdateTimeOfDay();
+  }
 }
 
 void VRendererNodeCommon::RemovePostprocessors()
@@ -326,7 +350,7 @@ void VRendererNodeCommon::InitializePostProcessors()
 
           if(pFinalTargetContext->RendersIntoBackBuffer())
           {
-            #if !defined(_VISION_ANDROID)
+            #if !defined(_VISION_ANDROID) && !defined(_VISION_TIZEN)
               // On Android, the back buffer context uses a fixed FBO, so we can't replace the DST.
               bCanReplaceDST = Vision::Video.GetCurrentConfig()->m_eMultiSample == VVIDEO_MULTISAMPLE_OFF;
             #endif
@@ -869,13 +893,80 @@ void VRendererNodeCommon::SetResolveColorBufferRenderHook(unsigned int uiRenderH
   }
 }
 
+void VRendererNodeCommon::CreateSky(const char *szPrefixNoon, const char *szPrefixDawn, const char *szPrefixDusk, const char *szPrefixNight, const char *szExtension, bool bUseBottom)
+{
+  DestroySky();
+
+  BOOL bResult = Vision::Shaders.LoadShaderLibrary("\\Shaders\\DefaultSky.ShaderLib", SHADERLIBFLAG_HIDDEN) != NULL;
+  VASSERT(bResult);
+
+  VCompiledEffect *pFX = Vision::Shaders.CreateEffect("DefaultSky", NULL, 0);
+  m_spSky = new VSky(szPrefixNoon, szPrefixDawn, szPrefixDusk, szPrefixNight, szExtension, bUseBottom, pFX);
+}
+
+void VRendererNodeCommon::DestroySky()
+{
+  if (m_spSky == NULL)
+    return;
+
+  m_spSky->SetEffect(NULL);
+  m_spSky = NULL;
+}
+
+void VRendererNodeCommon::UpdateTimeOfDay()
+{
+  // Update the active sky.
+  IVSky* pSky = m_spSky;
+  if (pSky == NULL)
+  {
+    pSky = Vision::World.GetActiveSky();
+  }
+  if (pSky != NULL)
+  {
+    pSky->Tick(0);
+  }
+
+  // Update Time Of Day handler.
+  IVTimeOfDay* pTimeOfDayInterface = Vision::Renderer.GetTimeOfDayHandler();
+  if (pTimeOfDayInterface != NULL)
+  {
+    VASSERT_MSG(pTimeOfDayInterface->IsOfType(V_RUNTIME_CLASS(VTimeOfDay)),
+      "Incompatible time of day handler installed - has to be VTimeOfDay or a subclass of it!");
+    VTimeOfDay* pTimeOfDay = vstatic_cast<VTimeOfDay*>(pTimeOfDayInterface);
+    pTimeOfDay->UpdateFogParameters();
+
+    VColorRef vAmbientColor(false);
+    float fDawnWeight, fDuskWeight, fNightWeight;
+    pTimeOfDay->EvaluateColorValue(0.1f, vAmbientColor, fDawnWeight, fDuskWeight, fNightWeight);
+    Vision::Renderer.SetGlobalAmbientColor(vAmbientColor.ToFloat().getAsVec4(1.0f));
+  }
+  else
+  {
+    // Set the default global ambient color.
+    Vision::Renderer.SetGlobalAmbientColor(Vision::Renderer.GetDefaultGlobalAmbientColor());
+  }
+}
+
+void VRendererNodeCommon::DeInitializeRenderer()
+{
+  // Re-set global ambient color.
+  Vision::Renderer.SetGlobalAmbientColor(hkvVec4::ZeroVector());
+
+  IVRendererNode::DeInitializeRenderer();
+}
+
+
+#define RENDERERNODEBASE_VERSION_1            1 // Initial version, corresponds to forward version 6 and deferred version 12
+#define RENDERERNODEBASE_VERSION_CURRENT      RENDERERNODEBASE_VERSION_1
+
 void VRendererNodeCommon::Serialize( VArchive &ar )
 {
   char iLocalVersion = RENDERERNODEBASE_VERSION_CURRENT;
   if (ar.IsLoading())
   {
     ar >> iLocalVersion;
-    VASSERT_MSG(iLocalVersion <= RENDERERNODEBASE_VERSION_CURRENT, "VRendererNodeCommon: Invalid version number");
+    VASSERT_MSG(iLocalVersion >= RENDERERNODEBASE_VERSION_1 && iLocalVersion <= RENDERERNODEBASE_VERSION_CURRENT, 
+      "VRendererNodeCommon: Invalid version number");
   }
   else
   {
@@ -902,7 +993,7 @@ START_VAR_TABLE(VRendererNodeCommon, IVRendererNode, "VRendererNodeCommon", 0, "
   END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

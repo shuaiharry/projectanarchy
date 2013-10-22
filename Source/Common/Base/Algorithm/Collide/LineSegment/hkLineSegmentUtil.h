@@ -92,12 +92,29 @@ class hkLineSegmentUtil
 			/// Compute the closest point between two infinite lines (each specified by a point and direction)
 		static hkResult HK_CALL closestPointInfLineInfLine( const hkVector4& A, const hkVector4& dA, const hkVector4& B, const hkVector4& dB, ClosestPointInfLineInfLineResult& result);
 
+		//
+		// Infinite line / plane
+		//
+
+		struct IntersectionInfLinePlaneResult
+		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_MATH, hkLineSegmentUtil::IntersectionInfLinePlaneResult );
+
+			/// The fraction along dA
+			hkPadSpu<hkReal> m_fractionA;
+
+			hkVector4 m_pointOnPlane;
+		};
+
+		/// Compute the intersection of an infinite line and a plane
+		static hkResult HK_CALL intersectionInfLinePlane( const hkVector4& A, const hkVector4& dA, const hkVector4& planeEquation, IntersectionInfLinePlaneResult& result);
+
 };
 
 #endif // HK_INTERNAL_LINE_SEGMENT_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

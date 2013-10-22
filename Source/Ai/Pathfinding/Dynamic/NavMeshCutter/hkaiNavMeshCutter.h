@@ -10,7 +10,7 @@
 
 #include <Ai/Pathfinding/NavMesh/hkaiNavMesh.h>
 #include <Ai/Pathfinding/Dynamic/Silhouette/hkaiCompoundSilhouette.h>
-#include <Ai/Internal/NavMesh/hkaiNavMeshGenerationSettings.h>
+#include <Ai/Internal/NavMesh/hkaiNavMeshEdgeMatchingParams.h>
 #include <Ai/Pathfinding/NavMesh/hkaiNavMeshUtils.h>
 #include <Ai/Pathfinding/Dynamic/NavMeshCutter/hkaiNavMeshSilhouetteSelector.h>
 #include <Common/Base/Container/Set/hkSet.h>
@@ -90,6 +90,9 @@ struct hkaiPersistentFaceKey
 	void setInvalid() { m_key = HKAI_INVALID_PACKED_KEY; m_offset = -1; }
 };
 
+	/// Edge information that tracks an edge key relative to the start of its corresponding face.
+	/// This is valid if the face changes index (due to other faces being cut or uncut),
+	/// but if this face gets cut or recut, the hkaiPersistentEdgeKey is invalid.
 struct hkaiPersistentEdgeKey
 {
 	HK_DECLARE_POD_TYPE();
@@ -98,8 +101,8 @@ struct hkaiPersistentEdgeKey
 	hkaiPersistentFaceKey m_faceKey;
 	hkInt16 m_edgeOffset;
 
-	/// A value for m_edgeOffset which specifies that this "edge key" is to be
-	/// used only for its contained face key.
+		/// A value for m_edgeOffset which specifies that this "edge key" is to be
+		/// used only for its contained face key.
 	static const hkInt16 EDGE_OFFSET_FACE_ONLY = -1;
 
 	hkaiRuntimeIndex getRuntimeId() const { return m_faceKey.getRuntimeId(); }
@@ -122,26 +125,27 @@ struct hkaiPersistentEdgeKey
 };
 
 
-/// Dynamically and incrementally cuts 2d shapes from a nav mesh.
-/// Starting with a base nav mesh, this class can cut a subset of
-/// faces to allow for additional obstacles. Cutting is always done from the
-/// base nav mesh which is modified in place. Each original face is
-/// replaced by one or more smaller "cut" faces.
-/// Cut faces, edges and vertices appear after the original faces,
-/// edges and vertices. Note that their indices will change after each cut
-/// as empty space is compacted.
-/// Original faces, edges and vertices remain at their original indices.
-/// Faces which have been cut and therefore not logically part of the nav mesh
-/// have hkaiNavMesh::FLAG_HIDDEN set.
+	/// Dynamically and incrementally cuts 2d shapes from a nav mesh.
+	/// Starting with a base nav mesh, this class can cut a subset of
+	/// faces to allow for additional obstacles. Cutting is always done from the
+	/// base nav mesh which is modified in place. Each original face is
+	/// replaced by one or more smaller "cut" faces.
+	/// Cut faces, edges and vertices appear after the original faces,
+	/// edges and vertices. Note that their indices will change after each cut
+	/// as empty space is compacted.
+	/// Original faces, edges and vertices remain at their original indices.
+	/// Faces which have been cut and therefore not logically part of the nav mesh
+	/// have hkaiNavMesh::FLAG_HIDDEN set.
 class hkaiNavMeshCutter : public hkReferencedObject
 {
 public:
 
 	//+vtable(true)
-	//+version(11)
+	//+version(13)
 	HK_DECLARE_REFLECTION();
 	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH);
 
+		/// Controls how nav mesh clearance values are reset after cutting.
 	enum ClearanceResetMethod
 	{
 			/// Always reset all clearance values. This is fast, but will increase path search costs.
@@ -264,6 +268,10 @@ public:
 		/// Gets the closest point on the specified face. If the face is hidden, its corresponding hit faces are checked.
 	hkaiPackedKey getClosestPointOnFaceLocal( hkVector4Parameter position, hkaiPackedKey faceKey, hkVector4& closestPointOut ) const;
 
+		/// Gets the closest boundary edge on the specified face. If the face is hidden, its corresponding hit faces are checked.
+	hkaiPackedKey getClosestBoundaryOnFaceLocal( hkVector4Parameter position, hkaiPackedKey faceKey, hkVector4Parameter up, hkVector4& closestPointOut ) const;
+
+
 		/// Undoes all cuts for the specified section
 	void uncutSection( hkaiRuntimeIndex sectionIndex, bool doChecks = true );
 
@@ -276,6 +284,7 @@ public:
 
 	const hkArray<int>& getMappingForSection( hkaiRuntimeIndex secIdx ) const { return m_meshInfos[secIdx].m_magic; }
 
+		/// Whether gatherCutEdges() should get all edges or just boundary edges.
 	enum GatherCutEdgesMode
 	{
 		GATHER_ALL_EDGES,
@@ -290,6 +299,14 @@ public:
 	void gatherCutEdgesFromCutFaces( hkaiPackedKey originalEdgeKey, const hkArrayBase<hkaiPackedKey>& cutfaceKeys,  hkArray<hkaiNavMeshCutter::FaceEdgePair>::Temp& cutPairs ) const;
 
 	void resetClearanceForCutFaces( const hkArrayBase<hkaiRuntimeIndex>& updatedSections, const hkArrayBase<hkaiPackedKey>& cutFaceKeys  );
+	
+		/// Recomputes all dirty global clearance values for the instance.
+		/// A value is considered dirty if it is greater than the maxGlobalClearance for the instance.
+	void recomputeDirtyGlobalClearances( hkaiNavMeshInstance& instance );
+
+		/// Resets edge clearances and recomputes global clearances for the faces in the set.
+	void recomputeGlobalClearancesForFaces( const hkSet<hkaiPackedKey>& facesToReset );
+
 
 		/// Make a persistent record to the given (possibly cut) face, which can be resolved to the equivalent face
 		/// even after face re-cuts move it to a different place, as long as the original face is not itself re-cut.
@@ -406,12 +423,15 @@ protected:
 		/// List of faces which have to be recut next frame
 	hkArray<hkaiPackedKey> m_forceRecutFaceKeys;
 
+		/// List of faces who need their clearnance reset
+	hkArray<hkaiPackedKey> m_forceClearanceCalcFaceKeys;
+
 public:
 		/// Used during edge matching
 	hkVector4 m_up; 
 
 		/// Edge matching parameters. They should be set as least as large as the ones used in nav mesh generation.
-	struct hkaiNavMeshGenerationSettings::EdgeMatchingParameters m_edgeMatchParams;
+	hkaiNavMeshEdgeMatchingParameters m_edgeMatchParams;
 
 		/// Tolerance used to determine when a pair of edges can be easily matched with each other.
 	hkReal m_cutEdgeTolerance; //+default(1e-4f)
@@ -426,6 +446,13 @@ public:
 
 		/// How to reset the clearance cache after cutting.
 	hkEnum<ClearanceResetMethod, hkUint8> m_clearanceResetMethod; //+default(hkaiNavMeshCutter::CLEARANCE_RESET_ALL)
+
+		/// Whether or not to use the new sweep-line based cutter, or the deprecated triangulator-based cutter.
+	hkBool m_useNewCutter; //+default(true)
+
+		/// Whether to compute the clearance values after cutting, or on the fly during A*
+		/// See hkaiWorld::m_precomputeNavMeshClearance for a description of the tradeoffs.
+	hkBool m_recomputeClearanceAfterCutting; //+default(false)
 };
 
 	/// Utility methods for hkaiNavMeshCutter.
@@ -452,7 +479,7 @@ public:
 #endif // HK_NAVMESH_CUTTER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

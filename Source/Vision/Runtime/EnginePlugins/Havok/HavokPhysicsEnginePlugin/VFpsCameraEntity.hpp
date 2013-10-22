@@ -25,14 +25,12 @@ public:
   VHAVOK_IMPEXP virtual void InitFunction() HKV_OVERRIDE;
   VHAVOK_IMPEXP virtual void ThinkFunction() HKV_OVERRIDE;
   VHAVOK_IMPEXP virtual void DeInitFunction() HKV_OVERRIDE;
-//  VHAVOK_IMPEXP virtual void MessageFunction( int iID, INT_PTR iParamA, INT_PTR iParamB ) HK_OVERRIDE;
 
   V_DECLARE_SERIAL_DLLEXP( VFpsCameraEntity,  VHAVOK_IMPEXP );
   VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
 
   // entity
   IMPLEMENT_OBJ_CLASS(VFpsCameraEntity);
-
 
 private:
   VisBaseEntity_cl *m_pCamera;
@@ -60,7 +58,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

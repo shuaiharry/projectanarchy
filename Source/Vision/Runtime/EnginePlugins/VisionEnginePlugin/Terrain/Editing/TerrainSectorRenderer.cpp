@@ -11,11 +11,12 @@
 #include <Vision/Runtime/Base/System/Memory/VMemDbg.hpp>
 
 
-VTerrainSectorRenderLoop::VTerrainSectorRenderLoop(int iResX, int iResY)
+VTerrainSectorRenderLoop::VTerrainSectorRenderLoop(int iResX, int iResY, bool bBakedLightmaps)
 {
   m_pSector = NULL;
   m_iResX = iResX;
   m_iResY = iResY;
+  m_bBakedLightmaps = bBakedLightmaps;
   m_pTargetData = NULL;
 #if ( defined(_VR_DX9) && defined(WIN32) )
   pRenderTarget = NULL;
@@ -50,16 +51,29 @@ void VTerrainSectorRenderLoop::OnDoRenderLoop(void *pUserData)
   const int iBaseX = hkvMath::Max(0, m_pSector->m_iIndexX - 1);
   const int iBaseY = hkvMath::Max(0, m_pSector->m_iIndexY - 1);
 
+  VTextureObjectPtr spLightmapTexture = NULL;
   for (int iSx = 0; iSx < iCountX; ++iSx)
   {
     for (int iSy = 0; iSy < iCountY; ++iSy)
     {
-      pSectorManager->GetSector(iBaseX + iSx, iBaseY + iSy)->Render(NULL, m_AllInst, 0, VPT_PrimaryOpaquePass);
+      VTerrainSector* pSector = pSectorManager->GetSector(iBaseX + iSx, iBaseY + iSy);
+      if (!m_bBakedLightmaps)
+      {
+        spLightmapTexture = pSector->GetLightmapTexture(0);
+        pSector->SetLightmapTexture(NULL, 0);
+        pSector->Render(NULL, m_AllInst, 0, VPT_PrimaryOpaquePass);
+        pSector->SetLightmapTexture(spLightmapTexture, 0);
+        spLightmapTexture = NULL;
+      }
+      else
+      {
+        pSector->Render(NULL, m_AllInst, 0, VPT_PrimaryOpaquePass);
+      }
     }
   }
 }
 
-VTerrainSectorRenderer::VTerrainSectorRenderer(VTerrain *pOwner, int iRes, int iBorderWidth)
+VTerrainSectorRenderer::VTerrainSectorRenderer(VTerrain *pOwner, int iRes, int iBorderWidth, bool bBakedLightmaps)
 {
   m_spOwner = pOwner;
   m_iBorderWidth = iBorderWidth;
@@ -67,7 +81,7 @@ VTerrainSectorRenderer::VTerrainSectorRenderer(VTerrain *pOwner, int iRes, int i
   m_spContext = new VisRenderContext_cl();
   m_spContext->SetName("TerrainSectorRenderer");
 
-  m_pRenderLoop = new VTerrainSectorRenderLoop(iRes, iRes);
+  m_pRenderLoop = new VTerrainSectorRenderLoop(iRes, iRes, bBakedLightmaps);
   m_spContext->SetRenderLoop(m_pRenderLoop);
   m_pCamera = new VisContextCamera_cl();
   m_spContext->SetCamera(m_pCamera);
@@ -295,29 +309,6 @@ bool VTerrainSectorRenderer::SaveRenderTarget(VTerrainSector* pSector, VisRender
   VMemoryTempBuffer<512*512*3> buffer(sx*sy*3);
   UBYTE* pDest = (UBYTE*)buffer.GetBuffer();
   Vision::Game.WriteScreenToBuffer(0, 0, sx, sy, pDest, pTex);
-  UBYTE szLine[4];
-  // flip vertically:
-  int iStride = sx*3;
-  for (int y=0; y<sy/2; y++)
-  {
-    UBYTE *l1 = &pDest[y*iStride];
-    UBYTE *l2 = &pDest[(sy-1-y)*iStride];
-    for (int x=0; x<sx; x++, l1+=3, l2+=3)
-    {
-      szLine[0] = l1[0]; 
-      szLine[1] = l1[1]; 
-      szLine[2] = l1[2]; 
-      
-      l1[0] = l2[2]; 
-      l1[1] = l2[1]; 
-      l1[2] = l2[0]; // flip components
-
-      l2[0] = szLine[2]; 
-      l2[1] = szLine[1]; 
-      l2[2] = szLine[0]; // flip components        
-    }
-  }
-
   if(Vision::Renderer.GetSRGBMode() == V_SRGB_ASSUME_FOR_DIFFUSE)
   {
     for (int i = 0; i < sx*sy*3; ++i)
@@ -388,7 +379,7 @@ bool VTerrainSectorRenderer::SaveToFile(VTerrainSector *pSector)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

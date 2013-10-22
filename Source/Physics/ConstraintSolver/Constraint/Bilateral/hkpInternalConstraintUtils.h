@@ -16,17 +16,17 @@
 extern "C"
 {
 	/// Calculates the relative angle between twist axes given plane axis
-	void HK_CALL hkInternalConstraintUtils_calcRelativeAngle( 
-		const hkVector4& twistAxisAinWorld, const hkVector4& twistAxisBinWorld, 
+	void HK_CALL hkInternalConstraintUtils_calcRelativeAngle(
+		const hkVector4& twistAxisAinWorld, const hkVector4& twistAxisBinWorld,
 		const hkVector4& planeAxisAinWorld, const hkVector4& planeAxisBinWorld,
 		hkVector4& axisOut, hkPadSpu<hkReal>& angleOut );
 }
 
 
-HK_FORCE_INLINE void HK_CALL hkInternalConstraintUtils_inlineCalcRelativeAngle( 
-	const hkVector4& twistAxisAinWorld, const hkVector4& twistAxisBinWorld, 
+HK_FORCE_INLINE void HK_CALL hkInternalConstraintUtils_inlineCalcRelativeAngle(
+	const hkVector4& twistAxisAinWorld, const hkVector4& twistAxisBinWorld,
 	const hkVector4& planeAxisAinWorld, const hkVector4& planeAxisBinWorld,
-	hkVector4& axisOut, hkPadSpu<hkReal>& angleOut, hkPadSpu<hkReal>& tauMaxOut ) 
+	hkVector4& axisOut, hkPadSpu<hkReal>& angleOut, hkPadSpu<hkReal>& tauMaxOut )
 {
 	// Note : This algorithm is replicated inside the physics tools (max/maya)
 	//		  Any changes should be ported there also.
@@ -57,7 +57,7 @@ HK_FORCE_INLINE void HK_CALL hkInternalConstraintUtils_inlineCalcRelativeAngle(
 		c1.setCross(twist_axis_ws, planeAxisBinWorld);
 		c2.setCross(c1, c0);
 	}
-		
+
 	hkSimdReal d1 = m_ws_us.getColumn<1>().dot<3>( planeAxisAinWorld );
 	hkSimdReal d2 = m_ws_us.getColumn<2>().dot<3>( planeAxisAinWorld );
 	hkSimdReal a = hkVector4Util::atan2Approximation(d1,d2);
@@ -68,7 +68,7 @@ HK_FORCE_INLINE void HK_CALL hkInternalConstraintUtils_inlineCalcRelativeAngle(
 
 //	Computes the inertia scale factors for a linear constraint. These are used to make the constraint more stable
 //	by scaling down the angular parts of the virtual mass.
-HK_FORCE_INLINE void HK_CALL hkInternalConstraintUtils_computeInertiaScaleFactors(	const hkVector4& invInertiaA, const hkVector4& invInertiaB, 
+HK_FORCE_INLINE void HK_CALL hkInternalConstraintUtils_computeInertiaScaleFactors(	const hkVector4& invInertiaA, const hkVector4& invInertiaB,
 																					const hkSimdReal& armLenA, const hkSimdReal& armLenB,
 																					const hkSimdReal& scaleFactor,
 																					hkSimdReal& fOutA, hkSimdReal& fOutB)
@@ -101,7 +101,7 @@ HK_FORCE_INLINE void HK_CALL hkInternalConstraintUtils_computeInertiaScaleFactor
 #endif // HKP_INTERNAL_CONSTRAINT_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

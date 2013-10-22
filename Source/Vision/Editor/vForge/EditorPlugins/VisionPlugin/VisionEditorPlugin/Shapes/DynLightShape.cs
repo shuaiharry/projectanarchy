@@ -767,6 +767,9 @@ namespace VisionEditorPlugin.Shapes
         if (_engineInstance == null)
           return;
 
+        // Temporarily disable the preview components - they always need to be recreated when the light type changes.
+        EngineLight.SetUsePreviewShadowComponent(false);
+
         EngineLight.SetLightType(_lightType, _fSpotAngle, _sProjectedTexture);
 
         // check whether components have to be removed
@@ -853,6 +856,7 @@ namespace VisionEditorPlugin.Shapes
 
         if (_fSpotAngle==fClamped) return;
         _fSpotAngle = fClamped;
+        Modified = true;
 
         // the rest sets properties on the engine instance
         if (_engineInstance==null) return;
@@ -873,6 +877,7 @@ namespace VisionEditorPlugin.Shapes
       {
         if (_sProjectedTexture==value) return;
         _sProjectedTexture = value;
+        Modified = true;
         // the rest sets properties on the engine instance
         if (_engineInstance==null) return;
         EngineLight.SetLightType(_lightType, _fSpotAngle, _sProjectedTexture);
@@ -2157,7 +2162,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -9,7 +9,7 @@
 inline void hkpPointToPlaneConstraintData::setInWorldSpace(const hkTransform& bodyATransform,
 													 const hkTransform& bodyBTransform,
 													 const hkVector4& pivotW,
-													 const hkVector4& planeNormalW) 
+													 const hkVector4& planeNormalW)
 {
 	m_pivotInA.setTransformedInversePos(bodyATransform,pivotW);
 	m_pivotInB.setTransformedInversePos(bodyBTransform,pivotW);
@@ -19,12 +19,12 @@ inline void hkpPointToPlaneConstraintData::setInWorldSpace(const hkTransform& bo
 inline void hkpPointToPlaneConstraintData::setInBodySpace( const hkVector4& pivotA,const hkVector4& pivotB, const hkVector4& planeNormalA )
 {
 	m_pivotInA = pivotA;
-	m_pivotInB = pivotB;	
+	m_pivotInB = pivotB;
 	m_planeNormalA = planeNormalA;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

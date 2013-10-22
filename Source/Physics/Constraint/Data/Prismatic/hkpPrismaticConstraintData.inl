@@ -33,7 +33,7 @@ inline void hkpPrismaticConstraintData::setMinLinearLimit(hkReal mmin)
 
 inline void hkpPrismaticConstraintData::setMaxFrictionForce(hkReal fmag)
 {
-	m_atoms.m_friction.m_maxFrictionForce = fmag;	
+	m_atoms.m_friction.m_maxFrictionForce = fmag;
 }
 
 inline hkReal hkpPrismaticConstraintData::getMaxLinearLimit() const
@@ -72,7 +72,7 @@ inline hkReal hkpPrismaticConstraintData::getMotorTargetPosition()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

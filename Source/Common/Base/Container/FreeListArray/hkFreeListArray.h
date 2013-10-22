@@ -197,8 +197,8 @@ struct hkFreeListArray
 				enum { VALUE = (sizeof(HasIsEmpty<OPERATIONS>(0)) == sizeof(Yes)) };
 		};
 
-		typedef hkTraitBool<true> CanCheckForEmpty;
-		typedef hkTraitBool<false> CanNotCheckForEmpty;
+		typedef hkTrait::TraitBool<true> CanCheckForEmpty;
+		typedef hkTrait::TraitBool<false> CanNotCheckForEmpty;
 
 	private:
 		
@@ -222,7 +222,7 @@ struct hkFreeListArray
 #endif // HKBASE_FREE_LIST_ARRAY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

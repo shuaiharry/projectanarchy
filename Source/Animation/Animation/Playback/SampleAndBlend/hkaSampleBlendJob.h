@@ -154,7 +154,7 @@ public:
 		m_numSkeletonBones = 0;
 		m_numFloats = 0;
 		m_chunkBufferSize = 0;
-		m_referencePoseWeightThreshold = 0.0f;
+		m_referencePoseWeightThreshold = 0;
 		m_numAnimationsAllocated = 0;
 		m_numAnims = 0;
 		m_convertToModel = false;
@@ -181,7 +181,7 @@ public:
 		m_numSkeletonBones = 0;
 		m_numFloats = 0;
 		m_chunkBufferSize = 0;
-		m_referencePoseWeightThreshold = 0.0f;
+		m_referencePoseWeightThreshold = 0;
 		m_numAnimationsAllocated = 0;
 		m_numAnims = 0;
 		m_convertToModel = false;
@@ -261,7 +261,7 @@ void HK_CALL executeSampleBlendJob(const hkaSampleBlendJob& job);
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

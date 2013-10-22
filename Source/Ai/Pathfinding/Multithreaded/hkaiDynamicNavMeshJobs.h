@@ -21,6 +21,7 @@ struct hkaiDynamicNavMeshJob : public hkJob
 {
 	public:
 
+			/// Job subtypes for hkaiDynamicNavMeshJob
 		enum JobSubType
 		{
 			JOB_DYNAMIC_NAVMESH_CUT_FACE,
@@ -82,6 +83,7 @@ struct hkaiNavMeshCutFaceJob : public hkaiDynamicNavMeshJob
 	hkReal m_radiusExpansionAmount;
 
 	hkBool m_isWallClimbing; 
+	hkBool m_useNewCutter;
 
 	// location of hkaiFaceCutResults
 	struct hkaiFaceCutResults* m_results;
@@ -96,7 +98,7 @@ struct hkaiNavMeshCutFaceJob : public hkaiDynamicNavMeshJob
 #endif // HK_AI_DYNAMIC_NAVMESH_JOBS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

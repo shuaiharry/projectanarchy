@@ -1455,12 +1455,12 @@ namespace VisionEditorPlugin.Shapes
       base.OnHotSpotRender (hotSpot, view, mode);
       if (hotSpot==_hotSpotTangentIn)
       {
-        view.RenderLine(Position,Position+_hotSpotTangentIn.CurrentPosition, VisionColors.Grey, 2.0f);
+        view.RenderLine(RenderPosition, RenderPosition + _hotSpotTangentIn.CurrentPosition, VisionColors.Grey, 2.0f);
         return;
       }
       if (hotSpot==_hotSpotTangentOut)
       {
-        view.RenderLine(Position,Position+_hotSpotTangentOut.CurrentPosition, VisionColors.Grey, 2.0f);
+        view.RenderLine(RenderPosition, RenderPosition + _hotSpotTangentOut.CurrentPosition, VisionColors.Grey, 2.0f);
         return;
       }
     }
@@ -2095,7 +2095,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

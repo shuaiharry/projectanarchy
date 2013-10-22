@@ -16,25 +16,38 @@ class hkOstream;
 /// We use these routines to help ensure we have reasonable definition of class reflection
 namespace hkSerializationCheckingUtils
 {
-		/// Verify that a class reflection is defined as required.
+		/// Verify all registered class reflections are defined as required.
 		/// It checks that if the class is virtual and has registered corresponding vtable,
 		/// class finish constructor definitions.
 		/// It also checks if reflected class members are defined reasonably,
 		/// e.g., members of type of a non-serializable class are defined
 		/// with '+nosave' or '+serialized(false)' annotations and are not embedded objects.
 		/// A human readable report is written to the output stream.
-	hkResult HK_CALL verifyClassReflection(const hkClass& klass, const hkClassNameRegistry& classRegistry, hkOstream& output);
-
-		/// Verify all registered class reflections.
-		/// A human readable report is written to the output stream.
 		/// The check will fail if memoryManagedPrefixes is non-NULL and a class that begins with one of the prefixes isn't properly memory-managed.
-	hkResult HK_CALL verifyReflection(const hkClassNameRegistry& classRegistry, hkOstream& output, const char** memoryManagedPrefixes = HK_NULL, int numPrefixes = 0);
+	hkResult HK_CALL verifyReflection(const hkClassNameRegistry& classRegistry, hkOstream& output, const char** memoryManagedPrefixes = HK_NULL, int numPrefixes = 0, bool reportNonMemoryManaged = true);
+
+		/// Utility class for conditionally outputting error messages.
+	struct DeferredErrorStream : public hkStreamWriter
+	{
+		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_STREAM);
+
+		//
+		// hkStreamWriter interface
+		//
+		int write(const void* buf, int nbytes) HK_OVERRIDE;
+		hkBool isOk() const HK_OVERRIDE;
+
+		void clear();
+		void dump();
+
+		hkArray<char> m_data;
+	};
 }
 
 #endif // HKSERIALZE_SERIALIZATION_CHECKING_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

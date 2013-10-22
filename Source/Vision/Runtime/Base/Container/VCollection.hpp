@@ -73,6 +73,23 @@ public:
   }
 
   /// \brief
+  ///   Ensures the number of elements accessible in the collection matches iCount.
+  ///
+  /// If the current count is bigger, nothing is done.
+  /// If the current count is smaller the additional entries are initialized with NULL.
+  ///
+  /// \param iCount
+  ///   The new number of elements to be accessible in the collection.
+  inline void EnsureCount(int iCount)
+  {
+    if (m_iCount >= iCount)
+      return;
+
+    EnsureCapacity(iCount);
+    m_iCount = iCount;
+  }
+
+  /// \brief
   ///   Returns the number of allocated entries in the list
   inline int GetCapacity() const 
   {
@@ -92,12 +109,15 @@ public:
   inline void SetAt(int iIndex, RCCLASS* pElement) const 
   {
     VASSERT(iIndex>=0 && iIndex<Count());
+
+    // Add reference first in case old and new element is the same.
+    if (pElement != NULL)
+      pElement->AddRef();
+
     if (m_ppElements[iIndex] != NULL)
       m_ppElements[iIndex]->Release();
     
     m_ppElements[iIndex] = pElement;
-    if (pElement != NULL)
-      pElement->AddRef();
   }
 
   /// \brief
@@ -207,6 +227,20 @@ public:
   }
 
   /// \brief
+  ///   Ensures that the actual element count (as checked by SetAt()/GetAt()) is no less than iCount, fills the extra elements with NULL.
+  inline void EnsureSize(int iCount)
+  {
+    if (iCount > m_iCapacity)
+    {
+      EnsureCapacity(iCount);
+    }
+    for (; m_iCount < iCount; ++m_iCount)
+    {
+      m_ppElements[m_iCount] = NULL;
+    }
+  }
+
+  /// \brief
   ///   Returns the address of the pointer list for faster iteration
   inline RCCLASS** GetPtrs() 
   {
@@ -296,7 +330,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

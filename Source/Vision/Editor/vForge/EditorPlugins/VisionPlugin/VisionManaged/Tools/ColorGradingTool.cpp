@@ -134,28 +134,38 @@ String ^ ColorGradingTool::CreateGradingLUT(String ^origFile, String ^targetFile
   }
   pTex->UpdateBox(0, 0,0,0, iEdgeSize,iEdgeSize,iEdgeSize, iEdgeSize*sizeof(VColorRef),iEdgeSize*iEdgeSize*sizeof(VColorRef),pFinal, V_TEXTURE_LOCKFLAG_DISCARDABLE);
 
-#if defined(_VR_DX11) && defined(SUPPORTS_D3DX)
-    bool bRes = D3DX11SaveTextureToFile(VVideo::GetD3DDeviceContext(), pTex->GetD3DResource(),D3DX11_IFF_DDS,sDest.AsChar())==S_OK;
+  bool bRes = false;
+
+#if defined(_VR_DX11) && _VR_DX11_SUPPORTS_D3DX
+    bRes = D3DX11SaveTextureToFile(VVideo::GetD3DDeviceContext(), pTex->GetD3DResource(),D3DX11_IFF_DDS,sDest.AsChar())==S_OK;
 #elif !defined(_VR_DX11)
-    bool bRes = D3DXSaveTextureToFile(sDest.AsChar(),D3DXIFF_DDS,pTex->GetD3DInterface(),NULL)==S_OK;
+    bRes = D3DXSaveTextureToFile(sDest.AsChar(),D3DXIFF_DDS,pTex->GetD3DInterface(),NULL)==S_OK;
+#else
+    delete pLUT;
+    return "Saving of 3D textures is not supported in this build (D3DX is not available). Please try another vForge build, such as DX9 or a Visual Studio 2010 build.";
 #endif
 
   delete pLUT;
 
   pTex->Purge();
 
+  if (!bRes)
+  {
+    return "Writing out the 3D texture failed.";
+  }
+
   // force reloading the 3D texture on the engine side, if overwritten:
   if (!sLUTProjRel.IsEmpty())
   {
     VTextureObject *pExisting = Vision::TextureManager.GetTextureObjectByName(sLUTProjRel);
     if (pExisting)
-      pExisting->CheckFileModified(Vision::File.GetManager(),TRUE,FALSE);
+      pExisting->CheckFileModified(Vision::File.GetManager(), VURO_ONLY_UNLOAD);
   }
   return nullptr;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

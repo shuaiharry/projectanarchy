@@ -12,11 +12,11 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokPhysicsModule.hpp>
 
 /// \brief
-///   Adds the possibility to throw Havok rigid bodies with the "Q" key
+///   Adds the possibility to throw Havok Physics rigid bodies with the "Q" key.
+///
 class VThrowItemComponent : public IVObjectComponent, public IVisCallbackHandler_cl
 {
 public:
-
   ///
   /// @name Constructor / Destructor
   /// @{
@@ -25,13 +25,13 @@ public:
   /// \brief
   ///   Default constructor. Sets up the input map.
   ///
-  /// The actual initialisation of the component happens in the ::SetOwner function
+  /// The actual initialisation of the component happens in the SetOwner function
   ///
   VHAVOK_IMPEXP VThrowItemComponent();
   
    /// \brief
   ///   Destructor
-  VHAVOK_IMPEXP ~VThrowItemComponent();
+  VHAVOK_IMPEXP virtual ~VThrowItemComponent();
 
   /// \brief
   ///   Init Function
@@ -45,7 +45,6 @@ public:
   /// @}
   ///
 
-
   ///
   /// @name IVObjectComponent Overrides
   /// @{
@@ -56,38 +55,37 @@ public:
   ///
   /// \param pOwner
   ///   The owner of this component.
-  VHAVOK_IMPEXP VOVERRIDE void SetOwner(VisTypedEngineObject_cl *pOwner);
+  VHAVOK_IMPEXP virtual void SetOwner(VisTypedEngineObject_cl *pOwner) HKV_OVERRIDE;
 
   /// \brief
   ///   Overridden function. This component can be attached to VisBaseEntity_cl instances
   ///
   /// \param pObject
-  ///   Possible owner candidate.
+  ///   Potential owner.
   /// 
   /// \param sErrorMsgOut
   ///   Reference to error message string.
   /// 
   /// \returns
-  ///   TRUE if this component can be attached to the given object, FALSE otherwise.
+  ///   TRUE if this component can be attached to the given object.
   /// 
-  VHAVOK_IMPEXP VOVERRIDE BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut);
+  VHAVOK_IMPEXP virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut) HKV_OVERRIDE;
 
   ///
   /// \brief
-  ///   Overridden function to respond to variable changes.
+  ///   Overridden function handling variable changes.
   /// 
   /// \param pVar
-  ///   Pointer to the variable object to identify the variable.
+  ///   Pointer to the variable object.
   /// 
   /// \param value
-  ///   New value of the variable
+  ///   New value of the variable.
   /// 
   VHAVOK_IMPEXP VOVERRIDE void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Serialization
@@ -107,12 +105,11 @@ public:
   ///
   /// \param ar
   ///   binary archive
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name IVisCallbackHandler_cl Overrides
@@ -121,7 +118,7 @@ public:
 
   /// 
   /// \brief
-  ///   Overridden function that gets called by all callbacks that this handler is registered to
+  ///   Overridden function that gets called by all callbacks that this handler is registered to.
   /// 
   /// \param pData
   ///   See IVisCallbackHandler_cl
@@ -129,12 +126,11 @@ public:
   /// \see
   ///   IVisCallbackHandler_cl
   /// 
-  VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData);
+  VHAVOK_IMPEXP virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Update Method
@@ -146,54 +142,63 @@ public:
   ///   Updates the the state machine for the current frame.
   /// 
   /// The PerFrameUpdate() function takes care of processing the input map (keyboard events)
-  /// and updating the gravity gun component functionality.
+  /// and updating the throw-item component.
   ///
   /// \note
   ///   You do not have to call this function manually, since the VThrowItemComponentManager
-  ///   class will take care of this
+  ///   class will take care of this.
   ///
   VHAVOK_IMPEXP void PerFrameUpdate();
 
   ///
   /// @}
   ///
-
   
   /// \brief
-  ///   Creates a physics object and throws it in specified direction.
+  ///   Creates a physics object and throws using the specified direction.
   VHAVOK_IMPEXP void ThrowItem(const hkvVec3& vThrowDir);
   
   /// \brief
   ///   Creates a physics object and throws it in the facing direction of its owner.
   VHAVOK_IMPEXP void ThrowItem();  
   
-  inline void SetModelFile(VString ModelFile) { this->ModelFile = ModelFile; }
-  inline const VString& GetModelFile() const { return ModelFile; }
+  inline void SetModelFile(VString ModelFile) 
+  { 
+    this->ModelFile = ModelFile; 
+  }
+
+  inline const VString& GetModelFile() const 
+  { 
+    return ModelFile; 
+  }
   
-  inline void SetVelocity(float Velocity) { this->Velocity = Velocity; }
-  inline float GetVelocity() const { return Velocity; }
+  inline void SetVelocity(float Velocity) 
+  { 
+    this->Velocity = Velocity; 
+  }
+
+  inline float GetVelocity() const 
+  { 
+    return Velocity; 
+  }
 
 private:
-
   /// \brief
   ///   Removes all physics object.
   void RemoveAllItems();
 
   /* Exposed to vForge */
-
   VString ModelFile;                    ///< Model filename
   float Velocity;                       ///< Velocity that is applied to the item
 
   /* Not Exposed to vForge */
-
   VInputMap *m_pInputMap;               ///< Input map for the character's keyboard/gamepad controls
-
 };
 
-#endif //VTHROWITEMCOMPONENT_HPP_INCLUDED
+#endif // VTHROWITEMCOMPONENT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

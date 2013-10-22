@@ -33,7 +33,7 @@ public:
 
 /// Ai Spawn Point class. Has a data driven prefab to spawn, and can be hooked up to a trigger.
 /// NOTE: this should only trigger on the Server or in a single player game.
-class RPG_Trigger: public RPG_BaseEntity
+class RPG_Trigger: public RPG_BaseEntity, public IVisCallbackHandler_cl
 {
 public:
   RPG_Trigger();
@@ -41,10 +41,12 @@ public:
   void OnOverlappingCollidableAdded(hkpCollidable *handle);
   void OnOverlappingCollidableRemoved(hkpCollidable *handle);
 
+  void Initialize() HK_OVERRIDE;
   void InitFunction() HKV_OVERRIDE;
   void DisposeObject() HKV_OVERRIDE;
-  void EditorThinkFunction() HKV_OVERRIDE;
   void ThinkFunction() HKV_OVERRIDE;
+
+  void OnHandleCallback(IVisCallbackDataObject_cl *callback_data) HKV_OVERRIDE;
 
   void PostInitialize() HKV_OVERRIDE;
 
@@ -112,7 +114,7 @@ private:
 #endif // RPG_TRIGGER_H__
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

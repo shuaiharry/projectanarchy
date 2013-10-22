@@ -11,6 +11,7 @@
 #define VISION_EXPORT_CONVERTER_UTILS__H
 
 #include <Vision/Tools/SceneDataConverter/Processor/hkVisionProcessorOptions.h>
+#include <Common/SceneData/Scene/hkxScene.h>
 class VGScene;
 class VGTransformable;
 
@@ -28,13 +29,21 @@ struct hkVisionConverterUtils
   // Returns 0 for special token other than <selection>, 1 for <selection> and 2 for custom recentering (usually a node name).
   static int HK_CALL getPivotTransformType(const VExporterOptions& options);
 
+  // Returns a valid UTF8 Vision string from a multi-byte string
+  static VString HK_CALL getUtf8String(const char* str);
+
+  // Returns a valid UTF8 Vision string from a wide string
+  static VString HK_CALL getUtf8String(const wchar_t* str);
+
+  // Returns a valid 7 bit ANSI (0-127) string from a multi-byte string
+  static VString HK_CALL getANSIString(const char* str, char replace = '?');
 };
 
 
 #endif //VISION_EXPORT_CONVERTER_UTILS__H
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

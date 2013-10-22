@@ -65,7 +65,7 @@ void hkpCharacterProxy::convertFractionToDistance( const hkpRootCdPoint* cHit, i
 	for (int i = numHits-1; i>=0; i--)
 	{
 		const hkSimdReal fraction = hit->m_contact.getDistanceSimdReal();
-		hit->m_contact.getPosition().setW(fraction);
+		hkVector4 cpPos = hit->m_contact.getPosition(); cpPos.setW(fraction); hit->m_contact.setPosition(cpPos);
 		const hkSimdReal projLength = displacement.dot<3>(hit->m_contact.getNormal());
 		hit->m_contact.setDistanceSimdReal( fraction * -projLength );
 		hit++;
@@ -109,7 +109,7 @@ void hkpCharacterProxy::addEntityOrPhantom( const hkpCollidable* collidable
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

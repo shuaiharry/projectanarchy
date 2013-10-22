@@ -16,7 +16,8 @@
 
 // Versions
 #define ENTITYLODCOMPONENT_VERSION_0          0     // Initial version
-#define ENTITYLODCOMPONENT_VERSION_CURRENT    0     // Current version
+#define ENTITYLODCOMPONENT_VERSION_1          1     // LOD count incremented by one in order to make code easier to read.
+#define ENTITYLODCOMPONENT_VERSION_CURRENT    1     // Current version
 
 ///
 /// \brief
@@ -29,9 +30,8 @@ enum VEntityLODLevel_e
   VLOD_ULTRALOW  = 3,     ///< Ultra low LOD level
 
   VLOD_NONE      = 4,     ///< No LOD, LOD is disabled, use entity mesh (if available)
-  VLOD_AUTO      = 5,     ///< Switches LOD by distance
+  VLOD_AUTO      = 5      ///< Switches LOD by distance
 };
-
 
 ///
 /// \brief
@@ -47,10 +47,7 @@ public:
     m_fMinSwitchDistance = 0.f;
     m_fMaxSwitchDistance = 0.f;
     m_pEntity = NULL;
-    m_iTagged = 0;
   }
-
-  ~VEntityLODLevelInfo();
 
   /// \brief
   ///   Associates a model file with this Level
@@ -76,75 +73,6 @@ public:
     return m_pEntity->GetBoundingBox(); 
   }
 
-  /// \brief
-  ///    Helper function for visibility loop implementations
-  ///
-  /// \param vCameraPos
-  ///   Camera position to test LOD clipping
-  /// \param fLODScaleSqr
-  ///   Square of the LOD scaling factor
-  ///
-  /// \returns
-  ///   true if the object is clipped either by near of far clip distance (if specified)
-  inline bool IsNearOrFarClipped(const hkvVec3& vCameraPos, float fLODScaleSqr=1.f) const
-  {
-    VASSERT(m_pEntity != NULL)
-
-    float fDistSqr = m_pEntity->GetPosition().getDistanceToSquared(vCameraPos);
-    return ((m_fMinSwitchDistance>0.f) && (fDistSqr<(m_fMinSwitchDistance*m_fMinSwitchDistance))) 
-        || ((m_fMaxSwitchDistance>0.f) && (fDistSqr>=(m_fMaxSwitchDistance*m_fMaxSwitchDistance)));
-  }
-
-  /// \brief
-  ///    Helper function to retrieve current distance to a given plane
-  ///
-  /// \param vCameraPos
-  ///   Camera position
-  /// \param fLODScaleSqr
-  ///   Square of the LOD scaling factor
-  /// \param fPlane
-  ///   Reference plane distance
-  ///
-  /// \returns
-  ///   Relative distance from object to given plane
-  inline float GetDistanceToPlane(const hkvVec3& vCameraPos, float fLODScaleSqr=1.f, float fPlane=0.f) const
-  {
-    float fDistSqr = m_pEntity->GetPosition().getDistanceToSquared(vCameraPos);
-    return hkvMath::sqrt(fDistSqr) - fPlane;
-  }
-
-  /// \brief
-  ///   Tags the entity. 
-  /// 
-  /// Tagging can be used to quickly flag a number of entities for a specific operation. For instance, if you
-  /// have multiple potentially overlapping collections of entities, you can use tagging to generate a single
-  /// list that contains all entities from the collection, but no duplicates. Tagging (including querying and
-  /// resetting tags) is a very fast operation.
-  ///
-  /// \sa VisEntityCollection_cl::GetTaggedEntries
-  inline void Tag() { m_iTagged = s_iTagCtr; }
-
-  /// \brief
-  ///   Returns whether an entity is tagged. This is a low-overhead operation.
-  inline bool IsTagged() const { return m_iTagged == s_iTagCtr; }
-
-  /// \brief
-  ///   Resets all entity tags. This is a low-overhead operation.
-  static inline void ResetTags() { s_iTagCtr++; }
-
-  /// \brief
-  ///   Returns near clip distance.
-  inline float GetNearClipDistance() const
-  {
-    return m_fMinSwitchDistance;
-  }
-
-  /// \brief
-  ///   Returns far clip distance.
-  inline float GetFarClipDistance() const
-  {
-    return m_fMaxSwitchDistance;
-  }
 
 public:
   VDynamicMeshPtr m_spMesh;                                   ///< Mesh of this LOD level
@@ -153,9 +81,6 @@ public:
   float m_fMinSwitchDistance;                                 ///< Min switching distance of this LOD level
   float m_fMaxSwitchDistance;                                 ///< Max switching distance of this LOD level
   VisBaseEntity_cl* m_pEntity;                                ///< Entity instance that is owner of the VEntityLODComponent
-  unsigned int m_iTagged;                                     ///< Tagging value
-  EFFECTS_IMPEXP static unsigned int s_iTagCtr;               ///< Global consecutive tagging number
-  EFFECTS_IMPEXP static VisCallback_cl OnEntityLODDestroyed;  ///< Callback that gets triggered when an instance is destroyed
 };
 
 
@@ -168,6 +93,7 @@ public:
   VEntityLODLevelInfo* m_pEntityLODObject;
 };
 
+class VEntityLODComponentManager;
 
 /// 
 /// \brief
@@ -179,6 +105,8 @@ public:
   class VEntityLODComponent : public IVObjectComponent
 #endif //SUPPORTS_LOD_HYSTERESIS_THRESHOLDING
 {
+  friend class VEntityLODComponentManager;
+
 public: 
 
   ///
@@ -208,7 +136,6 @@ public:
   /// @}
   ///
 
-
   ///
   /// @name Component methods
   /// @{
@@ -218,32 +145,13 @@ public:
   /// \brief
   ///   Initializes the entity LOD component by setting the initial values
   /// 
-  EFFECTS_IMPEXP void CommonInit(bool bFirstInit);
+  EFFECTS_IMPEXP void CommonInit();
 
   ///
   /// \brief
-  ///   Updates the LOD level of the owner object
-  /// 
-  /// The PerFrameUpdate() function takes care of evaluating the current distance of the object 
-  /// to the camera and updates the LOD level by assigning the respective model.
+  ///   Try to find an anim config that might have been set from outside (animation component, transition state machine)
   ///
-  /// \note
-  ///   You do not have to call this function manually, since the VEntityLODComponentManager
-  ///   class will take care of this.
-  ///
-  void PerFrameUpdate();
-  
-  ///
-  /// \brief
-  ///   Updates the LOD level depending on the camera distance
-  ///
-  void UpdateLOD(bool bFirstTime);
-
-  ///
-  /// \brief
-  ///   Updates the passed LOD level
-  ///
-  void UpdateLODLevel(int newLevel);
+  EFFECTS_IMPEXP bool ConnectToExistingAnimConfig();
 
   ///
   /// \brief
@@ -251,26 +159,15 @@ public:
   ///
   inline VEntityLODLevelInfo &GetLevelInfo(int iIndex)
   {
-    VASSERT(iIndex > -1 && iIndex < LOD_LevelCount + 2);
+    VASSERT(iIndex >= 0 && iIndex <= LOD_LevelCount);
     return m_pLevels[iIndex];
-  }
-
-  ///
-  /// \brief
-  ///   Updates the skeletal animation root node on all animation configs
-  ///
-  void SetSkeletalAnimRootNode(IVisAnimResultGenerator_cl *pRoot)
-  {
-    for (int i = 0; i < LOD_LevelCount + 2; i++)
-      if (m_pLevels[i].m_spFinalSkeletalResult)
-        m_pLevels[i].m_spFinalSkeletalResult->SetSkeletalAnimInput(pRoot);
   }
 
   ///
   /// \brief
   ///   Forwards the new frozen state to all animation configs involved
   ///
-  void SetFrozen(bool bNewState)
+  inline void SetFrozen(bool bNewState)
   {
     for (int i=0; i < LOD_LevelCount; i++)
       m_pLevels[i].m_spAnimConfig->SetFrozen(bNewState);
@@ -280,31 +177,159 @@ public:
   /// \brief
   ///   Sets a LOD index. Can be LOD_AUTO to detect according to distance in the Update() function
   ///
-  void SetLODLevel(VEntityLODLevel_e newLevel);
+  EFFECTS_IMPEXP void SetLODLevel(VEntityLODLevel_e newLevel);
 
   ///
   /// \brief
   ///   Returns the current LOD level, which is always >= 0
   ///
-  inline int GetCurrentLODLevel() const { return m_iCurrentLevel; }
+  inline int GetCurrentLODLevel() const 
+  { 
+    return m_iCurrentLevel; 
+  }
+
+  ///
+  /// \brief
+  ///   Sets the LOD Level Count.
+  ///
+  inline void SetLODLevelCount(const int iCount)
+  {
+    LOD_LevelCount = iCount;
+    CommonInit(); // reinitializes component if owner is set.
+  }
+
+  ///
+  /// \brief
+  ///   Returns LOD Level Count.
+  ///
+  inline int GetLODLevelCount() const
+  {
+    return LOD_LevelCount;
+  }
+
+  ///
+  /// \brief
+  ///   Sets Medium Level Mesh Filename.
+  ///
+  inline void SetMediumLevelMesh(const char* szFilename)
+  {
+    Level_Medium_Mesh = szFilename;
+    CommonInit(); // reinitializes component if owner is set.
+  }
+
+  ///
+  /// \brief
+  ///   Returns Medium Level Mesh Filename.
+  ///
+  inline const char* GetMediumLevelMesh() const
+  {
+    return Level_Medium_Mesh.AsChar();
+  }
+
+  ///
+  /// \brief
+  ///   Sets Low Level Mesh Filename.
+  ///
+  inline void SetLowLevelMesh(const char* szFilename)
+  {
+    Level_Low_Mesh = szFilename;
+    CommonInit(); // reinitializes component if owner is set.
+  }
+
+  ///
+  /// \brief
+  ///   Returns Low Level Mesh Filename.
+  ///
+  inline const char* GetLowLevelMesh() const
+  {
+    return Level_Low_Mesh.AsChar();
+  }
+
+  ///
+  /// \brief
+  ///   Sets UltraLow Level Mesh Filename.
+  ///
+  inline void SetUltraLowLevelMesh(const char* szFilename)
+  {
+    Level_UltraLow_Mesh = szFilename;
+    CommonInit(); // reinitializes component if owner is set.
+  }
+
+  ///
+  /// \brief
+  ///   Returns UltraLow Level Mesh Filename.
+  ///
+  inline const char* GetUltraLowLevelMesh() const
+  {
+    return Level_UltraLow_Mesh.AsChar();
+  }
+
+  ///
+  /// \brief
+  ///   Sets the Medium Level distance.
+  ///
+  inline void SetMediumLevelDistance(float fDistance)
+  {
+    Level_Medium_Distance = fDistance;
+    CommonInit(); // reinitializes component if owner is set.
+  }
+
+  ///
+  /// \brief
+  ///  Returns the Medium Level distance.
+  ///
+  inline float GetMediumLevelDistance() const
+  {
+    return Level_Medium_Distance;
+  }
+
+  ///
+  /// \brief
+  ///   Sets the Low Level distance.
+  ///
+  inline void SetLowLevelDistance(float fDistance)
+  {
+    Level_Low_Distance = fDistance;
+    CommonInit(); // reinitializes component if owner is set.
+  }
+
+  ///
+  /// \brief
+  ///  Returns the Low Level distance.
+  ///
+  inline float GetLowLevelDistance() const
+  {
+    return Level_Low_Distance;
+  }
+  ///
+  /// \brief
+  ///   Sets the UltraLow Level distance.
+  ///
+  inline void SetUltraLowLevelDistance(float fDistance)
+  {
+    Level_UltraLow_Distance = fDistance;
+    CommonInit(); // reinitializes component if owner is set.
+  }
+
+  ///
+  /// \brief
+  ///  Returns the UltraLow Level distance.
+  ///
+  inline float GetUltraLowLevelDistance() const
+  {
+    return Level_UltraLow_Distance;
+  }
 
   ///
   /// \brief
   ///   Evaluates the current distance of the owner's entity to the camera
   ///
-  inline float GetDistanceToCamera() const { return (((VisBaseEntity_cl*)GetOwner())->GetPosition() - Vision::Camera.GetCurrentCameraPosition()).getLength(); }
-
-  ///
-  /// \brief
-  ///   Try connect to a transition state machine component
-  ///
-  bool ConnectStateMachine();
-
-  ///
-  /// \brief
-  ///   Try to find an anim config that might have been set from outside (animation component, transition state machine)
-  ///
-  bool FindAnimConfig();
+  inline float GetDistanceToCamera() const 
+  {
+    VASSERT(GetOwner() != NULL);
+    return (static_cast<VisBaseEntity_cl*>(GetOwner())->GetPosition() - 
+      Vision::Camera.GetCurrentCameraPosition()).getLength(); 
+  }
 
   ///
   /// @}
@@ -329,38 +354,11 @@ public:
 
 #if defined(WIN32) || defined(_VISION_DOC)
 
-  ///
-  /// \brief
-  ///   Overridable that is called by the editor to retrieve per-instance variable display hints. 
-  ///
-  /// \param pVariable
-  ///   Variable to retrieve dynamic display hints for.
-  ///
-  /// \param destInfo
-  ///   Structure that can be modified to affect the editor's displaying 
-  ///   of the respective variable (read-only, hidden).
-  ///
   EFFECTS_IMPEXP virtual void GetVariableAttributes(VisVariable_cl *pVariable, VVariableAttributeInfo &destInfo) HKV_OVERRIDE;
 
 #endif
 
-  ///
-  /// \brief
-  ///   Virtual function that gets called whenever a message is sent to this object
-  ///
-  /// \param iID
-  ///   The ID constant of the message.
-  /// 
-  /// \param iParamA
-  ///   Message data value
-  /// 
-  /// \param iParamB
-  ///   Message data value
-  ///
-  /// \see
-  ///   VisTypedEngineObject_cl::MessageFunction
-  ///
-  EFFECTS_IMPEXP virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB);
+  EFFECTS_IMPEXP virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB) HKV_OVERRIDE;
 
   ///
   /// @}
@@ -372,48 +370,64 @@ public:
   /// @{
   ///
 
-  /// \brief
-  ///   Overridden function to respond to owner changes
-  EFFECTS_IMPEXP virtual void SetOwner(VisTypedEngineObject_cl *pOwner);
+  EFFECTS_IMPEXP virtual void SetOwner(VisTypedEngineObject_cl *pOwner) HKV_OVERRIDE;
 
-  /// \brief
-  ///   Overridden function. Blob shadows can be attached to VisObject3D_cl instances
-  EFFECTS_IMPEXP virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut);
+  EFFECTS_IMPEXP virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut) HKV_OVERRIDE;
 
-  /// \brief
-  ///   Overridden function to respond to variable changes
-  EFFECTS_IMPEXP virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
+  EFFECTS_IMPEXP virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Serialization
   /// @{
   ///
 
-  /// \brief
-  ///   RTTI macro
   V_DECLARE_SERIAL_DLLEXP(VEntityLODComponent, EFFECTS_IMPEXP)
 
-  /// \brief
-  ///   RTTI macro to add a variable table
   V_DECLARE_VARTABLE(VEntityLODComponent, EFFECTS_IMPEXP)
 
-  /// \brief
-  ///   Serialization function
-  ///
-  /// \param ar
-  ///   Binary archive
-  EFFECTS_IMPEXP virtual void Serialize( VArchive &ar );
+  EFFECTS_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
 
+protected:
+  ///
+  /// \brief
+  ///   Updates the LOD level of the owner object
+  /// 
+  /// The PerFrameUpdate() function takes care of evaluating the current distance of the object 
+  /// to the camera and updates the LOD level by assigning the respective model.
+  ///
+  /// \note
+  ///   You do not have to call this function manually, since the VEntityLODComponentManager
+  ///   class will take care of this.
+  ///
+  EFFECTS_IMPEXP void PerFrameUpdate();
+
+  ///
+  /// \brief
+  ///   Updates the LOD level depending on the camera distance
+  ///
+  EFFECTS_IMPEXP void UpdateLOD();
+
+  ///
+  /// \brief
+  ///   Updates the passed LOD level
+  ///
+  EFFECTS_IMPEXP void ApplyLOD(int newLevel);
+
+
 private:  
+  // Private functions
+  void InitializeLODLevelInfo(int iLevel, const char* szMeshFilename, float fMinDistance, float fMaxDistance);
+
+  // Set the result generator as the animation root node on the final result of each LOD.
+  void SetSkeletalAnimRootNode(IVisAnimResultGenerator_cl *pRoot, bool bAppyMotionDelta);
 
   // Exposed to vForge:
   int LOD_LevelMode;
@@ -427,7 +441,6 @@ private:
 
   // Not exposed:
   VString Level_High_Mesh;              ///< High level mesh defined by owner entity mesh
-  float Level_High_Distance;            ///< High level distance is always 0.0f 
   int m_iCurrentLevel;                  ///< Current LOD level
   VEntityLODLevelInfo *m_pLevels;       ///< Information about LOD levels
 };
@@ -453,7 +466,6 @@ class VEntityLODComponentCollection : public VRefCountedCollection<VEntityLODCom
 class VEntityLODComponentManager : public IVisCallbackHandler_cl
 {
 public:
-
   ///
   /// \brief
   ///   Gets the singleton of the manager
@@ -510,7 +522,7 @@ protected:
 #endif // VENTITYLODCOMPONENT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

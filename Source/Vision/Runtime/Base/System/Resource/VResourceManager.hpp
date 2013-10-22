@@ -85,6 +85,14 @@ enum VResourceMemoryType_e
   VRESOURCEMEMORY_ALLTYPES            = VRESOURCEMEMORY_SYSTEM|VRESOURCEMEMORY_GPU|VRESOURCEMEMORY_DEPENDENT_SYSTEM|VRESOURCEMEMORY_DEPENDENT_GPU ///< Bitflag combinations for all memory types
 };
 
+/// \brief options for unloading and reloading resources
+enum VUnloadReloadOptions_e
+{
+  VURO_HOT_RELOAD,  ///< unloads and reloads the resource trying to maintain existing runtime data
+  VURO_COLD_RELOAD, ///< unloads and relaods the resource throwing away all existing runtime data
+  VURO_ONLY_UNLOAD  ///< only unloads the resource
+};
+
 #ifdef SUPPORTS_RESOURCEVIEWER
 
 /// \brief Helper to generate data for the vResViewer. For internal use.
@@ -696,6 +704,36 @@ public:
   ///   The file stream manager used for retrieving the time stamp. Should be
   ///   Vision::File.GetManager() when used in the engine.
   /// 
+  /// \param eOptions
+  ///   Which type of reloading should happen
+  /// 
+  /// \return
+  ///   unsigned int iModifiedCount : Number of resources that have been detected to be modified.
+  /// 
+  /// \note
+  ///   The following combinations of the bUnload,bReload flags actually make sense:
+  ///   \li FALSE,FALSE : Nothing happens to the resources, useful for counting the modified
+  ///     resources.
+  /// 
+  ///   \li TRUE,FALSE :  Modified resource are unloaded but not reloaded. Reloading will happen
+  ///     the next time the resource is used.
+  /// 
+  ///   \li TRUE,TRUE :  Modified resource are unloaded and reloaded. The resource is up-to-date
+  ///     afterwards.
+  VBASE_IMPEXP unsigned int ReloadModifiedResourceFiles(IVFileStreamManager *pManager, 
+                                                        VUnloadReloadOptions_e eOptions = VURO_COLD_RELOAD);
+
+  /// \brief
+  ///   Reloads all modified resources in the manager.
+  /// 
+  /// Modified resources are identified by their file time stamp.
+  /// 
+  /// A file stream manager has to be passed for loading resources.
+  /// 
+  /// \param pManager
+  ///   The file stream manager used for retrieving the time stamp. Should be
+  ///   Vision::File.GetManager() when used in the engine.
+  /// 
   /// \param bUnload
   ///   If TRUE, the resource will be unloaded in case it has been modified (calls EnsureUnloaded
   ///   for the resource).
@@ -717,7 +755,32 @@ public:
   /// 
   ///   \li TRUE,TRUE :  Modified resource are unloaded and reloaded. The resource is up-to-date
   ///     afterwards.
-  VBASE_IMPEXP unsigned int ReloadModifiedResourceFiles(IVFileStreamManager *pManager, BOOL bUnload=TRUE, BOOL bReload=TRUE);
+  inline HKV_DEPRECATED_2013_2 unsigned int ReloadModifiedResourceFiles(IVFileStreamManager *pManager, BOOL bUnload, BOOL bReload)
+  {
+    return ReloadModifiedResourceFiles(pManager, bReload ? VURO_COLD_RELOAD : VURO_ONLY_UNLOAD);
+  }
+
+  /// \brief
+  ///   Reloads a specific modified resource in the manager.
+  /// 
+  /// Modified resources are identified by their file time stamp.
+  /// 
+  /// A file stream manager has to be passed for loading resources.
+  ///
+  /// \param szResourceId
+  ///   The ID of the resource to reload.
+  ///
+  /// \param pManager
+  ///   The file stream manager used for retrieving the time stamp. Should be
+  ///   Vision::File.GetManager() when used in the engine.
+  ///
+  /// \param eOptions
+  ///   The type of reloading that should be performed
+  /// 
+  /// \return
+  ///   Returns TRUE when the resource was modified.
+  VBASE_IMPEXP BOOL ReloadModifiedResourceFile(const char *szResourceId, IVFileStreamManager *pManager, 
+                                               VUnloadReloadOptions_e eOptions = VURO_COLD_RELOAD);
 
   /// \brief
   ///   Reloads a specific modified resource in the manager.
@@ -744,7 +807,41 @@ public:
   /// 
   /// \return
   ///   Returns TRUE when the resource was modified.
-  VBASE_IMPEXP BOOL ReloadModifiedResourceFile(const char *szResourceId, IVFileStreamManager *pManager, BOOL bUnload=TRUE, BOOL bReload=TRUE);
+  inline HKV_DEPRECATED_2013_2 BOOL ReloadModifiedResourceFile(const char *szResourceId, IVFileStreamManager *pManager, BOOL bUnload, BOOL bReload)
+  {
+    return ReloadModifiedResourceFile(szResourceId, pManager, bReload ? VURO_COLD_RELOAD : VURO_ONLY_UNLOAD);
+  }
+
+  /// \brief
+  ///   Reloads a specific resource in this resource manager. The resource is reloaded
+  ///   regardless of whether the file has actually been modified or not.
+  /// 
+  /// \param szResourceId
+  ///   The ID of the resource to reload.
+  /// 
+  /// \param pManager
+  ///   The file stream manager used for retrieving the time stamp. Should be
+  ///   Vision::File.GetManager() when used in the engine.
+  /// 
+  /// \param eOptions
+  ///   the type of reloading which should be performed on the resource
+  /// 
+  /// \return
+  ///   TRUE if the resource has been found and was reloaded; false if either the specified resource
+  ///   manager was not found or the resource was not found within the resource manager.
+  /// 
+  /// \note
+  ///   The following combinations of the bUnload,bReload flags actually make sense:
+  ///   \li FALSE,FALSE : Nothing happens to the resource. Might be useful for checking whether a
+  ///     resource can actually be resolved.
+  /// 
+  ///   \li TRUE,FALSE :  The resource is unloaded, but not reloaded. Reloading will happen
+  ///     the next time the resource is used.
+  /// 
+  ///   \li TRUE,TRUE :  The resource is unloaded and reloaded. It is guaranteed
+  ///     to be up-to-date afterwards.
+  VBASE_IMPEXP BOOL ReloadSpecificResourceFile(const char *szResourceId, IVFileStreamManager *pManager, 
+                                               VUnloadReloadOptions_e eOptions = VURO_COLD_RELOAD);
 
   /// \brief
   ///   Reloads a specific resource in this resource manager. The resource is reloaded
@@ -777,7 +874,10 @@ public:
   /// 
   ///   \li TRUE,TRUE :  The resource is unloaded and reloaded. It is guaranteed
   ///     to be up-to-date afterwards.
-  VBASE_IMPEXP BOOL ReloadSpecificResourceFile(const char *szResourceId, IVFileStreamManager *pManager, BOOL bUnload=TRUE, BOOL bReload=TRUE);
+  inline HKV_DEPRECATED_2013_2 BOOL ReloadSpecificResourceFile(const char *szResourceId, IVFileStreamManager *pManager, BOOL bUnload, BOOL bReload)
+  {
+    return ReloadSpecificResourceFile(szResourceId, pManager, bReload ? VURO_COLD_RELOAD : VURO_ONLY_UNLOAD);
+  }
   
   ///
   /// @}
@@ -846,7 +946,7 @@ public:
   ///   Sets a bitmask that controls the purging behavior of this resource manager
   /// 
   /// This bitmask is compared against the bitmask passed in
-  /// VisResourceSystem_cl::PurgeAllResourceManager.
+  /// VisResourceSystem_cl::PurgeAllResourceManagers.
   /// 
   /// \param iMask
   ///   Bitmask value to filter resource manager. The following pre-defined bitmasks are supported
@@ -856,7 +956,7 @@ public:
   ///   \li VRESOURCEMANAGER_PURGEMASK_STREAMINGCLEANUP: This manager gets cleaned up when triggered by zone streaming.
   ///   \li VRESOURCEMANAGER_PURGEMASK_FORCEALL: This manager gets cleaned up at engine de-init time. This bit is always set.
   ///
-  /// \sa VisResourceSystem_cl::PurgeAllResourceManager
+  /// \sa VisResourceSystem_cl::PurgeAllResourceManagers
   inline void SetPurgeMask(unsigned int iMask)
   {
     m_iPurgeMask = iMask|(unsigned int)VRESOURCEMANAGER_PURGEMASK_FORCEALL;
@@ -1149,7 +1249,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

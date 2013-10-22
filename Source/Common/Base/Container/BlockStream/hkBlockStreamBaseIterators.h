@@ -278,15 +278,15 @@ namespace hkBlockStreamBase
 
 			/// A contiguous memory block on SPU to hold a user-defined number of stream blocks. If more than one Block
 			/// is allocated here they are used in a ring-fashion, allowing for double (or more) buffering.
-			HK_PAD_ON_SPU(Block*)				m_blockBuffer;		
+			HK_PAD_ON_SPU(Block*)				m_blockBuffer;
 
 			/// The PPU addresses of all local SPU blocks (which are held in m_blockBuffer).
 			Block*								m_blocksPpu[MAX_NUM_ACTIVE_BLOCKS];	
 
-			/// The number of allocated Blocks in local SPU memory.
-			HK_PAD_ON_SPU(int)					m_numBlocksInBuffer;
+			/// Maximum number of blocks that can be stored in the block buffer.
+			HK_PAD_ON_SPU(int)					m_blockBufferCapacity;
 
-			/// The index of the Block (in m_blockBuffer) which has its DMA transfer back to PPU initiated last.
+			/// The index of the next SPU block in m_blockBuffer to use when a new block is required.
 			HK_PAD_ON_SPU(int)					m_nextBuffer;
 
 			/// For the current block, add this offset to an element's SPU address to get its PPU equivalent.
@@ -379,7 +379,7 @@ namespace hkBlockStreamBase
 #endif// HK_BLOCKSTREAM_ITERATORS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

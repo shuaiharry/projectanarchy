@@ -108,7 +108,7 @@ VManagedResource *RPG_VisionEffectHelper::GetEffectResource(const char* resource
       return NULL;
     }
     
-    Vision::Error.Warning("[RPG] Resource is not cached: %s", szFilename);   
+    Vision::Error.SystemMessage("[RPG] Resource is not cached: %s", szFilename);   
   }
 
   return resource; 
@@ -137,7 +137,7 @@ VFmodEvent* RPG_VisionEffectHelper::PlayFmodSoundEvent(VString const& eventGroup
   VString const& eventProjectPath = RPG_GameManager::s_instance.GetFmodEventProject();
   VASSERT_MSG(!eventProjectPath.IsEmpty(), "Please ensure that GameManager::FMOD_EVENT_PROJECT points to a valid FMOD project file.");
 
-#ifdef _DEBUG
+#if (defined _DEBUG) && !(RPG_FMOD_SUPPRESS_NONNULL_ASSERTS)
   // @for testing only: validate the project filename
   FMOD::EventProject* pEventProject = VFmodManager::GlobalManager().LoadEventProject(eventProjectPath.AsChar());
   VASSERT_MSG(pEventProject, eventProjectPath.AsChar());
@@ -145,7 +145,9 @@ VFmodEvent* RPG_VisionEffectHelper::PlayFmodSoundEvent(VString const& eventGroup
 
   // load event group
   VFmodEventGroup *pEventGroup = VFmodManager::GlobalManager().LoadEventGroup(eventProjectPath.AsChar(), eventGroupName.AsChar());
+#if !(RPG_FMOD_SUPPRESS_NONNULL_ASSERTS)
   VASSERT_MSG(pEventGroup && pEventGroup->IsValid(), eventGroupName.AsChar());
+#endif
 
   if (pEventGroup && pEventGroup->IsValid())
   {
@@ -186,7 +188,7 @@ bool RPG_VisionEffectHelper::LoadMesh(char const* fileName)
       return NULL;
     }
     
-    Vision::Error.Warning("[RPG] Resource is not cached: %s", fileName);   
+    Vision::Error.SystemMessage("[RPG] Resource is not cached: %s", fileName);   
   }
 
   return resource; 
@@ -222,7 +224,7 @@ bool RPG_VisionEffectHelper::IsLoopedFmodEvent(const VFmodEvent* event)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

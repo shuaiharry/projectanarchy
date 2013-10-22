@@ -18,7 +18,7 @@
   class VConnection;
   class VMessage;
 
-  #ifndef _VISION_ANDROID
+  #if !defined(_VISION_ANDROID) && !defined(_VISION_TIZEN)
   struct fd_set;
   #endif
 
@@ -145,7 +145,46 @@
       ///
       /// \param  Socket  The socket to close. 
       ///
-      static void CloseSocket(int Socket);
+      VBASE_IMPEXP static void CloseSocket(int Socket);
+
+      /// \fn static bool RecvOnSocket(int Socket, void* pBuffer, int BufferSize)
+      ///
+      /// \brief  Receives data from the socket.
+      ///
+      /// \param  Socket  The socket where data should be read from. 
+      ///
+      /// \param  pBuffer The target buffer (needs to be at least BufferSize big)
+      ///
+      /// \param BufferSize The size of the receive buffer.
+      ///
+      static bool RecvOnSocket(int Socket, void* pBuffer, int BufferSize);
+
+      /// \fn static bool SendOnSocket(int Socket, const void* pBuffer, int BufferSize)
+      ///
+      /// \brief  Sends data over the socket.
+      ///
+      /// \param  Socket  The socket where data should be sent to. 
+      ///
+      /// \param  pBuffer The source buffer (needs to be at least BufferSize big)
+      ///
+      /// \param BufferSize The size of the data buffer to send.
+      ///     
+      static bool SendOnSocket(int Socket, const void* pBuffer, int BufferSize);
+
+      /// \brief Creates a new socket for UDP broadcasting.
+      VBASE_IMPEXP static int CreateUDPBroadcastSocket();
+
+      /// \brief Broadcasts a message over a previously created UDP socket.
+      ///
+      /// \param iSocket
+      ///   the socket to broadcast over
+      ///
+      /// \param usPort
+      ///    the port to use for the broadcast
+      ///
+      /// \param msg
+      ///   the message to broadcast
+      VBASE_IMPEXP static bool BroadcastMessage(int iSocket, unsigned short usPort, VMessage* msg);
 
       //! This callback can be used to be notified when there is a new connection.
       VBASE_IMPEXP static VCallback OnConnection;
@@ -351,7 +390,7 @@
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

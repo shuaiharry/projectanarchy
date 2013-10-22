@@ -43,6 +43,8 @@ class hkaiMoppNavMeshQueryMediator : public hkaiNavMeshQueryMediator
 			/// Implementation of hkaiNavMeshQueryMediator interface.
 		virtual void queryAabb( const AabbQueryInput& input, hkArray<hkaiPackedKey>::Temp& hits ) const HK_OVERRIDE;
 
+		virtual hkaiPackedKey getClosestBoundaryEdge( const GetClosestBoundaryEdgeInput& input, hkVector4& closestPointOut ) const HK_OVERRIDE;
+
 	protected:
 
 		hkRefPtr<const hkpMoppCode>	m_code;
@@ -54,7 +56,7 @@ class hkaiMoppNavMeshQueryMediator : public hkaiNavMeshQueryMediator
 #endif // HK_AI_MOPP_NAV_MESH_MEDIATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -19,7 +19,9 @@ struct hkcdManifold4
 {
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BASE, hkcdManifold4 );
 
-	HK_ON_DETERMINISM_CHECKS_ENABLED( hkcdManifold4() { hkString::memSet(this, 0xcd, sizeof(hkcdManifold4)); /*Deterministically set unused memory.*/ } )
+	#ifdef HK_WANT_DETERMINISM_CHECKS
+		hkcdManifold4() { hkString::memSet(this, 0xcd, sizeof(hkcdManifold4)); /*Deterministically set unused memory.*/ }
+	#endif
 
 	HK_FORCE_INLINE hkSimdReal getDistance( int i ) const 
 	{
@@ -49,7 +51,7 @@ struct hkcdManifold4
 #endif // HKCD_TYPES_MANIFOLD_4
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

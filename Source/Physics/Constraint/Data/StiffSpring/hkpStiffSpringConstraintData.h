@@ -23,7 +23,7 @@ class hkpStiffSpringConstraintData : public hkpConstraintData
 
 		enum
 		{
-			SOLVER_RESULT_LIN_0	= 0,	// linear constraint 
+			SOLVER_RESULT_LIN_0	= 0,	// linear constraint
 			SOLVER_RESULT_MAX	= 1
 		};
 
@@ -56,21 +56,25 @@ class hkpStiffSpringConstraintData : public hkpConstraintData
 		};
 
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
-		
+
 		/// Constructor.
 		hkpStiffSpringConstraintData();
-		
+
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		hkpStiffSpringConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
+
+#endif
 
 		/// Sets the spring up with world space information.
 		/// Will compute a rest length too (so call setlength after this if needed)
 		/// \param pivotA			bodyA's pivot point, specified in world space.
 		/// \param pivotB			bodyB's pivot point, specified in world space.
-		inline void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, 
+		inline void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
 								const hkVector4& pivotAW, const hkVector4& pivotBW);
 
 		/// Sets the spring up with body space information.
@@ -114,7 +118,7 @@ class hkpStiffSpringConstraintData : public hkpConstraintData
 #endif // HKP_STIFF_SPRING_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

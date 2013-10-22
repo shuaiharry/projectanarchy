@@ -118,6 +118,8 @@ V_HAS_STACKWALKER         ///< Support for callstack walking
 SUPPORTS_SELECTIVE_BLENDING ///< means that blending can be enabled / disabled for each render target (not different blend states) (if you add this to a platform, also add to VisionCommon.inc)
 SUPPORTS_CLOUD_LAYER
 
+NEEDS_SHADER_SOURCE_PATCHER
+
 ======================================================================
 
 */
@@ -161,7 +163,11 @@ SUPPORTS_CLOUD_LAYER
 #elif defined(_VISION_ANDROID)
 
   #include "hkvPlatformAndroid.h"
-  
+
+#elif defined(_VISION_TIZEN)
+
+  #include "hkvPlatformTizen.h"
+
 #elif defined(_VISION_PSP2)
 
   #include "hkvPlatformPSP2.h"
@@ -188,7 +194,7 @@ SUPPORTS_CLOUD_LAYER
 #endif // HKVPLATFORMDEFINES_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

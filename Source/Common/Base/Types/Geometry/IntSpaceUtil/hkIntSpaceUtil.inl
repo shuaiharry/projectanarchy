@@ -48,7 +48,9 @@ void hkIntSpaceUtil::transformDirectionIntoIntSpace( hkVector4Parameter vecWorld
 
 void hkIntSpaceUtil::convertAabb(const hkAabb& aabbF, hkAabb16& aabbOut)const
 {
+#if !defined(HK_ALIGN_RELAX_CHECKS)
 	HK_ASSERT2( 0xf03ddfe5, 0 == (0xf & hkUlong(&aabbOut)), "Your output aabb is not aligned. Note: you need to align it by hand as hkAabb16 has no alignment declaration.");
+#endif
 
 	hkVector4 mi;  mi.setAdd( m_bitOffsetLow,  aabbF.m_min );
 	hkVector4 ma;  ma.setAdd( m_bitOffsetHigh, aabbF.m_max );
@@ -166,7 +168,7 @@ HK_FORCE_INLINE void hkIntSpaceUtil::convertIntToWorldSpace( const hkAabb& intSp
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

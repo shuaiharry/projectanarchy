@@ -69,7 +69,7 @@
 
 
 
-#elif defined(_VISION_IOS) || defined(_VISION_ANDROID) || defined(_VISION_PSP2) || defined(_VISION_WIIU)
+#elif defined(_VISION_IOS) || defined(_VISION_ANDROID) || defined(_VISION_PSP2) || defined(_VISION_WIIU) || defined(_VISION_TIZEN)
 #define VEXPORT extern "C" 
 #define VIMPORT extern "C" 
 
@@ -426,7 +426,7 @@ protected:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

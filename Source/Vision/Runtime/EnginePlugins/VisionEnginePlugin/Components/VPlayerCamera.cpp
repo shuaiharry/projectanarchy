@@ -39,7 +39,7 @@ enum CAMERA_CONTROL
 
 VPlayerCamera::VPlayerCamera(int iComponentFlags) : IVObjectComponent(0, iComponentFlags)
 {
-  VisionApp_cl::OnUpdatePhysicsFinished += this;
+  Vision::Callbacks.OnUpdateSceneFinished += this;
   Vision::Callbacks.OnEditorModeChanged += this;
 
   // Initial values
@@ -104,7 +104,7 @@ VPlayerCamera::VPlayerCamera(int iComponentFlags) : IVObjectComponent(0, iCompon
   // Map the same input for all pad-like devices
   IVInputDevice* padDevices[] =
   {
-#if defined (_VISION_XENON) || defined (_VISION_PS3) || defined (_VISION_PSP2) || defined(WIN32)
+#if defined (_VISION_XENON) || defined (_VISION_PS3) || defined (_VISION_PSP2) || ( defined(WIN32) && !defined( _VISION_APOLLO ) )
     VInputManager::IsInitialized() ? &V_PAD(0) : NULL,
 #elif defined(_VISION_WIIU)
     &VInputManagerWiiU::GetDRC(V_DRC_FIRST),
@@ -129,7 +129,7 @@ VPlayerCamera::VPlayerCamera(int iComponentFlags) : IVObjectComponent(0, iCompon
 VPlayerCamera::~VPlayerCamera()
 {
   Vision::Callbacks.OnEditorModeChanged -= this;
-  VisionApp_cl::OnUpdatePhysicsFinished -= this;
+  Vision::Callbacks.OnUpdateSceneFinished -= this;
 
   V_SAFE_DELETE(m_pInputMap);
 
@@ -268,10 +268,8 @@ void VPlayerCamera::OnHandleCallback(IVisCallbackDataObject_cl *pData)
   if(pData->m_pSender == &Vision::Callbacks.OnEditorModeChanged)
   {
     UpdateAttachment();
-    return;
   }
-
-  if(pData->m_pSender == &VisionApp_cl::OnUpdatePhysicsFinished)
+  else if(pData->m_pSender == &Vision::Callbacks.OnUpdateSceneFinished)
   {
     if (!m_spCameraProxy)
     {
@@ -280,7 +278,7 @@ void VPlayerCamera::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 
     float fStepX = CameraSensitivity * m_pInputMap->GetTrigger(CAMERA_HORIZONTAL_MOVEMENT);
     float fStepY = CameraSensitivity * m_pInputMap->GetTrigger(CAMERA_VERTICAL_MOVEMENT);
-    float fStepZoom = (Zoom ? 1.0f : 0.0f) * CameraSensitivity * m_pInputMap->GetTrigger(CAMERA_ZOOM);
+    float fStepZoom = (Zoom ? -1.0f : 0.0f) * CameraSensitivity * m_pInputMap->GetTrigger(CAMERA_ZOOM);
 
     // Step camera move
     SetCameraStep(fStepX, fStepY, fStepZoom, 0.f); 
@@ -384,7 +382,7 @@ void VPlayerCamera::SetCameraStep(float fYawStep, float fPitchStep, float fDista
   if (Follow)
   {
     // Calculate current blending weight
-    float weight = Vision::GetTimer()->GetTimeDifference() / MoveSmoothness;  // Use Vision::GetUITimer() here?
+    float weight = Vision::GetTimer()->GetTimeDifference() / MoveSmoothness;
 
     // apparently it is possible to have negative values in here, in some obscure configurations
     // not sure what would happen, if we were to clamp that to 0 then.
@@ -495,7 +493,7 @@ DEFINE_VAR_FLOAT(VPlayerCamera, MoveSmoothness, "Camera movement ease in/out (af
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

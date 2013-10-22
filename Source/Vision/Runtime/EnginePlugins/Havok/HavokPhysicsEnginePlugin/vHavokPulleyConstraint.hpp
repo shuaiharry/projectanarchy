@@ -12,59 +12,58 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConstraint.hpp>
 
 /// \brief
-///   Descriptor for vHavok Pulley constraint.
+///   Descriptor for vHavokPhysics Pulley constraint.
 class vHavokPulleyConstraintDesc : public vHavokConstraintDesc
 {
 public:
   VHAVOK_IMPEXP vHavokPulleyConstraintDesc();
 
-  VHAVOK_IMPEXP virtual void Reset();
+  VHAVOK_IMPEXP virtual void Reset() HKV_OVERRIDE;
 
-  V_DECLARE_SERIAL_DLLEXP( vHavokPulleyConstraintDesc, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokPulleyConstraintDesc, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 public:
-  hkvVec3 m_vPulleyPivots[2]; ///< The constraint's pulley pivots in world space
-  float m_fLeverage;               ///< The leverage ratio of the pulley. Pulley exerts 'leverageRatio' times greater forces on second body
-  float m_fRopeLength;             ///< The length of the rope. Full length == (length of rope from bodyA to pulleyPivotA) + leverageRation * (length of rope from body B to pulleyPivotB).  
-                                   ///< (length == 0 means, that the rope length is automatically calculated corresponding to the positions of the linked bodies and assuming the rope is fully stretched)
+  hkvVec3 m_vPulleyPivots[2];   ///< The constraint's pulley pivots in world space
+  float m_fLeverage;            ///< The leverage ratio of the pulley. Pulley exerts 'leverageRatio' times 
+                                ///< greater forces on second body
+  float m_fRopeLength;          ///< The length of the rope. 
+                                ///< Full length == (length of rope from bodyA to pulleyPivotA) + leverageRation * (length of rope from body B to pulleyPivotB).  
+                                ///< (length == 0 means, that the rope length is automatically calculated 
+                                ///< corresponding to the positions of the linked bodies and assuming the rope 
+                                ///< is fully stretched)
    
 private:
   static const unsigned int s_iSerialVersion;
 };
 
-
-// ----------------------------------------------------------------------------
-// vHavokPulleyConstraint
-// ----------------------------------------------------------------------------
-
 /// \brief
-///   Implementation of the vHavok Pulley constraint.
+///   Implementation of the vHavokPhysics Pulley constraint.
 class vHavokPulleyConstraint : public vHavokConstraint
 {
 public:
   // serialization and type management
-  V_DECLARE_SERIAL_DLLEXP( vHavokPulleyConstraint, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokPulleyConstraint, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 protected:
-  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData();
-  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc();
-  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, vHavokConstraintDesc const& desc);
+  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, 
+    vHavokConstraintDesc const& desc) HKV_OVERRIDE;
 public:
-  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc);
+  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc) HKV_OVERRIDE;
 
 private:
-  static const unsigned int s_iSerialVersion;
-
   vHavokPulleyConstraintDesc m_savedPulleyConstraintDesc;  ///< Saved pulley constraint desc
 
+  static const unsigned int s_iSerialVersion;
 };
 
 #endif //V_HAVOK_PULLEY_CONSTRAINT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

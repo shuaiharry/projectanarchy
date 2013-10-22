@@ -17,63 +17,36 @@ public:
   // Constructor needs to be public for FORCE_LINKDYNCLASS on mobile
   RPG_RangedGuardianAiControllerComponent();
 
-protected:
-  //@{
-  // States
-  void SelectState() HKV_OVERRIDE;
-  //@}
-
-  //@{
-  // Individual State Updates
-  void UpdateWandering(float const deltaTime) HKV_OVERRIDE;
-  void UpdateMovingToPosition(float const deltaTime) HKV_OVERRIDE;
-  void UpdateRangedAttacking(float const deltaTime) HKV_OVERRIDE;
-  void UpdateFleeing(float const deltaTime) HKV_OVERRIDE;
-  //@}
-
-  //@{
-  // Conditions
-  bool IsTargetTooClose() const;
-  bool IsTargetTooFar() const;
-  bool IsReadyToFlee() const;
-  //@}
-
-  //@{
-  // Attacking state
-  float m_lastAttackTime;     ///< When did this character last attack?
-  float m_attackInterval;     ///< Randomly assigned delay between attacks
-  float m_attackIntervalMin;
-  float m_attackIntervalMax;
-  float m_attackMaxRange;
-  hkvVec3 m_attackLineOfSightPosition;
-  bool m_attackMovingToLineOfSight;
-  float m_attackMovingToLineOfSightStartTime;
-  //@}
-
-  //@{
-  // Wander state
-  hkvVec3 m_wanderOrigin;
-  float m_wanderAngle;
-  float m_wanderIdleTime;
-  //@}
-
-  //@{
-  // Fleeing state
-  float m_holdOffRange;
-  float m_fleeMaxDuration;
-  float m_fleeMinInterval;
-  float m_lastFleeTime;
-  //@}
-
 private:
+  void SetOwner(VisTypedEngineObject_cl *newOwner);
+
   V_DECLARE_SERIAL_DLLEXP(RPG_RangedGuardianAiControllerComponent, RPG_PLUGIN_IMPEXP);
   V_DECLARE_VARTABLE(RPG_RangedGuardianAiControllerComponent, RPG_PLUGIN_IMPEXP);
 };
 
+namespace RPG_RangedGuardianAiControllerState
+{
+  // Idling
+  class Idling : public RPG_ControllerStateBase
+  {
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "Ranged::Idling"; }
+  };
+
+  // Moving
+  class Moving : public RPG_ControllerState::Moving
+  {
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "Ranged::Moving"; }
+  };
+}
+
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

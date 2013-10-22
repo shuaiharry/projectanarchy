@@ -92,6 +92,27 @@ public:
 		/// The closest face key is also returned. This will be HKAI_INVALID_PACKED_KEY if no face is found.
 	virtual hkaiPackedKey getClosestPoint( const GetClosestPointInput& input, hkVector4& closestPointOut ) const = 0;
 
+		/// Input information for getClosestBoundaryEdge queries
+	struct GetClosestBoundaryEdgeInput : public GetClosestPointInput
+	{
+		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI, GetClosestBoundaryEdgeInput);
+
+		inline GetClosestBoundaryEdgeInput();
+
+		/// Sets m_position and m_queryRadius to the provided values
+		inline GetClosestBoundaryEdgeInput( hkVector4Parameter position, hkSimdRealParameter radius );
+
+		/// Copies filter info, userdata, and hit filter pointer from the base input.
+		inline GetClosestBoundaryEdgeInput(const QueryInputBase& base);
+
+			/// Direction to project the boundary and query point before computing distances.
+		hkVector4 m_projectionDirection;
+	};
+
+		/// Output the closest point on a boundary edge to the given position. The distance squared is stored in the w component.
+		/// The closest edge key is also returned. This will be HKAI_INVALID_PACKED_KEY if no edge is found.
+	virtual hkaiPackedKey getClosestBoundaryEdge( const GetClosestBoundaryEdgeInput& input, hkVector4& closestPointOut ) const = 0;
+
 		/// Input information for raycast queries
 	struct RaycastInput : public QueryInputBase
 	{
@@ -110,6 +131,7 @@ public:
 		hkVector4 m_to;
 	};
 
+		/// Input information for castBidirectionalRay queries
 	struct BidirectionalRaycastInput : public QueryInputBase
 	{
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI, BidirectionalRaycastInput);
@@ -261,7 +283,7 @@ protected:
 #endif // HKAI_QUERY_MEDIATOR
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

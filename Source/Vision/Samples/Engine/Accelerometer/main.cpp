@@ -60,13 +60,16 @@ IVMultiTouchInput* touchscreen;
   VMotionInputAndroid* pMotionInput = NULL;
 #elif defined(_VISION_WINRT)
   VMotionInputWinRT* pMotionInput = NULL;
+#elif defined(_VISION_TIZEN)
+  VMotionInputTizen* pMotionInput = NULL;
 #elif defined(WIN32)
   VMotionInputPC* pMotionInput = NULL;
   IVRemoteInput* pRemoteInput = NULL;
 #endif
 
-
+#if defined( _VISION_IOS )
 VISION_SET_SUPPORTED_ORIENTATIONS(VisOrientationLandscapeLeft);
+#endif
 
 VISION_INIT
 {
@@ -87,14 +90,14 @@ VISION_INIT
   // Create an application
   spApp = new VisSampleApp();
   
-  int flags = VSAMPLE_INIT_DEFAULTS;
-  flags |= VSAMPLE_WAITRETRACE;
-  flags &= ~VSAMPLE_ASKFULLSCREEN;
+  uint64 flags = VSampleFlags::VSAMPLE_INIT_DEFAULTS;
+  flags |= VSampleFlags::VSAMPLE_WAITRETRACE;
+  flags &= ~VSampleFlags::VSAMPLE_ASKFULLSCREEN;
 
 #ifdef _VISION_WIIU
-  flags |= VSAMPLE_MULTISAMPLE4X;
-  flags &= ~VSAMPLE_WIIU_DRCDEMO;
-  flags |= VSAMPLE_WIIU_DRCCOPY;
+  flags |= VSampleFlags::VSAMPLE_MULTISAMPLE4X;
+  flags &= ~VSampleFlags::VSAMPLE_WIIU_DRCDEMO;
+  flags |= VSampleFlags::VSAMPLE_WIIU_DRCCOPY;
 #endif
 
   valueX = 0.f;
@@ -114,6 +117,7 @@ VISION_INIT
 
 VISION_SAMPLEAPP_AFTER_LOADING
 {
+
   // Create a game state entity
   pGameStateEntity = (GameState_cl*)Vision::Game.CreateEntity( "GameState_cl", hkvVec3(), "");
 
@@ -130,6 +134,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
 
   VGUIManager::GlobalManager().LoadResourceFile("GUI\\MenuSystem.xml");
 
+
 #if defined(WIN32)
   VisSampleApp::GetInputMap()->MapTrigger(TOUCHDEBUG, V_PC_KEYBOARD, CT_KB_Q, VInputOptions::Once());
 #elif defined(_VISION_PSP2)
@@ -142,6 +147,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
   {
     touchscreen = static_cast<IVMultiTouchInput*>(inputDevice);
   }
+
 
   // Enable motion input
 #if defined(_VISION_PSP2)
@@ -157,10 +163,15 @@ VISION_SAMPLEAPP_AFTER_LOADING
 #elif defined(_VISION_ANDROID)
   pMotionInput = (VMotionInputAndroid*)(&VInputManager::GetInputDevice(INPUT_DEVICE_MOTION_SENSOR));
   pMotionInput->SetEnabled(true);
+#elif defined(_VISION_TIZEN)
+  pMotionInput = (VMotionInputTizen*)(&VInputManager::GetInputDevice(INPUT_DEVICE_MOTION_SENSOR));
+  pMotionInput->SetEnabled(true);
 #endif 
   
+
   spApp->AddHelpText("rotate your device and try to get the ball onto the finish field");
   spApp->SetShowHelpText(true);
+
 }
 
 VISION_SAMPLEAPP_RUN
@@ -168,6 +179,7 @@ VISION_SAMPLEAPP_RUN
   // Run the main loop of the application until we quit
   if (spApp->Run())
   { 
+
 #if defined(WIN32) && !defined(_VISION_WINRT)
     pRemoteInput->DebugDrawTouchAreas(VColorRef(255,255,255));
     pRemoteInput->DebugDrawTouchPoints(VColorRef(255,0,0));
@@ -177,7 +189,7 @@ VISION_SAMPLEAPP_RUN
     pRemoteInput->UpdateVariable("ballYPos",vBallPos.y);
 #endif
 
-#if defined(_VISION_IOS) || defined(_VISION_PSP2) || defined(WIN32) || defined(_VISION_ANDROID) || defined(_VISION_WIIU)
+#if defined(_VISION_IOS) || defined(_VISION_PSP2) || defined(WIN32) || defined(_VISION_ANDROID) || defined(_VISION_WIIU) || defined(_VISION_TIZEN)
     hkvVec3 vAcceleration;
 #if defined(_VISION_WIIU)
     vAcceleration.x = -VInputManager::GetDRC(V_DRC_FIRST).GetControlValue(CT_PAD_WIIU_ACCELERATION_X, 0.0f);
@@ -209,7 +221,7 @@ VISION_SAMPLEAPP_RUN
       //modal dialogs are not supported on iOS
       int iResult = VGUIManager::ID_YES;
 #else
-      int iResult = spGUIContext->ShowDialogModal(NULL, "GUI\\MessageBox.xml", hkvVec2(0,0), spGUIContext->GetNullApp());     
+      int iResult = spGUIContext->ShowDialogModal(NULL, "GUI\\MessageBox.xml", hkvVec2(0,0), spGUIContext->GetNullApp());
 #endif
       if (iResult==VGUIManager::ID_YES) 
       {
@@ -297,7 +309,7 @@ VISION_DEINIT
   pCameraEntity = NULL;
   pBallEntity = NULL;
   touchscreen = NULL;
-#if defined(_VISION_PSP2) || defined(_VISION_IOS) || defined(_VISION_ANDROID) || defined(WIN32)
+#if defined(_VISION_PSP2) || defined(_VISION_IOS) || defined(_VISION_ANDROID) || defined(WIN32) || defined(_VISION_TIZEN)
   pMotionInput = NULL;
 #endif
 #if defined(WIN32) && !defined(_VISION_WINRT)
@@ -317,7 +329,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

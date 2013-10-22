@@ -49,7 +49,7 @@ public:
   /// @name Trigger Box Functions
   /// @{
   
-  /// \brief Set flags to determinate the behavor of the trigger box, see detailed description.
+  /// \brief Set flags to determinate the behavior of the trigger box, see detailed description.
   /// \details
   ///    You can combine these flags for your desired observation behavior of the trigger box:
   ///    - do not observe anything:        VBitmask(0)

@@ -39,7 +39,7 @@ public:
 		bool m_skipPrefabs; // normally true if doing whole scene export, false if doing exportselected
 		bool m_flattenBones;	// flatten bone hierarchy to all root bones
 		bool m_disableBoneSorting;	// dont reorder bones in the skeletons
-		const char* m_assetPath; // so that textures can
+		VString m_assetPath; // so that textures can
 
 		VExporterOptions* m_processorOptions; // so that we can only produce as much as requested, know the animation ranges etc 
 	} m_options;
@@ -84,18 +84,21 @@ protected:
 	hkArray<VGBone*> m_bones; // as per indexed from skins
 	hkPointerMap< const hkxTextureInplace*, char* > m_inplaceTextureFiles;
 
+	hkArray<VGBone*> m_scaleRemovedBones;
+
 private:
 
 	void	 convertBoneAnimsRecursive(const hkxNode* hnode, const hkSet< float >* hints, hkArray<const hkxNode*>& interNodePath );
 	void	 convertBindPoseRecursive( const hkxNode* hnode, VGBone& vbone, const hkArray<const hkxSkinBinding*>& bindings, const hkMatrix4& parentWorldTransform, hkArray<const hkxNode*>& interNodePath );
-	void	 getBoneAnimFromKeyFrame( VGBone& vbone, VGAnimation_Bone& vboneAnim, const hkxNode* hnode, hkArray<const hkxNode*>& interNodePath, int startFrame, int keyframe, bool rootScale = false );
-	bool	 getBoneAnimFromKeyTime( VGBone& vbone, VGAnimation_Bone& vboneAnim, const hkxNode* hnode, hkArray<const hkxNode*>& interNodePath, float startTime, float keyTime, bool rootScale = false );
+	void     convertBoneXForm( hkvMat4& mv, const hkMatrix4& m, VGBone& vbone );
+	void	 getBoneAnimFromKeyFrame( VGBone& vbone, VGAnimation_Bone& vboneAnim, const hkxNode* hnode, hkArray<const hkxNode*>& interNodePath, int startFrame, int keyframe);
+	bool	 getBoneAnimFromKeyTime( VGBone& vbone, VGAnimation_Bone& vboneAnim, const hkxNode* hnode, hkArray<const hkxNode*>& interNodePath, float startTime, float keyTime);
 };
 
 #endif //VISION_EXPORT_CONVERTER__H
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -563,7 +563,7 @@ public:
 protected:
   /// \brief
   ///   Loops through all sub-managers and returns the first stream that was successfully opened through a data directory
-  VISION_APIFUNC virtual IVFileInStream* InternalOpen(const char* pszFileName, int iFlags) HKV_OVERRIDE;
+  VISION_APIFUNC virtual IVFileInStream* InternalOpen(const char* pszFileName, int iFlags, const InternalOpenContext& ioc) HKV_OVERRIDE;
 
   /// \brief
   ///   Returns TRUE if the file exists in any sub-manager (i.e. data directory)
@@ -589,7 +589,7 @@ protected:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

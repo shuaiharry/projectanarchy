@@ -41,7 +41,7 @@ struct hkpConstraintAtom
 			TYPE_BRIDGE,					// 1
 
 			TYPE_SET_LOCAL_TRANSFORMS,		// 2
-			TYPE_SET_LOCAL_TRANSLATIONS,	// 3	
+			TYPE_SET_LOCAL_TRANSLATIONS,	// 3
 			TYPE_SET_LOCAL_ROTATIONS,		// 4
 
 			TYPE_BALL_SOCKET,				// 5
@@ -74,7 +74,8 @@ struct hkpConstraintAtom
 			TYPE_DEFORMABLE_3D_ANG,			// 26
 
 			TYPE_OVERWRITE_PIVOT, //xx patch values from here [inclusive] on.
-			
+
+			TYPE_WHEEL_FRICTION,			// 28
 
 			TYPE_CONTACT,
 
@@ -102,7 +103,7 @@ struct hkpConstraintAtom
 			CALLBACK_REQUEST_SETUP_CALLBACK			= 4,
 			CALLBACK_REQUEST_CONTACT_POINT_CALLBACK	= 8
 		};
-		
+
 		/// Possible types of solving methods used by the constraint atoms.
 		enum SolvingMethod
 		{
@@ -276,7 +277,7 @@ struct hkpDeformableLinConstraintAtom : public hkpConstraintAtom
 	public:
 
 		/// Offset that must be preserved between pivots, i.e. pivotB - pivotA = offset, in local space of body A. Maximum allowed distance
-		/// between pivots is stored in the .w component 
+		/// between pivots is stored in the .w component
 		hkVector4 m_offset;	//+default(0.0f,0.0f,0.0f,0.0f)
 
 		/// Yield strength tensor. Has force units (i.e. N) when projected on an axis. Gives the maximum force the solver can apply
@@ -371,10 +372,10 @@ struct hkpBallSocketConstraintAtom : public hkpConstraintAtom
 		HK_FORCE_INLINE hkpConstraintAtom* next() const { return const_cast<hkpConstraintAtom*>( static_cast<const hkpConstraintAtom*>(this+1) ); }
 
 			/// This tells how many solver-constraints this atom generates and how may solver-results slots it requires.
-		HK_FORCE_INLINE int numSolverResults() const    
-		{ 
+		HK_FORCE_INLINE int numSolverResults() const
+		{
 			const int numResults = hkMath::_max2<int>(3 * hkpJacobianSchemaInfo::Bilateral1D::Results, hkpJacobianSchemaInfo::StableBallSocket::Results);
-			return numResults; 
+			return numResults;
 		}
 
 			/// This tells how much memory the system will need to store solver schemas and Jacobian's for this atom.
@@ -638,7 +639,7 @@ struct hkpLinSoftConstraintAtom : public hkpConstraintAtom
 		HK_FORCE_INLINE void addToConstraintInfo(hkpConstraintInfo& infoOut) const { infoOut.add<hkpJacobianSchemaInfo::BilateralUserTau1D>(); }
 
 	public:
-			
+
 		hkUint8 m_axisIndex;	///< Specifies the index of the axis of the bodyB's constraint base, that will be constrained.
 		hkReal m_tau;			///< Specifies a custom value for the tau parameter used by the solver.
 		hkReal m_damping;		///< Specifies a custom value for the damping parameter used by the solver.
@@ -701,7 +702,7 @@ struct hkp2dAngConstraintAtom : public hkpConstraintAtom
 		HK_FORCE_INLINE void addToConstraintInfo(hkpConstraintInfo& infoOut) const { infoOut.addMultiple<hkpJacobianSchemaInfo::Angular1D>(2); }
 
 	public:
-		
+
 		hkUint8 m_freeRotationAxis;	///< Specifies the index of the unconstrained axis of relative rotation in bodyB's constraint base.
 
 #if defined(HK_REAL_IS_DOUBLE)
@@ -729,7 +730,7 @@ struct hkpAngConstraintAtom : public hkpConstraintAtom
 		HK_FORCE_INLINE void addToConstraintInfo(hkpConstraintInfo& infoOut) const { infoOut.addMultiple<hkpJacobianSchemaInfo::Angular1D>(m_numConstrainedAxes); }
 
 	public:
-			
+
 		hkUint8 m_firstConstrainedAxis;		///< Index of the first axis to constrain, in bodyA's constraint base.
 		hkUint8 m_numConstrainedAxes;		///< Number of subsequent base axes to constrain.
 
@@ -800,7 +801,7 @@ struct hkpTwistLimitConstraintAtom : public hkpConstraintAtom
 		/// Tells whether the atom should be handled by the solver.
 		/// Note that if it is not, the atom's corresponding hkpSolverResults are not updated.
 		hkUint8 m_isEnabled;
-					
+
 		hkUint8 m_twistAxis;	///< The index of the axis in the bodyA's constraint base, that will be limited.
 		hkUint8 m_refAxis;		///< The index of a perpendicular axis used as a reference to measure the angle.
 		hkReal m_minAngle;		///< Minimum angle value in radians (may be negative).
@@ -895,9 +896,9 @@ struct hkpAngFrictionConstraintAtom : public hkpConstraintAtom
 		/// Tells whether the atom should be handled by the solver.
 		/// Note that if it is not, the atom's corresponding hkpSolverResults are not updated.
 		hkUint8 m_isEnabled;
-				
+
 		hkUint8 m_firstFrictionAxis;	///< Index of the first axis to apply friction along, in bodyA's constraint base.
-		hkUint8 m_numFrictionAxes;		///< Number of subsequent base axes to constrain.			
+		hkUint8 m_numFrictionAxes;		///< Number of subsequent base axes to constrain.
 		hkReal m_maxFrictionTorque;		///< Maximum allowed torque to be applied due to friction.
 
 #if defined(HK_REAL_IS_DOUBLE)
@@ -1028,7 +1029,7 @@ struct hkpLinFrictionConstraintAtom : public hkpConstraintAtom
 		/// Tells whether the atom should be handled by the solver.
 		/// Note that if it is not, the atom's corresponding hkpSolverResults are not updated.
 		hkUint8 m_isEnabled;
-					
+
 		hkUint8 m_frictionAxis;		///< Index of the axis to apply friction along, in bodyB's constraint base.
 		hkReal m_maxFrictionForce;	///< Maximum allowed force to be applied due to friction.
 
@@ -1039,6 +1040,135 @@ struct hkpLinFrictionConstraintAtom : public hkpConstraintAtom
 		// padding to 16 bytes
 		hkUint8 m_padding[8]; //+nosave
 #endif
+};
+
+/// Atom for wheel simulation
+struct hkpWheelFrictionConstraintAtom : public hkpConstraintAtom
+{
+public:
+
+	// Used to simulate multiple wheels on the same fixed axle. Allows multiple hkpWheelFrictionConstraintAtoms
+	// to share the same spin velocity. This is necessary because the wheel / axle doesn't have its own velocityAccumulator
+	// in the solver, but it needs to have impulses applied to it and get integrated just like a rigid body. Note
+	// that two constraints sharing an axle should must also share a chassis, or else they could be in different simulation
+	// islands and cause a race condition.
+	struct Axle
+	{
+		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT, hkpWheelFrictionConstraintAtom::Axle );
+		HK_DECLARE_REFLECTION();
+
+		Axle() {}
+		Axle( hkFinishLoadedObjectFlag f ) {}
+
+		hkReal m_spinVelocity;	// Spin velocity of the axle
+		hkReal m_sumVelocity;	// Sum of spin velocity for solver integration
+		int m_numWheels;		// Number of wheels on the axle
+		int m_wheelsSolved;		// Number of wheels solved so far during the current solver step
+		int m_stepsSolved;		// Number of solver steps completed so far during the current physics step
+
+		hkReal m_invInertia;
+		hkReal m_inertia;
+
+		hkReal m_impulseScaling;	// Scale the impulse applied to body B
+		hkReal m_impulseMax;		// Clip the impulse applied to body B
+
+		hkBool m_isFixed;
+
+		int m_numWheelsOnGround;	// Number of wheels currently in contact with another body
+
+		void init( int numWheels, hkReal invInertia )
+		{
+			m_numWheels = numWheels;
+			setInvInertia( invInertia );
+
+			m_spinVelocity = 0.0f;
+			m_sumVelocity = 0.0f;
+			m_wheelsSolved = 0;
+			m_stepsSolved = 0;
+			m_isFixed = false;
+			m_impulseScaling = 1.0f;
+			m_impulseMax = HK_REAL_MAX;
+			m_numWheelsOnGround = 0;
+		}
+
+		void setInvInertia( hkReal invInertia )
+		{
+			m_invInertia = invInertia;
+			if (invInertia == 0.0f)
+			{
+				m_inertia = 0.0f;
+			}
+			else
+			{
+				m_inertia = 1.f / invInertia;
+			}
+		}
+
+		// Sets scaling and clipping for impulses applied to body B. This makes it possible to
+		// soften the friction impulse when the wheel drives over a dynamic body.
+		void setImpulseScaling(hkReal impulseScaling, hkReal impulseMax)
+		{
+			m_impulseScaling = impulseScaling;
+			m_impulseMax = impulseMax;
+		}
+	};
+
+	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT, hkpWheelFrictionConstraintAtom );
+	HK_DECLARE_REFLECTION();
+
+	hkpWheelFrictionConstraintAtom() : hkpConstraintAtom(TYPE_WHEEL_FRICTION), m_isEnabled(true) { resetSolverData(); }
+	hkpWheelFrictionConstraintAtom(hkFinishLoadedObjectFlag f) : hkpConstraintAtom(f)
+	{
+		if(f.m_finishing)
+		{
+			resetSolverData();
+		}
+	}
+
+	HK_FORCE_INLINE hkpConstraintAtom* next() const { return const_cast<hkpConstraintAtom*>( static_cast<const hkpConstraintAtom*>(this+1) ); }
+	HK_FORCE_INLINE int numSolverResults() const { return  hkpJacobianSchemaInfo::WheelFriction::Results; }
+	HK_FORCE_INLINE void addToConstraintInfo(hkpConstraintInfo& infoOut) const { infoOut.add<hkpJacobianSchemaInfo::WheelFriction>(); }
+
+	hkReal getSpinVelocity()
+	{
+		return m_axle->m_spinVelocity;
+	}
+
+	// Call only outside of the physics step to update the wheel's spin velocity
+	void setSpinVelocity(hkReal spinVelocity)
+	{
+		m_axle->m_spinVelocity = spinVelocity;
+	}
+
+	// Reset the atom's solver results before beginning a new step.
+	void resetSolverData()
+	{
+		m_frictionImpulse[0] = 0;
+		m_frictionImpulse[1] = 0;
+		m_slipImpulse[0] = 0;
+		m_slipImpulse[1] = 0;
+	}
+
+public:
+
+	/// Tells whether the atom should be handled by the solver.
+	/// Note that if it is not, the atom's corresponding hkpSolverResults are not updated.
+	hkUint8 m_isEnabled;
+
+	hkUint8 m_forwardAxis;		///< Index of axis defined by (spin axis) x (contact normal), in bodyB's constraint base.
+	hkUint8 m_sideAxis;			///< Index of axis defined by (contact normal) x (forward axis), in bodyB's constraint base.
+	hkReal m_maxFrictionForce;	///< Maximum allowed force to be applied due to friction.
+	hkReal m_torque;			///< Torque at the wheel (driving / braking force)
+
+	hkReal m_radius;		// wheel radius
+
+	// Wheel doesn't use solver results, we pass a pointer to the atom into the jacobian so that it can export results here.
+	// Because this information is stored in the atom, there can only be one constraint instance per atom. That could be fixed
+	// by adding a separately allocated structure to store the results, but there's not much reason for multiple instances
+	// of the same wheel atom, and this is similar to how contact constraints work where the info is stored in the atom.
+	hkReal m_frictionImpulse[2];	// Total friction impulse applied in each direction
+	hkReal m_slipImpulse[2];		// Total slip impulse in each direction
+	Axle* m_axle;
 };
 
 
@@ -1067,7 +1197,7 @@ struct hkpLinMotorConstraintAtom : public hkpConstraintAtom
 
 		hkBool m_isEnabled;						///< A flag saying whether the motor is active
 		hkUint8 m_motorAxis;					///< The index of the axis in the bodyB's constraint base, that will be controlled.
-		
+
 		/// Memory offset from atom's solver results to runtime's m_initialized member.
 		hkInt16 m_initializedOffset;	//+nosave
 
@@ -1102,7 +1232,7 @@ struct hkpPulleyConstraintAtom : public hkpConstraintAtom
 		HK_FORCE_INLINE void addToConstraintInfo(hkpConstraintInfo& infoOut) const { infoOut.add<hkpJacobianSchemaInfo::Pulley1D>(); }
 
 	public:
-		
+
 		hkVector4 m_fixedPivotAinWorld;		///< Pulley's first fixed pivot point.
 		hkVector4 m_fixedPivotBinWorld;		///< Pulley's second fixed pivot point.
 		hkReal m_ropeLength;				///< The rest length (equal to ((BodyA's rope) + leverageOnBodyB * (BodyB's rope length)) )
@@ -1167,7 +1297,7 @@ struct hkpCogWheelConstraintAtom : public hkpConstraintAtom
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT, hkpCogWheelConstraintAtom );
 		HK_DECLARE_REFLECTION();
-	
+
 		hkpCogWheelConstraintAtom() : hkpConstraintAtom(TYPE_COG_WHEEL) {}
 		hkpCogWheelConstraintAtom(hkFinishLoadedObjectFlag f) : hkpConstraintAtom(f) {}
 
@@ -1196,7 +1326,7 @@ struct hkpCogWheelConstraintAtom : public hkpConstraintAtom
 #endif // HKP_CONSTRAINT_ATOM_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

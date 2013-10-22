@@ -17,7 +17,7 @@
 class hkbBlendingTransitionEffectInternalState : public hkReferencedObject
 {
 	//+vtable(1)
-	//+version(0)
+	//+version(1)
 	public:
 
 		HK_DECLARE_REFLECTION();
@@ -39,7 +39,8 @@ class hkbBlendingTransitionEffectInternalState : public hkReferencedObject
 		hkArray<hkQsTransform> m_characterPoseAtBeginningOfTransition;
 		hkReal m_timeRemaining;
 		hkReal m_timeInTransition;
-		hkBool m_applySelfTransition;
+		hkBool m_resetToGenerator;
+		hkEnum< hkbTransitionEffect::SelfTransitionMode, hkInt8 > m_toGeneratorSelfTranstitionMode;
 		hkBool m_initializeCharacterPose;
 		hkBool m_alignThisFrame;
 		hkBool m_alignmentFinished;
@@ -48,7 +49,7 @@ class hkbBlendingTransitionEffectInternalState : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

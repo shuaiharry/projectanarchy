@@ -294,6 +294,7 @@ namespace Editor
         if (DetectFolderType() != FolderType_e.Local || EditorManager.Settings.OpenMultiUserEditingDialogForLocalProjects)
         {
           MultiUserEditingDlg dlg = new MultiUserEditingDlg();
+          dlg.ShowInTaskbar = false;
           dlg.Project = this;
           if (dlg.ShowDialog() != DialogResult.OK)
             return false;
@@ -311,7 +312,7 @@ namespace Editor
       EditorManager.ProfileManager.InitNewProject(ProjectDir);
 
       //Add the project directory to the engine base data directory
-      //EditorManager.EngineManager.File_RemoveAllDataDirectories(); //Don't remove all data directories, or else we loose the base data directory
+      //EditorManager.EngineManager.File_RemoveAllDataDirectories(); //Don't remove all data directories, or else we lose the base data directory
       EditorManager.EngineManager.File_AddDataDirectory(ProjectDir);
 
       // Notify the asset manager of automatically added data directories
@@ -531,7 +532,7 @@ namespace Editor
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

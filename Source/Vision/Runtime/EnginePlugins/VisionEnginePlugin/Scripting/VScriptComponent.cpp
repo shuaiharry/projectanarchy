@@ -35,9 +35,9 @@ VScriptMember::VScriptMember(const char * szName, const char * szValue, const ch
 {
   VASSERT_MSG(szName!=NULL, "Please always specify a name for a member!");
 
-  m_szType = szType==NULL ? NULL : strdup(szType);
-  m_szName = szName==NULL ? NULL : strdup(szName);
-  m_szValue = szValue==NULL ? NULL : strdup(szValue);
+  m_szType = szType==NULL ? NULL : vStrDup(szType);
+  m_szName = szName==NULL ? NULL : vStrDup(szName);
+  m_szValue = szValue==NULL ? NULL : vStrDup(szValue);
 }
 
 VScriptMember::~VScriptMember()
@@ -50,14 +50,14 @@ VScriptMember::~VScriptMember()
 void VScriptMember::SetValue(const char * szValue)
 {
   V_SAFE_DELETE(m_szValue);
-  m_szValue = szValue==NULL ? NULL : strdup(szValue);
+  m_szValue = szValue==NULL ? NULL : vStrDup(szValue);
 }
 
 void VScriptMember::operator=(const VScriptMember &copy)
 {
-  m_szType = copy.m_szType==NULL ? NULL : strdup(copy.m_szType);
-  m_szName = copy.m_szName==NULL ? NULL : strdup(copy.m_szName);
-  m_szValue = copy.m_szValue==NULL ? NULL : strdup(copy.m_szValue);
+  m_szType = copy.m_szType==NULL ? NULL : vStrDup(copy.m_szType);
+  m_szName = copy.m_szName==NULL ? NULL : vStrDup(copy.m_szName);
+  m_szValue = copy.m_szValue==NULL ? NULL : vStrDup(copy.m_szValue);
 }
 
 bool VScriptMember::operator==(const VScriptMember & other) const
@@ -148,7 +148,7 @@ void VScriptComponent::SetOwner(VisTypedEngineObject_cl *pOwner)
 
     // will reload resource if timestamp is deprecated
     if (pRes != NULL)
-      pRes->CheckFileModified(Vision::File.GetManager(), TRUE, TRUE); 
+      pRes->CheckFileModified(Vision::File.GetManager()); 
   }
 
   if (pOwner != NULL && !ScriptFile.IsEmpty())
@@ -577,7 +577,7 @@ DEFINE_VAR_VSTRING(VScriptComponent, ScriptFile, "Filename of the script file", 
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

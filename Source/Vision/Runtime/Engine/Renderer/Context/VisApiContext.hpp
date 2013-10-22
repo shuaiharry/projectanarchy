@@ -157,7 +157,7 @@ public:
   /// 
   /// \return
   ///   VisRenderContext_cl *: Pointer to the currently active render context.
-  VISION_APIFUNC VisRenderContext_cl *GetCurrentContext();
+  VISION_APIFUNC VisRenderContext_cl *GetCurrentContext() const;
 
   /// \brief
   ///   Returns the main render context
@@ -171,7 +171,7 @@ public:
   /// 
   /// \return
   ///   VisRenderContext_cl *: Pointer to the main render context
-  VISION_APIFUNC VisRenderContext_cl *GetMainRenderContext();
+  VISION_APIFUNC VisRenderContext_cl *GetMainRenderContext() const;
 
   ///
   /// @}
@@ -183,7 +183,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

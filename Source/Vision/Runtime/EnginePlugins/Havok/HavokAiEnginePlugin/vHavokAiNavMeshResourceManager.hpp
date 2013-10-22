@@ -13,6 +13,10 @@
 
 class vHavokAiNavMeshResource;
 
+/// \brief
+///   Resource manager for nav mesh resources. 
+///
+/// A global instance of this manager can be accessed via vHavokAiNavMeshResourceManager::GetInstance().
 class vHavokAiNavMeshResourceManager : public VisResourceManager_cl
 {
 public:
@@ -23,8 +27,8 @@ public:
 	///
 
 	vHavokAiNavMeshResourceManager();
-	VOVERRIDE ~vHavokAiNavMeshResourceManager();
-	VHAVOKAI_IMPEXP static vHavokAiNavMeshResourceManager* GetInstance() {return &g_GlobalManager;}
+	virtual ~vHavokAiNavMeshResourceManager();
+	VHAVOKAI_IMPEXP static vHavokAiNavMeshResourceManager* GetInstance() { return &g_GlobalManager; }
 
 	///
 	/// @}
@@ -35,9 +39,12 @@ public:
 	/// @{
 	///
 
-	/// should be called at plugin initialization time
+  /// \brief
+	///   Should be called at plugin initialization time.
 	void OneTimeInit();
-	/// should be called at plugin de-initialization time
+
+  /// \brief
+	///   Should be called at plugin de-initialization time.
 	void OneTimeDeInit();
 
 	///
@@ -45,13 +52,12 @@ public:
 	///
 
 	///
-	/// @name VisResourceManager_cl overrides
+	/// @name VisResourceManager_cl implementation
 	/// @{
 	///
 
-	/// \brief
-	///   Virtual function that should be implemented by each resource manager to create a resource 
-	VHAVOKAI_IMPEXP VOVERRIDE VManagedResource *CreateResource(const char *szFilename, VResourceSnapshotEntry *pExtraInfo);
+	VHAVOKAI_IMPEXP virtual VManagedResource *CreateResource(const char *szFilename, 
+    VResourceSnapshotEntry *pExtraInfo) HKV_OVERRIDE;
 
 	///
 	/// @}
@@ -65,7 +71,7 @@ protected:
 #endif	// __VHAVOK_AI_NAVMESH_RESOURCE_MANAGER_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

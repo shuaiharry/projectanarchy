@@ -181,6 +181,16 @@ namespace hkaBatchBlenderUtilities
 	HK_FORCE_INLINE void HK_CALL sin_series_2_terms( hkVector4& out, const hkVector4& theta );
 	HK_FORCE_INLINE void HK_CALL acos_series_4_terms( hkVector4& out, const hkVector4& theta );
 
+	// Data used by the previous functions, extracted as extern constant because of wii/wiiu compilers not
+	// able to handle static const function variables properly.
+	extern const hkQuadReal s_sin_series_2_terms_c2;
+	extern const hkQuadReal s_sin_series_2_terms_c4;
+
+	extern const hkQuadReal s_acos_series_4_terms_c0;
+	extern const hkQuadReal s_acos_series_4_terms_c1;
+	extern const hkQuadReal s_acos_series_4_terms_c2;
+	extern const hkQuadReal s_acos_series_4_terms_c3;
+
 	// blend without weights
 	template< typename TYPE >
 	void HK_CALL blendBase( TYPE* HK_RESTRICT dstOut, const TYPE* HK_RESTRICT srcL, const TYPE* HK_RESTRICT srcR, const hkSimdReal& alpha, int n, hkaBlender::BLEND_MODE blendMode, hkaBlender::ROTATION_MODE rotationMode );
@@ -388,19 +398,19 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::lerp4(
 	
 	// Compute beta = ( 1 - alpha )
 	hkVector4 beta;
-	beta.setSub4( hkVector4::getConstant(HK_QUADREAL_1), alpha );
+	beta.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), alpha );
 	
 	// Blend the left input by beta
-	xt.setMul4( beta, xl );
-	yt.setMul4( beta, yl );
-	zt.setMul4( beta, zl );
-	wt.setMul4( beta, wl );
+	xt.setMul( beta, xl );
+	yt.setMul( beta, yl );
+	zt.setMul( beta, zl );
+	wt.setMul( beta, wl );
 
 	// Blend the right input by alpha
-	xt.addMul4( alpha, xr );
-	yt.addMul4( alpha, yr );
-	zt.addMul4( alpha, zr );
-	wt.addMul4( alpha, wr );
+	xt.addMul( alpha, xr );
+	yt.addMul( alpha, yr );
+	zt.addMul( alpha, zr );
+	wt.addMul( alpha, wr );
 
 	// Transpose back for output
 	transpose4( xt, yt, zt, wt );
@@ -417,8 +427,7 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::slerp4(
 {
 	// HK_ASSERT2( 0x1ebafe53, checkRange01( alpha ), "Must have 0 <= alpha <= 1" );
 	
-	static const hkQuadReal hkQuadRealNeg1111 = HK_QUADREAL_CONSTANT( -1.0f, -1.0f, -1.0f, -1.0f );
-	static const hkQuadReal hkQuadRealNearly1111 = HK_QUADREAL_CONSTANT( 1.0f - HK_REAL_EPSILON, 1.0f - HK_REAL_EPSILON, 1.0f - HK_REAL_EPSILON, 1.0f - HK_REAL_EPSILON );
+	hkVector4 nearly1111; nearly1111.setSub(hkVector4::getConstant<HK_QUADREAL_1>(), hkVector4::getConstant<HK_QUADREAL_EPS>());
 
 	// Allocate temporary storage for transpose style operations
 
@@ -454,26 +463,23 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::slerp4(
 	// Compute the dot product
 	hkVector4 dot;
 	{
-		dot.setMul4( xl, xr );
-		dot.addMul4( yl, yr );
-		dot.addMul4( zl, zr );
-		dot.addMul4( wl, wr );
+		dot.setMul( xl, xr );
+		dot.addMul( yl, yr );
+		dot.addMul( zl, zr );
+		dot.addMul( wl, wr );
 	}
 
 	// Put the quaternions in the same hemisphere
 	{
-		hkVector4Comparison negative = dot.compareLessThanZero4();
-
-		hkVector4 sgn;
-		sgn.select32( hkVector4::getConstant(HK_QUADREAL_1), ( hkVector4& )hkQuadRealNeg1111, negative );
+		hkVector4Comparison negative = dot.lessZero();
 
 		// Note, multiplying all rhs vectors here timed faster than negating qAlpha below
-		xr.mul4( sgn );
-		yr.mul4( sgn );
-		zr.mul4( sgn );
-		wr.mul4( sgn );
+		xr.setFlipSign(xr,negative);
+		yr.setFlipSign(yr,negative);
+		zr.setFlipSign(zr,negative);
+		wr.setFlipSign(wr,negative);
 
-		dot.mul4( sgn );
+		dot.setFlipSign(dot,negative);
 	}
 	
 	// Compute the slerp blend weights
@@ -489,15 +495,15 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::slerp4(
 
 		// beta = 1 - alpha
 		hkVector4 beta;
-		beta.setSub4( hkVector4::getConstant(HK_QUADREAL_1), alpha );
+		beta.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), alpha );
 
 		// alpha * theta
 		hkVector4 alphaTheta;
-		alphaTheta.setMul4( alpha, theta );
+		alphaTheta.setMul( alpha, theta );
 
 		// beta * theta
 		hkVector4 betaTheta;
-		betaTheta.setMul4( beta, theta );
+		betaTheta.setMul( beta, theta );
 
 		// sin( theta )
 		hkVector4 sinTheta;
@@ -512,31 +518,31 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::slerp4(
 		sin_series_2_terms( sinBetaTheta, betaTheta );
 
 		// Find the blending amounts
-		qAlpha.setDiv4( sinAlphaTheta, sinTheta );
-		qBeta.setDiv4( sinBetaTheta, sinTheta );
+		qAlpha.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( sinAlphaTheta, sinTheta );
+		qBeta.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( sinBetaTheta, sinTheta );
 
 		// Check if cos( theta ) approx equal 1.0.  theta == 0 or theta == 180
 		hkVector4Comparison smallAngle;
-		smallAngle = dot.compareGreaterThan4( ( hkVector4& )hkQuadRealNearly1111 );
+		smallAngle = dot.greater( nearly1111 );
 
 		// If theta is near 0 or 180 degrees, many of the above calculations will divide by zero
 		// Simply choose the left side over the right.
 		// This gives the correct answer for 0, and defines the otherwise undefined 180 result
-		qAlpha.select32( qAlpha, hkVector4::getConstant(HK_QUADREAL_1), smallAngle );
-		qBeta.select32( qBeta,   hkVector4::getConstant(HK_QUADREAL_0), smallAngle );
+		qAlpha.setSelect(smallAngle, hkVector4::getConstant<HK_QUADREAL_1>(), qAlpha );
+		qBeta.zeroIfTrue(smallAngle);
 	}
 
 	// Blend the left input by beta
-	xt.setMul4( qBeta, xl );
-	yt.setMul4( qBeta, yl );
-	zt.setMul4( qBeta, zl );
-	wt.setMul4( qBeta, wl );
+	xt.setMul( qBeta, xl );
+	yt.setMul( qBeta, yl );
+	zt.setMul( qBeta, zl );
+	wt.setMul( qBeta, wl );
 
 	// Blend the right input by alpha
-	xt.addMul4( qAlpha, xr );
-	yt.addMul4( qAlpha, yr );
-	zt.addMul4( qAlpha, zr );
-	wt.addMul4( qAlpha, wr );
+	xt.addMul( qAlpha, xr );
+	yt.addMul( qAlpha, yr );
+	zt.addMul( qAlpha, zr );
+	wt.addMul( qAlpha, wr );
 
 	// Transpose back for output
 	transpose4( xt, yt, zt, wt );
@@ -557,8 +563,6 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::qlerp4(
 {
 	// HK_ASSERT2( 0x1ebafe53, checkRange01( alpha ), "Must have 0 <= alpha <= 1" );
 	
-	static const hkQuadReal hkQuadRealNeg1111 = HK_QUADREAL_CONSTANT( -1.0f, -1.0f, -1.0f, -1.0f );
-
 	// Allocate temporary storage for transpose style operations
 
 	// Left values
@@ -593,33 +597,30 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::qlerp4(
 	// Compute the dot product
 	hkVector4 dot;
 	{
-		dot.setMul4( xl, xr );
-		dot.addMul4( yl, yr );
-		dot.addMul4( zl, zr );
-		dot.addMul4( wl, wr );
+		dot.setMul( xl, xr );
+		dot.addMul( yl, yr );
+		dot.addMul( zl, zr );
+		dot.addMul( wl, wr );
 	}
 
 	// Put the quaternions in the same hemisphere
-	hkVector4Comparison negative = dot.compareLessThanZero4();
+	hkVector4Comparison negative = dot.lessZero();
 
-	hkVector4 sgn;
-	sgn.select32( hkVector4::getConstant(HK_QUADREAL_1), ( hkVector4& )hkQuadRealNeg1111, negative );
-	
 	qAlpha = alpha;
-	qBeta.setSub4( hkVector4::getConstant(HK_QUADREAL_1), alpha );
-	qBeta.mul4( sgn );
+	qBeta.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), alpha );
+	qBeta.setFlipSign(qBeta, negative);
 
 	// Blend the left input by beta
-	xt.setMul4( qBeta, xl );
-	yt.setMul4( qBeta, yl );
-	zt.setMul4( qBeta, zl );
-	wt.setMul4( qBeta, wl );
+	xt.setMul( qBeta, xl );
+	yt.setMul( qBeta, yl );
+	zt.setMul( qBeta, zl );
+	wt.setMul( qBeta, wl );
 
 	// Blend the right input by alpha
-	xt.addMul4( qAlpha, xr );
-	yt.addMul4( qAlpha, yr );
-	zt.addMul4( qAlpha, zr );
-	wt.addMul4( qAlpha, wr );
+	xt.addMul( qAlpha, xr );
+	yt.addMul( qAlpha, yr );
+	zt.addMul( qAlpha, zr );
+	wt.addMul( qAlpha, wr );
 
 	// Transpose back for output
 	transpose4( xt, yt, zt, wt );
@@ -683,27 +684,27 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::computeBlendFactorAndWeig
 
 	// If weightL > weightR then want beta < alpha.  Let beta = alpha * weightR / weightL
 	hkVector4 betaL;
-	betaL.setMul4( alpha, weightR );
-	betaL.div4( weightL );
+	betaL.setMul( alpha, weightR );
+	betaL.div( weightL );
 
 	// If weightR > weightL then want (1-beta) < (1-alpha).  Let (1-beta) = (1-alpha) * weightL / weightR
 	hkVector4 betaR;
-	betaR.setSub4( hkVector4::getConstant(HK_QUADREAL_1), alpha );
-	betaR.mul4( weightL );
-	betaR.div4( weightR );
-	betaR.setSub4( hkVector4::getConstant(HK_QUADREAL_1), betaR );
+	betaR.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), alpha );
+	betaR.mul( weightL );
+	betaR.div( weightR );
+	betaR.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), betaR );
 
 	// Select from betaL, betaR
-	const hkVector4Comparison l_gt_R =  weightL.compareGreaterThan4( weightR );
-	beta.select32( betaR, betaL, l_gt_R );
+	const hkVector4Comparison l_gt_R =  weightL.greater( weightR );
+	beta.setSelect(l_gt_R, betaL, betaR);
 
 	// Temp for output weights
 	hkVector4 w;
 
 	// w = blend( weightL, weightR, beta )
-	w.setSub4( hkVector4::getConstant(HK_QUADREAL_1), beta );
-	w.mul4( weightL );
-	w.addMul4( beta, weightR );
+	w.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), beta );
+	w.mul( weightL );
+	w.addMul( beta, weightR );
 
 	// Lastly, handle zero weights
 
@@ -715,19 +716,19 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::computeBlendFactorAndWeig
 	// weightR == 0  |  w = weightL                      |  w = 0              
     //               |  beta = 0                         |  beta = alpha  
 
-	const hkVector4Comparison weightL_lte0 = weightL.compareLessThanEqual4( hkVector4::getZero() );
-	const hkVector4Comparison weightR_lte0 = weightR.compareLessThanEqual4( hkVector4::getZero() );
+	const hkVector4Comparison weightL_lte0 = weightL.lessEqualZero();
+	const hkVector4Comparison weightR_lte0 = weightR.lessEqualZero();
 	hkVector4Comparison weightsEqualZero;
 	weightsEqualZero.setAnd( weightL_lte0, weightR_lte0 );
 
 	// Select beta as in the chart above
-	beta.select32( beta, hkVector4::getConstant(HK_QUADREAL_1), weightL_lte0 );
-	beta.select32( beta, hkVector4::getConstant(HK_QUADREAL_0), weightR_lte0 );
-	beta.select32( beta, alpha, weightsEqualZero );
+	beta.setSelect(weightL_lte0, hkVector4::getConstant<HK_QUADREAL_1>(), beta );
+	beta.zeroIfTrue( weightR_lte0 );
+	beta.setSelect( weightsEqualZero, alpha, beta );
 		
 	// Update w according to the above chart
-	w.select32( w, weightR, weightL_lte0 );
-	w.select32( w, weightL, weightR_lte0 );
+	w.setSelect( weightL_lte0, weightR, w );
+	w.setSelect( weightR_lte0, weightL, w );
 
 	// Write the outputs
 	alphaOut = beta;
@@ -748,7 +749,7 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::computeBlendFactorAndWeig
 //	HK_ASSERT2( 0x1bb02353, checkRange01( weightR ), "Weights must be between zero and one." );
 
 	// Output alpha is input alpha * right weights
-	alphaOut.setMul4( alpha, weightR );
+	alphaOut.setMul( alpha, weightR );
 
 	// Output weights are the same as the left weights
 	weightOut = weightL;
@@ -771,24 +772,24 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::normalize4(
 	hkVector4 z2;
 	hkVector4 w2;
 
-	x2.setMul4( x, x );
-	y2.setMul4( y, y );
-	z2.setMul4( z, z );
-	w2.setMul4( w, w );
+	x2.setMul( x, x );
+	y2.setMul( y, y );
+	z2.setMul( z, z );
+	w2.setMul( w, w );
 
 
 	hkVector4 sum;
-	sum.setAdd4( x2, y2 );
-	sum.add4( z2 );
-	sum.add4( w2 );
+	sum.setAdd( x2, y2 );
+	sum.add( z2 );
+	sum.add( w2 );
 	
 	hkVector4 invMag;
-	invMag.setSqrtInverse4( sum );
+	invMag.setSqrtInverse<HK_ACC_23_BIT,HK_SQRT_IGNORE>( sum );
 
-	x.mul4( invMag );
-	y.mul4( invMag );
-	z.mul4( invMag );
-	w.mul4( invMag );
+	x.mul( invMag );
+	y.mul( invMag );
+	z.mul( invMag );
+	w.mul( invMag );
 
 	transpose4( x, y, z, w );
 	copy4( qInOut0.m_vec, qInOut1.m_vec, qInOut2.m_vec, qInOut3.m_vec, x, y, z, w );
@@ -800,10 +801,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::add4(
 	const hkVector4& srcR0, const hkVector4& srcR1, const hkVector4& srcR2, const hkVector4& srcR3
 	)
 {
-	dst0.setAdd4( srcL0, srcR0 );
-	dst1.setAdd4( srcL1, srcR1 );
-	dst2.setAdd4( srcL2, srcR2 );
-	dst3.setAdd4( srcL3, srcR3 );
+	dst0.setAdd( srcL0, srcR0 );
+	dst1.setAdd( srcL1, srcR1 );
+	dst2.setAdd( srcL2, srcR2 );
+	dst3.setAdd( srcL3, srcR3 );
 }
 
 HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::sub4(
@@ -812,10 +813,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::sub4(
 	const hkVector4& srcR0, const hkVector4& srcR1, const hkVector4& srcR2, const hkVector4& srcR3
 	)
 {
-	dst0.setSub4( srcL0, srcR0 );
-	dst1.setSub4( srcL1, srcR1 );
-	dst2.setSub4( srcL2, srcR2 );
-	dst3.setSub4( srcL3, srcR3 );
+	dst0.setSub( srcL0, srcR0 );
+	dst1.setSub( srcL1, srcR1 );
+	dst2.setSub( srcL2, srcR2 );
+	dst3.setSub( srcL3, srcR3 );
 }
 
 HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mul4(
@@ -824,10 +825,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mul4(
 	const hkVector4& srcR0, const hkVector4& srcR1, const hkVector4& srcR2, const hkVector4& srcR3
 	)
 {
-	dst0.setMul4( srcL0, srcR0 );
-	dst1.setMul4( srcL1, srcR1 );
-	dst2.setMul4( srcL2, srcR2 );
-	dst3.setMul4( srcL3, srcR3 );
+	dst0.setMul( srcL0, srcR0 );
+	dst1.setMul( srcL1, srcR1 );
+	dst2.setMul( srcL2, srcR2 );
+	dst3.setMul( srcL3, srcR3 );
 }
 
 HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mul4(
@@ -865,12 +866,12 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mul4(
 	hkVector4 s;
 	{
 		// Compute the scalar product
-		s.setMul4( wl, wr );
+		s.setMul( wl, wr );
 
 		// Compute the dot product of the vector part
-		s.subMul4( xl, xr );
-		s.subMul4( yl, yr );
-		s.subMul4( zl, zr );
+		s.subMul( xl, xr );
+		s.subMul( yl, yr );
+		s.subMul( zl, zr );
 	}
 
 	// Compute the vector component
@@ -881,22 +882,22 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mul4(
 		// Compute the cross product
 		// {-yr*zl + yl*zr, zl*xr - zr*xl, -xr*yl + xl*yr}
 		
-		xv.setMul4( yl, zr );
-		xv.subMul4( yr, zl );
-		yv.setMul4( zl, xr );
-		yv.subMul4( zr, xl );
-		zv.setMul4( xl, yr );
-		zv.subMul4( xr, yl );
+		xv.setMul( yl, zr );
+		xv.subMul( yr, zl );
+		yv.setMul( zl, xr );
+		yv.subMul( zr, xl );
+		zv.setMul( xl, yr );
+		zv.subMul( xr, yl );
 
 		// Add in the vector scalar products
 
-		xv.addMul4( wl, xr );
-		yv.addMul4( wl, yr );
-		zv.addMul4( wl, zr );
+		xv.addMul( wl, xr );
+		yv.addMul( wl, yr );
+		zv.addMul( wl, zr );
 
-		xv.addMul4( wr, xl );
-		yv.addMul4( wr, yl );
-		zv.addMul4( wr, zl );
+		xv.addMul( wr, xl );
+		yv.addMul( wr, yl );
+		zv.addMul( wr, zl );
 	}
 	
 
@@ -932,7 +933,7 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mulInv4(
 
 	copy4( xr, yr, zr, wr, srcR0.m_vec, srcR1.m_vec, srcR2.m_vec, srcR3.m_vec );
 	transpose4( xr, yr, zr, wr );
-	wr.setNeg4( wr );
+	wr.setNeg<4>( wr );
 
 	// ( xl, yl, zl, wl ) * ( xr, yr, zr, wr ) =
 	// ( vl, sl ) * ( vr, sr ) =
@@ -942,12 +943,12 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mulInv4(
 	hkVector4 s;
 	{
 		// Compute the scalar product
-		s.setMul4( wl, wr );
+		s.setMul( wl, wr );
 
 		// Compute the dot product of the vector part
-		s.subMul4( xl, xr );
-		s.subMul4( yl, yr );
-		s.subMul4( zl, zr );
+		s.subMul( xl, xr );
+		s.subMul( yl, yr );
+		s.subMul( zl, zr );
 	}
 
 	// Compute the vector component
@@ -958,22 +959,22 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mulInv4(
 		// Compute the cross product
 		// {-yr*zl + yl*zr, zl*xr - zr*xl, -xr*yl + xl*yr}
 		
-		xv.setMul4( yl, zr );
-		xv.subMul4( yr, zl );
-		yv.setMul4( zl, xr );
-		yv.subMul4( zr, xl );
-		zv.setMul4( xl, yr );
-		zv.subMul4( xr, yl );
+		xv.setMul( yl, zr );
+		xv.subMul( yr, zl );
+		yv.setMul( zl, xr );
+		yv.subMul( zr, xl );
+		zv.setMul( xl, yr );
+		zv.subMul( xr, yl );
 
 		// Add in the vector scalar products
 
-		xv.addMul4( wl, xr );
-		yv.addMul4( wl, yr );
-		zv.addMul4( wl, zr );
+		xv.addMul( wl, xr );
+		yv.addMul( wl, yr );
+		zv.addMul( wl, zr );
 
-		xv.addMul4( wr, xl );
-		yv.addMul4( wr, yl );
-		zv.addMul4( wr, zl );
+		xv.addMul( wr, xl );
+		yv.addMul( wr, yl );
+		zv.addMul( wr, zl );
 	}
 	
 
@@ -1001,7 +1002,7 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::inv4(
 	transpose4( xsrc, ysrc, zsrc, wsrc );
 
 	// Negate the w components
-	wsrc.setNeg4( wsrc );
+	wsrc.setNeg<4>( wsrc );
 
 	// Transpose back for output
 	transpose4( xsrc, ysrc, zsrc, wsrc );
@@ -1019,7 +1020,7 @@ void HK_FORCE_INLINE hkaBatchBlenderUtilities::rotateBase4(
 	const hkVector4& v0, const hkVector4& v1, const hkVector4& v2, const hkVector4& v3
 	)
 {
-	const hkQuadReal hkQuadRealNegQuarter = HK_QUADREAL_CONSTANT( -0.25f, -0.25f, -0.25f, -0.25f );
+	hkVector4 negQuarter; negQuarter.setNeg<4>(hkVector4::getConstant<HK_QUADREAL_INV_4>());
 
 	// Allocate temporary storage for transpose style operations
 
@@ -1057,17 +1058,17 @@ void HK_FORCE_INLINE hkaBatchBlenderUtilities::rotateBase4(
 		hkVector4 yq2m; // yq^2 - 1/4
 		hkVector4 zq2m; // zq^2 - 1/4
 
-		xq2m.setAddMul4( ( hkVector4& )hkQuadRealNegQuarter, xq, xq );
-		yq2m.setAddMul4( ( hkVector4& )hkQuadRealNegQuarter, yq, yq );
-		zq2m.setAddMul4( ( hkVector4& )hkQuadRealNegQuarter, zq, zq );
+		xq2m.setAddMul( negQuarter, xq, xq );
+		yq2m.setAddMul( negQuarter, yq, yq );
+		zq2m.setAddMul( negQuarter, zq, zq );
 
 		hkVector4 xqxv; // xq*xv
 		hkVector4 yqyv; // yq*yv
 		hkVector4 zqzv; // zq*zv
 
-		xqxv.setMul4( xq, xv );
-		yqyv.setMul4( yq, yv );
-		zqzv.setMul4( zq, zv );
+		xqxv.setMul( xq, xv );
+		yqyv.setMul( yq, yv );
+		zqzv.setMul( zq, zv );
 
 		// The following code was partly generated with a numerical algebra package
 		// xr/2 = ( 1/2 - yq2 - zq2 )*xv + ( yq*yv + zq*zv )*xq + ( yq*zv - zq*yv )*wq;
@@ -1081,15 +1082,15 @@ void HK_FORCE_INLINE hkaBatchBlenderUtilities::rotateBase4(
 			hkVector4 tmpB;
 			hkVector4 tmpC;
 
-			tmpA.setAdd4( yq2m, zq2m );
-			tmpB.setAdd4( yqyv, zqzv );
-			tmpC.setMul4( yq, zv );
-			tmpC.subMul4( zq, yv );
+			tmpA.setAdd( yq2m, zq2m );
+			tmpB.setAdd( yqyv, zqzv );
+			tmpC.setMul( yq, zv );
+			tmpC.subMul( zq, yv );
 
-			xr.setMul4( tmpB, xq );
-			xr.addMul4( tmpC, wq );
-			xr.subMul4( tmpA, xv );
-			xr.add4( xr );
+			xr.setMul( tmpB, xq );
+			xr.addMul( tmpC, wq );
+			xr.subMul( tmpA, xv );
+			xr.add( xr );
 		}
 
 		// yr
@@ -1098,15 +1099,15 @@ void HK_FORCE_INLINE hkaBatchBlenderUtilities::rotateBase4(
 			hkVector4 tmpB;
 			hkVector4 tmpC;
 
-			tmpA.setAdd4( zq2m, xq2m );
-			tmpB.setAdd4( zqzv, xqxv );
-			tmpC.setMul4( zq, xv );
-			tmpC.subMul4( xq, zv );
+			tmpA.setAdd( zq2m, xq2m );
+			tmpB.setAdd( zqzv, xqxv );
+			tmpC.setMul( zq, xv );
+			tmpC.subMul( xq, zv );
 
-			yr.setMul4( tmpB, yq );
-			yr.addMul4( tmpC, wq );
-			yr.subMul4( tmpA, yv );
-			yr.add4( yr );
+			yr.setMul( tmpB, yq );
+			yr.addMul( tmpC, wq );
+			yr.subMul( tmpA, yv );
+			yr.add( yr );
 		}
 
 		// zr
@@ -1115,15 +1116,15 @@ void HK_FORCE_INLINE hkaBatchBlenderUtilities::rotateBase4(
 			hkVector4 tmpB;
 			hkVector4 tmpC;
 
-			tmpA.setAdd4( xq2m, yq2m );
-			tmpB.setAdd4( xqxv, yqyv );
-			tmpC.setMul4( xq, yv );
-			tmpC.subMul4( yq, xv );
+			tmpA.setAdd( xq2m, yq2m );
+			tmpB.setAdd( xqxv, yqyv );
+			tmpC.setMul( xq, yv );
+			tmpC.subMul( yq, xv );
 
-			zr.setMul4( tmpB, zq );
-			zr.addMul4( tmpC, wq );
-			zr.subMul4( tmpA, zv );
-			zr.add4( zr );
+			zr.setMul( tmpB, zq );
+			zr.addMul( tmpC, wq );
+			zr.subMul( tmpA, zv );
+			zr.add( zr );
 		}
 	}
 
@@ -1171,10 +1172,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::transform4(
 	hkVector4 d3;
 
 	// Scale first
-	d0.setMul4( t0.m_scale, v0 );
-	d1.setMul4( t1.m_scale, v1 );
-	d2.setMul4( t2.m_scale, v2 );
-	d3.setMul4( t3.m_scale, v3 );
+	d0.setMul( t0.m_scale, v0 );
+	d1.setMul( t1.m_scale, v1 );
+	d2.setMul( t2.m_scale, v2 );
+	d3.setMul( t3.m_scale, v3 );
 
 	// Rotate
 	rotate4( d0, d1, d2, d3,
@@ -1182,10 +1183,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::transform4(
 			 d0, d1, d2, d3 );
 
 	// Translate
-	d0.add4( t0.m_translation );
-	d1.add4( t1.m_translation );
-	d2.add4( t2.m_translation );
-	d3.add4( t3.m_translation );
+	d0.add( t0.m_translation );
+	d1.add( t1.m_translation );
+	d2.add( t2.m_translation );
+	d3.add( t3.m_translation );
 
 	// Copy temporaries back
 	copy4( dst0, dst1, dst2, dst3,
@@ -1205,10 +1206,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::transformInv4(
 	hkVector4 d3;
 
 	// Translate
-	d0.setSub4( v0, t0.m_translation );
-	d1.setSub4( v1, t1.m_translation );
-	d2.setSub4( v2, t2.m_translation );
-	d3.setSub4( v3, t3.m_translation );
+	d0.setSub( v0, t0.m_translation );
+	d1.setSub( v1, t1.m_translation );
+	d2.setSub( v2, t2.m_translation );
+	d3.setSub( v3, t3.m_translation );
 
 	// Rotate
 	rotateInv4( d0, d1, d2, d3,
@@ -1216,10 +1217,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::transformInv4(
 				d0, d1, d2, d3 );
 
 	// Scale last
-	d0.setDiv4( d0, t0.m_scale );
-	d1.setDiv4( d1, t1.m_scale );
-	d2.setDiv4( d2, t2.m_scale );
-	d3.setDiv4( d3, t3.m_scale );
+	d0.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( d0, t0.m_scale );
+	d1.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( d1, t1.m_scale );
+	d2.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( d2, t2.m_scale );
+	d3.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( d3, t3.m_scale );
 
 	// Copy temporaries back
 	copy4( dst0, dst1, dst2, dst3,
@@ -1244,10 +1245,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mul4(
 			 srcR0.m_translation, srcR1.m_translation, srcR2.m_translation, srcR3.m_translation );
 
 	// Add the translations
-	d0.m_translation.add4( srcL0.m_translation );
-	d1.m_translation.add4( srcL1.m_translation );
-	d2.m_translation.add4( srcL2.m_translation );
-	d3.m_translation.add4( srcL3.m_translation );
+	d0.m_translation.add( srcL0.m_translation );
+	d1.m_translation.add( srcL1.m_translation );
+	d2.m_translation.add( srcL2.m_translation );
+	d3.m_translation.add( srcL3.m_translation );
 
 	// Multiply the quaternions
 	mul4( d0.m_rotation, d1.m_rotation, d2.m_rotation, d3.m_rotation,
@@ -1255,10 +1256,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mul4(
 		  srcR0.m_rotation, srcR1.m_rotation, srcR2.m_rotation, srcR3.m_rotation );
 
 	// Scales multiply flat
-	d0.m_scale.setMul4( srcL0.m_scale, srcR0.m_scale );
-	d1.m_scale.setMul4( srcL1.m_scale, srcR1.m_scale );
-	d2.m_scale.setMul4( srcL2.m_scale, srcR2.m_scale );
-	d3.m_scale.setMul4( srcL3.m_scale, srcR3.m_scale );
+	d0.m_scale.setMul( srcL0.m_scale, srcR0.m_scale );
+	d1.m_scale.setMul( srcL1.m_scale, srcR1.m_scale );
+	d2.m_scale.setMul( srcL2.m_scale, srcR2.m_scale );
+	d3.m_scale.setMul( srcL3.m_scale, srcR3.m_scale );
 
 	// Copy the temporaries back
 	dst0 = d0;
@@ -1290,17 +1291,17 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::mulInv4(
 			 srcR0.m_translation, srcR1.m_translation, srcR2.m_translation, srcR3.m_translation );
 
 	// Diff the translations
-	d0.m_translation.setSub4( srcL0.m_translation, d0.m_translation );
-	d1.m_translation.setSub4( srcL1.m_translation, d1.m_translation );
-	d2.m_translation.setSub4( srcL2.m_translation, d2.m_translation );
-	d3.m_translation.setSub4( srcL3.m_translation, d3.m_translation );
+	d0.m_translation.setSub( srcL0.m_translation, d0.m_translation );
+	d1.m_translation.setSub( srcL1.m_translation, d1.m_translation );
+	d2.m_translation.setSub( srcL2.m_translation, d2.m_translation );
+	d3.m_translation.setSub( srcL3.m_translation, d3.m_translation );
 
 	// Scales multiply flat
 	// Scales multiply flat
-	d0.m_scale.setDiv4( srcL0.m_scale, srcR0.m_scale );
-	d1.m_scale.setDiv4( srcL1.m_scale, srcR1.m_scale );
-	d2.m_scale.setDiv4( srcL2.m_scale, srcR2.m_scale );
-	d3.m_scale.setDiv4( srcL3.m_scale, srcR3.m_scale );
+	d0.m_scale.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( srcL0.m_scale, srcR0.m_scale );
+	d1.m_scale.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( srcL1.m_scale, srcR1.m_scale );
+	d2.m_scale.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( srcL2.m_scale, srcR2.m_scale );
+	d3.m_scale.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( srcL3.m_scale, srcR3.m_scale );
 
 	// Copy the temporaries back
 	dst0 = d0;
@@ -1354,7 +1355,7 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::inv4(
 	transpose4( d0.m_rotation.m_vec, d1.m_rotation.m_vec, d2.m_rotation.m_vec, d3.m_rotation.m_vec );
 
 	// Invert the rotations
-	d3.m_rotation.m_vec.setNeg4( d3.m_rotation.m_vec );
+	d3.m_rotation.m_vec.setNeg<4>( d3.m_rotation.m_vec );
 
 	// Transpose the rotations back
 	transpose4( d0.m_rotation.m_vec, d1.m_rotation.m_vec, d2.m_rotation.m_vec, d3.m_rotation.m_vec );
@@ -1365,10 +1366,10 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::inv4(
 			 src0.m_translation, src1.m_translation, src2.m_translation, src3.m_translation );
 
 	// Invert the scales
-	d0.m_scale.setReciprocal4( src0.m_scale );
-	d1.m_scale.setReciprocal4( src1.m_scale );
-	d2.m_scale.setReciprocal4( src2.m_scale );
-	d3.m_scale.setReciprocal4( src3.m_scale );
+	d0.m_scale.setReciprocal( src0.m_scale );
+	d1.m_scale.setReciprocal( src1.m_scale );
+	d2.m_scale.setReciprocal( src2.m_scale );
+	d3.m_scale.setReciprocal( src3.m_scale );
 
 	// Copy the temporaries back
 	dst0 = d0;
@@ -1383,27 +1384,24 @@ HK_FORCE_INLINE void hkaBatchBlenderUtilities::PosateFunctor::operator()( hkVect
 
 HK_FORCE_INLINE void hkaBatchBlenderUtilities::NegateFunctor::operator()( hkVector4& vInOut )
 {
-	vInOut.setNeg4( vInOut );
+	vInOut.setNeg<4>( vInOut );
 }
+
 
 HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::sin_series_2_terms( hkVector4& out, const hkVector4& theta )
 {
 	// Abramowitz and Stegun 4.3.96
-	static const hkQuadReal c2 = HK_QUADREAL_CONSTANT( -0.16605f, -0.16605f, -0.16605f, -0.16605f );
-	static const hkQuadReal c4 = HK_QUADREAL_CONSTANT(  0.00761f,  0.00761f,  0.00761f,  0.00761f );
-
 	// Sin is an odd function, so only need theta^2
 	hkVector4 theta_sq;
-	theta_sq.setMul4( theta, theta );
+	theta_sq.setMul( theta, theta );
 
 	// Evaluate by Horner's rule
-	hkVector4 tmp = ( hkVector4& )c4;
-	tmp.setAddMul4( ( hkVector4& )c2, tmp, theta_sq );
-	tmp.setAddMul4( hkVector4::getConstant(HK_QUADREAL_1), theta_sq, tmp );
+	hkVector4 tmp = ( hkVector4& )s_sin_series_2_terms_c4;
+	tmp.setAddMul( ( hkVector4& )s_sin_series_2_terms_c2, tmp, theta_sq );
+	tmp.setAddMul( hkVector4::getConstant<HK_QUADREAL_1>(), theta_sq, tmp );
 
-	out.setMul4( tmp, theta );
+	out.setMul( tmp, theta );
 }
-
 
 HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::acos_series_4_terms( hkVector4& out, const hkVector4& cos_theta )
 {
@@ -1411,24 +1409,19 @@ HK_FORCE_INLINE void HK_CALL hkaBatchBlenderUtilities::acos_series_4_terms( hkVe
 
 //	HK_ASSERT2( 0x04c558db, checkRange01( cos_theta ), "Cosine not in range" );
 
-	static const hkQuadReal acos_c0 = HK_QUADREAL_CONSTANT( 1.57073f, 1.57073f, 1.57073f, 1.57073f );
-	static const hkQuadReal acos_c1 = HK_QUADREAL_CONSTANT( -0.212114f, -0.212114f, -0.212114f, -0.212114f );
-	static const hkQuadReal acos_c2 = HK_QUADREAL_CONSTANT( 0.074261f, 0.074261f, 0.074261f, 0.074261f );
-	static const hkQuadReal acos_c3 = HK_QUADREAL_CONSTANT( -0.0187293f, -0.0187293f, -0.0187293f, -0.0187293f );
-
 	// Evaluate using horner's rule
-	hkVector4 theta = ( hkVector4& )acos_c3;
-	theta.setAddMul4( ( hkVector4& )acos_c2, theta, cos_theta );
-	theta.setAddMul4( ( hkVector4& )acos_c1, theta, cos_theta );
-	theta.setAddMul4( ( hkVector4& )acos_c0, theta, cos_theta );
+	hkVector4 theta = ( hkVector4& )s_acos_series_4_terms_c3;
+	theta.setAddMul( ( hkVector4& )s_acos_series_4_terms_c2, theta, cos_theta );
+	theta.setAddMul( ( hkVector4& )s_acos_series_4_terms_c1, theta, cos_theta );
+	theta.setAddMul( ( hkVector4& )s_acos_series_4_terms_c0, theta, cos_theta );
 
 	hkVector4 tmp;
-	tmp.setSub4( hkVector4::getConstant(HK_QUADREAL_1), cos_theta );
+	tmp.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), cos_theta );
 	
 	hkVector4 tmp2;
-	tmp2.setSqrtInverse4( tmp );
+	tmp2.setSqrtInverse<HK_ACC_23_BIT,HK_SQRT_IGNORE>( tmp );
 
-	out.setDiv4( theta, tmp2 );
+	out.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>( theta, tmp2 );
 }
 
 template< typename TYPE >
@@ -1543,12 +1536,12 @@ void HK_CALL hkaBatchBlenderUtilities::blendBase( TYPE* HK_RESTRICT dst, hkReal*
 template< typename TYPE, typename BLEND_FUNCTOR, typename WEIGHT_FUNCTOR, typename INTERPOLATION_FUNCTOR  >
 void HK_FORCE_INLINE hkaBatchBlenderUtilities::blendCore( TYPE* HK_RESTRICT dst, hkReal* weightsOut, const TYPE* HK_RESTRICT srcL, const hkReal* weightsL, const TYPE* HK_RESTRICT srcR, const hkReal* weightsR, const hkSimdReal& alpha, int n, WEIGHT_FUNCTOR weightFunctor, BLEND_FUNCTOR blendFunctor, INTERPOLATION_FUNCTOR interpFunctor )
 {
-	HK_ASSERT2( 0x1d210589, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x0ebd6e86, ( hkUlong( weightsOut ) & 0x0F ) == 0, "weightsOut must be 16 byte aligned" );
-	HK_ASSERT2( 0x1955457a, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x1538ddf6, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
-	HK_ASSERT2( 0x109d48dc, ( hkUlong( weightsL ) & 0x0F ) == 0, "weightL must be 16 byte aligned." );
-	HK_ASSERT2( 0x1a8e0ebc, ( hkUlong( weightsR ) & 0x0F ) == 0, "weightR must be 16 byte aligned." );
+	HK_ASSERT2( 0x1d210589, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x0ebd6e86, ( hkUlong( weightsOut ) & (HK_REAL_ALIGNMENT-1) ) == 0, "weightsOut must be aligned for SIMD" );
+	HK_ASSERT2( 0x1955457a, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x1538ddf6, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
+	HK_ASSERT2( 0x109d48dc, ( hkUlong( weightsL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "weightL must be aligned for SIMD." );
+	HK_ASSERT2( 0x1a8e0ebc, ( hkUlong( weightsR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "weightR must be aligned for SIMD." );
 
 	hkVector4 alphav;
 	alphav.setAll( alpha );
@@ -1564,7 +1557,7 @@ void HK_FORCE_INLINE hkaBatchBlenderUtilities::blendCore( TYPE* HK_RESTRICT dst,
 		hkVector4 beta;
 		weightFunctor( beta, *weightsOutv, alphav, *weightsLv, *weightsRv );
 
-		HK_ALIGN16( TYPE comp[ 4 ] );
+		HK_ALIGN_REAL( TYPE comp[ 4 ] );
 		blendFunctor( comp[ 0 ], comp[ 1 ], comp[ 2 ], comp[ 3 ],
 					  srcL[ 0 ], srcL[ 1 ], srcL[ 2 ], srcL[ 3 ],
 					  srcR[ 0 ], srcR[ 1 ], srcR[ 2 ], srcR[ 3 ] );
@@ -1582,12 +1575,13 @@ void hkaBatchBlenderUtilities::LerpFunctor::operator() (
 	const hkReal& srcR0, const hkReal& srcR1, const hkReal& srcR2, const hkReal& srcR3,
 	const hkVector4& alpha )
 {
-	
+	hkVector4 srcL0_v; srcL0_v.load<4>(&srcL0);
+	hkVector4 srcR0_v; srcR0_v.load<4>(&srcR0);
 	hkVector4 tmp;
-	tmp.setSub4( *reinterpret_cast< const hkVector4* >( &srcR0 ), *reinterpret_cast< const hkVector4* >( &srcL0  ) );
-	tmp.mul4( alpha );
-	tmp.add4( *reinterpret_cast< const hkVector4* >( &srcL0  ) );
-	*reinterpret_cast< hkVector4* >( &dst0 ) = tmp;
+	tmp.setSub( srcR0_v, srcL0_v );
+	tmp.mul( alpha );
+	tmp.add( srcL0_v );
+	tmp.store<4>(&dst0);
 }
 
 void hkaBatchBlenderUtilities::LerpFunctor::operator() (
@@ -1642,11 +1636,13 @@ void hkaBatchBlenderUtilities::SlerpFunctor::operator() (
 	const hkReal& srcR0, const hkReal& srcR1, const hkReal& srcR2, const hkReal& srcR3,
 	const hkVector4& alpha )
 {
+	hkVector4 srcL0_v; srcL0_v.load<4>(&srcL0);
+	hkVector4 srcR0_v; srcR0_v.load<4>(&srcR0);
 	hkVector4 tmp;
-	tmp.setSub4( *reinterpret_cast< const hkVector4* >( &srcR0 ), *reinterpret_cast< const hkVector4* >( &srcL0  ) );
-	tmp.mul4( alpha );
-	tmp.add4( *reinterpret_cast< const hkVector4* >( &srcL0  ) );
-	*reinterpret_cast< hkVector4* >( &dst0 ) = tmp;
+	tmp.setSub( srcR0_v, srcL0_v );
+	tmp.mul( alpha );
+	tmp.add( srcL0_v );
+	tmp.store<4>( &dst0 );
 }
 
 void hkaBatchBlenderUtilities::SlerpFunctor::operator() (
@@ -1733,7 +1729,7 @@ void hkaBatchBlenderUtilities::BlendAdditiveFunctor::operator() (
 	const hkReal& srcL0, const hkReal& srcL1, const hkReal& srcL2, const hkReal& srcL3,
 	const hkReal& srcR0, const hkReal& srcR1, const hkReal& srcR2, const hkReal& srcR3 )
 {
-	reinterpret_cast< hkVector4* >( &dst0 )->setAdd4(
+	reinterpret_cast< hkVector4* >( &dst0 )->setAdd(
 		*reinterpret_cast< const hkVector4* >( &srcL0 ),
 		*reinterpret_cast< const hkVector4* >( &srcR0 ) );
 }
@@ -1767,7 +1763,7 @@ void hkaBatchBlenderUtilities::BlendSubtractiveFunctor::operator() (
 	const hkReal& srcL0, const hkReal& srcL1, const hkReal& srcL2, const hkReal& srcL3,
 	const hkReal& srcR0, const hkReal& srcR1, const hkReal& srcR2, const hkReal& srcR3 )
 {
-	reinterpret_cast< hkVector4* >( &dst0 )->setSub4(
+	reinterpret_cast< hkVector4* >( &dst0 )->setSub(
 		*reinterpret_cast< const hkVector4* >( &srcL0 ),
 		*reinterpret_cast< const hkVector4* >( &srcR0 ) );
 }
@@ -1820,29 +1816,29 @@ void hkaBatchBlenderUtilities::WeightNormalFunctor::operator() (
 
 	// If weightL > weightR then want beta < alpha.  Let beta = alpha * weightR / weightL
 	hkVector4 betaL;
-	betaL.setMul4( alpha, weightR );
+	betaL.setMul( alpha, weightR );
 	// use 23-bit division because we don't need the accuracy and it doesn't cause a div-by-0 exception on win32
 	betaL.div<HK_ACC_23_BIT,HK_DIV_IGNORE>( weightL );
 
 	// If weightR > weightL then want (1-beta) < (1-alpha).  Let (1-beta) = (1-alpha) * weightL / weightR
 	hkVector4 betaR;
-	betaR.setSub4( hkVector4::getConstant(HK_QUADREAL_1), alpha );
-	betaR.mul4( weightL );
+	betaR.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), alpha );
+	betaR.mul( weightL );
 	// use 23-bit division because we don't need the accuracy and it doesn't cause a div-by-0 exception on win32
 	betaR.div<HK_ACC_23_BIT,HK_DIV_IGNORE>( weightR );
-	betaR.setSub4( hkVector4::getConstant(HK_QUADREAL_1), betaR );
+	betaR.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), betaR );
 
 	// Select from betaL, betaR
-	const hkVector4Comparison l_gt_R =  weightL.compareGreaterThan4( weightR );
-	beta.select32( betaR, betaL, l_gt_R );
+	const hkVector4Comparison l_gt_R =  weightL.greater( weightR );
+	beta.setSelect( l_gt_R, betaL, betaR );
 
 	// Temp for output weights
 	hkVector4 w;
 
 	// w = blend( weightL, weightR, beta )
-	w.setSub4( hkVector4::getConstant(HK_QUADREAL_1), beta );
-	w.mul4( weightL );
-	w.addMul4( beta, weightR );
+	w.setSub( hkVector4::getConstant<HK_QUADREAL_1>(), beta );
+	w.mul( weightL );
+	w.addMul( beta, weightR );
 
 	// Lastly, handle zero weights
 
@@ -1854,19 +1850,19 @@ void hkaBatchBlenderUtilities::WeightNormalFunctor::operator() (
 	// weightR == 0  |  w = weightL                      |  w = 0              
     //               |  beta = 0                         |  beta = alpha  
 
-	const hkVector4Comparison weightL_lte0 = weightL.compareLessThanEqual4( hkVector4::getZero() );
-	const hkVector4Comparison weightR_lte0 = weightR.compareLessThanEqual4( hkVector4::getZero() );
+	const hkVector4Comparison weightL_lte0 = weightL.lessEqualZero();
+	const hkVector4Comparison weightR_lte0 = weightR.lessEqualZero();
 	hkVector4Comparison weightsEqualZero;
 	weightsEqualZero.setAnd( weightL_lte0, weightR_lte0 );
 
 	// Select beta as in the chart above
-	beta.select32( beta, hkVector4::getConstant(HK_QUADREAL_1), weightL_lte0 );
-	beta.select32( beta, hkVector4::getConstant(HK_QUADREAL_0), weightR_lte0 );
-	beta.select32( beta, alpha, weightsEqualZero );
+	beta.setSelect(weightL_lte0, hkVector4::getConstant<HK_QUADREAL_1>(), beta );
+	beta.zeroIfTrue(weightR_lte0);
+	beta.setSelect( weightsEqualZero, alpha, beta );
 		
 	// Update w according to the above chart
-	w.select32( w, weightR, weightL_lte0 );
-	w.select32( w, weightL, weightR_lte0 );
+	w.setSelect( weightL_lte0, weightR, w );
+	w.setSelect( weightR_lte0, weightL, w );
 
 	// Write the outputs
 	alphaOut = beta;
@@ -1879,14 +1875,14 @@ void hkaBatchBlenderUtilities::WeightAdditiveFunctor::operator() (
 	const hkVector4& weightL, const hkVector4& weightR )
 {
 	// Output alpha is input alpha * right weights
-	alphaOut.setMul4( alpha, weightR );
+	alphaOut.setMul( alpha, weightR );
 
 	// Output weights are the same as the left weights
 	weightOut = weightL;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

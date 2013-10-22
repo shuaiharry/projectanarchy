@@ -152,6 +152,10 @@ class hkMatrix4d
 			/// Checks if this matrix is identity within \a epsilon.
 		HK_FORCE_INLINE hkBool32 isApproximatelyIdentity ( hkSimdDouble64Parameter epsilon ) const;
 
+			/// Set this as the inverse of "m".
+			/// And inline version is also available in hkMatrix4Util.
+		hkResult setInverse(const hkMatrix4d& m, hkSimdDouble64Parameter epsilon);
+
 			/// Transposes this matrix in place.
 		void transpose();
 
@@ -224,7 +228,7 @@ class hkMatrix4d
 #endif // HK_MATH_MATRIX4d_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

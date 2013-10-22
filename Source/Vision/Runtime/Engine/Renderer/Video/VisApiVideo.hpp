@@ -8,8 +8,6 @@
 
 /// \file VisApiVideo.hpp
 
-/// \file VisApiVideo.hpp
-
 #ifndef DEFINE_VISAPIVIDEO
 #define DEFINE_VISAPIVIDEO
 
@@ -78,7 +76,6 @@ public:
   /// Similar to the DirectX method Present. The method used for presenting the back buffer
   /// contents are transparent to the user (e.g. flipping, copying).
   VISION_APIFUNC void UpdateScreen();
-
   
   /// \brief
   ///   Sets a specified screen mode.
@@ -255,7 +252,20 @@ public:
   ///
   /// \param pVideoConfig
   ///   VVideoConfig containing the information of the swap chain to present (has to be NULL on consoles).
-  VISION_APIFUNC void Present(VVideoConfig *pVideoConfig = NULL);
+  inline void Present(VVideoConfig *pVideoConfig = NULL)
+  {
+    PresentInternal(pVideoConfig);
+    m_uiFrameCount++;
+  }
+
+  /// \brief
+  ///   Returns the number of times Present() was called (may overflow).
+  ///
+  /// The frame count is automatically incremented each time Present() is called.
+  inline unsigned int GetFrameCount() const
+  {
+    return m_uiFrameCount;
+  }
 
   /// \brief
   ///   Suspends rendering for automatic flipping of the screen.
@@ -326,11 +336,16 @@ private:
   friend class VisError_cl;
   friend void Vision_GL_RenderWorld();
 
+  // Platform specific implementation of Present().
+  VISION_APIFUNC void PresentInternal(VVideoConfig *pVideoConfig);
+
   void InitTexturemanager();
   //void FillVideoConfig(VVideoConfig &vc, int sizeX, int sizeY, SLONG colorDepth, SLONG zBufferDepth, BOOL fullScreen, BOOL fullControl, int windowHandle, SLONG refreshRate);
 
   bool m_bSMInitialized;                 ///< TRUE if valid screen mode is initialized
   VVideoConfig currentConfig;            ///< information structures for the current screen config
+
+  unsigned int m_uiFrameCount;           ///< The count that is incremented each time Present() is called.
    
 #ifdef _VISION_WINRT
   VMutex m_winRTVisibleLock;
@@ -346,7 +361,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

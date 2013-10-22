@@ -23,6 +23,7 @@
 // a vertex animation.
 //
 // ***********************************************************************************************
+
 #include <Vision/Samples/Engine/BasicAnimation/BasicAnimationPCH.h>
 #include <Vision/Samples/Engine/BasicAnimation/BasicAnimation.h>
 #include <Vision/Samples/Engine/BasicAnimation/SimpleSkeletalAnimatedObject.h>
@@ -54,10 +55,12 @@ void TestSerialize(VisBaseEntity_cl *pEntity)
     // ...and load again as a separate instance running parallel
     IVFileInStream *pMemStream = m_spClipboard->Open("MemoryStream");
     VArchive ar("TestArchive",pMemStream,Vision::GetTypeManager());
-      int iVers;
-      ar >> iVers;
-      ar.SetLoadingVersion(iVers);
-      VisBaseEntity_cl *pEntity1 = (VisBaseEntity_cl *)ar.ReadObject(NULL);
+
+    int iVers;
+    ar >> iVers;
+    ar.SetLoadingVersion(iVers);
+    VisBaseEntity_cl *pEntity1 = (VisBaseEntity_cl *)ar.ReadObject(NULL);
+
     ar.Close();
     pMemStream->Close();
     pEntity1->IncPosition(10.f,0,0); // shift to the side so we can see whether both are synchronous
@@ -78,11 +81,11 @@ VISION_INIT
   // Create and init an application
   spApp = new VisSampleApp();
 #if defined(_VISION_MOBILE) || defined( HK_ANARCHY )
-  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground_mobile" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS | VSAMPLE_ALIGNLOGOALTERNATIVE | VSAMPLE_FORCEMOBILEMODE))
+  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground_mobile" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_ALIGNLOGOALTERNATIVE | VSampleFlags::VSAMPLE_FORCEMOBILEMODE))
 #elif defined(_VISION_PSP2)
-  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS | VSAMPLE_ALIGNLOGOALTERNATIVE, 960, 544 ))
+  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground_mobile" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_ALIGNLOGOALTERNATIVE, 960, 544 ))
 #else
-  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground" /*SampleScene*/, VSAMPLE_INIT_DEFAULTS | VSAMPLE_ALIGNLOGOALTERNATIVE ))
+  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, "ground" /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_ALIGNLOGOALTERNATIVE ))
 #endif
     return false;
 
@@ -143,6 +146,9 @@ VISION_SAMPLEAPP_AFTER_LOADING
   VMobileShadowMapComponentSpotDirectional *pComponent = new VMobileShadowMapComponentSpotDirectional(0);
   pComponent->SetShadowMapSize(512);
   pComponent->SetNearClip( 100.0f );
+  pLight->AddComponent(pComponent);
+#elif defined(_VISION_PSP2)
+  // No shadows for performance reasons
 #else
   VShadowMapComponentSpotDirectional *pComponent = new VShadowMapComponentSpotDirectional(0);
   pComponent->SetShadowMapSize(1024);
@@ -150,25 +156,26 @@ VISION_SAMPLEAPP_AFTER_LOADING
   pComponent->SetCascadeRange(0, 400.0f);
   pComponent->SetCascadeSelection(VShadowMapComponentSpotDirectional::CSM_SELECT_BY_BOUNDINGBOX);
   pComponent->SetShadowMappingMode(SHADOW_MAPPING_MODE_PCF8);
-#endif
   pLight->AddComponent(pComponent);
+#endif
 
 #endif
 
-  // Create two entities
-  SimpleSkeletalAnimatedObject_cl *pSkeletalObj = (SimpleSkeletalAnimatedObject_cl *) 
-    Vision::Game.CreateEntity("SimpleSkeletalAnimatedObject_cl",characterOrigin);
-  VisBaseEntity_cl *pCharacter = Vision::Game.CreateEntity("SimpleVertexAnimatedObject_cl",bubbleOrigin);
-  // set enity keys so the GUI can find them
+  // Create two entities.
+  SimpleSkeletalAnimatedObject_cl *pSkeletalObj = static_cast<SimpleSkeletalAnimatedObject_cl*>(
+    Vision::Game.CreateEntity("SimpleSkeletalAnimatedObject_cl", characterOrigin));
+  VisBaseEntity_cl *pCharacter = Vision::Game.CreateEntity("SimpleVertexAnimatedObject_cl", bubbleOrigin);
+
+  // Set entity keys so that the GUI can find them.
   pSkeletalObj->SetEntityKey("SkeletalAnimEntity");
   pCharacter->SetEntityKey("VertexAnimEntity");
 
-  // Setup the camera
+  // Setup the camera.
   hkvVec3 cameraOrigin( 0.f, 0.f, 200.f );
-  StaticCamera_cl *pCamera = (StaticCamera_cl *) Vision::Game.CreateEntity( "StaticCamera_cl", cameraOrigin );
+  StaticCamera_cl *pCamera = static_cast<StaticCamera_cl*>(Vision::Game.CreateEntity("StaticCamera_cl", cameraOrigin));
   pCamera->SetTarget( pSkeletalObj );
   hkvVec3 vCamTarget(0.f, 100.f, 50.f);
-  pCamera->SetTargetOffset( vCamTarget ); //look at the center of the character
+  pCamera->SetTargetOffset(vCamTarget); // look at the center of the character
 
   // load some GUI resources
   VGUIManager::GlobalManager().LoadResourceFile("BasicAnimation\\MenuSystem.xml");
@@ -213,7 +220,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

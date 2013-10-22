@@ -41,7 +41,7 @@ public:
   void RemoveAttackableEntity(RPG_DamageableEntity* entity);
   VArray<RPG_DamageableEntity*> const& GetAttackableEntities() const;
 
-  VisBaseEntity_cl* SpawnPlayer(const VString& prefabName);
+  VisBaseEntity_cl* SpawnPlayer(const VString& prefabName, hkvVec3 const& position, hkvVec3 const& orientation);
 
   VisBaseEntity_cl* CreateEntity(const char* className, const hkvVec3& position);
   VisBaseEntity_cl* CreateEntityFromScript(const VString& scriptName, const hkvVec3& position, const hkvVec3& orientation);
@@ -55,10 +55,17 @@ public:
 
   const VString& GetFmodEventProject() const;
 
-protected:
-  void FindLevelInfo();
+  void SetBossEntity(VisBaseEntity_cl *bossEntity);
+
+  bool IsGameOver() const { return (m_bossEntitySpawned && !m_bossEntity); }
+
+public:
+  RPG_PLUGIN_IMPEXP static RPG_GameManager s_instance;
 
 private:
+  // LevelInfo
+  void FindLevelInfo();
+
   void OnBeforeSceneLoaded(char const *sceneFileName);
 
   void OnAfterSceneLoaded();
@@ -72,9 +79,6 @@ private:
   // IVisCallbackHandler_cl interface
   void OnHandleCallback(IVisCallbackDataObject_cl *callbackData);
 
-public:
-  static RPG_GameManager s_instance;
-
 private:
   VString m_sceneFileName;
 
@@ -84,12 +88,21 @@ private:
   VArray<RPG_DamageableEntity*> m_attackableEntities;
 
   RPG_LevelInfo* m_levelInfo;
+
+  VWeakPtr<VisBaseEntity_cl> m_playerEntity;
+  hkvVec3 m_playerRespawnPosition;
+
+  VWeakPtr<VisBaseEntity_cl> m_bossEntity;
+  bool m_bossEntitySpawned;
+
+  static VString const FMOD_EVENT_PROJECT;
+  static VString const PLAYER_PREFAB_NAME;
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

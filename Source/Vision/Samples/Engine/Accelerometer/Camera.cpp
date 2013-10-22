@@ -34,6 +34,10 @@ void Camera_cl::InitFunction()
     VMultiTouchInputPSP2* pInput = static_cast<VMultiTouchInputPSP2*>(m_pMultiTouchInput);
     pInput->SetEnabled(true);
 
+  #elif defined( _VISION_WINRT )
+    VMultiTouchInputWinRT* pInput = static_cast< VMultiTouchInputWinRT* >( m_pMultiTouchInput );
+    pInput->SetEnabled ( true );
+
   #elif defined(WIN32)
     VMultiTouchInputPC* pInput = static_cast<VMultiTouchInputPC*>(m_pMultiTouchInput);
     pInput->SetEnabled(true);
@@ -184,7 +188,7 @@ START_VAR_TABLE(Camera_cl, VisBaseEntity_cl, "Camera_cl", 0, "")
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

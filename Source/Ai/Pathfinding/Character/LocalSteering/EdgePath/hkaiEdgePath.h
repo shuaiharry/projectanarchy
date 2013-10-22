@@ -79,7 +79,7 @@ public:
 
 		void setCalculatedValid(bool isleft, int offset)
 		{
-			HK_ASSERT(0x27d13818, offset > 0 && offset < 2<<13);
+			HK_ASSERT(0x27d13818, offset >= 0 && offset < 2<<13);
 			m_data = 0xC000u | (isleft << 13) | (hkUint16)offset;
 		}
 
@@ -316,7 +316,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -149,6 +149,7 @@ namespace HavokEditorPlugin
       EditorManager.CustomSceneSerialization += new CustomSceneSerializationEventHandler(EditorManager_CustomSceneSerialization);
       EditorManager.SceneChanged += new SceneChangedEventHandler(EditorManager_SceneChanged);
       IScene.LayerChanged += new LayerChangedEventHandler(IScene_LayerChanged);
+      EditorManager.EditorSettingsChanged += EditorManager_EditorSettingsChanged;
     }
 
     #endregion
@@ -157,6 +158,7 @@ namespace HavokEditorPlugin
 
     protected override void Dispose(bool disposing)
     {
+      EditorManager.EditorSettingsChanged -= EditorManager_EditorSettingsChanged;
       EditorManager.EditorModeChanged -= new EditorModeChangedEventHandler(EditorManager_EditorModeChanged);
       EditorManager.CustomSceneSerialization -= new CustomSceneSerializationEventHandler(EditorManager_CustomSceneSerialization);
       EditorManager.SceneChanged -= new SceneChangedEventHandler(EditorManager_SceneChanged);
@@ -258,7 +260,9 @@ namespace HavokEditorPlugin
         EditorManager.Scene.MainLayer.Dirty = true;
 
       // Physics
-      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls, _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeStaticObjects);
+      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls, 
+        _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeBlockerVolumes,
+        _settings.VisualizeStaticObjects);
       EditorManager.ActiveView.UpdateView(false);
       PropertyGrid.Refresh();
       toolStripButton_VisDynamics.Checked = _settings.VisualizeDynamicObjects;
@@ -400,6 +404,10 @@ namespace HavokEditorPlugin
     {
       GetWorldRuntimeCollisionParams(); // refresh grid reflecting any changes to the physics module collision filter
       UpdateStatus();
+      
+      // We didn't have a chance to configure the VDB port at Engine startup - so let's do it when changing the Editor Mode, which is the
+      // earliest point at which the VDB connection is stepped anyway.
+      HavokManaged.ManagedModule.SetVisualDebuggerPort(EditorManager.Settings.VisualDebuggerPort);
     }
 
     void EditorManager_SceneChanged(object sender, SceneChangedArgs e)
@@ -413,6 +421,15 @@ namespace HavokEditorPlugin
       if (e.action == LayerChangedArgs.Action.LockStatusChanged)
         UpdateStatus();
     }
+
+    void EditorManager_EditorSettingsChanged(object sender, EditorSettingsChangedArgs e)
+    {
+      if (e.OldSettings.VisualDebuggerPort != e.NewSettings.VisualDebuggerPort)
+      {
+        HavokManaged.ManagedModule.SetVisualDebuggerPort(e.NewSettings.VisualDebuggerPort);
+      }
+    }
+
 
     #endregion
 
@@ -454,7 +471,9 @@ namespace HavokEditorPlugin
     {
       _settings.VisualizeDynamicObjects = toolStripButton_VisDynamics.Checked;
       PropertyGrid.SelectedObject = _settings;
-      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls, _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeStaticObjects);
+      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls,
+        _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeBlockerVolumes,
+        _settings.VisualizeStaticObjects);
       EditorManager.ActiveView.UpdateView(false);
     }
 
@@ -462,7 +481,9 @@ namespace HavokEditorPlugin
     {
       _settings.VisualizeStaticObjects = toolStripButton_VisStatic.Checked;
       PropertyGrid.SelectedObject = _settings;
-      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls, _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeStaticObjects);
+      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls,
+        _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeBlockerVolumes, 
+        _settings.VisualizeStaticObjects);
       EditorManager.ActiveView.UpdateView(false);
     }
 
@@ -470,7 +491,9 @@ namespace HavokEditorPlugin
     {
       _settings.VisualizeCharacterControllers = toolStripButton_VisController.Checked;
       PropertyGrid.SelectedObject = _settings;
-      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls, _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeStaticObjects);
+      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls,
+        _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeBlockerVolumes, 
+        _settings.VisualizeStaticObjects);
       EditorManager.ActiveView.UpdateView(false);
     }
 
@@ -478,7 +501,9 @@ namespace HavokEditorPlugin
     {
       _settings.VisualizeTriggerVolumes = toolStripButton_VisTrigger.Checked;
       PropertyGrid.SelectedObject = _settings;
-      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls, _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeStaticObjects);
+      HavokManaged.ManagedModule.EnableDebugRendering(_settings.VisualizeDynamicObjects, _settings.VisualizeRagdolls,
+        _settings.VisualizeCharacterControllers, _settings.VisualizeTriggerVolumes, _settings.VisualizeBlockerVolumes,
+        _settings.VisualizeStaticObjects);
       EditorManager.ActiveView.UpdateView(false);
     }
 
@@ -596,8 +621,16 @@ namespace HavokEditorPlugin
       set { _visualizeTriggerVolumes = value; }
     }
 
+    [SortedCategory(CAT_GENERAL, CATORDER_GENERAL), PropertyOrder(5)]
+    [DisplayName("Visualize Blocker Volumes"), Description("If enabled, the collision geometry of blocker volumes will be rendered as a blue wireframe.")]
+    public bool VisualizeBlockerVolumes
+    {
+      get { return _visualizeBlockerVolumes; }
+      set { _visualizeBlockerVolumes = value; }
+    }
+
     [SortedCategory(CAT_WORLDSETUP, CATORDER_WORLDSETUP), PropertyOrder(1)]
-    [DisplayName("Vision Units"), Description("Defines how many vision units define a meter in the world. Note: You must reload the scene for these changes to take effect.")]
+    [DisplayName("Vision Units"), Description("Defines how many Vision units define a meter in the world. Note: You must reload the scene for these changes to take effect.")]
     public float VisionUnits
     {
       get { return _visionUnits; }
@@ -623,7 +656,7 @@ namespace HavokEditorPlugin
     }
 
     [SortedCategory(CAT_WORLDSETUP, CATORDER_WORLDSETUP), PropertyOrder(2)]
-    [DisplayName("Static Geometry Mode"), Description("Specifies how the static geometry is represented/ optimized within Havok (SingleInstances: Each static mesh is represented as one Havok rigid body (editable, but slow), MergedInstances: All static meshes in the scene file are baked into one Havok rigid body (not editable, but fast)).")]
+    [DisplayName("Static Geometry Mode"), Description("Specifies how the static geometry is represented/optimized within Havok Physics (SingleInstances: Each static mesh is represented as one Physics rigid body (editable, but slow), MergedInstances: All static meshes in the scene file are baked into one Physics rigid body (not editable, but fast)).")]
     public StaticGeometryMode_e StaticGeometryMode
     {
       get { return _staticGeometryMode; }
@@ -649,7 +682,7 @@ namespace HavokEditorPlugin
     }
 
     [SortedCategory(CAT_WORLDSETUP, CATORDER_WORLDSETUP), PropertyOrder(3)]
-    [DisplayName("Merged Static Welding Type"), Description("Specifies the welding type for merged static mesh instances. Welding is the term used to address the problem of objects bouncing as new contact points are created while transitioning from a collision with one shape to a collision with a neighboring shape.")]
+    [DisplayName("Merged Static Welding Type"), Description("Welding is used to reduce the problem of objects bouncing while transitioning from a collision with one shape to a collision with a neighboring shape. Only considered for Shape Type Mesh. When enabled, the orientation for meshes used in Vision is usually Anticlockwise.")]
     public MergedStaticWeldingType_e MergedStaticWeldingType
     {
       get { return _mergedStaticWeldingType; }
@@ -683,7 +716,7 @@ namespace HavokEditorPlugin
     }
 
     [SortedCategory(CAT_WORLDRUNTIME, CATORDER_WORLDRUNTIME), PropertyOrder(2)]
-    [DisplayName("Broadphase Manual Size"), Description("Sets the manual broadphase size(a cube centered on the origin with the specified value as side length).")]
+    [DisplayName("Broadphase Manual Size"), Description("Sets the manual broadphase size (a cube centered on the origin with the specified value as side length).")]
     public float BroadphaseSizeManual
     {
       get { return _broadphaseSizeManual; }
@@ -691,7 +724,7 @@ namespace HavokEditorPlugin
     }
 
     [SortedCategory(CAT_WORLDRUNTIME, CATORDER_WORLDRUNTIME), PropertyOrder(3)]
-    [DisplayName("Constrained Body Collision"), Description("Enable collisions between rigid bodies, which are linked by the same constraint.")]
+    [DisplayName("Constrained Body Collision"), Description("Enable collisions between rigid bodies which are linked by the same constraint.")]
     public bool ConstrainedBodyCollision
     {
       get { return _constrainedBodyCollision; }
@@ -699,7 +732,7 @@ namespace HavokEditorPlugin
     }
 
     [SortedCategory(CAT_WORLDRUNTIME, CATORDER_WORLDRUNTIME), PropertyOrder(4)]
-    [DisplayName("Legacy Compound Shapes"), Description("Enable simulation of legacy compound shapes (i.e. extended / compressed mesh shape). Note that on PLAYSTATION(R)3 the legacy shapes are mutually exclusive with the static compound shape / BV compressed mesh shape.")]
+    [DisplayName("Legacy Compound Shapes"), Description("Enable simulation of legacy compound shapes (i.e. extended / compressed mesh shape). Only applies to PLAYSTATION(R)3. When using Destruction in a scene, this setting should be enabled, otherwise it is recommended to disable it. Note that the legacy shapes are mutually exclusive with the static compound shape / BV compressed mesh shape for SPU.")]
     public bool LegacyCompoundShapes
     {
         get { return _legacyCompoundShapes; }
@@ -707,7 +740,7 @@ namespace HavokEditorPlugin
     }
 
     [SortedCategory(CAT_WORLDRUNTIME, CATORDER_WORLDRUNTIME), PropertyOrder(5)]
-    [DisplayName("Shape Caching"), Description("Enable caching of physics shapes to file.")]
+    [DisplayName("Shape Caching"), Description("Enable caching of Physics shapes to file. When disabled, Physics shapes will have to be recreated from the collision mesh geometry on every scene load.")]
     public bool ShapeCaching
     {
       get { return _shapeCaching; }
@@ -723,7 +756,7 @@ namespace HavokEditorPlugin
     }
 
     [SortedCategory(CAT_WORLDRUNTIME, CATORDER_WORLDRUNTIME), PropertyOrder(7)]
-    [DisplayName("Solver Type"), Description("By default the solver (so to resolve forces etc.) will be run 4 times with a medium hardness.")]
+    [DisplayName("Solver Type"), Description("Higher number of iterations will result in more accurate simulation, but increase the simulation cost. The softness of the solver controls how quickly constraints are resolved. A hard solver applies greater forces, but is less stable. By default the solver will be run 4 times with a medium hardness.")]
     public SolverType_e SolverType
     {
         get { return _solverType; }
@@ -734,6 +767,7 @@ namespace HavokEditorPlugin
     private bool _visualizeRagdolls = false;
     private bool _visualizeCharacterControllers = false;
     private bool _visualizeTriggerVolumes = false;
+    private bool _visualizeBlockerVolumes = false;
     private bool _visualizeStaticObjects = false;
     private float _visionUnits = 100.0f;
     private StaticGeometryMode_e _staticGeometryMode = StaticGeometryMode_e.SingleInstances;
@@ -827,7 +861,7 @@ namespace HavokEditorPlugin
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

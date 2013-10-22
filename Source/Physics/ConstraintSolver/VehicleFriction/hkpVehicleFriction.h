@@ -36,11 +36,14 @@ struct hkpVehicleStepInfo
 /// hkVehicleFrictionDescriptionInitValues().
 /// Please examine hkpVehicleFrictionDescription::Cinfo for details on how to setup this structure
 /// and information on its various members.
-struct hkpVehicleFrictionDescription
+class hkpVehicleFrictionDescription : public hkReferencedObject
 {
+public:
+	//+version(1)
+
 	HK_DECLARE_REFLECTION();
-	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ACTION, hkpVehicleFrictionDescription);
-	
+	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ACTION);
+
 	/// A helper construction info class to fill in the values for a hkpVehicleFrictionDescription.
 	/// All values should be specified in chassis local space.
 	struct Cinfo
@@ -90,7 +93,7 @@ struct hkpVehicleFrictionDescription
 		//
 		//	For friction clipping (internal optimization)
 		//
-		hkReal	m_frictionCircleYtab[16];/*hkFricionEllipseLineSegments*/	
+		hkReal	m_frictionCircleYtab[16];/*hkFricionEllipseLineSegments*/
 		hkReal	m_xStep;
 		hkReal	m_xStart;
 
@@ -98,7 +101,7 @@ struct hkpVehicleFrictionDescription
 		hkReal	m_wheelSurfaceInertia;
 		hkReal	m_wheelSurfaceInertiaInv;
 
-		hkReal  m_wheelChassisMassRatio; 
+		hkReal  m_wheelChassisMassRatio;
 
 		hkReal  m_wheelRadius;
 		hkReal  m_wheelRadiusInv;
@@ -112,7 +115,10 @@ struct hkpVehicleFrictionDescription
 	hkReal m_wheelDistance;
 	hkReal m_chassisMassInv;
 
-	struct AxisDescription m_axleDescr[2];/*HK_VEHICLE_FRICTION_N_AXIS*/
+	AxisDescription m_axleDescr[2];/*HK_VEHICLE_FRICTION_N_AXIS*/
+
+	hkpVehicleFrictionDescription() {}
+	hkpVehicleFrictionDescription(hkFinishLoadedObjectFlag f) : hkReferencedObject(f) {}
 };
 
 
@@ -127,6 +133,9 @@ struct hkpVehicleFrictionStatus
 		HK_DECLARE_REFLECTION();
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_CONSTRAINT, AxisStatus);
 
+		AxisStatus() {}
+		AxisStatus( hkFinishLoadedObjectFlag f) {}
+
 		//
 		//	Export data
 		//
@@ -135,7 +144,7 @@ struct hkpVehicleFrictionStatus
 		hkReal  m_side_slip_velocity;       // [m/sec]
 		hkReal  m_skid_energy_density;		// [N]
 		hkReal	m_side_force;				// [N]
-			
+
 		//
 		// For internal use only
 		//
@@ -168,17 +177,17 @@ struct hkpVehicleFrictionStatus
 		}
 
 	};
-		
+
 	struct AxisStatus m_axis[2];/*HK_VEHICLE_FRICTION_N_AXIS*/
 
-	hkpVehicleFrictionStatus() 
+	hkpVehicleFrictionStatus()
 	{
-		m_axis[0].init(); 
-		m_axis[1].init(); 
+		m_axis[0].init();
+		m_axis[1].init();
 	}
 
-	hkpVehicleFrictionStatus( hkFinishLoadedObjectFlag flag ) 
-	{ 
+	hkpVehicleFrictionStatus( hkFinishLoadedObjectFlag flag )
+	{
 		// skip initialization of m_axis[0/1]
 	}
 };
@@ -187,7 +196,7 @@ struct hkpVehicleFrictionStatus
 #endif // HKP_VEHICLE_FRICTION_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

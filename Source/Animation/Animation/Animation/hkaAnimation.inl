@@ -8,7 +8,7 @@
 
 HK_FORCE_INLINE hkaAnimation::hkaAnimation() : m_type(HK_UNKNOWN_ANIMATION)
 {
-	m_duration = 0.0f;
+	m_duration = 0;
 	m_numberOfTransformTracks = 0;
 	m_numberOfFloatTracks = 0;
 	m_extractedMotion = HK_NULL;
@@ -23,18 +23,40 @@ HK_FORCE_INLINE void hkaAnimation::getFrameAndDelta( hkReal time, hkUint32& fram
 {
 	const hkUint32 maxFrameIndex = getNumOriginalFrames() - 1;
 	
-	const hkReal frameFloat = (m_duration > 0) ? (time / m_duration) * maxFrameIndex : 0;
-	frameOut = static_cast<hkUint32>( frameFloat );
+	const hkSimdReal t = hkSimdReal::fromFloat(time);
+
+	hkSimdReal frameFloat;
+#if (HK_CONFIG_SIMD == HK_CONFIG_SIMD_ENABLED)
+	hkSimdReal d; d.load<1>(&m_duration);
+	frameFloat.setFromInt32((hkInt32)maxFrameIndex);
+	frameFloat.mul(t / d);
+	frameFloat.zeroIfFalse(d.greaterZero());
+#else
+	const hkSimdReal d = hkSimdReal::fromFloat(m_duration);
+	if (d.isGreaterZero()) 
+	{
+		frameFloat = (t / d) * hkSimdReal::fromInt32((hkInt32)maxFrameIndex);
+	}
+	else
+	{
+		frameFloat.setZero();
+	}
+#endif
+	hkSimdReal floorFrame;
+	floorFrame.setFloor(frameFloat);
+	floorFrame.storeSaturateInt32((hkInt32*)&frameOut);
 
 	// Handle any roundoff error: We are always interpolating between pose[frameOut] and pose[frameOut+1]
-    if(frameOut > maxFrameIndex - 1)
+    if (frameOut > maxFrameIndex - 1)
 	{
 		frameOut = maxFrameIndex - 1;
-		deltaOut = 1.0f;
+		deltaOut = hkReal(1);
 		return;
 	}
 
-	deltaOut = hkMath::clamp(frameFloat - frameOut, hkReal(0.0f), hkReal(1.0f));
+	hkSimdReal clampedDelta;
+	clampedDelta.setClampedZeroOne(frameFloat - floorFrame);
+	deltaOut = clampedDelta.getReal();
 }
 
 HK_FORCE_INLINE hkBool hkaAnimation::hasExtractedMotion() const
@@ -75,7 +97,7 @@ HK_FORCE_INLINE void hkaAnimation::sampleSingleFloatTrack( hkReal time, hkInt16 
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

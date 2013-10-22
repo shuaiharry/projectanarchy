@@ -14,7 +14,7 @@ struct hkGeometry;
 
 /// A representation of a shape intended for visualization.
 /// There are several subclasses corresponding to different shape types, but all can return
-/// an hkpGeometry from their getGeometry() method. The geometry should be combined with
+/// a hkGeometry from their getGeometry() method. The geometry should be combined with
 /// the transform returned by getTransform().
 class hkDisplayGeometry : public hkReferencedObject
 {
@@ -75,7 +75,7 @@ class hkDisplayGeometry : public hkReferencedObject
 #endif // HK_GEOMETRY2_DISPLAY_GEOMETRY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

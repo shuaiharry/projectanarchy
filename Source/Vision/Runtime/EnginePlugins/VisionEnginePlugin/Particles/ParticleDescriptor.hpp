@@ -75,7 +75,7 @@ enum VIS_PARTICLE_TOPOLOGY_e
 ///\brief
 ///  A descriptor instance defines all properties of a particle effect layer. It keeps per-resource data, not per instance data
 ///
-///A list of decriptors is bound to the resource VisParticleEffectFile_cl which describes the full effect with multiple layers.
+///A list of descriptors is bound to the resource VisParticleEffectFile_cl which describes the full effect with multiple layers.
 ///Properties in this class correspond to a single particle layer in vForge
 ///
 ///\see
@@ -357,7 +357,7 @@ public:
   PARTICLE_IMPEXP void GetDependencies(VResourceSnapshot &snapshot, VManagedResource *pOwner);
 #endif
 
-  static bool TechniqueUsesLightGrid(VCompiledTechnique *pTech);
+  PARTICLE_IMPEXP static bool TechniqueUsesLightGrid(VCompiledTechnique *pTech);
 
 protected:
   inline int	binaryWeightSearch(float fAccumulatedWeight);
@@ -540,7 +540,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

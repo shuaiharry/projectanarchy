@@ -10,6 +10,8 @@
 #ifndef HK_AABB_16_H
 #define HK_AABB_16_H
 
+#include <Common/Base/Math/Vector/hkIntVector.h>
+
 /// Aabb using 15 bit storage (highest bit cannot be used), you can use the hkIntspaceUtil to convert back and forth this class.
 struct hkAabb16	
 {
@@ -63,7 +65,7 @@ struct hkAabb16
 		void setExtentsOfCenters( const hkAabb16* aabbsIn, int numAabbsIn );
 
 		/// Sets this to the intersection of aabb0 and aabb1.
-		void setIntersection( const hkAabb16& aabb0, const hkAabb16& aabb1 );
+		HK_FORCE_INLINE void setIntersection( const hkAabb16& aabb0, const hkAabb16& aabb1 );
 
 		/// Sets this to the union of aabb0 and aabb1.
 		HK_FORCE_INLINE void setUnion( const hkAabb16& aabb0, const hkAabb16& aabb1 );
@@ -101,7 +103,7 @@ struct hkAabb16
 #endif // HK_AABB_16_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

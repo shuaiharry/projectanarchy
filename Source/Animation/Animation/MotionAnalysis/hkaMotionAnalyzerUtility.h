@@ -25,11 +25,11 @@ public:
 	/// \param velocityTolerance Velocity tolerance in model units (distance units, per frame).
 	/// \param animation Animation to analyze.
 	/// \param isDownInOut Frames in which foot is considered down will be set true, other values not changed.
-	static void HK_CALL analyzeBoneDowns( hkInt16 bone, const hkVector4& up, hkReal positionTolerance, hkReal velocityTolerance, const hkaExpandAnimationUtility& animation, bool logicalOR, hkArray< hkBool >& isDownInOut );
+	static void HK_CALL analyzeBoneDowns( hkInt16 bone, hkVector4Parameter up, hkSimdRealParameter positionTolerance, hkSimdRealParameter velocityTolerance, const hkaExpandAnimationUtility& animation, bool logicalOR, hkArray< hkBool >& isDownInOut );
 
-	static void HK_CALL getPosition( hkInt16 bone, const hkVector4& up, const hkaExpandAnimationUtility& animation, hkArray< hkReal >& positionOut );
+	static void HK_CALL getPosition( hkInt16 bone, hkVector4Parameter up, const hkaExpandAnimationUtility& animation, hkArray< hkReal >& positionOut );
 
-	static void HK_CALL getVelocity( hkInt16 bone, const hkVector4& up, const hkaExpandAnimationUtility& animation, hkArray< hkReal >& velocityOut );
+	static void HK_CALL getVelocity( hkInt16 bone, hkVector4Parameter up, const hkaExpandAnimationUtility& animation, hkArray< hkReal >& velocityOut );
 
 	static void HK_CALL arrayMaximum( const hkArrayBase< hkReal >& a, const hkArrayBase< hkReal >& b, hkArray< hkReal >& out );
 
@@ -42,7 +42,7 @@ public:
 	/// \param forward Forward direction.
 	/// \param animation Animation to analyze.
 	/// \param isInFrontInOut Frames in which boneA is in front will be set true, other values not changed.
-	static void HK_CALL isInFrontOf( hkInt16 boneA, hkInt16 boneB, const hkVector4& forward, const hkaExpandAnimationUtility& animation, hkArray< hkBool >& isInFrontInOut );
+	static void HK_CALL isInFrontOf( hkInt16 boneA, hkInt16 boneB, hkVector4Parameter forward, const hkaExpandAnimationUtility& animation, hkArray< hkBool >& isInFrontInOut );
 
 
 	/// \return The minimum of the forward and backward difference of a bone, projected into a plane
@@ -50,14 +50,14 @@ public:
 	/// \param frame Frame to analyze at.
 	/// \param up Normal to the plane of projection.
 	/// \param animation Input animation.
-	static hkReal HK_CALL minimumPlanarDifference( hkInt16 bone, int frame, const hkVector4& up, const hkaExpandAnimationUtility& animation );
+	static hkSimdReal HK_CALL minimumPlanarDifference( hkInt16 bone, int frame, hkVector4Parameter up, const hkaExpandAnimationUtility& animation );
 
 
 	/// Finds the maximum component of a bone's motion in a specified direction
 	/// \param bone Bone to consider.
 	/// \param dir Direction to.
-	static hkReal HK_CALL maxDotPerBone( hkInt16 bone, const hkVector4& dir, const hkaExpandAnimationUtility& animation );
-	static hkReal HK_CALL minDotPerBone( hkInt16 bone, const hkVector4& dir, const hkaExpandAnimationUtility& animation );
+	static hkSimdReal HK_CALL maxDotPerBone( hkInt16 bone, hkVector4Parameter dir, const hkaExpandAnimationUtility& animation );
+	static hkSimdReal HK_CALL minDotPerBone( hkInt16 bone, hkVector4Parameter dir, const hkaExpandAnimationUtility& animation );
 
 	/// Computes the cyclic backward difference between positions at a given frame
 	/// \param bone Bone to analyze
@@ -73,19 +73,19 @@ public:
 	/// \return The index of the first frame in which the value changed to val
 	/// \param aniamtion World space animation to analyze
 	/// \param val Value
-	static int getCyclicEventFrame( const hkArrayBase< hkBool >& values, hkBool val );
+	static int HK_CALL getCyclicEventFrame( const hkArrayBase< hkBool >& values, hkBool val );
 
 	/// \return The index of the first frame with value == val and cyclic previous != val
-	static int findFirst( hkBool val, const hkArrayBase< hkBool >& values );
+	static int HK_CALL findFirst( hkBool val, const hkArrayBase< hkBool >& values );
 
 	/// Find frames with value == val and cyclic previous != val
-	static void findTransitions( hkBool val, const hkArrayBase< hkBool >& values, hkArray< int >& framesOut );
+	static void HK_CALL findTransitions( hkBool val, const hkArrayBase< hkBool >& values, hkArray< int >& framesOut );
 };
 
 #endif // HK_MOTION_ANALYZER_UTILITY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

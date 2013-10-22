@@ -15,7 +15,6 @@
 #include <Vision/Runtime/Engine/SceneElements/VisApiConvexVolume.hpp>
 #include <Vision/Runtime/Engine/System/ModuleSystem/VisApiModuleSystemChild.hpp>
 #include <Vision/Runtime/Engine/System/ElementManager/VisApiElementManager.hpp>
-#include <Vision/Runtime/Engine/Visibility/VisApiElementVisData.hpp>
 #include <Vision/Runtime/Engine/SceneElements/VisApiObject3D.hpp>
 #include <Vision/Runtime/Engine/System/VisApiDefs.hpp>
 #include <Vision/Runtime/Engine/Renderer/Texture/VisApiBitmap.hpp>
@@ -1357,7 +1356,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

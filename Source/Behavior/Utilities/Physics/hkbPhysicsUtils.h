@@ -16,6 +16,7 @@
 
 class hkbContext;
 class hkaPose;
+class hkaSkeletonMapper;
 
 /// A set of physics utilities used by the SDK.
 class hkbPhysicsUtils
@@ -44,6 +45,33 @@ public:
 		const hkQuaternion& nextOrientation,
 		hkReal invDeltaTime,
 		hkbRigidBodyHandle rigidBody );
+
+	//////////////////////////////////////////////////////////////////////////
+	// Deprecated Physics Utility Functions
+	// Requires bridge be built with HKBP_DEPRECATED_PHYSICS_NODE_SUPPORT/HKBNP_DEPRECATED_PHYSICS_NODE_SUPPORT
+	//////////////////////////////////////////////////////////////////////////
+
+		/// Compute the velocity of the center-of-mass of an animation generator at a specific time.
+		/// The deltaTimeForFiniteDifference parameter determines the finite-difference granularity.
+	static void HK_CALL computeComVelocity(
+		hkbGenerator* generator,
+		hkbContext& context, 
+		const hkReal time, 
+		const hkReal deltaTimeForFiniteDifference,
+		hkVector4& comVelocity );
+
+		/// Compute the radial velocity of the center-of-mass of an animation generator.  Decomposes the
+		/// velocity into polar form, after projecting onto an x-y plane that can be any of the 
+		/// standard coordinate planes.
+	static void HK_CALL computeRadialComVelocity(
+		hkbGenerator* generator, 
+		hkbContext& context,
+		const hkReal time,
+		const hkReal deltaTimeForFiniteDifference,
+		const int xAxisMS,
+		const int yAxisMS,
+		hkReal& angle,
+		hkReal& radialSpeed );
 };
 
 #include <Behavior/Utilities/Physics/hkbPhysicsUtils.inl>
@@ -51,7 +79,7 @@ public:
 #endif // hkbPhysicsUtils_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

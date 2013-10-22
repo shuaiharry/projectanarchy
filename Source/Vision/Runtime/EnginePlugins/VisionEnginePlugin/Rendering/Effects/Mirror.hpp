@@ -398,17 +398,15 @@ public:
 #endif //_VISION_DOC
 
 protected:
-  EFFECTS_IMPEXP VisMirror_cl(); ///< reserved for serialization (doesn't call InitMirror)
+  EFFECTS_IMPEXP VisMirror_cl(); ///< Reserved for serialization (doesn't call InitMirror)
   friend class VisMirrorManager_cl;
   void  GetWorldSpaceVertices(hkvVec3* pVert) const;
   void  SetupSingleShaderProjection(VCompiledShaderPass *shader, const hkvVec3& campos, const hkvMat3 &camrot);
   void  PrepareProjectionPlanes();
-  float GetClosestDist(const hkvVec3& vCamPos);
   void  RecreateRenderTarget();
   void  FreeRenderTarget();
   IVisVisibilityCollector_cl *GetVisibilityCollectorForView(VisRenderContext_cl *pView);
   void  ClearViewVisibilityCollectors();
-  float GetMirrorDistanceFromCameraPlane(const VisContextCamera_cl &mainCam);
 
   VisMirrorManager_cl *m_pParentManager;
   
@@ -464,6 +462,7 @@ protected:
   bool            m_bExecuteRenderHooks;
   bool            m_bDoubleSided;
   bool            m_bCameraOnFrontSide;
+  unsigned int    m_uiVisibilityRefreshFrame;             /// Last frame in which the visibility objects were changed.
 };
 
 /// \brief
@@ -501,6 +500,7 @@ public:
   virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData);
 
   VRefCountedCollection<VisMirror_cl> m_Instances;
+
 private:
   static VisMirrorManager_cl g_MirrorManager;
 };
@@ -508,7 +508,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

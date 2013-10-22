@@ -47,7 +47,7 @@ class hkpParametricCurve : public hkReferencedObject
 		virtual void getPointsToDraw(hkArray<hkVector4>& pathPoints) const = 0;
 
 		///Transform all the points in the curve
-		virtual void transformPoints( const hkTransform& transformation ) = 0; 
+		virtual void transformPoints( const hkTransform& transformation ) = 0;
 
 		/// Create an exact copy of path
 		virtual hkpParametricCurve* clone() = 0;
@@ -64,7 +64,7 @@ class hkpParametricCurve : public hkReferencedObject
 #endif	// HKP_PARAMETRIC_CURVE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

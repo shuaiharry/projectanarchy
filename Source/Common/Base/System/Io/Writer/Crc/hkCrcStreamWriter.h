@@ -37,12 +37,29 @@ class hkCrc32StreamWriter : public hkCrcStreamWriter<hkUint32, 0xedb88320>
 		hkCrc32StreamWriter( hkUint32 startCrc = 0 ) : hkCrcStreamWriter<hkUint32, 0xedb88320>( startCrc ) {}
 };
 
+/// CRC64
+class hkCrc64StreamWriter : public hkCrcStreamWriter<hkUint64, 0xc96c5795d7870f42ull> 
+{
+public:
+	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
+	hkCrc64StreamWriter( hkUint64 startCrc = 0 ) : hkCrcStreamWriter<hkUint64, 0xc96c5795d7870f42ull>( startCrc ) {}
+
+	static const hkUint64 g_crc64lookupTable[256];
+};
+
+// Specialize the template for crc64 to use the look-up table.
+template<>
+inline hkUint64 hkCrcStreamWriter<hkUint64, 0xc96c5795d7870f42ull>::calcPermute(hkUint64 p)
+{
+	return hkCrc64StreamWriter::g_crc64lookupTable[p];
+}
+
 #include <Common/Base/System/Io/Writer/Crc/hkCrcStreamWriter.inl>
 
 #endif // HK_BASE_CRCSTREAMWRITER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -17,6 +17,7 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokStaticMesh.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokRagdoll.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokCharacterController.hpp>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokBlockerVolumeComponent.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokProfiler.hpp>
 
 #ifdef SUPPORTS_TERRAIN
@@ -219,9 +220,9 @@ public:
       hkpWorldRayCastCommand& cmd = m_commands.expandOne();
 
       hkpWorldRayCastInput& ray = cmd.m_rayInput;
-    vHavokConversionUtils::VisVecToPhysVecWorld(pRaycastData->vRayStart, ray.m_from);
-    vHavokConversionUtils::VisVecToPhysVecWorld(pRaycastData->vRayEnd, ray.m_to);
-    ray.m_enableShapeCollectionFilter = true;
+      vHavokConversionUtils::VisVecToPhysVecWorld(pRaycastData->vRayStart, ray.m_from);
+      vHavokConversionUtils::VisVecToPhysVecWorld(pRaycastData->vRayEnd, ray.m_to);
+      ray.m_enableShapeCollectionFilter = true;
       ray.m_filterInfo = pRaycastData->iCollisionBitmask;
       cmd.m_resultsCapacity = m_iResultCapacity;
       cmd.m_numResultsOut = 0;
@@ -292,7 +293,7 @@ public:
           if(output.hasHit())
             m_pModule->ForwardRaycastData(m_rays[i], &output);
         }
-            m_rays[i]->bFinished = true;
+            m_rays[i]->onFinished();
          }
 
          for(int j = 0; j < jobHeaders.getSize(); ++j)
@@ -324,7 +325,7 @@ public:
           {
             m_pModule->ForwardRaycastData(m_rays[i], &output);
           }
-          m_rays[i]->bFinished = true;
+          m_rays[i]->onFinished();
         }
       }
       else
@@ -353,7 +354,7 @@ public:
               m_pModule->ForwardRaycastData(m_rays[i],&hit);
             }
           }
-          m_rays[i]->bFinished = true;
+          m_rays[i]->onFinished();
         }
       }
       }
@@ -542,7 +543,7 @@ public:
     vMemAlignedFree(p);
   }
 
-  virtual void getMemoryStatistics( MemoryStatistics& u )
+  virtual void getMemoryStatistics( MemoryStatistics& u ) const
   {
      u.m_allocated = m_currentUsed;
      u.m_peakInUse = m_peakUse;
@@ -553,7 +554,7 @@ public:
      m_peakUse = m_currentUsed;
   }
 
-  virtual int getAllocatedSize( const void* obj, int numBytes )
+  virtual int getAllocatedSize( const void* obj, int numBytes ) const
   {
      return numBytes;
   }
@@ -579,7 +580,8 @@ vHavokPhysicsModule::vHavokPhysicsModule(void) :
   m_steppedExternally(false),
   m_vdbSteppedExternally(false),
   m_iMinSolverBufferIncreaseStep(2 * 1024 * 1024),
-  m_pSweepSemaphore(NULL)
+  m_pSweepSemaphore(NULL),
+  m_iVisualDebuggerPort(HK_VISUAL_DEBUGGER_DEFAULT_PORT)
 {
   vHavokConversionUtils::SetHavok2VisionScale(DEFAULT_HAVOK_TO_VISION_SCALE);
   m_staticGeomMode = vHavokPhysicsModule::SGM_SINGLE_INSTANCES;
@@ -597,7 +599,7 @@ vHavokPhysicsModule::vHavokPhysicsModule(void) :
   m_pProfiler = HK_NULL;
   m_pPhysicsWorld = HK_NULL;
 
-  m_bAsyncPhysics = true;
+  m_bAsyncPhysics = false;
   m_pTask = new VHavokTask(this);
 
   m_bForceHktShapeCaching = false;
@@ -610,6 +612,7 @@ vHavokPhysicsModule::vHavokPhysicsModule(void) :
   m_bDebugRenderRagdolls = false;
   m_bDebugRenderCharacterControllers = false;
   m_bDebugRenderTriggerVolumes = false;
+  m_bDebugRenderBlockerVolumes = false;
   m_bDebugRenderStaticMeshes = false;
 }
 
@@ -789,7 +792,7 @@ BOOL vHavokPhysicsModule::OnInitPhysics()
   m_iMaxTicksPerFrame = 2;            // use up to two physics steps per frame
   m_bFixedTicksPerFrame = false;      // don't use a fixed number of physics steps per frame
   m_bAllowVariableStepRate = true;    // allow variable step rate...
-  m_fMinTimeStep = 1/90.0f;           // ...between 90Hz...
+  m_fMinTimeStep = 1/120.0f;           // ...between 120Hz...
   m_fMaxTimeStep = 1/30.0f;           // ...and 30Hz.
 
   /*
@@ -1376,8 +1379,8 @@ BOOL vHavokPhysicsModule::OnDeInitPhysics()
   WaitForSimulationToComplete();
 
   {
-    vHavokPhysicsModuleCallbackData callbackData(&OnBeforeDeInitializePhysics, this);
-    callbackData.Trigger();
+	  vHavokPhysicsModuleCallbackData callbackData(&OnBeforeDeInitializePhysics, this);
+	  callbackData.Trigger();
   }
 
   if (m_pPhysicsWorld != NULL)
@@ -1409,12 +1412,12 @@ BOOL vHavokPhysicsModule::OnDeInitPhysics()
   {
     // Dispose all simulated static meshes, so that they get removed from the
     // module and releases their Havok data.
-    int iStaticMeshCount = m_simulatedStaticMeshes.Count();
+    const int iStaticMeshCount = m_simulatedStaticMeshes.Count();
     for (int i = iStaticMeshCount - 1; i >= 0; i--)
       m_simulatedStaticMeshes.GetAt(i)->DisposeObject();
 
 #ifdef SUPPORTS_TERRAIN
-    int iTerrainCount = m_simulatedTerrainSectors.Count();
+    const int iTerrainCount = m_simulatedTerrainSectors.Count();
     for (int i = iTerrainCount - 1; i >= 0; i--)
       m_simulatedTerrainSectors.GetAt(i)->DisposeObject();
 #endif
@@ -1423,31 +1426,35 @@ BOOL vHavokPhysicsModule::OnDeInitPhysics()
     // module and releases their Havok data.
     // Usually there won't be any rigid bodies left, unless the physics module
     // is deinitialized although an owner entity is still alive.
-    int iRigidBodyMeshCount = m_simulatedRigidBodies.Count();
+    const int iRigidBodyMeshCount = m_simulatedRigidBodies.Count();
     for (int i = iRigidBodyMeshCount - 1; i >= 0; i--)
       m_simulatedRigidBodies.GetAt(i)->DisposeObject();
 
-    int iRagdollCount = m_simulatedRagdolls.Count();
+    const int iRagdollCount = m_simulatedRagdolls.Count();
     for (int i = iRagdollCount - 1; i >= 0; i--)
       m_simulatedRagdolls.GetAt(i)->DisposeObject();
 
-    int iControllerCount = m_simulatedControllers.Count();
+    const int iControllerCount = m_simulatedControllers.Count();
     for (int i = iControllerCount - 1; i >= 0; i--)
       m_simulatedControllers.GetAt(i)->DisposeObject();
     
-    int iConstCount = m_simulatedConstraints.GetLength();
+    const int iConstCount = m_simulatedConstraints.GetLength();
     for (int i = iConstCount - 1; i >= 0; i--)
       m_simulatedConstraints.Get(i)->DisposeObject();
 
 #ifdef SUPPORTS_TERRAIN
-    int iDecCount = m_simulatedDecorations.Count();
+    const int iDecCount = m_simulatedDecorations.Count();
     for (int i = iDecCount - 1; i >= 0; i--)
       m_simulatedDecorations.GetAt(i)->DisposeObject();
 #endif
 
-    int iTriggerVolumeCount = m_simulatedTriggerVolumes.Count();
+    const int iTriggerVolumeCount = m_simulatedTriggerVolumes.Count();
     for (int i = iTriggerVolumeCount - 1; i >= 0; i--)
       m_simulatedTriggerVolumes.GetAt(i)->DisposeObject();
+
+    const int iBlockerVolumeCount = m_simulatedBlockerVolumes.Count();
+    for (int i = iBlockerVolumeCount - 1; i >= 0; i--)
+      m_simulatedBlockerVolumes.GetAt(i)->DisposeObject();
   }
 
 
@@ -1570,7 +1577,7 @@ void vHavokPhysicsModule::SetVisionWorldScale(hkReal fUnitsPerMeter)
   vHavokConversionUtils::SetHavok2VisionScale(fUnitsPerMeter);
 }
 
-hkReal vHavokPhysicsModule::GetVisionWorldScale()
+hkReal vHavokPhysicsModule::GetVisionWorldScale() const
 {
   return vHavokConversionUtils::GetHavok2VisionScale();
 }
@@ -1600,12 +1607,13 @@ void vHavokPhysicsModule::SetThreadCount(unsigned int iNumThreads)
 }
 
 void vHavokPhysicsModule::EnableDebugRendering(bool bRigidBodies, bool bRagdolls, bool bCharacterControlers, 
-  bool bTriggerVolumes, bool bStaticMeshes)
+  bool bTriggerVolumes, bool bBlockerVolumes, bool bStaticMeshes)
 {
   m_bDebugRenderRigidBodies = bRigidBodies;
   m_bDebugRenderRagdolls = bRagdolls;
   m_bDebugRenderCharacterControllers = bCharacterControlers;
   m_bDebugRenderTriggerVolumes = bTriggerVolumes;
+  m_bDebugRenderBlockerVolumes = bBlockerVolumes;
   m_bDebugRenderStaticMeshes = bStaticMeshes;
 
   // will update debug rendering, depending on the global flags
@@ -1624,6 +1632,9 @@ void vHavokPhysicsModule::EnableDebugRendering(bool bRigidBodies, bool bRagdolls
 
   for (int i = 0; i < m_simulatedTriggerVolumes.Count (); ++i)
     m_simulatedTriggerVolumes.GetAt (i)->SetDebugRendering (m_simulatedTriggerVolumes.GetAt (i)->GetDebugRenderEnabled ());
+
+  for (int i = 0; i < m_simulatedBlockerVolumes.Count(); ++i)
+    m_simulatedBlockerVolumes.GetAt(i)->SetDebugRendering(m_simulatedBlockerVolumes.GetAt(i)->GetDebugRenderEnabled());
 }
 
 // -------------------------------------------------------------------------- //
@@ -1657,7 +1668,7 @@ void vHavokPhysicsModule::OnRunPhysics( float fDuration )
   {
     m_iNumTicksThisFrame = 1;
 
-    if ( m_fMaxTimeStep > 0.0f && m_fLeftOver > m_fMaxTimeStep)
+    if (m_fMaxTimeStep > 0.0f && m_fLeftOver > m_fMaxTimeStep)
     {
       m_iNumTicksThisFrame = static_cast<int>(m_fLeftOver / m_fMaxTimeStep);
       m_iNumTicksThisFrame = hkvMath::Min(m_iNumTicksThisFrame, m_iMaxTicksPerFrame);
@@ -1673,6 +1684,7 @@ void vHavokPhysicsModule::OnRunPhysics( float fDuration )
       m_fTimeStep = m_fLeftOver;
     }
   }
+  // Configure this frame for fixed time stepping.
   else
   {
     if (m_bFixedTicksPerFrame)
@@ -1688,10 +1700,11 @@ void vHavokPhysicsModule::OnRunPhysics( float fDuration )
     }
   }
 
-  // Update character controller/ rigid bodies outside physics tick loop as 
-  // the motion / rotation delta gets updated once per frame.
+  // Update character controller/ rigid bodies outside physics tick in order
+  // to process motion delta.
   // Also note that since the entities are modified here which is not thread safe,
-  // this code can't be executed from within the task that calls PerformSimulation
+  // this code can't be executed from within the task that calls PerformSimulation.
+
   {
     // Need to step the controllers at actual frame dt as high framerates otherwise
     // miss delta motion etc
@@ -1776,7 +1789,6 @@ void vHavokPhysicsModule::PerformSimulation(bool bTask, bool bWorkerThread)
 
   // Set the total duration to the remaining time since the last time step
   m_fLeftOver = hkMath::fmod(m_fLeftOver, m_fTimeStep);
-  //m_fLeftOver = m_fLeftOver - static_cast<float>(m_iNumTicksThisFrame) * m_fTimeStep;
 
   hkCheckDeterminismUtil::workerThreadFinishFrame();
 }
@@ -1796,14 +1808,6 @@ void vHavokPhysicsModule::FetchPhysicsResults()
   // if m_bSimulationStarted == true, WaitForSimulationToComplete sets m_bSimulationStarted = false, m_bResultsExpected = true
   WaitForSimulationToComplete();
 
-  // Update the entities handled by character controllers
-  // Can have new data if m_bNewResultsAvailable == true, even if m_bResultsExpected == false
-  {  
-    int iCount = m_simulatedControllers.Count();
-    for (int i = 0; i < iCount; i++)
-      m_simulatedControllers.GetAt(i)->UpdateOwner();
-  }
-
 
   // Dump the cached messages to the log
   // Don't wait for a physics step to update the log (catch startup messages, character step messages etc)
@@ -1815,9 +1819,23 @@ void vHavokPhysicsModule::FetchPhysicsResults()
     // Will only have new data if m_bResultsExpected == true
     // (Keyframed Vision objects are updated to new animation positions even if m_bResultsExpected == false)
     UpdateHavok2Vision();
+  }
 
-      // Fire callbacks
-      OnFetchPhysicsResults.TriggerCallbacks();
+  // Update the entities handled by character controllers
+  // Can have new data if m_bNewResultsAvailable == true, even if m_bResultsExpected == false
+  // We have to do this *after* synching rigid body changes to Vision in order to keep 
+  // parent data for those rigid bodies consistent. (Otherwise all sorts of errors creep into 
+  // local position and orientation offsets.)
+  {  
+    int iCount = m_simulatedControllers.Count();
+    for (int i = 0; i < iCount; i++)
+      m_simulatedControllers.GetAt(i)->UpdateOwner();
+  }
+
+  if(m_bResultsExpected)
+  {
+    // Fire callbacks
+    OnFetchPhysicsResults.TriggerCallbacks();
 
     SendEnqueuedNotifications();
 
@@ -1900,8 +1918,10 @@ void vHavokPhysicsModule::SetPhysicsTickCount(int iTickCount,
 #endif
     m_bFixedTicksPerFrame = bFixedTicksPerFrame;
     m_bAllowVariableStepRate = false;
-    m_fMinTimeStep = 0.0f;
-    m_fMaxTimeStep = 0.0f;
+
+    // Don't set min and max timestep to zero, since we want to keep these values in case 
+    // the normal SetPhysicsTickCount function from the IVisPhysicsModule_cl interface
+    // gets called for enabling variable time stepping.
   }
   // variable time stepping
   else
@@ -1913,6 +1933,11 @@ void vHavokPhysicsModule::SetPhysicsTickCount(int iTickCount,
     m_fMinTimeStep = fMinPhysicsTimeStep;
     m_fMaxTimeStep = fMaxPhysicsTimeStep;
   }
+}
+
+void vHavokPhysicsModule::SetPhysicsTickCount(int iTickCount, int iMaxTicksPerFrame)
+{
+  SetPhysicsTickCount(iTickCount, iMaxTicksPerFrame, false, m_fMinTimeStep, m_fMaxTimeStep);
 }
 
 #ifdef SUPPORTS_SNAPSHOT_CREATION
@@ -1996,7 +2021,7 @@ void vHavokPhysicsModule::ForwardRaycastData(VisPhysicsRaycastBase_cl *pRaycastD
          }
          else if (havokComponent->IsOfType(vHavokCharacterController::GetClassTypeId()))
          {
-           const vHavokCharacterPushableProxy* pCharacterController = static_cast<const vHavokCharacterController*>(havokComponent)->GetHavokController();
+           const vHavokCharacterPushableProxy* pCharacterController = static_cast<const vHavokCharacterController*>(havokComponent)->GetCharacterProxy();
            hit.hitMaterial.fStaticFriction = float(pCharacterController->m_staticFriction);
            hit.hitMaterial.fDynamicFriction = float(pCharacterController->m_dynamicFriction);
            // leave default value for restitution
@@ -2129,6 +2154,8 @@ void vHavokPhysicsModule::PerformRaycast(VisPhysicsRaycastBase_cl *pRaycastData)
 
 void vHavokPhysicsModule::EnqueueRaycast(VisPhysicsRaycastBase_cl *pRaycastData)
 {
+  pRaycastData->onEnqueued();
+
   // if not all the hits (only the closest)
   if (!pRaycastData->allHits())
   {
@@ -2179,7 +2206,7 @@ int vHavokPhysicsModule::PerformSweep(vHavokSweepResult *pResults, int iNumResul
 
   vHavokMarkWorld markWorld(m_pPhysicsWorld);
 
-  return PerformSweepInternal(pResults, iNumResults, pCharacterCtrl->GetHavokController()->getShapePhantom()->getCollidable(), pCharacterCtrl->GetPosition(), vDir, fDistance);
+  return PerformSweepInternal(pResults, iNumResults, pCharacterCtrl->GetCharacterProxy()->getShapePhantom()->getCollidable(), pCharacterCtrl->GetPosition(), vDir, fDistance);
 }
 
 int vHavokPhysicsModule::PerformSweepInternal(vHavokSweepResult *pResults, int iNumResults, const hkpCollidable *pCollidable, const hkvVec3& vPos,
@@ -2258,7 +2285,7 @@ void vHavokPhysicsModule::PerformSweepBatched(vHavokSweepCommand* pCommands, int
 
       if(command.m_pCharacterController)
       {
-        physicsCommand.m_collidable = command.m_pCharacterController->GetHavokController()->getShapePhantom()->getCollidable();
+        physicsCommand.m_collidable = command.m_pCharacterController->GetCharacterProxy()->getShapePhantom()->getCollidable();
         vPos = command.m_pCharacterController->GetPosition();
       }
       else if(command.m_pRigidBody)
@@ -2335,7 +2362,7 @@ void vHavokPhysicsModule::PerformSweepBatched(vHavokSweepCommand* pCommands, int
       }
       else if ( command.m_pCharacterController != NULL )
       {
-        pCollidable = command.m_pCharacterController->GetHavokController()->getShapePhantom()->getCollidable();
+        pCollidable = command.m_pCharacterController->GetCharacterProxy()->getShapePhantom()->getCollidable();
         v3Pos = command.m_pCharacterController->GetPosition();
       }
       else
@@ -2398,12 +2425,47 @@ void vHavokPhysicsModule::OnNewWorldLoaded()
 {
 }
 
+
+void vHavokPhysicsModule::OnReposition()
+{
+  WaitForSimulationToComplete();
+
+  hkvVec3d worldPivot; Vision::GetSceneManager()->GetZoneRepositionInfo().GetGlobalPivotPos(worldPivot);
+  vHavokConversionUtils::SetVisionWorldPivot(worldPivot);
+
+  // Update rigid bodies
+  {
+    int iCount = m_simulatedRigidBodies.Count();
+    for (int i = 0; i < iCount; i++)
+    {
+      m_simulatedRigidBodies.GetAt(i)->UpdateHavok2Vision();
+    }
+  }
+
+  // Update character controllers
+  {  
+    int iCount = m_simulatedControllers.Count();
+    for (int i = 0; i < iCount; i++)
+      m_simulatedControllers.GetAt(i)->UpdateOwner();
+  }
+
+
+  // Update rag dolls
+  {
+    int iCount = m_simulatedRagdolls.Count();
+    for (int i = 0; i < iCount; i++)
+    {
+      m_simulatedRagdolls.GetAt(i)->UpdateOwner();
+    }
+  }  
+}
+
+
 void vHavokPhysicsModule::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
   if( pData->m_pSender == &IVisSceneManager_cl::OnReposition)
   {
-    hkvVec3d worldPivot; Vision::GetSceneManager()->GetZoneRepositionInfo().GetGlobalPivotPos(worldPivot);
-    vHavokConversionUtils::SetVisionWorldPivot(worldPivot);
+    OnReposition();
   }
   else if (pData->m_pSender == &Vision::Callbacks.OnBeforeSceneLoaded)
   {
@@ -2417,21 +2479,7 @@ void vHavokPhysicsModule::OnHandleCallback(IVisCallbackDataObject_cl *pData)
     if (!m_pPhysicsWorld)
       CreateWorld();
 
-   // Set the collide elf if different
-   if ( ((bool)m_pPhysicsWorld->m_useCompoundSpuElf) == ((bool)g_vGlobalWorldParams.m_runtimeParams.m_bEnableLegacyCompoundShapes) )
-   {
-      m_pPhysicsWorld->m_useCompoundSpuElf = !g_vGlobalWorldParams.m_runtimeParams.m_bEnableLegacyCompoundShapes;
-   }
-    // Set the collide elf if different
-    if ( ((bool)m_pPhysicsWorld->m_useCompoundSpuElf) == ((bool)g_vGlobalWorldParams.m_runtimeParams.m_bEnableLegacyCompoundShapes) )
-    {
-      m_pPhysicsWorld->m_useCompoundSpuElf = !g_vGlobalWorldParams.m_runtimeParams.m_bEnableLegacyCompoundShapes;
-    }
-    // Set the collide elf if different
-    if ( ((bool)m_pPhysicsWorld->m_useCompoundSpuElf) == ((bool)g_vGlobalWorldParams.m_runtimeParams.m_bEnableLegacyCompoundShapes) )
-    {
-      m_pPhysicsWorld->m_useCompoundSpuElf = !g_vGlobalWorldParams.m_runtimeParams.m_bEnableLegacyCompoundShapes;
-    }
+    m_pPhysicsWorld->m_useCompoundSpuElf = !g_vGlobalWorldParams.m_runtimeParams.m_bEnableLegacyCompoundShapes;
 
     hkMemorySystem::getInstance().garbageCollect();
 
@@ -2449,7 +2497,7 @@ void vHavokPhysicsModule::OnHandleCallback(IVisCallbackDataObject_cl *pData)
       }
       else
       {
-        Vision::Error.Warning("Could not automatically compute broadphase size (extents must be greater than %.1f Vision units), fallback to manual size.", HK2VIS_FLOAT_SCALED(2.f*BROADPHASE_SIZE_TOLERANCE));
+        Vision::Error.Warning("Could not automatically compute broadphase size - no static Physics meshes were found, or the total extent of the static geometry was to small (must be greater than %.1f Vision units in all dimensions). Fallback to manual size.", HK2VIS_FLOAT_SCALED(2.f*BROADPHASE_SIZE_TOLERANCE));
       }
     }
     
@@ -2463,7 +2511,7 @@ void vHavokPhysicsModule::OnHandleCallback(IVisCallbackDataObject_cl *pData)
     // Debug geometry is discarded when setting the broadphase size. The following call re-creates
     // what was enabled before.
     EnableDebugRendering(m_bDebugRenderRigidBodies, m_bDebugRenderRagdolls, m_bDebugRenderCharacterControllers, 
-      m_bDebugRenderTriggerVolumes, m_bDebugRenderStaticMeshes);
+      m_bDebugRenderTriggerVolumes, m_bDebugRenderBlockerVolumes, m_bDebugRenderStaticMeshes);
 
     return;
   }
@@ -2474,6 +2522,7 @@ void vHavokPhysicsModule::OnHandleCallback(IVisCallbackDataObject_cl *pData)
     m_staticGeomMode = (StaticGeomMode)g_vGlobalWorldParams.m_setupParams.m_iStaticGeomMode;
     m_mergedStaticWeldingType = (VisWeldingType_e)g_vGlobalWorldParams.m_setupParams.m_iMergedStaticWeldingType;  
 
+    vHavokConstraint::ElementManagerDeleteAll();
     vHavokConstraintChain::ElementManagerDeleteAll();
   }  
   else if (pData->m_pSender==&VSceneLoader::OnCustomChunkBeforeShapesSerialization)
@@ -2881,6 +2930,32 @@ void vHavokPhysicsModule::RemoveTriggerVolume(vHavokTriggerVolume *pTriggerVolum
   }
 }
 
+// -------------------------------------------------------------------------- //
+// Blocker Volume Management                                                  //
+// -------------------------------------------------------------------------- //
+
+void vHavokPhysicsModule::AddBlockerVolume(vHavokBlockerVolumeComponent* pBlockerVolume)
+{
+  VVERIFY_OR_RET(pBlockerVolume != NULL);
+
+  // Add to own list of rag dolls
+  VASSERT(m_simulatedBlockerVolumes.Find(pBlockerVolume) == -1);
+  m_simulatedBlockerVolumes.Add(pBlockerVolume);
+
+  // will enable debug rendering, especially if the global flag is set
+  pBlockerVolume->SetDebugRendering(pBlockerVolume->GetDebugRenderEnabled());
+}
+
+void vHavokPhysicsModule::RemoveBlockerVolume(vHavokBlockerVolumeComponent* pBlockerVolume)
+{
+  VVERIFY_OR_RET(pBlockerVolume != NULL);
+
+  // It is possible the rag doll was never added to the world
+  if (m_simulatedBlockerVolumes.Find(pBlockerVolume) != -1)
+  {
+    m_simulatedBlockerVolumes.Remove(pBlockerVolume);
+  }
+}
 
 // -------------------------------------------------------------------------- //
 // Havok Debug Rendering                                                      //
@@ -2893,7 +2968,7 @@ void vHavokPhysicsModule::SetEnabledVisualDebugger(BOOL bEnabled)
 
   if (m_bVisualDebugger && (m_spVisualDebugger == NULL) && (m_pPhysicsWorld != NULL) )
   {
-    m_spVisualDebugger = new vHavokVisualDebugger(m_pPhysicsWorld);
+    m_spVisualDebugger = new vHavokVisualDebugger(m_pPhysicsWorld, m_iVisualDebuggerPort);
   }
   else if (!m_bVisualDebugger && m_spVisualDebugger != NULL)
   {
@@ -2904,9 +2979,18 @@ void vHavokPhysicsModule::SetEnabledVisualDebugger(BOOL bEnabled)
 #endif
 }
 
-BOOL vHavokPhysicsModule::IsEnabledVisualDebugger()
+BOOL vHavokPhysicsModule::IsEnabledVisualDebugger() const
 {
   return m_bVisualDebugger;
+}
+
+void vHavokPhysicsModule::SetVisualDebuggerPort(int iPort)
+{
+  m_iVisualDebuggerPort = iPort;
+  if(m_spVisualDebugger)
+  {
+    m_spVisualDebugger->SetPort(m_iVisualDebuggerPort);
+  }
 }
 
 void vHavokPhysicsModule::SetEnabledDebug(BOOL bEnabled)
@@ -2919,7 +3003,7 @@ void vHavokPhysicsModule::SetEnabledDebug(BOOL bEnabled)
     m_spDisplayHandler = NULL;
 }
 
-BOOL vHavokPhysicsModule::IsEnabledDebug()
+BOOL vHavokPhysicsModule::IsEnabledDebug() const
 {
   return m_bDebugDisplay;
 }
@@ -3388,7 +3472,7 @@ void vHavokPhysicsModule::SetGravity(const hkvVec3& gravity)
   }
 }
 
-void vHavokPhysicsModule::GetGravity(hkvVec3& gravity)
+void vHavokPhysicsModule::GetGravity(hkvVec3& gravity) const
 {
   gravity = g_vGlobalWorldParams.m_runtimeParams.m_vGravity;
 }
@@ -3668,7 +3752,7 @@ void vHavokPhysicsModule::TriggerCollisionScriptFunction(IVObjectComponent *pPhy
   }
   else
   {
-    VASSERT_MSG(false, "Unknown Collsion!");
+    VASSERT_MSG(false, "Unknown Collision!");
   }
 
   //execute the callback on every script component with matching callback
@@ -3816,7 +3900,7 @@ void vHavokPhysicsModule::FinishDeterminismTest()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

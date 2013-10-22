@@ -113,12 +113,12 @@ void RPG_Effect::Create(RPG_EffectDefinition const& effectDefinition, hkvVec3 co
   // if an FMOD event exists for this effect, play it
   if (!effectDefinition.m_fmodEventGroupName.IsEmpty() && !effectDefinition.m_fmodEventName.IsEmpty())
   {
-    VVERIFY_MSG(CreateSoundEffect(effectDefinition, position), "Tried to create an undefined sound effect.");
+    CreateSoundEffect(effectDefinition, position);
   }
   // otherwise, if a sound effect for this type has been specified, play it
   else if (!effectDefinition.m_sfxFilename.IsEmpty())
   {
-    VVERIFY_MSG(RPG_VisionEffectHelper::PlaySoundFile(effectDefinition.m_sfxFilename, position), "Tried to play an undefined sound file.");
+    RPG_VisionEffectHelper::PlaySoundFile(effectDefinition.m_sfxFilename, position);
   }
 
   // if wallmark information exists for this effect, create the wallmark.
@@ -466,7 +466,7 @@ RPG_EffectDefinition::RPG_EffectDefinition()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

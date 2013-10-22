@@ -9,9 +9,11 @@
 #ifndef HKB_NODE_H
 #define HKB_NODE_H
 
+#include <Behavior/Behavior/hkbBase.h>
 #include <Behavior/Behavior/Event/hkbEvent.h>
 #include <Behavior/Behavior/Node/hkbBindable.h>
 #include <Behavior/Behavior/Node/hkbNodeInfo.h>
+#include <Common/Base/DebugUtil/DeterminismUtil/hkCheckDeterminismUtil.h>
 
 extern const class hkClass hkbNodeClass;
 
@@ -408,7 +410,15 @@ class hkbNode : public hkbBindable
 
 	public:
 
-		hkbNode( hkFinishLoadedObjectFlag flag ) : hkbBindable(flag), m_name(flag) {}
+#if defined(HK_ENABLE_DETERMINISM_CHECKS)
+		virtual void checkDeterminism()
+		{
+			hkCheckDeterminismUtil::checkMt(0xb0000003, HKB_DETERMINISTIC_NODE_ID_BASE + m_id);
+			hkCheckDeterminismUtil::checkMt(0xb0000020, m_type);
+		}
+#endif
+
+		hkbNode( hkFinishLoadedObjectFlag flag );
 };
 
 #include <Behavior/Behavior/Node/hkbNode.inl>
@@ -416,7 +426,7 @@ class hkbNode : public hkbBindable
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -1166,10 +1166,10 @@ protected:
 ///   Otherwise the key is 'pressed'. Do not call two times in same frame to GetValue method, instead use follow client code
 ///   to get the trigger state:
 ///
-///   float triggetState = pInput->GetTriggetState( MY_HOLD_KEY );
-///   if ( PRESSHOLD_ISPRESSED( triggetState ) )
+///   float triggerState = pInput->GetTrigger( MY_HOLD_KEY );
+///   if ( PRESSHOLD_ISPRESSED( triggerState ) )
 ///     // do when is pressed
-///   else if ( PRESSHOLD_ISHOLD( triggetState ) )
+///   else if ( PRESSHOLD_ISHOLD( triggerState ) )
 ///     // do when is hold
 class VMappedPressHold : public VMappedInput
 {
@@ -2060,6 +2060,20 @@ public:
   MSG m_Msg;    ///< the windows message structure
   bool m_bProcessed;  ///< set this member to true to skip the next TranslateMessage/DispatchMessage calls
 };
+
+
+/// \brief
+///   Window focus changed data object.
+/// 
+class VWindowFocusChangedDataObject_cl : public IVisCallbackDataObject_cl
+{
+ public:
+   VWindowFocusChangedDataObject_cl(VCallback *pSender, bool focusReceived) : IVisCallbackDataObject_cl(pSender), m_bFocusReceived(focusReceived)
+   {
+   
+   }
+   bool m_bFocusReceived;
+  };
 #endif
 
 
@@ -2128,6 +2142,8 @@ public:
   ///   }
   ///   \endcode
   VBASE_IMPEXP static VCallback OnPostTranslateMessage;
+
+  VBASE_IMPEXP static VCallback OnWindowFocusChanged;
   
 #endif
 
@@ -2158,7 +2174,7 @@ public:
 #endif //VINPUT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

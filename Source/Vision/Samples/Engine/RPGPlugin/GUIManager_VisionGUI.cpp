@@ -34,6 +34,8 @@ namespace
 }
 #endif
 
+#define SMALLSCREENSIZELIMIT 600
+
 RPG_GuiManager_VisionGUI::RPG_GuiManager_VisionGUI()
   : RPG_GuiManager()
   //, m_hudDialogFilename("GUI/Dialogs/Gui_Hud.xml")
@@ -106,10 +108,6 @@ void RPG_GuiManager_VisionGUI::OnActivate(PlayerUIDialog* parentDialog)
   RPG_GuiManager::OnActivate(parentDialog);
   VASSERT(m_parentDialog);  // should have been set by the parent's OnActivate()
 
-  VString msg = "RPG_GuiManager_VisionGUI::OnActivate()";
-  Vision::Error.SystemMessage(msg.AsChar());
-  Vision::Message.Add(1, msg.AsChar());
-
   AddSkillButtonsToParentDialog();
   AddHealthAndManaBarsToParentDialog();
   AddMinimapToParentDialog();
@@ -152,12 +150,16 @@ void RPG_GuiManager_VisionGUI::InitializeButtonDefinitions()
 {
   RPG_SkillButtons_e skillbutton;
   int textureSizeX, textureSizeY, textureDepth;
+  const float multiplier = Vision::Video.GetUse2xAssetsForCurrentConfig() ? 2.f : 1.f;
+  const float offset = Vision::Video.GetUse2xAssetsForCurrentConfig() ? 96.f : 0.f;
+  const float smallScreenOffsetX = Vision::Video.GetYRes() > SMALLSCREENSIZELIMIT ? 28.f : 0.f;
+  const float smallScreenOffsetY = Vision::Video.GetYRes() > SMALLSCREENSIZELIMIT ? 80.f : 0.f;
 
   skillbutton = BTN_RangedAttack;
   {
     m_skillButtonDefinitions[skillbutton].m_imageFileName = "GUI/Textures/btn_rangedAttack.tga";
     m_skillButtonDefinitions[skillbutton].m_positionCorner = CORNER_LowerLeft;
-    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2(48.f, 372.f);
+    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2((20.f + smallScreenOffsetX) * multiplier, 282.f + smallScreenOffsetY + offset * 3.f);
     m_skillButtonDefinitions[skillbutton].m_initiallyVisible = true;
   }
 
@@ -165,7 +167,7 @@ void RPG_GuiManager_VisionGUI::InitializeButtonDefinitions()
   {
     m_skillButtonDefinitions[skillbutton].m_imageFileName = "GUI/Textures/btn_powerAttack.tga";
     m_skillButtonDefinitions[skillbutton].m_positionCorner = CORNER_LowerLeft;
-    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2(48.f, 284.f);
+    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2((20.f + smallScreenOffsetX) * multiplier, 194.f + smallScreenOffsetY + offset * 2.f);
     m_skillButtonDefinitions[skillbutton].m_initiallyVisible = true;
   }
 
@@ -173,7 +175,7 @@ void RPG_GuiManager_VisionGUI::InitializeButtonDefinitions()
   {
     m_skillButtonDefinitions[skillbutton].m_imageFileName = "GUI/Textures/btn_aoeAttack.tga";
     m_skillButtonDefinitions[skillbutton].m_positionCorner = CORNER_LowerLeft;
-    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2(48.f, 196.f);
+    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2((20.f + smallScreenOffsetX) * multiplier, 106.f + smallScreenOffsetY + offset);
     m_skillButtonDefinitions[skillbutton].m_initiallyVisible = true;
   }
 
@@ -181,7 +183,7 @@ void RPG_GuiManager_VisionGUI::InitializeButtonDefinitions()
   {
     m_skillButtonDefinitions[skillbutton].m_imageFileName = "GUI/Textures/btn_rangedAttack.tga";
     m_skillButtonDefinitions[skillbutton].m_positionCorner = CORNER_LowerRight;
-    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2(128.f, 372.f);
+    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2((100.f + smallScreenOffsetX) * multiplier, 282.f + smallScreenOffsetY + offset * 3.f);
     m_skillButtonDefinitions[skillbutton].m_initiallyVisible = true;
   }
 
@@ -189,7 +191,7 @@ void RPG_GuiManager_VisionGUI::InitializeButtonDefinitions()
   {
     m_skillButtonDefinitions[skillbutton].m_imageFileName = "GUI/Textures/btn_powerAttack.tga";
     m_skillButtonDefinitions[skillbutton].m_positionCorner = CORNER_LowerRight;
-    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2(128.f, 284.f);
+    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2((100.f + smallScreenOffsetX) * multiplier, 194.f + smallScreenOffsetY + offset * 2.f);
     m_skillButtonDefinitions[skillbutton].m_initiallyVisible = true;
   }
 
@@ -197,7 +199,7 @@ void RPG_GuiManager_VisionGUI::InitializeButtonDefinitions()
   {
     m_skillButtonDefinitions[skillbutton].m_imageFileName = "GUI/Textures/btn_aoeAttack.tga";
     m_skillButtonDefinitions[skillbutton].m_positionCorner = CORNER_LowerRight;
-    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2(128.f, 196.f);
+    m_skillButtonDefinitions[skillbutton].m_positionOffsetFromCorner = hkvVec2((100.f + smallScreenOffsetX) * multiplier, 106.f + smallScreenOffsetY + offset);
     m_skillButtonDefinitions[skillbutton].m_initiallyVisible = true;
   }
 
@@ -225,9 +227,13 @@ void RPG_GuiManager_VisionGUI::InitializeHealthAndManaBarDefinitions()
   m_healthBarGlowTextureFilename      = "GUI/Textures/ind_health_glow.tga";
   m_manaBarTextureFilename            = "GUI/Textures/ind_mana.tga";
   m_manaBarGlowTextureFilename        = "GUI/Textures/ind_mana_glow.tga";
-  m_indicatorBarFlareOrigin = hkvVec2(72.f, 16.f);
-  m_healthBarPosition = hkvVec2(32.f, 32.f);
-  m_manaBarPosition = hkvVec2(32.f, 64.f);
+
+  const float offset = Vision::Video.GetUse2xAssetsForCurrentConfig() ? 32.f : 0.f;
+  const float multiplier = Vision::Video.GetUse2xAssetsForCurrentConfig() ? 2.f : 1.f;
+  const float smallScreenOffset = Vision::Video.GetYRes() > SMALLSCREENSIZELIMIT ? 30.f : 0.f;
+  m_indicatorBarFlareOrigin = hkvVec2(72.f, 16.f) * multiplier;
+  m_healthBarPosition = hkvVec2(22.f + smallScreenOffset + offset, 22.f + smallScreenOffset + offset);
+  m_manaBarPosition = hkvVec2(22.f + smallScreenOffset + offset, 54.f + smallScreenOffset + offset + offset);
 
   m_indicatorBarTrackTexture = Vision::TextureManager.Load2DTexture(m_indicatorBarTrackTextureFilename.AsChar());
   VASSERT_MSG(m_indicatorBarTrackTexture, "m_indicatorBarTrackTexture failed to load.");
@@ -288,9 +294,18 @@ void RPG_GuiManager_VisionGUI::InitializeMinimapDefinitions()
     VASSERT_MSG(m_minimapPlayerTexture, "m_minimapPlayerTexture failed to load.");
     VASSERT_MSG(m_minimapPlayerTexture->IsTexturePowerOfTwo(), "m_minimapPlayerTexture's dimensions must be a power of two.");
 
-    // Minimap position and size    
-    m_minimapSize = hkvVec2(128.f, 128.f);
-    m_minimapPosition = hkvVec2(Vision::Video.GetXRes() - m_minimapSize.x - 32.f, 32.f);
+    // Minimap position and size	
+    if (Vision::Video.GetUse2xAssetsForCurrentConfig())
+    {
+      m_minimapSize = hkvVec2(256.f, 256.f);
+      m_minimapPosition = hkvVec2(Vision::Video.GetXRes() - m_minimapSize.x - 64.f, 64.f);
+    }
+    else
+    {
+      const float smallScreenOffset = Vision::Video.GetYRes() > SMALLSCREENSIZELIMIT ? 20.f : 0.f;
+      m_minimapSize = hkvVec2(128.f, 128.f);
+      m_minimapPosition = hkvVec2(Vision::Video.GetXRes() - m_minimapSize.x - (12.f + smallScreenOffset), 12.f + smallScreenOffset);
+    }
     
     // Minimap image relative origin (we need this value in the range 0..1 in order to add the character position)
     hkvVec2 minimapImageDimensions = levelInfo->GetMinimapImageDimensions();
@@ -745,7 +760,7 @@ RPG_SkillButtonDefinition::RPG_SkillButtonDefinition()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

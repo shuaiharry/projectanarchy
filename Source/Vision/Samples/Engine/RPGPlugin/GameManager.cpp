@@ -18,12 +18,15 @@
 #include <Vision/Samples/Engine/RPGPlugin/PlayerUI.h>
 #include <Vision/Samples/Engine/RPGPlugin/VisionHavokBehaviorWorldListener.h>
 
-const VString FMOD_EVENT_PROJECT = "Sounds\\FMOD\\RPG.fdp"; // path to the FMOD event project used by the game
+VString const RPG_GameManager::FMOD_EVENT_PROJECT = "Sounds\\FMOD\\RPG.fdp"; // path to the FMOD event project used by the game
+VString const RPG_GameManager::PLAYER_PREFAB_NAME = "Prefabs\\Demo_Player_Hero.vprefab";
 
 RPG_GameManager::RPG_GameManager()
-  : m_characters()
-  , m_attackableEntities()
-  , m_levelInfo(NULL)
+  : m_characters(),
+  m_attackableEntities(),
+  m_levelInfo(NULL),
+  m_playerRespawnPosition(),
+  m_bossEntitySpawned(false)
 {
 }
 
@@ -91,25 +94,25 @@ VArray<RPG_DamageableEntity*> const& RPG_GameManager::GetAttackableEntities() co
   return m_attackableEntities;
 }
 
-VisBaseEntity_cl* RPG_GameManager::SpawnPlayer(const VString& prefabName)
+VisBaseEntity_cl* RPG_GameManager::SpawnPlayer(const VString& prefabName, hkvVec3 const& position, hkvVec3 const& orientation)
 {
-  VisBaseEntity_cl* entity = NULL;
+  VisBaseEntity_cl* playerEntity = CreateEntityFromPrefab(prefabName, position, orientation);
 
-  if(m_levelInfo)
+  if(playerEntity)
   {
-      RPG_PlayerSpawnPoint* playerSpawnPoint = m_levelInfo->GetInitialPlayerSpawnPoint();
+    RPG_PlayerControllerComponent *const playerController = static_cast<RPG_PlayerControllerComponent*>
+      (playerEntity->Components().GetComponentOfBaseType(V_RUNTIME_CLASS(RPG_PlayerControllerComponent)));
 
-      if(playerSpawnPoint)
-      {
-        entity = CreateEntityFromPrefab(prefabName, playerSpawnPoint->GetPosition(), playerSpawnPoint->GetOrientation());
-      }
-      else
-      {
-        entity = CreateEntityFromPrefab(prefabName, hkvVec3(0.0f, 0.0f, 0.0f), hkvVec3(0.0f, 0.0f, 0.0f));
-      }
+    VASSERT(playerController);
+    if(playerController)
+    {
+      RPG_PlayerUI::s_instance.SetController(playerController);
+    }
+
+    m_playerEntity = playerEntity->GetWeakReference();
   }
 
-  return entity;
+  return playerEntity;
 }
 
 /// RPG CreateEntity Function. 
@@ -180,7 +183,7 @@ VisBaseEntity_cl* RPG_GameManager::CreateEntityFromPrefab(const VString& prefabN
 
     prefab->Instantiate(info);
 
-    VisBaseEntity_cl* entity = static_cast<VisBaseEntity_cl*>(info.m_Instances[0]);
+    VisBaseEntity_cl* entity = vstatic_cast<VisBaseEntity_cl*>(info.m_Instances[0]);
 
     return entity;
   }
@@ -227,6 +230,15 @@ const VString& RPG_GameManager::GetFmodEventProject() const
   return FMOD_EVENT_PROJECT;
 }
 
+void RPG_GameManager::SetBossEntity(VisBaseEntity_cl *const bossEntity)
+{
+  if(bossEntity)
+  {
+    m_bossEntitySpawned = true;
+    m_bossEntity = bossEntity->GetWeakReference();
+  }
+}
+
 RPG_Effect* RPG_GameManager::CreateEffect(RPG_EffectDefinition const& effectDefinition, VisBaseEntity_cl* parentEntity)
 {
   RPG_Effect* effect = static_cast<RPG_Effect*>(CreateEntity("RPG_Effect", hkvVec3()));
@@ -245,8 +257,6 @@ void RPG_GameManager::OnBeforeSceneLoaded(char const *sceneFileName)
 {
   m_sceneFileName = sceneFileName;
 
-  Vision::Callbacks.OnUpdateSceneBegin += this;
-
   // Add our own Havok Behavior world listener in order to listen to Behavior events
   vHavokBehaviorModule *const havok_behavior_module = vHavokBehaviorModule::GetInstance();
   {
@@ -256,6 +266,8 @@ void RPG_GameManager::OnBeforeSceneLoaded(char const *sceneFileName)
 
 void RPG_GameManager::OnAfterSceneLoaded()
 {
+  Vision::Callbacks.OnUpdateSceneBegin += this;
+
   RPG_RendererUtil::StoreViewParams(m_storedViewParams);
 
   // Set up game view params
@@ -270,19 +282,15 @@ void RPG_GameManager::OnAfterSceneLoaded()
 
   RPG_RendererUtil::LoadViewParams(viewParams);
 
-  // Local player
-  VisBaseEntity_cl* playerEntity = SpawnPlayer("Prefabs\\Demo_Player_Hero.vprefab");
-
-  if(playerEntity)
+  // Initial player spawn
+  if(m_levelInfo && m_levelInfo->GetInitialPlayerSpawnPoint())
   {
-    RPG_PlayerControllerComponent *const playerController = static_cast<RPG_PlayerControllerComponent*>
-      (playerEntity->Components().GetComponentOfBaseType(V_RUNTIME_CLASS(RPG_PlayerControllerComponent)));
-
-    VASSERT(playerController);
-    if(playerController)
-    {
-      RPG_PlayerUI::s_instance.SetController(playerController);
-    }
+    RPG_PlayerSpawnPoint const *const playerSpawnPoint = m_levelInfo->GetInitialPlayerSpawnPoint();
+    SpawnPlayer(PLAYER_PREFAB_NAME, playerSpawnPoint->GetPosition(), playerSpawnPoint->GetOrientation());
+  }
+  else
+  {
+    SpawnPlayer(PLAYER_PREFAB_NAME, hkvVec3::ZeroVector(), hkvVec3::ZeroVector());
   }
 }
 
@@ -296,6 +304,8 @@ void RPG_GameManager::OnBeforeSceneUnloaded()
 void RPG_GameManager::OnAfterSceneUnloaded()
 {
   m_sceneFileName = "";
+  
+  m_bossEntitySpawned = false;
 
   Vision::Callbacks.OnUpdateSceneBegin -= this;
 
@@ -307,8 +317,19 @@ void RPG_GameManager::OnAfterSceneUnloaded()
 
 void RPG_GameManager::OnUpdateSceneBegin()
 {
-  // TOOD: In a future release the HB world listener will be moved and updated inside the HB engine plugin
-  RPG_HavokBehaviorWorldListener::s_instance.SendEnqueuedNotifications();
+  if(!IsGameOver())
+  {
+    // Handle demo player
+    if(!m_playerEntity)
+    {
+      SpawnPlayer(PLAYER_PREFAB_NAME, m_playerRespawnPosition, hkvVec3::ZeroVector());
+    }
+    else
+    {
+      // Store the most recent player position for respawn
+      m_playerRespawnPosition = m_playerEntity->GetPosition();
+    }
+  }
 }
 
 void RPG_GameManager::OnHandleCallback(IVisCallbackDataObject_cl *callbackData)
@@ -342,7 +363,7 @@ void RPG_GameManager::OnHandleCallback(IVisCallbackDataObject_cl *callbackData)
 RPG_GameManager RPG_GameManager::s_instance;
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -65,7 +65,9 @@ class hkbRagdollUtils
 			hkReal newScaleFactor );
 
 			/// Set the characters animation skeleton to the clone of the incoming animation skeleton.
-		static void HK_CALL setAnimationSkeletonClone( hkbCharacter* character, hkaSkeleton* animationSkeleton );
+		static void HK_CALL setAnimationSkeletonClone(
+			hkbCharacter* character, 
+			const hkaSkeleton* animationSkeleton );
 
 			/// Given a ragdoll find all the rigid bodies with collision info that collides with the input collision info.
 		static void HK_CALL getRigidBodiesInRagdoll(
@@ -124,6 +126,72 @@ class hkbRagdollUtils
 			hkbRagdollController*& persistentControllerInOut );
 
 		//////////////////////////////////////////////////////////////////////////
+		// Deprecated Ragdoll Utility Functions
+		// Requires bridge be built with HKBP_DEPRECATED_PHYSICS_NODE_SUPPORT/HKBNP_DEPRECATED_PHYSICS_NODE_SUPPORT
+		//////////////////////////////////////////////////////////////////////////
+			
+			/// Compute the center-of-mass of a ragdoll bone given the pose.  Returns the mass.
+		static void HK_CALL computeRagdollBoneCenterOfMassFromModelPose(
+			int boneIndex,
+			hkbPhysicsInterface* physicsInterface,
+			const hkbRagdollInterface* ragdollInterface,
+			const hkQsTransform* modelPose, 
+			const hkQsTransform& worldFromModel, 
+			hkVector4& com );
+
+			/// Computes the center-of-mass of the ragdoll in the given model-space pose.  Returns the mass.
+		static hkReal HK_CALL computeRagdollCenterOfMassFromModelPose(
+			hkbPhysicsInterface* physicsInterface,
+			const hkbRagdollInterface* ragdollInterface,
+			const hkQsTransform* modelPose, 
+			const hkQsTransform& worldFromModel, 
+			hkVector4& com );
+
+			/// Computes the center-of-mass of a ragdoll subtree in the given model-space pose.  Returns the mass.
+		static hkReal HK_CALL computeRagdollSubtreeCenterOfMassFromModelPose(
+			int subtreeRootBoneIndex,
+			hkbPhysicsInterface* physicsInterface,
+			const hkbRagdollInterface* ragdollInterface,
+			const hkQsTransform* modelPose, 
+			const hkQsTransform& worldFromModel,
+			hkVector4& com );
+
+			/// Computes the center-of-mass of a bone (rigid body) in the given model-space pose.  The mass of this bone
+			/// is added to massAccumulator.  The COM of this bone is multiplied by its mass and then added to comAccumulator.
+			/// This function is useful for computing the center-of-mass of a set of bones, or an entire ragdoll.
+		static void HK_CALL accumulateRagdollBoneCenterOfMassFromModelPose(
+			int boneIndex,
+			hkbPhysicsInterface& physicsInterface,
+			const hkbRagdollInterface& ragdollInterface,
+			const hkQsTransform* modelPose,
+			const hkQsTransform& worldFromModel,
+			hkVector4& comAccumulator,
+			hkReal& massAccumulator );
+
+			/// Compute the goal center-of-mass, which lies along the line between the feet 
+			/// rigid body midpoint and the ankle midpoint.
+		static void HK_CALL computeRagdollBalancedCom(
+			hkbPhysicsInterface* physicsInterface,
+			const hkbRagdollInterface* ragdollInterface,
+			const hkQsTransform* ragdollPoseMS,
+			const hkQsTransform& worldFromModel,
+			int leftFootBoneIndex,
+			int rightFootBoneIndex,
+			hkReal balanceOnAnklesFraction,
+			hkVector4& goalCom );
+
+			/// Return the sum of the speeds (linear and angular) of the ragdoll rigid bodies.
+		static hkReal HK_CALL getRagdollRigidBodySpeedSum(
+			hkbPhysicsInterface* physicsInterface,
+			const hkbRagdollInterface* ragdollInterface );
+
+			/// Map an animation pose in local space to a ragdoll pose in model space.
+		static void HK_CALL mapAnimationPoseLocalToRagdollPoseModel(
+			const hkQsTransform* animPoseLocal, 
+			const hkaSkeletonMapper* animToRagdollMapper,
+			hkQsTransform* ragdollPoseModel );
+
+		//////////////////////////////////////////////////////////////////////////
 		// Deprecated Physics Implementation Specific Functions
 		// Must link against hkbPhysics2012Bridge
 		//////////////////////////////////////////////////////////////////////////
@@ -180,7 +248,7 @@ class hkbRagdollUtils
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

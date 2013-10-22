@@ -24,7 +24,7 @@ public:
 
 		/// Computes the path backwards from endKeyIn. Returns whether the array was big enough for all the keys.
 	static hkBool32 HK_CALL getPath(
-		const struct hkaiHashSearchStateBase& state, 
+		const struct hkaiHashSearchState& state, 
 		hkaiPackedKey endKeyIn, 
 		GetPathOptions options,
 		hkArray<hkaiPackedKey>& statesOut,
@@ -35,7 +35,7 @@ public:
 #endif // HKAI_ASTAR_SEARCHSTATE_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

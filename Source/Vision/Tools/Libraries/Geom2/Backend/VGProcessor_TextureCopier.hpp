@@ -39,23 +39,36 @@ public:
   ///
   /// \param p
   ///   Texture path
-  inline void             SetTexturePath(const VString& p)           { m_texturePath = p; }//@@@ test
+  inline void             SetTexturePath(const VString& p)           { m_texturePath = p; }
 
   /// \brief
   ///   Gets path processor use as target directory for textures (and to rewrite paths)
   ///
   /// \return
   ///   Texture path
-  inline const VString&   GetTexturePath() const throw()             { return m_texturePath; }//@@@ test
+  inline const VString&   GetTexturePath() const throw()             { return m_texturePath; }
 
+  /// \brief
+  ///   Sets whether the textures should be physically copied or not
+  ///
+  /// \param copy
+  ///   Texture path
+  inline void             SetCopy(bool copy)           { m_copy = copy; }
 
+  /// \brief
+  ///   Gets whether the textures should be physically copied or not
+  ///
+  /// \return
+  ///   Texture path
+  inline bool             GetCopy() const              { return m_copy; }
 
 private:
   VString m_texturePath;
+  bool m_copy;
 };
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

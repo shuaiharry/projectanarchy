@@ -96,19 +96,19 @@ class hkFreeListAllocator : public hkMemoryAllocator, public hkMemoryAllocator::
 		void init(hkMemoryAllocator* allocator, hkMemoryAllocator::ExtendedInterface* allocatorExtended, const Cinfo* info = HK_NULL);
 
 			// hkMemoryAllocator
-		virtual void* blockAlloc(int nbytes);
+		virtual void* blockAlloc(int nbytes) HK_OVERRIDE;
 
-		virtual void blockFree(void*, int nbytes);
+		virtual void blockFree(void*, int nbytes) HK_OVERRIDE;
 
-		virtual void* bufAlloc(int& reqNumInOut);
+		virtual void* bufAlloc(int& reqNumInOut) HK_OVERRIDE;
 
-		virtual void blockAllocBatch(void** blocksOut, int nblocks, int nbytes);
+		virtual void blockAllocBatch(void** blocksOut, int nblocks, int nbytes) HK_OVERRIDE;
 
-		virtual void blockFreeBatch(void** blocks, int nblocks, int nbytes);
+		virtual void blockFreeBatch(void** blocks, int nblocks, int nbytes) HK_OVERRIDE;
 
-		virtual int getAllocatedSize( const void* p, int nbytes);
+		virtual int getAllocatedSize( const void* p, int nbytes) const HK_OVERRIDE;
 
-		virtual void getMemoryStatistics( MemoryStatistics& u );
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
 
 		virtual void resetPeakMemoryStatistics();
 
@@ -191,7 +191,7 @@ class hkFreeListAllocator : public hkMemoryAllocator, public hkMemoryAllocator::
 #endif // HK_FREELIST_MEMORY
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

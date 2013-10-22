@@ -114,7 +114,7 @@ namespace VisionEditorPlugin.Shapes
     #region Engine Instance
 
     /// <summary>
-    /// Returns the engine instance as a EngineInstanceRenderTarget
+    /// Returns the engine instance as a EngineInstanceCubemapEntity
     /// </summary>
     [BrowsableAttribute(false)]
     public EngineInstanceCubemapEntity CubemapEntity {get {return (EngineInstanceCubemapEntity)_engineInstance;}}
@@ -139,14 +139,14 @@ namespace VisionEditorPlugin.Shapes
       if (_engineInstance==null)
         return;
       base.SetEngineInstanceBaseProperties();
-      CubemapEntity.SetCubemapKey(_key,_iSize);
-      CubemapEntity.SetUpdateParams(_bContinuousUpdate, _fUpdateInterval, _iUpdateCount, _bAlternate);
+      CubemapEntity.SetCubemapKey(GetHandleKey(), _key, _iSize);
+      CubemapEntity.SetUpdateParams(_bDynamicUpdate, _fUpdateInterval, _bAlternate);
       CubemapEntity.SetClipPlanes(_fNearClip, _fFarClip);
       CubemapEntity.SetRenderFilterMask((uint)_iRenderFilterMask);
       CubemapEntity.SetBlurPasses(_iPasses);
       CubemapEntity.SetAutoGenMipMaps(_bGenMipMaps);
       CubemapEntity.SetPreviewVisible(this.Selected || _bAlwaysVisible);
-      CubemapEntity.SetExportAsEntity(!IsFile);
+      CubemapEntity.SetExportAsEntity(_bDynamicUpdate);
       CubemapEntity.SetRenderingType(_eRenderingType);
 
       switch(_eRenderingType)
@@ -167,8 +167,7 @@ namespace VisionEditorPlugin.Shapes
 
     public override bool OnExport(CSharpFramework.Scene.SceneExportInfo info)
     {
-      if (this.SaveOnExport)
-        SaveToFile();
+      UpdateCubemap();
       return base.OnExport(info);
     }
 
@@ -212,16 +211,13 @@ namespace VisionEditorPlugin.Shapes
     /// <param name="context"></param>
     protected CubemapShape(SerializationInfo info, StreamingContext context) : base(info, context)
     {
-      _key = info.GetString("_key");
       _iSize = info.GetInt32("_iSize");
       if (SerializationHelper.HasElement(info,"_bGenMipMaps"))
         _bGenMipMaps = info.GetBoolean("_bGenMipMaps");
       if (SerializationHelper.HasElement(info,"_iPasses"))
         _iPasses = info.GetInt32("_iPasses");
       if (SerializationHelper.HasElement(info,"_bContinuousUpdate"))
-        _bContinuousUpdate = info.GetBoolean("_bContinuousUpdate");
-      if (SerializationHelper.HasElement(info,"_iUpdateCount"))
-        _iUpdateCount = info.GetInt32("_iUpdateCount");
+        _bDynamicUpdate = info.GetBoolean("_bContinuousUpdate");
       if (SerializationHelper.HasElement(info,"_fUpdateInterval"))
         _fUpdateInterval = info.GetSingle("_fUpdateInterval");
       if (SerializationHelper.HasElement(info, "_bAlternate"))
@@ -235,8 +231,6 @@ namespace VisionEditorPlugin.Shapes
     
       if (SerializationHelper.HasElement(info,"_bUpdateInEditor"))
         _bUpdateInEditor = info.GetBoolean("_bUpdateInEditor");
-      if (SerializationHelper.HasElement(info, "_bSaveOnExport"))
-        _bSaveOnExport = info.GetBoolean("_bSaveOnExport");
 
       if (SerializationHelper.HasElement(info, "_rendererConfig"))
         _rendererConfig = info.GetString("_rendererConfig");
@@ -249,6 +243,8 @@ namespace VisionEditorPlugin.Shapes
 
       if (SerializationHelper.HasElement(info, "_bAlwaysVisible"))
         _bAlwaysVisible = info.GetBoolean("_bAlwaysVisible");
+
+      _key = SanitizeKey(info.GetString("_key"));
 
 			AddHint(HintFlags_e.NoRotation);
       RemoveHint(HintFlags_e.NoScale);
@@ -266,8 +262,7 @@ namespace VisionEditorPlugin.Shapes
       info.AddValue("_iPasses", _iPasses);
       info.AddValue("_key", _key);
       info.AddValue("_iSize", _iSize);
-      info.AddValue("_bContinuousUpdate", _bContinuousUpdate);
-      info.AddValue("_iUpdateCount", _iUpdateCount);
+      info.AddValue("_bContinuousUpdate", _bDynamicUpdate);
       info.AddValue("_fUpdateInterval", _fUpdateInterval);
       info.AddValue("_bAlternate", _bAlternate);
       info.AddValue("_fNearClip", _fNearClip);
@@ -275,7 +270,6 @@ namespace VisionEditorPlugin.Shapes
       info.AddValue("_iRenderFilterMask", _iRenderFilterMask);
 
       info.AddValue("_bUpdateInEditor",_bUpdateInEditor);
-      info.AddValue("_bSaveOnExport", _bSaveOnExport);
 
       info.AddValue("_rendererConfig", _rendererConfig);
       info.AddValue("_eRenderingType", _eRenderingType);
@@ -285,41 +279,15 @@ namespace VisionEditorPlugin.Shapes
 
     #endregion
 
-    #region Relevant operations
-
-    static string RO_SAVETOFILE = "Save to file";
-
-    public override ArrayList RelevantOperations
-    {
-      get
-      {
-        ArrayList arr = base.RelevantOperations;
-        if (IsFile)
-        {
-          if (arr == null)
-            arr = new ArrayList(1);
-          arr.Add(RO_SAVETOFILE);
-        }
-        return arr;
-      }
-    }
+    #region Saving
 
     private void SaveToFile()
     {
-      if (CubemapEntity == null || !this.IsFile)
+      if (CubemapEntity == null || _bDynamicUpdate)
         return;
 
       string filename = this.Key; // not absolute
       CubemapEntity.SaveToFile(filename);
-    }
-
-    public override void PerformRelevantOperation(string name, int iShapeIndex, int iShapeCount)
-    {
-      base.PerformRelevantOperation(name, iShapeIndex, iShapeCount);
-      if (name == RO_SAVETOFILE)
-      {
-        SaveToFile();
-      }
     }
 
     #endregion
@@ -358,14 +326,6 @@ namespace VisionEditorPlugin.Shapes
       _hotSpotUpdate = null;
     }
 
-/*
-    public override void OnHotSpotEvaluatePosition(HotSpotBase hotSpot)
-    {
-      base.OnHotSpotEvaluatePosition (hotSpot);
-      if (hotSpot==_hotSpotUpdate)
-        _hotSpotUpdate.Position = this.Position;
-    }
-*/
     #endregion
 
     #region Members
@@ -375,9 +335,7 @@ namespace VisionEditorPlugin.Shapes
     string _key = "<cubemap>";
     int _iSize = 256;
     static bool _bUpdateInEditor = true;
-    bool _bContinuousUpdate = false;
-    bool _bSaveOnExport = true;
-    int _iUpdateCount = 0;
+    bool _bDynamicUpdate = true;
     float _fUpdateInterval = 0.0f;
     bool _bAlternate = false;
     float _fNearClip = -1.0f;
@@ -393,50 +351,80 @@ namespace VisionEditorPlugin.Shapes
     #region Properties
 
     /// <summary>
+    /// Determines whether the cubemap should be updated dynamically at run time, or be baked into a persistent texture file.
+    /// </summary>
+    [SortedCategory(CAT_CUBEMAP, CATORDER_CUBEMAP), PropertyOrder(0),
+    Description("Determines whether the cubemap should be updated dynamically at run time, or be baked into a persistent texture file.")]
+    public bool DynamicUpdate
+    {
+      get
+      {
+        return _bDynamicUpdate;
+      }
+      set
+      {
+        _bDynamicUpdate = value;
+
+        if (HasEngineInstance())
+        {
+          CubemapEntity.SetUpdateParams(_bDynamicUpdate, _fUpdateInterval, _bAlternate);
+          CubemapEntity.SetExportAsEntity(value);
+        }
+
+        // Reapply key to recreate the texture and make a valid filename if needed
+        Key = Key;
+      }
+    }
+
+    // Remove invalid chars and add .dds ending when saving to file
+    string SanitizeKey(string key)
+    {
+      if (!_bDynamicUpdate)
+      {
+        foreach (char c in Path.GetInvalidPathChars())
+        {
+          key = key.Replace(c.ToString(), "");
+        }
+        key = Path.ChangeExtension(key, ".dds");
+      }
+
+      return key;
+    }
+
+    /// <summary>
     /// Cubemap key that can be specified as a texture filename in shaders.
     /// </summary>
     [SortedCategory(CAT_CUBEMAP, CATORDER_CUBEMAP), PropertyOrder(1),
-    Description("Cubemap key that can be specified as a texture filename in shaders. If this key specifies a .dds filename, it can be saved to file manually or on export time.")]
+    Description("Cubemap key that can be specified as a texture filename in shaders.")]
     [TypeConverter(typeof(SceneObjectKeyConverter)), SceneObjectKeyType(IEngineManager.ObjectKeyType_e.Cubemap)]
     public string Key
     {
       get {return _key;}
       set 
       {
-        _key=value;
+        _key = SanitizeKey(value);
+
         if (HasEngineInstance())
         {
-          CubemapEntity.SetCubemapKey(_key,_iSize);
-          CubemapEntity.SetExportAsEntity(!IsFile);
+          CubemapEntity.SetCubemapKey(GetHandleKey(), _key, _iSize);
         }
+
+        UpdateCubemap();
       }
     }
 
-    [Description("Indicates whether the key specifies a .dds filename or not")]
-    [SortedCategory(CAT_CUBEMAP, CATORDER_CUBEMAP), PropertyOrder(10)]
-    public bool IsFile
+    // If we store the cubemap to a file, we need to have a separate key for the actual render target and the texture used by materials.
+    private string GetHandleKey()
     {
-      get
+      if (_bDynamicUpdate)
       {
-        return _key != null && _key.EndsWith(".dds", true, null);
+        return _key;
+      }
+      else
+      {
+        return "<" + _key + "_temp_RT>";
       }
     }
-
-
-    [Description("If the key specifies a target .dds file then this flag specifies whether the .dds should be saved at scene export time.")]
-    [SortedCategory(CAT_CUBEMAP, CATORDER_CUBEMAP), PropertyOrder(11), DefaultValue(true)]
-    public bool SaveOnExport
-    {
-      get
-      {
-        return _bSaveOnExport;
-      }
-      set
-      {
-        _bSaveOnExport = value;
-      }
-    }
-
 
     /// <summary>
     /// Edge size of the cubemap texture. Must be a power of 2.
@@ -451,25 +439,8 @@ namespace VisionEditorPlugin.Shapes
       {
         _iSize=value;
         if (HasEngineInstance())
-          CubemapEntity.SetCubemapKey(_key, _iSize);
+          CubemapEntity.SetCubemapKey(GetHandleKey(), _key, _iSize);
         UpdateCubemap();
-      }
-    }
-
-    /// <summary>
-    /// If true, the cubemap gets contiuously updated in the game which costs significant performance.
-    /// If false, the cubemap gets only rendered at creation time
-    /// </summary>
-    [SortedCategory(CAT_UPDATE, CATORDER_UPDATE), PropertyOrder(1),
-    Description("If true, the cubemap gets contiuously updated in the game which costs significant performance. If false, the cubemap gets only rendered at creation time"), DefaultValue(false)]
-    public bool ContinuousUpdate
-    {
-      get {return _bContinuousUpdate;}
-      set 
-      {
-        _bContinuousUpdate=value;
-        if (HasEngineInstance())
-          CubemapEntity.SetUpdateParams(_bContinuousUpdate, _fUpdateInterval, _iUpdateCount, _bAlternate);
       }
     }
 
@@ -485,7 +456,7 @@ namespace VisionEditorPlugin.Shapes
       {
         _fUpdateInterval=value;
         if (HasEngineInstance())
-          CubemapEntity.SetUpdateParams(_bContinuousUpdate, _fUpdateInterval, _iUpdateCount, _bAlternate);
+          CubemapEntity.SetUpdateParams(_bDynamicUpdate, _fUpdateInterval, _bAlternate);
       }
     }
 
@@ -501,23 +472,7 @@ namespace VisionEditorPlugin.Shapes
       {
         _bAlternate = value;
         if (HasEngineInstance())
-          CubemapEntity.SetUpdateParams(_bContinuousUpdate, _fUpdateInterval, _iUpdateCount, _bAlternate);
-      }
-    }
-
-    /// <summary>
-    /// If ContinuousUpdate is enabled, this defines the number of updates (0 for infinite count)
-    /// </summary>
-    [SortedCategory(CAT_UPDATE, CATORDER_UPDATE), PropertyOrder(4),
-    Description("If ContinuousUpdate is enabled, this defines the number of updates (0 for infinite count)"), DefaultValue(0)]
-    public int UpdateCount
-    {
-      get {return _iUpdateCount;}
-      set 
-      {
-        _iUpdateCount=value;
-        if (HasEngineInstance())
-          CubemapEntity.SetUpdateParams(_bContinuousUpdate, _fUpdateInterval, _iUpdateCount, _bAlternate);
+          CubemapEntity.SetUpdateParams(_bDynamicUpdate, _fUpdateInterval, _bAlternate);
       }
     }
 
@@ -717,27 +672,32 @@ namespace VisionEditorPlugin.Shapes
 
     #region IPropertyFlagsProvider Members
 
-    public override PropertyFlags_e GetPropertyFlags(PropertyFlagsProviderInfo pd)
+    public override PropertyFlags_e GetPropertyFlags(PropertyFlagsProviderInfo info)
     {
-      switch(_eRenderingType)
+      switch (info.Name)
       {
-        case EngineInstanceCubemapEntity.CubeMapRenderingType_e.Scene:
-          if(pd.Name == "RendererConfig" || pd.Name == "SpecularPower")
-            return PropertyFlags_e.Hidden;
-          break;
+        // Available only for renderer node type
+        case "RendererConfig":
+          return _eRenderingType == EngineInstanceCubemapEntity.CubeMapRenderingType_e.RendererNode ? PropertyFlags_e.None : PropertyFlags_e.Hidden;
 
-        case EngineInstanceCubemapEntity.CubeMapRenderingType_e.RendererNode:
-          if(pd.Name == "SpecularPower")
-            return PropertyFlags_e.Hidden;
-          break;
+        // Available only for specular type
+        case "SpecularPower":
+          return _eRenderingType == EngineInstanceCubemapEntity.CubeMapRenderingType_e.Specular ? PropertyFlags_e.None : PropertyFlags_e.Hidden;
 
-        case EngineInstanceCubemapEntity.CubeMapRenderingType_e.Specular:
-          if (pd.Name == "NearClipDistance" || pd.Name == "FarClipDistance" || pd.Name == "RendererConfig")
-            return PropertyFlags_e.Hidden;
-          break;
+        // Available for all except specular type
+        case "NearClipDistance":
+        case "FarClipDistance":
+          return _eRenderingType != EngineInstanceCubemapEntity.CubeMapRenderingType_e.Specular ? PropertyFlags_e.None : PropertyFlags_e.Hidden;
+
+        // Available only for dynamically updating cubemaps
+        case "UpdateInterval":
+        case "AlternatingFaceUpdate":
+        case "AutoGenerateMipmaps":
+          return _bDynamicUpdate ? PropertyFlags_e.None : PropertyFlags_e.Hidden;
+
+        default:
+          return base.GetPropertyFlags(info);
       }
-
-      return base.GetPropertyFlags(pd);
     }
 
     #endregion
@@ -749,8 +709,12 @@ namespace VisionEditorPlugin.Shapes
     /// </summary>
     public void UpdateCubemap()
     {
-      if (this._engineInstance!=null)
+      if (this._engineInstance != null)
+      {
         CubemapEntity.UpdateCubemap();
+        EditorManager.ActiveView.UpdateView(true);
+        SaveToFile();
+      }
       EditorManager.ActiveView.UpdateView(false);
     }
 
@@ -811,7 +775,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

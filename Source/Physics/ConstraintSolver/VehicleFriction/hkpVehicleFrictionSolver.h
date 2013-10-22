@@ -21,7 +21,7 @@ struct hkpVehicleFrictionSolverAxleParams
 	public:
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ACTION, hkpVehicleFrictionSolverAxleParams);
-		
+
 		/// Initializes all data members to default values.
 		inline void initialize();
 
@@ -43,7 +43,7 @@ struct hkpVehicleFrictionSolverAxleParams
 		hkpVelocityAccumulator* m_groundObjectAtLastIntegration;
 
 		//
-		// Friction Info: 
+		// Friction Info:
 		//  formula:   finalFriction = min( m_maxFrictionCoefficient, m_frictionCoefficient + slipVelocity * m_viscosityFrictionCoefficient );
 		//             maxForce = finalFriction * m_wheelDownForce
 		//
@@ -124,7 +124,7 @@ extern "C"
 #endif // HKP_VEHICLE_FRICTION_SOLVER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

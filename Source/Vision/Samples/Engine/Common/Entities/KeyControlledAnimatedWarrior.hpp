@@ -41,12 +41,15 @@ public:
   KeyControlledAnimatedWarrior_cl();
   ~KeyControlledAnimatedWarrior_cl();
 
-  VOVERRIDE void InitFunction();
-  VOVERRIDE void ThinkFunction();
+  virtual void InitFunction() HKV_OVERRIDE;
+  virtual void ThinkFunction() HKV_OVERRIDE;
   VISION_APIFUNC void SetInputStatus(bool bStatus);
   VISION_APIFUNC bool GetInputStatus();
   
-  inline VInputMap* GetInputMap() { return m_pInputMap; }
+  inline VInputMap* GetInputMap() 
+  { 
+    return m_pInputMap; 
+  }
 
 protected:
   VInputMap* m_pInputMap;
@@ -67,7 +70,7 @@ public:
 #endif  // KEYCONTROLLED_ANIMATEDCHARACTER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

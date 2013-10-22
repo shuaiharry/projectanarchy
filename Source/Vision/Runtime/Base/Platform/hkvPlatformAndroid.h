@@ -45,6 +45,9 @@
   #define SUPPORTS_GPU_DATA_UPLOAD
   #define SUPPORTS_FILESERVE_CLIENT
 
+  #define NEEDS_SHADER_SOURCE_PATCHER
+  #define SUPPORTS_DEBUG_SHADING
+
   #if !defined(_VR_GLES2)
     #define _VR_GLES2
   #endif
@@ -52,7 +55,7 @@
 #endif // HKVPLATFORMDEFINESANDROID_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

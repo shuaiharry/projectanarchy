@@ -35,6 +35,7 @@ HK_STRUCT(hkMassProperties)
 HK_STRUCT(hkMeshBoneIndexMapping)
 HK_STRUCT(hkMeshSection)
 HK_STRUCT(hkMeshSectionCinfo)
+HK_STRUCT(hkMeshTextureRawBufferDescriptor)
 HK_STRUCT(hkMultipleVertexBufferElementInfo)
 HK_STRUCT(hkMultipleVertexBufferLockedElement)
 HK_STRUCT(hkMultipleVertexBufferVertexBufferInfo)
@@ -45,7 +46,7 @@ HK_STRUCT(hkVertexFormat)
 HK_STRUCT(hkVertexFormatElement)
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

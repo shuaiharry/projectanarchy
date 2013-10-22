@@ -14,365 +14,13 @@
 #include <Vision/Runtime/Engine/Material/VisApiMaterialTemplateManager.hpp>
 #include <Vision/Runtime/Engine/Renderer/Texture/VisApiTextureManager.hpp>
 #include <Vision/Runtime/Engine/Renderer/Shader/VisApiShaderEffect.hpp>
+#include <Vision/Runtime/Engine/Renderer/Material/VisApiSurfaceTextureSet.hpp>
 #include <Vision/Runtime/Engine/System/VisApiCallbacks.hpp>
-
-class VisSurfaceTextureSet_cl;
-typedef VSmartPtr<VisSurfaceTextureSet_cl> VisSurfaceTextureSetPtr;
 
 class VisSurfaceLibrary_cl;
 typedef VSmartPtr<VisSurfaceLibrary_cl> VisSurfaceLibraryPtr;
 
 #define MAX_AUXILIARY_TEXTURES    128
-
-/// \brief
-///   Class that provides material textures for surfaces.
-/// 
-/// The VisSurface_cl class is derived from this class to inherit the material textures.
-/// 
-/// Furthermore, entities can replace material sets via the VisSurfaceTextureSet_cl class.
-/// 
-/// See VisBaseEntity_cl::SetCustomTextureSet
-class VisSurfaceTextures_cl
-{
-public:
-
-  /// \brief
-  ///   Constructor
-  VisSurfaceTextures_cl() : m_vLightmapScaleOfs(1.0f, 1.0f, 0.0f, 0.0f)
-  {
-    m_iIndex = 0;
-    m_spAuxiliaryTextures = NULL;
-    m_iAuxiliaryTextureCount = 0;
-  }
-
-  ~VisSurfaceTextures_cl()
-  {
-    V_SAFE_DELETE_ARRAY(m_spAuxiliaryTextures);
-  }
-
-  /// \brief Enum specifying the usage of a texture.
-  enum VTextureType_e
-  {
-    VTT_Diffuse,      ///< The texture is used as a diffuse color map.
-    VTT_NormalMap,    ///< The texture is used as a normal map.
-    VTT_SpecularMap   ///< The texture is used as a specular map.
-  };
- 
-  ///
-  /// @name Access Textures
-  /// @{
-  ///
-   
-  /// \brief
-  ///   Helper function to load and set a specific texture in this set.
-  VISION_APIFUNC void SetTextureFile (VTextureType_e eType, const char *pszFileName);
-
-  /// \brief
-  ///   Helper function to return the texture filename string (or NULL) of the texture in the specified texture slot.
-  VISION_APIFUNC const char *GetTextureFile(VTextureType_e eType) const;
-
-  /// \brief
-  ///   Sets a specific texture object in the passed slot (diffuse/normalmap/specularmap). If the diffuse texture is changed (VTT_Diffuse), then the texture animation instance is changed.
-  VISION_APIFUNC void SetTexture (VTextureType_e eType, VTextureObject *pTex);
-
-  /// \brief
-  ///   Return the texture object in the specified texture slot.
-  VISION_APIFUNC VTextureObject* GetTexture (VTextureType_e eType) const;
-
-
-  /// \brief
-  ///   Returns the file name of the base texture.
-  inline const char *GetBaseTexture() const
-  {
-    if (m_spDiffuseTexture)
-      return m_spDiffuseTexture->GetOriginalFilename();
-    return NULL;
-  }
-
-  /// \brief
-  ///   Returns the file name of the normal map texture.
-  inline const char *GetNormalMapTexture() const
-  {
-    if (m_spNormalMap)
-      return m_spNormalMap->GetOriginalFilename();
-    return NULL;
-  }
-
-
-  /// \brief
-  ///   Returns the file name of the specular texture.
-  inline const char *GetSpecularMapTexture() const
-  {
-    if (m_spSpecularMap)
-      return m_spSpecularMap->GetOriginalFilename();
-    return NULL;
-  }
-
-
-  /// \brief
-  ///   Returns a pointer to the base texture object that represents the diffuse base texture of the surface.
-  inline VTextureObject *GetBaseTextureObject() const 
-  {
-    return m_spDiffuseTexture;
-  }
-
-  /// \brief
-  ///   Sets the diffuse base texture on this material and creates a texture animation instance if the texture is animated.
-  VISION_APIFUNC void SetBaseTexture(VTextureObject *pTex);
-
-  /// \brief
-  ///   Returns a pointer to the texture object that represents the normal map texture of the
-  ///   surface.
-  inline VTextureObject *GetNormalMapTextureObject() const 
-  {
-    return m_spNormalMap;
-  }
-
-  /// \brief
-  ///   Returns the specular map texture object.
-  inline VTextureObject *GetSpecularMapTextureObject() const 
-  {
-    return m_spSpecularMap;
-  }
-
-
-  /// \brief
-  ///   Return the animation instance that is associated with the diffuse texture. If the diffuse texture is not animated, this function returns NULL.
-  VisTextureAnimInstance_cl *GetDiffuseTextureAnimation() const
-  {
-    return m_spDiffuseAnim;
-  }
-
-  /// \brief
-  ///   Returns the number of additional auxiliary textures associated with this material.
-  inline int GetAuxiliaryTextureCount() const {return m_iAuxiliaryTextureCount;}
-
-  /// \brief
-  ///   Returns the additional auxiliary texture with index iIndex. The index must be in valid
-  ///   range [0..GetAuxiliaryTextureCount()-1].
-  ///
-  /// \param iIndex
-  ///  The index of the auxiliary texture.
-  ///   
-  /// The return value can be NULL is no auxiliary texture was set at the given index.
-  VTextureObject *GetAuxiliaryTexture(int iIndex) const 
-  {
-    VASSERT(m_spAuxiliaryTextures!=NULL && iIndex>=0 && iIndex<m_iAuxiliaryTextureCount);
-    return m_spAuxiliaryTextures[iIndex];
-  }
-
-  /// \brief
-  ///   Allocates an array of iCount auxiliary textures for this material. See GetAuxiliaryTexture or SetAuxiliaryTexture.
-  ///
-  /// Auxiliary textures can be used to associate an arbitrary number of custom textures with a material without any hardcoded
-  /// semantic (e.g. specular). Since auxiliary textures can be addressed in shader texture samplers, this is a convenient way
-  /// to render geometry with identical shader setup but different texture sets.
-  /// Allocating a new array does not preserve the old array in this material.
-  ///
-  /// \param iCount
-  ///   new number of auxiliary textures. Can be 0
-  VISION_APIFUNC void AllocateAuxiliaryTextures(int iCount);
-
-  /// \brief
-  ///   Associates an auxiliary texture with this material. The index must be in valid range defined by GetAuxiliaryTextureCount (which is the number of allocated textures via AllocateAuxiliaryTextures).
-  void SetAuxiliaryTexture(int iIndex, VTextureObject *pTexture) const 
-  {
-    VASSERT(m_spAuxiliaryTextures!=NULL && iIndex>=0 && iIndex<m_iAuxiliaryTextureCount);
-    m_spAuxiliaryTextures[iIndex] = pTexture;
-  }
-
-  ///
-  /// @}
-  ///
-
-  /// \brief
-  ///   Implements the SerializeX function to serialize the content of this set.
-  VISION_APIFUNC void SerializeX( VArchive &ar );
-  V_DECLARE_SERIALX( VisSurfaceTextures_cl, VISION_APIFUNC );
-
-
-  /// \brief
-  ///   Assignment operator; assigns the texture smart pointers componentwise.
-  VisSurfaceTextures_cl &operator = (const VisSurfaceTextures_cl &other)
-  {
-    if(this == &other)
-      return *this;
-  
-    m_iIndex = other.m_iIndex;
-    m_spDiffuseTexture = other.m_spDiffuseTexture;
-    m_spNormalMap = other.m_spNormalMap;
-    m_spSpecularMap = other.m_spSpecularMap;
-    m_spModelLightmaps[0] = other.m_spModelLightmaps[0];
-    m_spModelLightmaps[1] = other.m_spModelLightmaps[1];
-    m_spModelLightmaps[2] = other.m_spModelLightmaps[2];
-    m_spModelLightmaps[3] = other.m_spModelLightmaps[3];
-    m_vLightmapScaleOfs = other.m_vLightmapScaleOfs;
-
-    //copy auxiliary textures
-    V_SAFE_DELETE_ARRAY(m_spAuxiliaryTextures);
-    m_iAuxiliaryTextureCount = other.m_iAuxiliaryTextureCount;
-    if (m_iAuxiliaryTextureCount>0)
-    {
-      int i;
-      m_spAuxiliaryTextures = new VTextureObjectPtr[m_iAuxiliaryTextureCount];
-      for (i=0;i<m_iAuxiliaryTextureCount;i++)
-        m_spAuxiliaryTextures[i] = other.m_spAuxiliaryTextures[i];
-    }
-
-
-    return *this;
-  }
-
-  /// \brief
-  ///   Get the 0-based index of this entry in the owner's list.
-  inline int GetIndex() const {return m_iIndex;}
-
-  /// \brief
-  ///   Internal function - do not use
-  inline void SetIndex(int iIndex) {m_iIndex=iIndex;}
-
-#ifdef SUPPORTS_SNAPSHOT_CREATION
-  /// \brief
-  ///   Gather relevant resource information that pOwner relies on. In this case, add all textures.
-  VISION_APIFUNC void GetDependencies(VResourceSnapshot &snapshot, VManagedResource *pOwner);
-#endif
-  int m_iIndex; // index
-
-  hkvVec4 m_vLightmapScaleOfs;               ///< xy = scale, zw = ofsset for uv => lightmap uv transform
-  VTextureObjectPtr m_spDiffuseTexture;      ///< the diffuse base texture of the material
-  VTextureObjectPtr m_spNormalMap;           ///< the normalmap texture of the material
-  VTextureObjectPtr m_spSpecularMap;         ///< the reflection map texture of the material
-  VTextureObjectPtr m_spModelLightmaps[4];   ///< 0: diffuse, 1-3: dot3 lightmaps
-
-  VisTextureAnimInstancePtr m_spDiffuseAnim; ///< texture animation instance for diffuse texture animation
-
-  short m_iAuxiliaryTextureCount;
-  VTextureObjectPtr *m_spAuxiliaryTextures;
-};
-
-
-/// \brief
-///   Provides an array of VisSurfaceTextures_cl instances to match the material set of a model.
-/// 
-/// An instance of this class can be used to override the model material textures on a per-entity basis; see VisBaseEntity_cl::SetCustomTextureSet.
-/// 
-/// Once a set is initialized for a model, each entry in the m_pSurfaceTextures array corresponds
-/// to a surface in the mesh, i.e. pSet->GetTextures(i) <-> pMesh->GetSurfacebyIndex(i).
-/// This has to be taken into account when modifying the replacement textures.
-class VisSurfaceTextureSet_cl : public IVSerializationProxyCreator, public VRefCounter
-{
-public:
-
-  /// \brief
-  ///   Constructor that initializes an empty set. Should not be used, use one of the other constructors instead.
-  VisSurfaceTextureSet_cl()
-  {
-    m_iSurfaceCount = 0;
-    m_pSurfaceTextureArray = NULL;
-    m_pSurfaceArray = NULL;
-    m_pSurfaceRefArray = NULL;
-  }
-
-  /// \brief
-  ///   Constructor that initializes this set with the mesh's surface array.
-  VISION_APIFUNC VisSurfaceTextureSet_cl(VBaseMesh *pModel, bool bCreateSrfInstances=false);
-
-  /// \brief
-  ///   Constructor that initializes this set with the entity model's surface array.
-  VISION_APIFUNC VisSurfaceTextureSet_cl(VisBaseEntity_cl *pEntity, bool bCreateSrfInstances=false);
-
-  /// \brief
-  ///   Constructor that initializes this set with the static mesh's surface array.
-  VISION_APIFUNC VisSurfaceTextureSet_cl(VisStaticMeshInstance_cl *pMeshInst);
-
-  /// \brief
-  ///   Destructor. Frees the allocated array.
-  VISION_APIFUNC VOVERRIDE ~VisSurfaceTextureSet_cl();
-
-  /// \brief
-  ///   Initializes this set with the mesh's surface array.
-  /// 
-  /// It allocates an array of VisSurfaceTextures_cl or VisSurface_cl instances using the same amount as the mesh surfaces.
-  /// Each array element gets properly cloned from the original mesh materials.
-  /// A set that has been created through this function can be used for functions VisBaseEntity_cl::SetCustomTextureSet or 
-  /// VisStaticMeshInstance_cl::SetCustomSurfaceSet. If used for static meshes, the bCreateSrfInstances parameter has to be true.
-  ///
-  /// \param pMesh
-  ///   Mesh to use.
-  ///
-  /// \param bCreateSrfInstances
-  ///   If true, an array of VisSurface_cl is created, an array of the lightweight parent class VisSurfaceTextures_cl otherwise.
-  ///   Static meshes can only work on VisSurface_cl so in this case true has to be passed here.
-  ///
-  /// \return
-  ///   true if successful.
-  VISION_APIFUNC bool CreateForMesh(VBaseMesh *pMesh, bool bCreateSrfInstances);
-
-  /// \brief
-  ///   Wrapper function for backwards compatibility. Simply calls CreateForMesh.
-  VISION_APIFUNC bool CreateForModel(VDynamicMesh *pMesh, bool bCreateSrfInstances=false);
-
-  /// \brief
-  ///   Implements the SerializeX function to serialize the content of this set.
-  VISION_APIFUNC void SerializeX( VArchive &ar );
-  V_DECLARE_SERIALX( VisSurfaceTextureSet_cl, VISION_APIFUNC );
-
-  /// \brief
-  ///   Implements IVSerializationProxyCreator.
-  VISION_APIFUNC VOVERRIDE IVSerializationProxy *CreateProxy();
-
-  /// \brief
-  ///   Internal name that is serialized and which can be used to identify a variant by name. Used by vForge.
-  VISION_APIFUNC void SetVariantName(const VString& sName)
-  {
-    m_sVariantName = sName;
-  }
-
-#ifdef SUPPORTS_SNAPSHOT_CREATION
-  /// \brief
-  ///   Gather relevant resource information that pOwner relies on. In this case, add all textures
-  ///   from all sets.
-  void GetDependencies(VResourceSnapshot &snapshot, VManagedResource *pOwner)
-  {
-    for (int i=0;i<m_iSurfaceCount;i++)
-      GetTextures(i)->GetDependencies(snapshot,pOwner);
-  }
-#endif
-
-  /// \brief
-  ///   Returns the number of allocated textures / surfaces in this set. This matches pMesh->GetSurfaceCount of the owner mesh.
-  int GetSurfaceCount() const
-  {
-    return m_iSurfaceCount;
-  }
-
-  /// \brief
-  ///   Returns the textures of surface with specified index, where index must be in valid range [0..GetSurfaceCount()-1].
-  VisSurfaceTextures_cl* GetTextures(int iIndex) const;
-
-  /// \brief
-  ///   Indicates whether the array has been allocated with VisSurface_cl instances, i.e. bCreateSrfInstances = true was passed during creation.
-  bool UsesSurfaces() const
-  {
-    return m_pSurfaceRefArray!=NULL;
-  }
-
-  /// \brief
-  ///   Returns the array as an array of VisSurface_cl instances. This function requires that UsesSurfaces() == true.
-  inline VisSurface_cl** AsSurfaceArray() const
-  {
-    VASSERT_MSG(UsesSurfaces(), "Must not call this function when UsesSurfaces indicates false");
-    return m_pSurfaceRefArray;
-  }
-
-protected:
-  void DeleteArray();
-  short m_iSurfaceCount; ///< Number of materials in this set. Automatically allocated by constructor
-  VisSurfaceTextures_cl *m_pSurfaceTextureArray;  ///< Pointer to the array of material textures. The array holds m_iSurfaceCount elements
-  VisSurface_cl *m_pSurfaceArray;  ///< Pointer to the array of surfaces. The array holds m_iSurfaceCount elements
-  VisSurface_cl **m_pSurfaceRefArray;  ///< Pointer to the array of surface pointers. The array holds m_iSurfaceCount elements
-  VString m_sVariantName;
-};
 
 /// \brief
 ///   Material class used by the Vision engine.
@@ -787,6 +435,20 @@ public:
   ///   Sets the parallax bias value.
   VISION_APIFUNC void  SetParallaxBias (float f) {m_fParallaxBias = f;}
 
+  /// \brief
+  ///   Returns whether paths are saved relative to their data directories instead of the material's owner location.
+  VISION_APIFUNC bool GetSavePathsDataDirectoryRelative() const
+  {
+    return m_bSavePathsDataDirectoryRelative;
+  }
+
+  /// \brief
+  ///   Sets whether paths are saved relative to their data directories instead of the material's owner location. Default is false.
+  VISION_APIFUNC void SetSavePathsDataDirectoryRelative(bool bSavePathsDataDirectoryRelative)
+  {
+    m_bSavePathsDataDirectoryRelative = bSavePathsDataDirectoryRelative;
+  }
+  
 
   ///
   /// @}
@@ -1178,10 +840,11 @@ private:
   UBYTE m_uiDeferredID;          ///< material ID that is written to G-Buffer in deferred rendering
 
   bool m_bCastStaticShadows;
-  UBYTE m_uiPassType; 
+  UBYTE m_uiPassType; ///< casted to VPassType_e with VPT_Undefined=AUTO
   UBYTE m_uiResolvedPassType; ///< casted to VPassType_e, automatically detected pass type using force, transparency and shader settings
   bool m_bDoubleSided;
   bool m_bDepthWrite;
+  bool m_bSavePathsDataDirectoryRelative;
   UBYTE m_uiGeometryTopology;    ///< casted to VGeometryTopology_e
 
   float m_fSpecMul;     ///<specular multiplier
@@ -1291,7 +954,7 @@ inline VisSurfaceTextures_cl* VisSurfaceTextureSet_cl::GetTextures(int iIndex) c
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

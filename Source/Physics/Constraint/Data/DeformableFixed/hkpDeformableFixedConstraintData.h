@@ -17,10 +17,10 @@ class hkpDeformableFixedConstraintData : public hkpConstraintData
 {
 	public:
 
-		enum 
+		enum
 		{
 			SOLVER_RESULT_LIN_0	= 0,	// Linear constraint 0
-			SOLVER_RESULT_LIN_1	= 1,	// Linear constraint 1 
+			SOLVER_RESULT_LIN_1	= 1,	// Linear constraint 1
 			SOLVER_RESULT_LIN_2	= 2,	// Linear constraint 2
 			SOLVER_RESULT_ANG_0	= 3,	// Angular constraint 0
 			SOLVER_RESULT_ANG_1	= 4,	// Angular constraint 1
@@ -55,18 +55,22 @@ class hkpDeformableFixedConstraintData : public hkpConstraintData
 		};
 
 	public:
-		
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
 		/// Constructor
 		hkpDeformableFixedConstraintData();
 
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor
 		hkpDeformableFixedConstraintData(hkFinishLoadedObjectFlag f)
-			:	hkpConstraintData(f)
-			,	m_atoms(f)
+		:	hkpConstraintData(f)
+		,	m_atoms(f)
 		{}
+
+#endif
 
 		/// Sets the construction information with body space information.
 		/// \param pivotA The constraint pivot, specified in bodyA's space.
@@ -79,7 +83,7 @@ class hkpDeformableFixedConstraintData : public hkpConstraintData
 		/// \param bodyB The second rigid body transform
 		/// \param pivot The constraint pivot, specified in world space.
 		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, const hkTransform& pivotA, const hkTransform& pivotB);
-		
+
 		/// Sets the maximum distance
 		HK_FORCE_INLINE void setLinearLimit(hkReal maxDistance);
 
@@ -103,7 +107,7 @@ class hkpDeformableFixedConstraintData : public hkpConstraintData
 		//
 		// hkpConstraintData implementation
 		//
-		
+
 		virtual int getType() const;
 
 		virtual hkBool isValid() const;
@@ -111,10 +115,10 @@ class hkpDeformableFixedConstraintData : public hkpConstraintData
 		virtual void getConstraintInfo( hkpConstraintData::ConstraintInfo& infoOut ) const;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
+
 	public:
-		
-		HK_ALIGN_REAL( Atoms m_atoms );		
+
+		HK_ALIGN_REAL( Atoms m_atoms );
 };
 
 #include <Physics/Constraint/Data/DeformableFixed/hkpDeformableFixedConstraintData.inl>
@@ -123,7 +127,7 @@ class hkpDeformableFixedConstraintData : public hkpConstraintData
 #endif	// HKP_DEFORMABLE_FIXED_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

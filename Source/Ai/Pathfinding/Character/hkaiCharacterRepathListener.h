@@ -10,6 +10,7 @@
 
 #include <Ai/Pathfinding/Character/hkaiCharacter.h>
 #include <Ai/Pathfinding/World/hkaiWorld.h>
+#include <Common/Base/Container/BitField/hkBitField.h>
 
 class hkaiBehavior;
 
@@ -30,7 +31,7 @@ public:
 	void navMeshInstanceRemoved( const class hkaiWorld* world, hkaiNavMeshInstance* navMeshInstance, hkaiDirectedGraphInstance* hierarchyGraph  );
 
 		/// Given a list of AI behaviors, determine which behaviors' paths overlap with cut faces or unloaded sections.
-	void collideFacesAgainstPaths(const hkaiStreamingCollection* collection, const hkArrayBase<hkaiBehavior*>& behaviors, hkBitField& indicesToRepathOut) const;
+	void collideFacesAgainstPaths(const hkaiStreamingCollection* collection, const hkArrayBase<hkaiBehavior*>& behaviors, hkLocalBitField& indicesToRepathOut) const;
 
 	inline void setPathDistanceHorizon( hkReal d ) { m_pathDistanceHorizon = d; }
 	inline hkReal getPathDistanceHorizon() const { return m_pathDistanceHorizon; }
@@ -57,7 +58,7 @@ protected:
 #endif // HK_AI_CHARACTER_REPATH_LISTENER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

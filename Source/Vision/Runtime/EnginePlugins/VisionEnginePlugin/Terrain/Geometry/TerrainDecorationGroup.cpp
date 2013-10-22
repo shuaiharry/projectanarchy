@@ -81,7 +81,7 @@ void VTerrainDecorationGroup::SetFarClipDistance(float fFar)
   if (fFar<=0.f)
     SetClipMode(VIS_LOD_TEST_NONE);
   else
-    SetClipMode(VIS_LOD_TEST_BOUNDINGBOX|VIS_LOD_TEST_APPLYLODSCALING);
+    SetClipMode(VIS_LOD_TEST_BOUNDINGBOX);
   CalcMax3DDistance();
 }
 
@@ -256,6 +256,10 @@ void VTerrainDecorationGroup::RenderVisibleInstancesToShadowMap(IVisVisibilityCo
     return;
 
   m_Instances.m_pInstances[0].m_spModel->RenderBatch(NULL, g_VisibleInstances.GetDataPtr(), iInstCount);
+
+#if defined(_VR_DX11)
+  VisRenderStates_cl::SetVSConstantBuffer(VTERRAIN_CB_DECOMODEL, NULL);
+#endif
 }
 
 
@@ -765,7 +769,7 @@ void VTerrainDecorationGroupManager::OnHandleCallback(IVisCallbackDataObject_cl 
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

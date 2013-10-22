@@ -215,6 +215,7 @@
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.ShowInTaskbar = false;
       this.Name = "BatchExportDlg";
       this.Text = "Batch export";
       this.Load += new System.EventHandler(this.BatchExportDlg_Load);

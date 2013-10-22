@@ -10,7 +10,7 @@
 
 #include <Ai/Pathfinding/NavMesh/hkaiNavMeshUtils.h>
 #include <Common/Base/Algorithm/Collide/1AxisSweep/hk1AxisSweep.h>
-#include <Ai/Internal/NavMesh/hkaiNavMeshGenerationSettings.h>
+#include <Ai/Internal/NavMesh/hkaiNavMeshEdgeMatchingParams.h>
 
 class hkAabb;
 class hkaiNavMeshQueryMediator;
@@ -61,7 +61,7 @@ class hkaiStreamingUtils
 			hkVector4 m_up;
 
 				/// Edge matching parameters used to determine whether edges can be connected.
-			hkaiNavMeshGenerationSettings::EdgeMatchingParameters m_edgeMatchingParams;
+			hkaiNavMeshEdgeMatchingParameters m_edgeMatchingParams;
 
 				/// Mesh-to-world transform for the first mesh.
 			hkTransform	m_transformA;
@@ -91,7 +91,7 @@ class hkaiStreamingUtils
 #endif // HKAI_STREAMING_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

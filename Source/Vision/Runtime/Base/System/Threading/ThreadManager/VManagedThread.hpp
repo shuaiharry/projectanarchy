@@ -96,7 +96,11 @@ public:
 
   VBASE_IMPEXP void Start();
 
-  bool IsIdle() const { return m_pTask == NULL; }
+  bool IsIdle()
+  {
+    VMutexLocker locker(m_TaskMutex);
+    return m_pTask == NULL;
+  }
   inline bool IsSignaled() const { return m_bSignaled; }
   //bool IsLocked() const { return m_bIsLocked; }
 
@@ -146,6 +150,8 @@ private:
   friend class VThreadManager;
   volatile unsigned int m_iTaskMask;
 
+  VMutex m_TaskMutex;
+
 #if defined (WIN32)  || defined (_VISION_XENON) 
   DynArray_cl<void * volatile> m_pLocalScratchHeaps;
   DynArray_cl<volatile unsigned int> m_iScratchHeapSizes;
@@ -181,7 +187,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

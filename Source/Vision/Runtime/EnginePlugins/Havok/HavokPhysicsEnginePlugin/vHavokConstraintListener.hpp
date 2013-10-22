@@ -8,11 +8,6 @@
 
 /// \file vHavokConstraintListener.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
-
 #ifndef VHAVOKCONSTRAINTLISTENER_HPP_INCLUDED
 #define VHAVOKCONSTRAINTLISTENER_HPP_INCLUDED
 
@@ -31,40 +26,45 @@ class vHavokConstraintListener;
 ///
 struct vHavokConstraintBreakInfo_t
 {
-  vHavokConstraint *m_pConstraint; ///< The constraint that has been broken
-  hkReal m_fImpulse;                ///< Actual impulse that broke the constraint
+  vHavokConstraint *m_pConstraint;  ///< The constraint that has been broken.
+  hkReal m_fImpulse;                ///< Actual impulse that broke the constraint.
 };
 
 /// \brief
-///   Helper class for vHavok event handling - internal use only!
+///   Helper class for vHavokPhysics event handling - internal use only.
 ///
 class vHavokConstraintBreakListenerProxy : public hkpConstraintListener
 {
 public:
 	vHavokConstraintBreakListenerProxy() { }
-	void setOwner(vHavokConstraintListener* o ) { m_owner = o; }
+
+	inline void setOwner(vHavokConstraintListener* o) { m_owner = o; }
+
 	virtual void constraintBreakingCallback(const hkpConstraintBrokenEvent &event);
+
 	vHavokConstraintListener* m_owner;
 };
 
-
 /// 
 /// \brief
-///    Class that implements the hkpConstraintListener Interface, which notifies
+///    Class that implements the hkpConstraintListener Interface which gets notified
 ///    about constraint events.
 ///
-/// The Havok constraint listener is added to the Havok world to provide notification
-/// to other parts of the Havok plugin when a constraint event occurs.
+/// The Havok Physics constraint listener is added to the Havok Physics world to 
+/// provide notification of other parts of the Havok Physics engine plugin when a 
+/// constraint event occurs.
 ///
-class vHavokConstraintListener : 
-	public VRefCounter
+class vHavokConstraintListener : public VRefCounter
 {
 public:
-
+  ///
   /// @name Constructor / Destructor
-  // @{
+  /// @{
+  ///
+
   /// \brief
   ///   Constructor of the Havok Contact Listener.
+  ///
   /// \param pPhysicsWorld
   ///   Pointer to the Havok physics world this listener is added to.
   vHavokConstraintListener(hkpWorld* pPhysicsWorld);  
@@ -72,15 +72,28 @@ public:
   /// \brief
   ///   Destructor.
   ~vHavokConstraintListener();
-  //@}
 
+  ///
+  /// @}
+  ///
 
-  /// @name hkpConstraintListener Virtual Overrides
-  //@{
+  ///
+  /// @name hkpConstraintListener events
+  /// @{
+  ///
+
   /// \brief
   ///   Called by Havok when a constraint gets broken.
-  VOVERRIDE void constraintBreakingCallback(const hkpConstraintBrokenEvent &event);
-  //@}
+  ///
+  /// \param event
+  ///   Object containing information about the break event.
+  ///
+  /// Forwarded by vHavokConstraintBreakListenerProxy.
+  virtual void constraintBreakingCallback(const hkpConstraintBrokenEvent &event);
+
+  ///
+  /// @}
+  ///
 
   vHavokConstraintBreakListenerProxy m_listener;
 };
@@ -88,7 +101,7 @@ public:
 #endif // VHAVOKCONSTRAINTLISTENER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -44,10 +44,10 @@ class hkSolverAllocator : public hkMemoryAllocator
             /// Dtor
         virtual ~hkSolverAllocator();
 
-		virtual void* blockAlloc( int numBytes );
-		virtual void blockFree( void* p, int numBytes );
-		virtual void* bufAlloc( int& reqNumInOut );
-		virtual void bufFree( void* p, int num );
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
+		virtual void* bufAlloc( int& reqNumInOut ) HK_OVERRIDE;
+		virtual void bufFree( void* p, int num ) HK_OVERRIDE;
 
 		bool canAllocSingleBlock( int numBytes );
 
@@ -60,10 +60,10 @@ class hkSolverAllocator : public hkMemoryAllocator
 			int m_size;
 		};
 
-		int getBufferSize() { return int(m_bufferEnd-m_bufferStart); }
+		int getBufferSize() const { return int(m_bufferEnd-m_bufferStart); }
 
-		virtual void getMemoryStatistics( hkMemoryAllocator::MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes){ return nbytes; }
+		virtual void getMemoryStatistics( hkMemoryAllocator::MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE { return nbytes; }
 
 		virtual void resetPeakMemoryStatistics();
 
@@ -77,7 +77,7 @@ class hkSolverAllocator : public hkMemoryAllocator
 
 		hkArrayBase<Element> m_freeElems;
 		Element m_elemsBuf[64]; // max 64 simultaneous allocations and threads
-		hkCriticalSection m_criticalSection;
+		mutable hkCriticalSection m_criticalSection;
 
 	private:
 
@@ -87,7 +87,7 @@ class hkSolverAllocator : public hkMemoryAllocator
 #endif // HK_SOLVER_ALLOCATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

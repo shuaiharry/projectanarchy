@@ -80,7 +80,7 @@ public:
   ///
   SCRIPT_IMPEXP void ReloadAndReplace(char* pNewContent = NULL);
 
-  SCRIPT_IMPEXP virtual void UnloadAndReload(BOOL bUnload, BOOL bReload) HKV_OVERRIDE;
+  SCRIPT_IMPEXP virtual void UnloadAndReload(VUnloadReloadOptions_e eOptions) HKV_OVERRIDE;
 
  // VString m_sScriptText; // we don't need the script text outside Reload()
  // int m_iScriptLen;
@@ -96,7 +96,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

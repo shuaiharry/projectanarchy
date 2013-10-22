@@ -10,6 +10,8 @@
 #include <Common/Base/Config/hkProductFeatures.h>
 #include <Common/Serialize/Version/hkVersionPatchManager.h>
 #include <Common/Compat/hkHavokVersions.h>
+#include <Common/Base/Config/hkOptionalComponent.h>
+
 
 // HK_SERIALIZE_MIN_COMPATIBLE_VERSION can be used to define which is the oldest
 // compatible version of Havok assets. Removing compatibility with older versions
@@ -48,7 +50,7 @@ void HK_CALL hkProductFeatures::initialize()
 //
 #if 1
 	#if !defined(HK_EXCLUDE_FEATURE_SerializeDeprecatedPre700)
-		hkFeature_serializeDeprecatedPre700();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkSerializeDeprecated);
 	#endif
 
 	#if defined(HK_MEMORY_TRACKER_ENABLE) && !defined(HK_EXCLUDE_FEATURE_MemoryTracker)
@@ -72,43 +74,47 @@ void HK_CALL hkProductFeatures::initialize()
 //
 #ifdef HK_FEATURE_PRODUCT_PHYSICS_2012
 	#if !defined(HK_EXCLUDE_FEATURE_hkpHeightField)
-		hkpHeightFieldAgent_registerSelf();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpHeightFieldAgent);
 	#endif
 
 	#if !defined(HK_EXCLUDE_FEATURE_hkpSimulation)
-		hkpSimulation_registerSelf();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpSimulation);
 	#endif
 
 	#if !defined(HK_EXCLUDE_FEATURE_hkpContinuousSimulation)
-		hkpContinuousSimulation_registerSelf();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpContinuousSimulation);
 	#endif
 
 	#if (HK_CONFIG_THREAD != HK_CONFIG_SINGLE_THREADED)
 		#if !defined(HK_EXCLUDE_FEATURE_hkpMultiThreadedSimulation)
-			hkpMultiThreadedSimulation_registerSelf();
+			HK_OPTIONAL_COMPONENT_REQUEST(hkpMultiThreadedSimulation);
 		#endif
 	#endif
 
 	#if !defined(HK_EXCLUDE_FEATURE_hkpAccurateInertiaTensorComputer)
-		hkpAccurateInertiaTensorComputer_registerSelf();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpAccurateInertiaTensorComputer);
 	#endif
 
 	#if !defined(HK_EXCLUDE_FEATURE_hkp3AxisSweep)
-		hkp3AxisSweep_registerSelf();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkp3AxisSweep);
 	#endif
 
 	#if !defined(HK_EXCLUDE_FEATURE_hkpTreeBroadPhase)
-		hkpTreeBroadPhase_registerSelf();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpTreeBroadPhase);
+	#endif
+
+	#if !defined(HK_EXCLUDE_FEATURE_hkpTreeBroadPhase32)
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpTreeBroadPhase32);
 	#endif
 
 	#if defined(HK_EXCLUDE_FEATURE_hkpSampledHeightFieldDdaRayCast) && defined (HK_EXCLUDE_FEATURE_hkpSampledHeightFieldCoarseTreeRayCast)
 		// Do nothing, the function pointers are set to null.	
 	#elif defined(HK_EXCLUDE_FEATURE_hkpSampledHeightFieldDdaRayCast)
-		hkpSampledHeightField_registerCoarseTreeRayCastFunction();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpSampledHeightFieldShape_CoarseCast);
 	#elif defined(HK_EXCLUDE_FEATURE_hkpSampledHeightFieldCoarseTreeRayCast)
-		hkpSampledHeightField_registerDdaRayCastFunction();	
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpSampledHeightFieldShape_DdaCast);	
 	#else
-		hkpSampledHeightField_registerAllRayCastFunctions();
+		HK_OPTIONAL_COMPONENT_REQUEST(hkpSampledHeightField_AllCasts);
 	#endif
 #endif // HK_FEATURE_PRODUCT_PHYSICS_2012
 
@@ -116,65 +122,8 @@ void HK_CALL hkProductFeatures::initialize()
 // Destruction
 //
 #if defined(HK_FEATURE_PRODUCT_DESTRUCTION_2012) && !defined(HK_EXCLUDE_FEATURE_DestructionRuntime)
-	#if !defined(HK_EXCLUDE_FEATURE_hkdCutoutFracture_runtimeFracture)
-		hkdCutoutFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdDecomposeFracture_runtimeFracture)
-		hkdDecomposeFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdPieFracture_runtimeFracture)
-		hkdPieFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdRandomSplitFracture_runtimeFracture)
-		hkdRandomSplitFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdScriptedFracture_runtimeFracture)
-		hkdScriptedFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdSliceFracture_runtimeFracture)
-		hkdSliceFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdSplitInHalfFracture_runtimeFracture)
-		hkdSplitInHalfFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdVoronoiFracture_runtimeFracture)
-		hkdVoronoiFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdWoodFracture_runtimeFracture)
-		hkdWoodFractureRuntimeFracture_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdDecorateFractureFaceAction_filterPipeline)
-		hkdDecorateFractureFaceActionImpl_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdConvexDecompositionAction_filterPipeline)
-		hkdConvexDecompositionActionImpl_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdDecalMapAction_filterPipeline)
-		hkdDecalMapActionImpl_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdFractureUtilRetriangulateRecursively)
-		hkdFractureUtilRetriangulateRecursively_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdGlueFixedPiecesAction_filterPipeline)
-		hkdGlueFixedPiecesActionImpl_registerSelf();
-	#endif
-
-	#if !defined(HK_EXCLUDE_FEATURE_hkdSplitByPhysicsIslandsAction_filterPipeline)
-		hkdSplitByPhysicsIslandsActionImpl_registerSelf();
-	#endif
+	extern void HK_CALL registerDestructionRuntime();
+	registerDestructionRuntime();
 #endif
 }
 
@@ -202,7 +151,7 @@ void HK_CALL hkProductFeatures::initialize()
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

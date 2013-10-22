@@ -21,9 +21,16 @@
 class hkbGenerator;
 
 // commands
+extern const class hkClass hkbSimulationControlCommandClass;
 extern const class hkClass hkbCharacterControlCommandClass;
 extern const class hkClass hkbRaiseEventCommandClass;
+extern const class hkClass hkbSetSelectedCharacterCommandClass;
 extern const class hkClass hkbSetWordVariableCommandClass;
+extern const class hkClass hkbSetLocalTimeOfClipGeneratorCommandClass;
+extern const class hkClass hkbSetBehaviorCommandClass;
+extern const class hkClass hkbSetNodePropertyCommandClass;
+extern const class hkClass hkbRebuildScriptsCommandClass;
+extern const class hkClass hkbCameraVariablesChangedCommandClass;
 
 // infos
 extern const class hkClass hkbActiveNodesInfoClass;
@@ -416,8 +423,7 @@ class hkbBehaviorInfo : public hkReferencedObject
 				/// Type of object in the Animation Tool.
 			hkEnum<hkbToolNodeType::NodeType, hkUint16> m_toolType;
 				/// The SDK unique id of the node
-			hkInt16 m_id;
-
+			hkUint16 m_id;
 		};
 
 		hkUint64 m_characterId;
@@ -573,7 +579,7 @@ class hkbCharacterSelectedInfo: public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

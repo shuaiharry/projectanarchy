@@ -58,9 +58,9 @@ void hkaBlender::blend( hkQsTransform* HK_RESTRICT dst, hkReal* HK_RESTRICT weig
 
 void hkaBlender::mul( hkReal* HK_RESTRICT dst, const hkReal* HK_RESTRICT srcL, const hkReal* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x0cfb4e7f, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x0efb3b2e, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x18d6b5c3, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x0cfb4e7f, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x0efb3b2e, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x18d6b5c3, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	// Treat the multiples of 16 as hkVector4 in batches of 4
 	// handle the rest as individual hkVector4 in batches of 1
@@ -79,15 +79,15 @@ void hkaBlender::mul( hkReal* HK_RESTRICT dst, const hkReal* HK_RESTRICT srcL, c
 
 	for ( int i = 0; i < num4; ++i )
 	{
-		dstp[ i ].setMul4( srcLp[ i ], srcRp[ i ] );
+		dstp[ i ].setMul( srcLp[ i ], srcRp[ i ] );
 	}		
 }
 
 void hkaBlender::mul( hkVector4* HK_RESTRICT dst, const hkVector4* HK_RESTRICT srcL, const hkVector4* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x1e9b8626, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x1a68a9c8, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x16035782, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x1e9b8626, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x1a68a9c8, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x16035782, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -108,9 +108,9 @@ void hkaBlender::mul( hkVector4* HK_RESTRICT dst, const hkVector4* HK_RESTRICT s
 
 void hkaBlender::mul( hkQuaternion* HK_RESTRICT dst, const hkQuaternion* HK_RESTRICT srcL, const hkQuaternion* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x0eb9ae52, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x0b0191f5, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x060c16cf, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x0eb9ae52, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x0b0191f5, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x060c16cf, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -131,9 +131,9 @@ void hkaBlender::mul( hkQuaternion* HK_RESTRICT dst, const hkQuaternion* HK_REST
 
 void hkaBlender::mul( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_RESTRICT srcL, const hkQsTransform* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x07363922, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x037e1cc6, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x01035f33, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x07363922, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x037e1cc6, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x01035f33, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	
 	const int num = ( n + 3 ) / 4;
@@ -155,9 +155,9 @@ void hkaBlender::mul( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_RE
 
 void hkaBlender::mulInv( hkQuaternion* HK_RESTRICT dst, const hkQuaternion* HK_RESTRICT srcL, const hkQuaternion* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x0eb9ae52, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x0b0191f5, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x060c16cf, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x0eb9ae52, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x0b0191f5, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x060c16cf, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -178,9 +178,9 @@ void hkaBlender::mulInv( hkQuaternion* HK_RESTRICT dst, const hkQuaternion* HK_R
 
 void hkaBlender::mulInv( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK_RESTRICT srcL, const hkQsTransform* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x07363922, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x037e1cc6, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x01035f33, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x07363922, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x037e1cc6, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x01035f33, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -201,7 +201,7 @@ void hkaBlender::mulInv( hkQsTransform* HK_RESTRICT dst, const hkQsTransform* HK
 
 void HK_CALL hkaBlender::normalize( hkQuaternion* quaternionsInOut, int n )
 {
-	HK_ASSERT2( 0x05864e6a, ( hkUlong( quaternionsInOut ) & 0x0F ) == 0, "Input must be 16 byte aligned" );
+	HK_ASSERT2( 0x05864e6a, ( hkUlong( quaternionsInOut ) & (HK_REAL_ALIGNMENT-1) ) == 0, "Input must be aligned for SIMD" );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -219,7 +219,7 @@ void HK_CALL hkaBlender::normalize( hkQuaternion* quaternionsInOut, int n )
 
 void HK_CALL hkaBlender::normalize( hkQsTransform* transformsInOut, int n )
 {
-	HK_ASSERT2( 0x05864e6a, ( hkUlong( transformsInOut ) & 0x0F ) == 0, "Input must be 16 byte aligned" );
+	HK_ASSERT2( 0x05864e6a, ( hkUlong( transformsInOut ) & (HK_REAL_ALIGNMENT-1) ) == 0, "Input must be aligned for SIMD" );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -238,9 +238,9 @@ void HK_CALL hkaBlender::normalize( hkQsTransform* transformsInOut, int n )
 
 void hkaBlender::rotate( hkVector4* HK_RESTRICT dst, const hkQuaternion* HK_RESTRICT srcL, const hkVector4* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x07363922, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x037e1cc6, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x01035f33, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x07363922, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x037e1cc6, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x01035f33, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -261,9 +261,9 @@ void hkaBlender::rotate( hkVector4* HK_RESTRICT dst, const hkQuaternion* HK_REST
 
 void hkaBlender::rotateInv( hkVector4* HK_RESTRICT dst, const hkQuaternion* HK_RESTRICT srcL, const hkVector4* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x07363922, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x037e1cc6, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x01035f33, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x07363922, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x037e1cc6, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x01035f33, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -284,9 +284,9 @@ void hkaBlender::rotateInv( hkVector4* HK_RESTRICT dst, const hkQuaternion* HK_R
 
 void hkaBlender::transform( hkVector4* HK_RESTRICT dst, const hkQsTransform* HK_RESTRICT srcL, const hkVector4* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x0c168cbe, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x099bcf2b, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x07211198, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x0c168cbe, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x099bcf2b, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x07211198, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -307,9 +307,9 @@ void hkaBlender::transform( hkVector4* HK_RESTRICT dst, const hkQsTransform* HK_
 
 void hkaBlender::transformInv( hkVector4* HK_RESTRICT dst, const hkQsTransform* HK_RESTRICT srcL, const hkVector4* HK_RESTRICT srcR, int n )
 {
-	HK_ASSERT2( 0x0c168cbe, ( hkUlong( dst ) & 0x0F ) == 0, "dst must be 16 byte aligned." );
-	HK_ASSERT2( 0x099bcf2b, ( hkUlong( srcL ) & 0x0F ) == 0, "srcL must be 16 byte aligned." );
-	HK_ASSERT2( 0x07211198, ( hkUlong( srcR ) & 0x0F ) == 0, "srcR must be 16 byte aligned." );
+	HK_ASSERT2( 0x0c168cbe, ( hkUlong( dst ) & (HK_REAL_ALIGNMENT-1) ) == 0, "dst must be aligned for SIMD." );
+	HK_ASSERT2( 0x099bcf2b, ( hkUlong( srcL ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcL must be aligned for SIMD." );
+	HK_ASSERT2( 0x07211198, ( hkUlong( srcR ) & (HK_REAL_ALIGNMENT-1) ) == 0, "srcR must be aligned for SIMD." );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -354,7 +354,7 @@ void HK_CALL hkaBlender::modelFromLocal( hkQsTransform* poseModelOut, hkQsTransf
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -153,6 +153,16 @@ namespace hkMath
 	}
 #endif
 
+#ifndef  HK_MATH_msb
+	namespace hkMath_Implementation
+	{
+		template <int INDEX,int X> struct unroll_msb { enum { VALUE = unroll_msb<INDEX+1,(X>>1)>::VALUE }; };
+		template <int INDEX> struct unroll_msb<INDEX,0> { enum { VALUE = INDEX }; };
+	}
+
+	template <int X> struct mostSignificantBit { enum { VALUE = hkMath_Implementation::unroll_msb<0,X>::VALUE }; };
+#endif
+
 #if !defined(HK_MATH_ceil) && !defined(HK_MATH_ceil_f)
 	HK_FORCE_INLINE static hkFloat32 HK_CALL ceil( const hkFloat32 r ) 
 	{ 
@@ -902,7 +912,6 @@ namespace hkMath
 			b = a % b;
 			a=t;
 		}
-
 		return a;
 	}
 #endif
@@ -1330,7 +1339,7 @@ namespace hkMath
 #endif // HK_MATH_MATH_FUNCS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

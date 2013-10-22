@@ -8,8 +8,7 @@
 
 #include <Vision/Samples/Engine/CharacterLOD/CharacterLODPCH.h>
 #include <Vision/Samples/Engine/CharacterLOD/GUI/MenuSystem.hpp>
-#include <Vision/Samples/Engine/CharacterLOD/LODObject.h>
-
+#include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Entities/_AnimEntity.hpp>
 
 VModule &GUIModule = VGUIManager::GUIModule();
 V_IMPLEMENT_SERIAL( AnimationMainMenu, VDialog, 0, &GUIModule );
@@ -26,71 +25,78 @@ void AnimationMainMenu::OnInitDialog()
   SetSize(GetSize().x, (float)Vision::Video.GetYRes());
 
   // find the entities in the scene
-  for (int i=0;i<ENTITY_COUNT;i++)
+  for (int i = 0; i < ENTITY_COUNT; i++)
   {
     char szKey[64];
-    sprintf(szKey,"Soldier_%i",i);
-    m_pSoldier[i] = (LODObject *)Vision::Game.SearchEntity(szKey);
-    VASSERT(m_pSoldier[i]);
+    sprintf(szKey, "Soldier_%i", i);
+    m_pSoldiers[i] = Vision::Game.SearchEntity(szKey);
+    VASSERT(m_pSoldiers[i]);
   }
-  // sub menues
-  m_pSubMenu = (VDialogSubCtrl *)Items().FindItem(VGUIManager::GetID("SUBMENU"));
+  // sub menus
+  m_pSubMenu = static_cast<VDialogSubCtrl*>(Items().FindItem(VGUIManager::GetID("SUBMENU")));
   m_spSubMenuDialog = GetMenuManager()->CreateDialogInstance("CharacterLOD\\Dialogs\\SubMenu.xml", GetContext(), this);
   VASSERT(m_pSubMenu && m_spSubMenuDialog);
 
   // skeletal anim
-  m_pLODSelectionList = (VListControl *)m_spSubMenuDialog->Items().FindItem(VGUIManager::GetID("LOD_SELECTION"));
-  m_pCheckBoxStopPlay   = (VCheckBox *)m_spSubMenuDialog->Items().FindItem(VGUIManager::GetID("STOP_PLAY"));
+  m_pLODSelectionList = static_cast<VListControl*>(m_spSubMenuDialog->Items().FindItem(VGUIManager::GetID("LOD_SELECTION")));
+  m_pCheckBoxStopPlay = static_cast<VCheckBox*>(m_spSubMenuDialog->Items().FindItem(VGUIManager::GetID("STOP_PLAY")));
   VASSERT(m_pLODSelectionList && m_pCheckBoxStopPlay);
   
   // fill the list control (put the enum in the data member):
   VListControlItem *pItem;
-  ADD_MODE(LOD_HIGH,     "High Quality",     "Use characters with high polygon count");
-  ADD_MODE(LOD_MEDIUM,   "Medium Quality",   "Use characters with medium polygon count");
-  ADD_MODE(LOD_LOW,      "Low Quality",      "Use characters with low polygon count");
-  ADD_MODE(LOD_ULTRALOW, "UltraLow Quality", "Use characters with ultra low polygon count");
-  ADD_MODE(LOD_AUTO,     "Use AutoLOD",          "Choose LOD-Level by distance");
+  ADD_MODE(VLOD_HIGH,     "High Quality",     "Use characters with high polygon count");
+  ADD_MODE(VLOD_MEDIUM,   "Medium Quality",   "Use characters with medium polygon count");
+  ADD_MODE(VLOD_LOW,      "Low Quality",      "Use characters with low polygon count");
+  ADD_MODE(VLOD_ULTRALOW, "UltraLow Quality", "Use characters with ultra low polygon count");
+  ADD_MODE(VLOD_AUTO,     "Use AutoLOD",      "Choose LOD-Level by distance");
 
   m_pSubMenu->SetDialog(m_spSubMenuDialog);
 
   // set the initial mode
-  SetLODLevel(LOD_AUTO);
+  SetLODLevel(VLOD_AUTO);
 }
-
-
 
 void AnimationMainMenu::OnValueChanged(VItemValueChangedEvent *pEvent)
 {
   VDialog::OnValueChanged(pEvent);
 
   // start single skeletal anim
-  if (pEvent->m_pItem==m_pCheckBoxStopPlay)
+  if (pEvent->m_pItem == m_pCheckBoxStopPlay)
   {
-    for (int i=0;i<ENTITY_COUNT;i++)
-      m_pSoldier[i]->SetPlayAnimation(pEvent->AsBool());
+    for (int i = 0; i < ENTITY_COUNT; i++)
+    {
+      VSimpleAnimationComponent* pAnimComponent = 
+        m_pSoldiers[i]->Components().GetComponentOfType<VSimpleAnimationComponent>();
+
+      if (pAnimComponent != NULL)
+      {
+        pAnimComponent->SetPaused(!pEvent->AsBool());
+      }
+    }
     return;
   }
-
 
   //set lod level
-  if (pEvent->m_pItem==m_pLODSelectionList)
+  if (pEvent->m_pItem == m_pLODSelectionList)
   {
-    SetLODLevel((LODLevel_e)pEvent->AsListItem()->GetData());
+    SetLODLevel(static_cast<VEntityLODLevel_e>(pEvent->AsListItem()->GetData()));
     return;
   }
-
 }
 
 // switch the skeletal playing mode
-void AnimationMainMenu::SetLODLevel(LODLevel_e eMode)
+void AnimationMainMenu::SetLODLevel(VEntityLODLevel_e eMode)
 {
   //select the list item in the control
   m_pLODSelectionList->SetSelection(m_pLODSelectionList->Items().FindItemByDataValue(eMode));
 
   //update the entities
-  for (int i=0;i<ENTITY_COUNT;i++)
-    m_pSoldier[i]->m_LOD.SetLODLevel(eMode);
-
+  for (int i = 0; i < ENTITY_COUNT; i++)
+  {
+    VEntityLODComponent* pLODComponent = m_pSoldiers[i]->Components().GetComponentOfType<VEntityLODComponent>();
+    if (pLODComponent != NULL)
+      pLODComponent->SetLODLevel(eMode);
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -103,13 +109,14 @@ VWindowBase* VDialogSubCtrl::TestMouseOver(VGUIUserInfo_t &user, const hkvVec2 &
     return NULL;
 
   VWindowBase* pDlgItem = m_spDialog->TestMouseOver(user, vAbsMouse);
-  if (pDlgItem==m_spDialog)
+  if (pDlgItem == m_spDialog)
     return this; // do not return the dialog, because it would drag around
+
   return pDlgItem;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

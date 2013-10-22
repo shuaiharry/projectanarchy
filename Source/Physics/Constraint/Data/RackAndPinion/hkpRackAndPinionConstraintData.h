@@ -23,7 +23,7 @@
 /// to move in a (physically sensible) range. And the constraints should properly track the contact point of the parts.
 /// It will also work, when the parts are physically disjoint at times. Note that the interaction force is always
 /// determined by the direction of the bodyB (and it's shiftAxis, which is stored in bodyB's local space).
-/// 
+///
 /// If you experience stability problems in bigger setups, the external prismatic and hinge constraints should
 /// have higher priority or the rack-and-pinion constraint should be added first.
 ///
@@ -37,7 +37,7 @@ class hkpRackAndPinionConstraintData : public hkpConstraintData
 			TYPE_SCREW
 		};
 
-		enum 
+		enum
 		{
 			SOLVER_RESULT_RACK_AND_PINION	= 0,
 			SOLVER_RESULT_MAX				= 1
@@ -49,8 +49,8 @@ class hkpRackAndPinionConstraintData : public hkpConstraintData
 
 			hkpSolverResults m_solverResults[SOLVER_RESULT_MAX];
 
-			// This stores the initial relative angular orientation of the bodies. 0 if uninitialized (triggers 
-			// initialization of m_revolutionCounter too). Non-zero when initialized (set to a tiny number 
+			// This stores the initial relative angular orientation of the bodies. 0 if uninitialized (triggers
+			// initialization of m_revolutionCounter too). Non-zero when initialized (set to a tiny number
 			// (< HK_REAL_EPSILON) for zero values).
 			hkReal m_initialAngleOffset;
 
@@ -81,7 +81,7 @@ class hkpRackAndPinionConstraintData : public hkpConstraintData
 		};
 
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
@@ -90,7 +90,7 @@ class hkpRackAndPinionConstraintData : public hkpConstraintData
 
 		/// Serialization constructor.
 		hkpRackAndPinionConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
-		
+
 		/// Sets the rack-and-pinion up with world space information.
 		/// \param pinionARotationPivot Is also the reference 'zero-point' for the linear limits along rackShiftAxis
 		/// \param rackBShiftAxis Shift axis of bodyB. Note that this cannot be parallel to pinionRotationAxis for
@@ -99,10 +99,10 @@ class hkpRackAndPinionConstraintData : public hkpConstraintData
 		/// \param pinionRadiusOrScrewPitch Is equal to linear displacement caused by one full rotation of elements.
 		///                                 The sign can be negative to reverse the shift direction.
 		void setInWorldSpace(	const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
-								const hkVector4& pinionARotationPivot, const hkVector4& pinionARotationAxis, 
+								const hkVector4& pinionARotationPivot, const hkVector4& pinionARotationAxis,
 								const hkVector4& rackBhiftAxis, hkReal pinionRadiusOrScrewPitch,
 								Type type = TYPE_RACK_AND_PINION);
-										
+
 		/// Sets the rack-and-pinion up with body space information.
 		/// The parameters are analogical to setInWorldSpace().
 		void setInBodySpace(	const hkVector4& pinionARotationPivotInA, const hkVector4& pinionARotationPivotInB,
@@ -122,7 +122,7 @@ class hkpRackAndPinionConstraintData : public hkpConstraintData
 		virtual void getConstraintInfo( hkpConstraintData::ConstraintInfo& infoOut ) const;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-				
+
 	public:
 
 		HK_ALIGN_REAL( Atoms m_atoms );
@@ -134,7 +134,7 @@ class hkpRackAndPinionConstraintData : public hkpConstraintData
 #endif // HKP_RACK_AND_PINION_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

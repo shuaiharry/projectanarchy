@@ -126,10 +126,9 @@ HK_FORCE_INLINE hkVector4Comparison hkcdRayBundleSphereIntersect(const hkcdRayBu
 	hkVector4Comparison activeMask = rayBundle.m_activeRays;
 
 	{
-		hkVector4 radius; radius.setAll(sphereRadius);
-		hkVector4 radius2; radius2.setMul(radius, radius);
+		hkSimdReal radius2; radius2.setMul(sphereRadius, sphereRadius);
 
-		hkVector4 oneHundred; oneHundred.setAll(hkReal(100));
+		const hkSimdReal oneHundred = hkSimdReal::fromFloat(hkReal(100));
 
 		// 
 		// solve quadratic function: ax*x + bx + c = 0
@@ -180,7 +179,7 @@ HK_FORCE_INLINE hkVector4Comparison hkcdRayBundleSphereIntersect(const hkcdRayBu
 		hkFourTransposedPoints midPoint;
 		midPoint.setAddMulT(rayBundle.m_start, vDir, midPointInterp);
 		midPoint.dot3(midPoint, C);
-		C.sub(radius2);
+		C.setSub(C,radius2);
 
 		// Scalar version: det = B*B - A*C;
 		hkVector4 det;
@@ -219,7 +218,7 @@ HK_FORCE_INLINE hkVector4Comparison hkcdRayBundleSphereIntersect(const hkcdRayBu
 		activeMask.setAnd(activeMask, tLessThanHitFrac);
 		activeMask.setAnd(activeMask, tGreaterThan0);
 
-		hkVector4 invRadius; invRadius.setReciprocal(radius);
+		hkVector4 invRadius; invRadius.setAll(sphereRadius.reciprocal());
 
 		// Compute all the normals at once instead of doing scalar divides
 		hkFourTransposedPoints fourNormals;
@@ -237,7 +236,7 @@ HK_FORCE_INLINE hkVector4Comparison hkcdRayBundleSphereIntersect(const hkcdRayBu
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -14,6 +14,7 @@ typedef hkUint32 hkaiSectionUid;
 typedef int hkaiRuntimeIndex;
 typedef hkUint32 hkaiTreeHandle;
 
+	/// Enums to determine hkaiPackedKey layout.
 enum hkaiIndices
 { 
 	HKAI_NUM_BITS_FOR_SECTION = 10,
@@ -45,12 +46,15 @@ HK_FORCE_INLINE hkaiPackedKey HK_CALL hkaiGetPackedKey(hkaiRuntimeIndex sectionI
 HK_FORCE_INLINE hkaiPackedKey HK_CALL hkaiGetOppositePackedKey( hkUint8 flags, hkaiRuntimeIndex thisRuntimeId, hkaiPackedKey storedKey);
 HK_FORCE_INLINE hkaiRuntimeIndex HK_CALL hkaiGetOppositeRuntimeIndex( hkUint8 flags, hkaiRuntimeIndex thisRuntimeId, hkaiPackedKey storedKey);
 
+// Handy macro for checking return values during generation
+#define HKAI_CHECK_SUCCESS( RES ){ if ( HK_VERY_UNLIKELY((RES) != HK_SUCCESS)) {return HK_FAILURE;} }
+
 #include <Ai/Pathfinding/hkaiBaseTypes.inl>
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

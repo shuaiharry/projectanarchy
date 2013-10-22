@@ -101,8 +101,8 @@ namespace FmodManaged
     ConversionUtils::StringToVString(eventGroupName, sEventGroupName);
     ConversionUtils::StringToVString(eventName, sEventName);
 
-    // create a new event instance
-    DisposeNativeInstance();
+    VFmodEvent* pOldInstance = m_pEvent;
+    m_pEvent = NULL;
 
     int iInstanceFlags = (int)flags & (int)VFMOD_FLAG_BITMASK;
 
@@ -113,22 +113,44 @@ namespace FmodManaged
         m_pEvent = pEventGroup->CreateEvent(sEventName, hkvVec3(0.0f,0.0f,0.0f), iInstanceFlags);
     }
 
-    if (!m_pEvent)
+    bool bAddTriggerComponents = true;
+
+    if (pOldInstance)
+    {
+      if(m_pEvent)
+      {
+        bAddTriggerComponents = false;
+
+        // Move components to new instance
+        while(pOldInstance->Components().Count() > 0)
+        {
+          VSmartPtr<IVObjectComponent> spComponent = pOldInstance->Components().GetAt(pOldInstance->Components().Count() - 1);
+          pOldInstance->RemoveComponent(spComponent);
+          m_pEvent->AddComponent(spComponent);
+        }
+      }
+
+      pOldInstance->DisposeObject();
+      pOldInstance->Release();
+      pOldInstance = NULL;
+    }
+
+    if(!m_pEvent)
       return;
 
     m_pEvent->AddRef();
     m_pEvent->SetMuted(!m_bIsVisible);
 
-    // add trigger target components - only inside vForge. They are only serialized when used.
-    VisTriggerTargetComponent_cl *pComp;
+    if(bAddTriggerComponents)
+    {
+      // add trigger target components - only inside vForge. They are only serialized when used.
 
-    // pause target
-    pComp = new VisTriggerTargetComponent_cl(VFMOD_TRIGGER_PAUSE, VIS_OBJECTCOMPONENTFLAG_SERIALIZEWHENRELEVANT);
-    m_pEvent->AddComponent(pComp);
+      // pause target
+      m_pEvent->AddComponent(new VisTriggerTargetComponent_cl(VFMOD_TRIGGER_PAUSE, VIS_OBJECTCOMPONENTFLAG_SERIALIZEWHENRELEVANT));
 
-    // unpause target
-    pComp = new VisTriggerTargetComponent_cl(VFMOD_TRIGGER_RESUME, VIS_OBJECTCOMPONENTFLAG_SERIALIZEWHENRELEVANT);
-    m_pEvent->AddComponent(pComp);
+      // unpause target
+      m_pEvent->AddComponent(new VisTriggerTargetComponent_cl(VFMOD_TRIGGER_RESUME, VIS_OBJECTCOMPONENTFLAG_SERIALIZEWHENRELEVANT));
+    }
   }
 
   bool EngineInstanceFmodEvent::IsValid()
@@ -194,7 +216,7 @@ namespace FmodManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

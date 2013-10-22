@@ -49,6 +49,20 @@ public:
   typedef hkRefPtr<hkvAsset> RefPtr;
   typedef hkRefPtr<const hkvAsset> RefCPtr;
 
+public:
+  typedef hkUint8 FlagsType;
+
+  enum Flags {
+    FLAG_UPDATE_PENDING    = V_BIT(0),
+    FLAG_UPDATE_ERROR      = V_BIT(1),
+    FLAG_UPTODATE          = V_BIT(2),
+    FLAG_TRANSFORM_PENDING = V_BIT(3),
+    FLAG_TRANSFORM_ERROR   = V_BIT(4),
+    FLAG_TRANSFORMED       = V_BIT(5),
+
+    FLAG_MASK_UPDATE = FLAG_UPDATE_PENDING | FLAG_UPDATE_ERROR | FLAG_UPTODATE,
+    FLAG_MASK_TRANSFORM = FLAG_TRANSFORM_PENDING | FLAG_TRANSFORM_ERROR | FLAG_TRANSFORMED
+  };
 
 public:
   class Variant
@@ -112,6 +126,7 @@ public:
 
 public: // Interface
   ASSETFRAMEWORK_IMPEXP virtual bool queryByString(const char* query) const;
+  ASSETFRAMEWORK_IMPEXP virtual bool queryByProperty(const char* propertyName, const char* propertyValue) const;
   ASSETFRAMEWORK_IMPEXP virtual hkUint32 getTypeIndex() const = 0;
   ASSETFRAMEWORK_IMPEXP const hkvAssetTypeInfo* getType() const;
 
@@ -135,7 +150,10 @@ public: // Member functions
 
   ASSETFRAMEWORK_IMPEXP virtual void makeDependencyList(std::vector<hkStringPtr>& out_list) const;
   ASSETFRAMEWORK_IMPEXP void setDependencyList(const std::vector<hkStringPtr>& dependencies);
-  ASSETFRAMEWORK_IMPEXP virtual void updateDependenciesFromList();
+  ASSETFRAMEWORK_IMPEXP virtual void updateDependenciesFromList();  
+  ASSETFRAMEWORK_IMPEXP virtual void handleProjectLoaded();
+
+  ASSETFRAMEWORK_IMPEXP virtual void processPropertyHint(const char* propertyHint) {}
 
   ASSETFRAMEWORK_IMPEXP const char* getName() const;
 
@@ -146,6 +164,28 @@ public: // Member functions
 
   ASSETFRAMEWORK_IMPEXP virtual void clearAssetSpecificData() const {}
   ASSETFRAMEWORK_IMPEXP virtual hkvAssetOperationResult updateAssetSpecificData(hkStreamReader& fileData) const { return HKV_AOR_SUCCESS; }
+
+  // Status flags
+  ASSETFRAMEWORK_IMPEXP FlagsType getStatusFlags() const;
+
+  ASSETFRAMEWORK_IMPEXP void setUpdateUnknown();
+  ASSETFRAMEWORK_IMPEXP void setUpdatePending();
+  ASSETFRAMEWORK_IMPEXP void setUpdateError();
+  ASSETFRAMEWORK_IMPEXP void setUpdateSuccess();
+
+  ASSETFRAMEWORK_IMPEXP void setTransformUnknown();
+  ASSETFRAMEWORK_IMPEXP void setTransformPending();
+  ASSETFRAMEWORK_IMPEXP void setTransformError();
+  ASSETFRAMEWORK_IMPEXP void setTransformSuccess();
+
+  // Log Messages
+  ASSETFRAMEWORK_IMPEXP void addLogMessage(const hkvAssetLogMessage& message);
+  ASSETFRAMEWORK_IMPEXP void clearLogMessages(hkvMessageCategory category = HKV_MESSAGE_CATEGORY_ANY);
+  ASSETFRAMEWORK_IMPEXP hkUint32 getLogMessageCount() const;
+  ASSETFRAMEWORK_IMPEXP const hkvAssetLogMessage& getLogMessage(hkUint32 index) const;
+
+  // Transformation
+  ASSETFRAMEWORK_IMPEXP void queueForTransformation();
 
   // Variants
   ASSETFRAMEWORK_IMPEXP Variants& getVariants() { return m_variants; }
@@ -169,10 +209,10 @@ public: // Member functions
     const char* nameValueSeparator, bool flatten, hkStringBuf& out_string) const;
 
   ASSETFRAMEWORK_IMPEXP const hkvTransformationRule* getTransformRule(const char* profileName) const;
-  hkBool hasCustomTransformRule() const;
-  hkUint32 getTransformTemplate() const;
-  void setTransformTemplate(const char* name, bool allowCreateTemplate);
-  void setTransformTemplate(hkUint32 newTemplateIndex);
+  ASSETFRAMEWORK_IMPEXP hkBool hasCustomTransformRule() const;
+  ASSETFRAMEWORK_IMPEXP hkUint32 getTransformTemplate() const;
+  ASSETFRAMEWORK_IMPEXP void setTransformTemplate(const char* name, bool allowCreateTemplate);
+  ASSETFRAMEWORK_IMPEXP void setTransformTemplate(hkUint32 newTemplateIndex);
 
   ASSETFRAMEWORK_IMPEXP void dropUnusedProfiles();
 
@@ -196,13 +236,12 @@ protected:
   hkUint32 m_indexInLibrary;
 
   hkRefPtr<hkvAssetTrackedFile> m_file;
-
-  mutable hkBool m_sourceFileChanged;
-
   mutable hkStringPtr m_templateName;
 
   typedef hkStorageStringMap<hkvTransformationRule*> TransformationRulesMap;
   mutable TransformationRulesMap m_transformationRules;
+
+  std::vector<hkvAssetLogMessage> m_logMessages;
 
   hkUint32 m_lastMissingThumbnailHash;
 
@@ -213,7 +252,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

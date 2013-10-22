@@ -116,7 +116,7 @@ public:
 
 
 protected:
-  VBASE_IMPEXP virtual IVFileInStream* InternalOpen (const char* szFileName, int iFlags) HKV_OVERRIDE;
+  VBASE_IMPEXP virtual IVFileInStream* InternalOpen (const char* szFileName, int iFlags, const InternalOpenContext& ioc) HKV_OVERRIDE;
   VBASE_IMPEXP virtual BOOL InternalExists (const char* szFileName) HKV_OVERRIDE;
   VBASE_IMPEXP virtual BOOL InternalGetTimeStamp (const char* szFileName, VFileTime &destTime) HKV_OVERRIDE { return false; }
   VBASE_IMPEXP virtual bool InternalSetDataDirectory (int idx, const char* szPath) HKV_OVERRIDE;
@@ -219,7 +219,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

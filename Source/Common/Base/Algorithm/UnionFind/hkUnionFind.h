@@ -41,6 +41,9 @@ class hkUnionFind
 			/// Destructor.
 		~hkUnionFind(){}
 
+			/// Clears the array of parents
+		void clear();
+
 			/// Start adding edges
 		HK_FORCE_INLINE void beginAddEdges();
 			/// add an edge
@@ -109,7 +112,7 @@ HK_FORCE_INLINE void hkUnionFind::endAddEdges()
 #endif //HAVOK_UNIONFIND_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

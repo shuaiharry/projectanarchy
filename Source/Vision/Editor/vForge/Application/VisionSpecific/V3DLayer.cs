@@ -351,12 +351,22 @@ namespace Editor
     /// <summary>
     /// Category string
     /// </summary>
+    protected const string CAT_TIME_STEPPING = "Time Stepping";
+
+    /// <summary>
+    /// Category ID
+    /// </summary>
+    protected const int CATORDER_TIME_STEPPING = Layer.LAST_CATEGORY_ORDER_ID + 5;
+
+    /// <summary>
+    /// Category string
+    /// </summary>
     protected const string CAT_SCRIPTING = "Scripting";
 
     /// <summary>
     /// Category ID
     /// </summary>
-    protected const int CATORDER_SCRIPTING = Layer.LAST_CATEGORY_ORDER_ID + 5;
+    protected const int CATORDER_SCRIPTING = Layer.LAST_CATEGORY_ORDER_ID + 6;
 
     /// <summary>
     /// Category string
@@ -366,7 +376,7 @@ namespace Editor
     /// <summary>
     /// Category ID
     /// </summary>
-    protected const int CATORDER_LOD_HYSTERESIS = Layer.LAST_CATEGORY_ORDER_ID + 6;
+    protected const int CATORDER_LOD_HYSTERESIS = Layer.LAST_CATEGORY_ORDER_ID + 7;
 
     /// <summary>
     /// last used category ID
@@ -390,6 +400,10 @@ namespace Editor
         FarClipDistance = newSettings._fFarClip;
         FOV = newSettings._fFovX;
 
+        // Time Stepping
+        _currentSettings._iTicksPerSecond = newSettings._iTicksPerSecond;
+        _currentSettings._iMaxTicksPerFrame = newSettings._iMaxTicksPerFrame;
+
         // Sky
         SkyConfig = newSettings._skyConfig;
         if (SkyConfig == null)
@@ -407,6 +421,7 @@ namespace Editor
         // Time of Day
         TimeOfDay = newSettings._timeOfDay;
         EditorManager.RendererNodeManager.UpdateTimeOfDay(TimeOfDay);
+        GlobalAmbientColor = newSettings._globalAmbientColor;
 
         // Renderer
         RendererNodeClass = newSettings._rendererSetup._rendererNodeClass;
@@ -415,6 +430,7 @@ namespace Editor
 
         EditorManager.EngineManager.SetFogParameters(FogSetup);
         EditorManager.EngineManager.SetSRGBMode(newSettings._eSRGBMode);
+        //EditorManager.EngineManager.SetUpdateTicksPerSecond(_currentSettings._iTicksPerSecond, _currentSettings._iMaxTicksPerFrame);
 
         //this event is necessary to update the property flags
         IScene.SendLayerChangedEvent(new LayerChangedArgs(this, null, LayerChangedArgs.Action.PropertyChanged));
@@ -490,6 +506,10 @@ namespace Editor
         _currentSettings._timeOfDay.Owner = this;
       }
 
+      // map projection
+      _mapProjection.Parent = this;
+      EditorManager.EngineManager.SetMapProjection(_mapProjection.Type, _mapProjection.Properties, SceneReferenceLocation);
+
       try
       {
         if (Modifiable)
@@ -513,18 +533,30 @@ namespace Editor
         EditorManager.DumpException(ex, true);
       }
 
+      // Make sure the postprocessor array is not NULL.
+      if (_currentSettings._rendererSetup._rendererComponents == null)
+      {
+        _currentSettings._rendererSetup._rendererComponents = new ShapeComponentCollection();
+      }
       // First make sure there is a renderer node, then check if it supports time of day, then recreate it with the time of day settings
       EditorManager.RendererNodeManager.UpdateRendererNode(RendererProperties, Postprocessors);
       EditorManager.RendererNodeManager.UpdateTimeOfDay(FinalEnableTimeOfDay ? this.TimeOfDay : null);
       EditorManager.RendererNodeManager.SetCurrentTime(CurrentTime);
       EditorManager.RendererNodeManager.UpdateRendererNode(RendererProperties, Postprocessors);
+
       _currentSettings._fogSetup.Update();
+
       // sky may depend on the renderer node, so update it again
       if (SkyConfig != null)
       {
         SkyConfig.Update();
       }
+
       EditorManager.EngineManager.SetSRGBMode(_currentSettings._eSRGBMode);
+      //EditorManager.EngineManager.SetUpdateTicksPerSecond(_currentSettings._iTicksPerSecond, _currentSettings._iMaxTicksPerFrame);
+
+      // Set default global ambient color on renderer node.
+      EditorManager.EngineManager.SetDefaultGlobalAmbientColor(VisionColors.Get(_currentSettings._globalAmbientColor));
 
       // set clip distances
       ViewSettings view = EditorManager.ActiveView.DefaultViewSettings;
@@ -556,7 +588,7 @@ namespace Editor
       // In case this is a newly created scene or an old scene that needs to be migrated to the new format we do so here.
       if (_currentSettings._needsMigration)
       {
-        EditorManager.ProfileManager.LoadProfileSpecificSettings(EditorManager.Project.Scene.AbsoluteFileName + ".Layers\\", _currentSettings, true);
+        EditorManager.ProfileManager.LoadProfileSpecificSettings(EditorManager.Project.Scene, _currentSettings, true);
       }
     }
 
@@ -565,9 +597,9 @@ namespace Editor
     {
       if (ParentScene != null)
       {
-        EditorManager.ProfileManager.ActiveProfileChanged -= new IProfileManager.ActiveProfileChangedEventHandler(IProfileManager_ActiveProfileChanged);
-        EditorManager.ProfileManager.GetCurrentSettings -= new IProfileManager.GetCurrentSettingsEventHandler(IProfileManager_GetCurrentSettings);
-        IScene.PropertyChanged -= new CSharpFramework.PropertyChangedEventHandler(IScene_PropertyChanged);
+      EditorManager.ProfileManager.ActiveProfileChanged -= new IProfileManager.ActiveProfileChangedEventHandler(IProfileManager_ActiveProfileChanged);
+      EditorManager.ProfileManager.GetCurrentSettings -= new IProfileManager.GetCurrentSettingsEventHandler(IProfileManager_GetCurrentSettings);
+      IScene.PropertyChanged -= new CSharpFramework.PropertyChangedEventHandler(IScene_PropertyChanged);
       }
 
       if (_currentSettings != null && _currentSettings._skyConfig != null)
@@ -644,7 +676,7 @@ namespace Editor
       EditorSettingsBase.CoordinateDisplayMode_e cd = EditorManager.Settings.CoordinateDisplay;
       if ((cd & EditorSettingsBase.CoordinateDisplayMode_e.Geodetic) == 0)
       {
-        if (pd.Name == "Location_Lat" || pd.Name == "Location_Long" || pd.Name == "Location_Alt")
+        if (pd.Name == "Location_Lat" || pd.Name == "Location_Long" || pd.Name == "Location_Alt" || pd.Name == "MapProjection")
           return PropertyFlags_e.Hidden;
       }
 
@@ -656,6 +688,11 @@ namespace Editor
       else if (pd.Name == "TimeOfDay" || pd.Name == "CurrentTime")
       {
         if (!FinalEnableTimeOfDay)
+          return PropertyFlags_e.Hidden;
+      }
+      else if (pd.Name == "GlobalAmbientColor")
+      {
+        if (FinalEnableTimeOfDay)
           return PropertyFlags_e.Hidden;
       }
       else if (pd.Name == "EnableTimeOfDay")
@@ -687,7 +724,7 @@ namespace Editor
 
     string _v3dFilename;
 
-    /// <summary>
+        /// <summary>
     /// Defines the default light color that is used when there is no lightmap file (.lit) or light grid (.vlg)
     /// </summary>
     [SortedCategory(CAT_V3D, CATORDER_V3D), PropertyOrder(2),
@@ -719,12 +756,11 @@ namespace Editor
     {
       get
       {
-        return _sceneReferenceLocation;
+          return _mapProjection.SceneReferenceLocation;
       }
       set
       {
-        _sceneReferenceLocation = value;
-        CSConversionHelpers.SetSceneReferencePosition(_sceneReferenceLocation.X, _sceneReferenceLocation.Y, _sceneReferenceLocation.Z);
+          _mapProjection.SceneReferenceLocation = value;
       }
     }
 
@@ -738,7 +774,7 @@ namespace Editor
       }
       set
       {
-        SceneReferenceLocation = new Vector3D(AngleToStringConversion.StringToAngle(value), _sceneReferenceLocation.Y, _sceneReferenceLocation.Z);
+          SceneReferenceLocation = new Vector3D(AngleToStringConversion.StringToAngle(value), SceneReferenceLocation.Y, SceneReferenceLocation.Z);
       }
     }
 
@@ -752,7 +788,7 @@ namespace Editor
       }
       set
       {
-        SceneReferenceLocation = new Vector3D(_sceneReferenceLocation.X, AngleToStringConversion.StringToAngle(value), _sceneReferenceLocation.Z);
+          SceneReferenceLocation = new Vector3D(SceneReferenceLocation.X, AngleToStringConversion.StringToAngle(value), SceneReferenceLocation.Z);
       }
     }
 
@@ -766,11 +802,66 @@ namespace Editor
       }
       set
       {
-        SceneReferenceLocation = new Vector3D(_sceneReferenceLocation.X, _sceneReferenceLocation.Y, value);
+          SceneReferenceLocation = new Vector3D(SceneReferenceLocation.X, SceneReferenceLocation.Y, value);
       }
     }
 
+    [TypeConverter(typeof(UndoableObjectConverter))]
+    [SortedCategory(CAT_V3D, CATORDER_V3D), PropertyOrder(53)]
+    [Description("Coordinate system properties")]
+    public CoordinateSystem MapProjection
+    {
+      get
+      {
+        return _mapProjection;
+      }
+      set
+      {
+        _mapProjection = value;
+        EditorManager.EngineManager.SetMapProjection(_mapProjection.Type, _mapProjection.Properties, _mapProjection.SceneReferenceLocation);
+      }
+    }
+
+    CoordinateSystem _mapProjection = new CoordinateSystem();
     #endregion
+
+    /*#region Time Stepping
+
+    [SortedCategory(CAT_TIME_STEPPING, CATORDER_TIME_STEPPING), PropertyOrder(1)]
+    [RangeCheckAttribute(0, 600)]
+    [Description("Defines the number of fixed update ticks per second (for Vision and Physics).\nSet to 0 to enable variable time stepping.")]
+    public int TicksPerSecond
+    {
+      get
+      {
+        return _currentSettings._iTicksPerSecond;
+      }
+      set
+      {
+        _currentSettings._iTicksPerSecond = value;
+
+        EditorManager.EngineManager.SetUpdateTicksPerSecond(_currentSettings._iTicksPerSecond, _currentSettings._iMaxTicksPerFrame);
+      }
+    }
+
+    [SortedCategory(CAT_TIME_STEPPING, CATORDER_TIME_STEPPING), PropertyOrder(2)]
+    [RangeCheckAttribute(1, Int32.MaxValue)]
+    [Description("Defines the maximum number of fixed update steps per frame.\nOnly applies if fixed time stepping is used.")]
+    public int MaxTicksPerFrame
+    {
+      get
+      {
+        return _currentSettings._iMaxTicksPerFrame;
+      }
+      set
+      {
+        _currentSettings._iMaxTicksPerFrame = value;
+
+        EditorManager.EngineManager.SetUpdateTicksPerSecond(_currentSettings._iTicksPerSecond, _currentSettings._iMaxTicksPerFrame);
+      }
+    }
+
+    #endregion*/
 
     #region Scripting
 
@@ -1217,11 +1308,19 @@ namespace Editor
       set
       {
         _currentSettings._rendererSetup._rendererComponents = value;
+        // null is not a valid value for postprocessors.
+        if (_currentSettings._rendererSetup._rendererComponents == null)
+        {
+          _currentSettings._rendererSetup._rendererComponents = new ShapeComponentCollection();
+        }
 
         if (_currentSettings._rendererSetup._rendererComponents != null)
+        {
           foreach (ShapeComponent c in _currentSettings._rendererSetup._rendererComponents)
+          {
             c.Owner = this;
-
+          }
+        }
         EditorManager.RendererNodeManager.UpdateRendererNode(RendererProperties, Postprocessors);
       }
     }
@@ -1274,72 +1373,6 @@ namespace Editor
 
         _currentSettings._eSRGBMode = value;
         EditorManager.EngineManager.SetSRGBMode(_currentSettings._eSRGBMode);
-      }
-    }
-
-    [Browsable(true)]
-    [SortedCategory(CAT_ATMOSPHERE, CATORDER_ATMOSPHERE), PropertyOrder(23)]
-    [EditorAttribute(typeof(TimeOfDayEditor), typeof(UITypeEditor))]
-    [Description("Enables time of day handling for the renderer node (if supported)")]
-    public bool EnableTimeOfDay
-    {
-      get
-      {
-        return _currentSettings._bWantsTimeOfDay;
-      }
-      set
-      {
-        if (_currentSettings._bWantsTimeOfDay == value && !_forceSetSettings)
-          return;
-        _currentSettings._bWantsTimeOfDay = value;
-        if (FinalEnableTimeOfDay)
-        {
-          EditorManager.RendererNodeManager.UpdateTimeOfDay(this.TimeOfDay);
-          EditorManager.RendererNodeManager.SetCurrentTime(CurrentTime);
-        }
-        else
-        {
-          EditorManager.RendererNodeManager.UpdateTimeOfDay(null);
-          if (_currentSettings._skyConfig != null)
-            _currentSettings._skyConfig.Update();
-          if (_currentSettings._fogSetup != null)
-            _currentSettings._fogSetup.Update();
-        }
-        TimeOfDay.TriggerTimeOfDayEnabledChanged();
-        EditorManager.RendererNodeManager.UpdateRendererNode(RendererProperties, Postprocessors);
-
-
-        if (!FinalEnableTimeOfDay)
-        {
-          // Resubmit light shape properties to reset time-of-day-controlled properties to the displayed PropertyGrid values
-          ShapeComponentType componentType = (ShapeComponentType)EditorManager.EngineManager.ComponentClassManager.GetCollectionType("VTimeOfDayComponent");
-
-          if (componentType != null)
-          {
-            ShapeCollection allShapes = EditorManager.Scene.AllShapesOfType(typeof(DynLightShape));
-            foreach (Shape3D shape in allShapes)
-            {
-              DynLightShape light = shape as DynLightShape;
-
-              // Not entirely sure how the component container can be null, but it happened in one scene causing a crash
-              if (light.Components == null)
-                continue;
-
-              ShapeComponent timeOfDayAttachment = light.Components.GetComponentByType(componentType);
-              if (timeOfDayAttachment != null)
-                light.SetEngineInstanceBaseProperties();
-            }
-          }
-        }
-      }
-    }
-
-    [Browsable(false)]
-    public bool FinalEnableTimeOfDay
-    {
-      get
-      {
-        return _currentSettings._bWantsTimeOfDay && EditorManager.RendererNodeManager.SupportsTimeOfDay();
       }
     }
 
@@ -1414,6 +1447,91 @@ namespace Editor
           fTime = (float)value;
         EditorManager.RendererNodeManager.SetCurrentTime(fTime);
         EditorManager.ActiveView.UpdateView(false);
+      }
+    }
+
+    /// <summary>
+    /// Defines the global ambient color that is used if time of day is disabled.
+    /// </summary>
+    [SortedCategory(CAT_ATMOSPHERE, CATORDER_ATMOSPHERE), PropertyOrder(23),
+    Description("Defines the global ambient color which is used if time-of-day is disabled.")]
+    [EditorAttribute(typeof(StandardColorDropDownEditor), typeof(UITypeEditor)), DefaultValue(typeof(Color), "0,0,0")]
+    public Color GlobalAmbientColor
+    {
+      get { return _currentSettings._globalAmbientColor; }
+      set
+      {
+        if (_currentSettings._globalAmbientColor == value)
+          return;
+
+        _currentSettings._globalAmbientColor = value;
+        EditorManager.EngineManager.SetDefaultGlobalAmbientColor(VisionColors.Get(_currentSettings._globalAmbientColor));
+      }
+    }
+
+    [Browsable(true)]
+    [SortedCategory(CAT_ATMOSPHERE, CATORDER_ATMOSPHERE), PropertyOrder(24)]
+    [EditorAttribute(typeof(TimeOfDayEditor), typeof(UITypeEditor))]
+    [Description("Enables time of day handling for the renderer node (if supported)")]
+    public bool EnableTimeOfDay
+    {
+      get
+      {
+        return _currentSettings._bWantsTimeOfDay;
+      }
+      set
+      {
+        if (_currentSettings._bWantsTimeOfDay == value && !_forceSetSettings)
+          return;
+        _currentSettings._bWantsTimeOfDay = value;
+        if (FinalEnableTimeOfDay)
+        {
+          EditorManager.RendererNodeManager.UpdateTimeOfDay(this.TimeOfDay);
+          EditorManager.RendererNodeManager.SetCurrentTime(CurrentTime);
+        }
+        else
+        {
+          EditorManager.RendererNodeManager.UpdateTimeOfDay(null);
+          if (_currentSettings._skyConfig != null)
+            _currentSettings._skyConfig.Update();
+          if (_currentSettings._fogSetup != null)
+            _currentSettings._fogSetup.Update();
+        }
+        TimeOfDay.TriggerTimeOfDayEnabledChanged();
+        EditorManager.RendererNodeManager.UpdateRendererNode(RendererProperties, Postprocessors);
+
+
+        if (!FinalEnableTimeOfDay)
+        {
+          // Resubmit light shape properties to reset time-of-day-controlled properties to the displayed PropertyGrid values
+          ShapeComponentType componentType = (ShapeComponentType)EditorManager.EngineManager.ComponentClassManager.GetCollectionType("VTimeOfDayComponent");
+
+          if (componentType != null)
+          {
+            ShapeCollection allShapes = EditorManager.Scene.AllShapesOfType(typeof(DynLightShape));
+            foreach (Shape3D shape in allShapes)
+            {
+              DynLightShape light = shape as DynLightShape;
+
+              // Not entirely sure how the component container can be null, but it happened in one scene causing a crash
+              if (light.Components == null)
+                continue;
+
+              ShapeComponent timeOfDayAttachment = light.Components.GetComponentByType(componentType);
+              if (timeOfDayAttachment != null)
+                light.SetEngineInstanceBaseProperties();
+            }
+          }
+        }
+      }
+    }
+
+    [Browsable(false)]
+    public bool FinalEnableTimeOfDay
+    {
+      get
+      {
+        return _currentSettings._bWantsTimeOfDay && EditorManager.RendererNodeManager.SupportsTimeOfDay();
       }
     }
 
@@ -1802,9 +1920,9 @@ namespace Editor
       {
         if (currentScene != null)
         {
-          _currentSettings._skyConfig = new VisionSky();
-          EditorManager.ProfileManager.LoadProfileSpecificSettings(currentScene.AbsoluteFileName + ".Layers\\", _currentSettings, false);
-          _currentSettings._skyConfig.Dispose();
+        _currentSettings._skyConfig = new VisionSky();
+          EditorManager.ProfileManager.LoadProfileSpecificSettings(currentScene, _currentSettings, false);
+        _currentSettings._skyConfig.Dispose();
         }
         _currentSettings = EditorManager.ProfileManager.GetActiveProfileSettings();
       }
@@ -1843,6 +1961,11 @@ namespace Editor
         }
       }
 
+      if (SerializationHelper.HasElement(info, "_mapProjection"))
+        MapProjection = (CoordinateSystem)info.GetValue("_mapProjection", typeof(CoordinateSystem));
+      else
+        MapProjection = new CoordinateSystem();
+
       if (SerializationHelper.HasElement(info, "SceneReferenceLocation"))
         SceneReferenceLocation = (Vector3D)info.GetValue("SceneReferenceLocation", typeof(Vector3D));
       else
@@ -1867,6 +1990,7 @@ namespace Editor
       info.AddValue("_sceneScriptFile", _sceneScriptFile);
       info.AddValue("_scriptThinkInterval", _scriptThinkInterval);
       info.AddValue("SceneReferenceLocation", SceneReferenceLocation);
+      info.AddValue("_mapProjection", _mapProjection); 
       info.AddValue("_fWorldGeometryThreshold", _fWorldGeometryThreshold);
       info.AddValue("_fEntityThreshold", _fEntityThreshold);
     }
@@ -2380,7 +2504,7 @@ namespace Editor
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

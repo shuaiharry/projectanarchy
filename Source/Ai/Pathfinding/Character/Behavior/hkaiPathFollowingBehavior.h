@@ -21,7 +21,8 @@ class hkaiPathFollowingBehavior : public hkaiSingleCharacterBehavior
 public:
 
 	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_STEERING);
-
+		
+		/// Type of path to compute and follow.
 	enum PathType
 	{
 		PATH_TYPE_NAVMESH,
@@ -177,6 +178,8 @@ public:
 
 	virtual hkaiCharacter::State getSavedCharacterState() HK_OVERRIDE { return m_savedCharacterState; }
 
+	virtual void getGoalPoints( hkArray<hkVector4>::Temp& goalsOut ) const HK_OVERRIDE;
+
 protected:
 
 	void handlePossibleNewPath();
@@ -257,7 +260,7 @@ protected:
 #endif // HK_AI_PATHFOLLOW_BEHAVIOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

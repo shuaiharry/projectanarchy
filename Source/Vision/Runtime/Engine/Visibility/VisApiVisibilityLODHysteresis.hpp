@@ -35,6 +35,7 @@ enum VLODHysteresisStates_e
   VLHS_BEHIND_FAR             ///< LOD object is behind the far clipping plane
 };
 
+
 /// \brief
 ///   Abstract component class that can be derived by other component classes that supports LOD hysteresis to retrieve the current LOD level
 class IVLODHysteresisComponent : public IVObjectComponent
@@ -97,18 +98,103 @@ protected:
   ///   Serializes the global threshold settings; may only be used by VSceneLoader and VSceneExporter.
   VISION_APIFUNC static void SerializeX(VArchive& ar);
 
-protected:
+public:
   #ifndef _VISION_DOC
+    struct NearFarPlaneSetting { NearFarPlaneSetting() : fNearPlane(0.0f), fFarPlane(0.0f) {} float fNearPlane; float fFarPlane; };
     typedef unsigned char StateValue;
     typedef DynArray_cl<StateValue> StateArray;
+    typedef DynArray_cl<NearFarPlaneSetting> NearFarPlaneSettingArray;
 
-    static const int VIS_CURR_FRAME_SHIFT = ((sizeof(StateValue) * 8) - 2); // shift value to access bit which indicates far/near clip visibility in current frame
-    static const int VIS_LAST_FRAME_SHIFT = ((sizeof(StateValue) * 8) - 1); // shift value to access bit which indicates far/near clip visibility in last frame
+    static const int LOD_LEVEL_SHIFT = 2;                                   ///> shift value to access LOD level
+    static const int LOD_LEVEL_MASK = 0xf;                                  ///> value to mask out LOD level
+    static const int STATE_MASK = 0x3;                                      ///> value to mask out state
+    static const int VIS_CURR_FRAME_SHIFT = ((sizeof(StateValue) * 8) - 2); ///> shift value to access bit which indicates far/near clip visibility in current frame
+    static const int VIS_LAST_FRAME_SHIFT = ((sizeof(StateValue) * 8) - 1); ///> shift value to access bit which indicates far/near clip visibility in last frame
   #endif //_VISION_DOC
 
-  StateArray* m_pStates[VLHT_COUNT];  ///< Current states for all type of objects
+  StateArray* m_pStates[VLHT_COUNT];                                    ///< Current states for all type of objects
+  NearFarPlaneSettingArray* m_pNearFarPlaneSettingStates[VLHT_COUNT];   ///< Current near/far plane settings for all type of objects
 
 public:
+  /// \brief
+  ///   Helper function that retrieves the hysteresis manager of the current context in case hysteresis is enabled, needs to be used for the given mesh and the
+  ///   threshold is not 0.
+  inline static VLODHysteresisManager* GetHysteresisManager(VLODHysteresisType_e eType, VBaseMesh* pMesh)
+  {
+#ifdef SUPPORTS_LOD_HYSTERESIS_THRESHOLDING
+    VisRenderContext_cl* pContext = VisRenderContext_cl::GetCurrentContext();
+    VASSERT(pContext != NULL);
+    if (pContext->GetVisibilityCollector() != NULL && pContext->GetVisibilityCollector()->IsOfType(V_RUNTIME_CLASS(VisionVisibilityCollector_cl)) &&
+        ((VisionVisibilityCollector_cl*)pContext->GetVisibilityCollector())->GetLODHysteresisManager()->GetThreshold(eType) > 0.0f &&
+        (pMesh == NULL || pMesh->ContainsClipDistance()))
+      return ((VisionVisibilityCollector_cl*)pContext->GetVisibilityCollector())->GetLODHysteresisManager();
+    else
+      return NULL;
+#else
+    return NULL;
+#endif //SUPPORTS_LOD_HYSTERESIS_THRESHOLDING
+  }
+
+  /// \brief
+  ///   Helper class that performs dynamic submesh clipping for entitis; returns true when submesh is visible
+  inline bool PerformDynamicSubmeshClipping(VDynamicSubmesh* pSubmesh, int iElementID) const
+  {
+    return pSubmesh->GetGeometryInfo().m_iLODIndex == GetLODLevel(VLHT_ENTITIES, iElementID);
+  }
+
+  /// \brief
+  ///   Returns the current hysteresis state of the given element
+  inline VLODHysteresisStates_e GetHysteresisState(VLODHysteresisType_e eType, int iElementID)
+  {
+    m_pStates[eType]->EnsureSize(iElementID + 1);
+    StateValue& stateValue(m_pStates[eType]->GetDataPtr()[iElementID]);
+
+    return (VLODHysteresisStates_e)(stateValue & STATE_MASK);
+  }
+
+  /// \brief
+  ///   Returns the current LOD level of the given element
+  inline int GetLODLevel(VLODHysteresisType_e eType, int iElementID) const
+  {
+    if ((int)(m_pStates[eType]->GetSize()) <= iElementID)
+      return 0;
+
+    StateValue& stateValue(m_pStates[eType]->GetDataPtr()[iElementID]);
+    return (stateValue >> LOD_LEVEL_SHIFT) & LOD_LEVEL_MASK;
+  }
+
+  /// \brief
+  ///   Sets the current state of the given element. Optionally, the near and far plane distances can also be set.
+  inline void SetStateValue(VLODHysteresisType_e eType, int iElementID, StateValue stateValue, float fNearPlane = 0.0f, float fFarPlane = 0.0f)
+  {
+    m_pStates[eType]->EnsureSize(iElementID + 1);
+    m_pStates[eType]->GetDataPtr()[iElementID] = stateValue;
+
+    if (fNearPlane != 0.0f || fFarPlane != 0.0f)
+    {
+      m_pNearFarPlaneSettingStates[eType]->EnsureSize(iElementID + 1);
+      NearFarPlaneSetting& nearFarSettings(m_pNearFarPlaneSettingStates[eType]->GetDataPtr()[iElementID]);
+      nearFarSettings.fNearPlane = fNearPlane;
+      nearFarSettings.fFarPlane = fFarPlane;
+    }
+  }
+
+  /// \brief
+  ///   Returns the current state value of the given element
+  inline StateValue GetStateValue(VLODHysteresisType_e eType, int iElementID)
+  {
+    m_pStates[eType]->EnsureSize(iElementID + 1);
+    return m_pStates[eType]->GetDataPtr()[iElementID];
+  }
+
+  /// \brief
+  ///   Returns the current near and far plane setting of the given element
+  inline const NearFarPlaneSetting& GetNearFarSetting(VLODHysteresisType_e eType, int iElementID)
+  {
+    m_pNearFarPlaneSettingStates[eType]->EnsureSize(iElementID + 1);
+    return m_pNearFarPlaneSettingStates[eType]->GetDataPtr()[iElementID];
+  }
+
   /// \brief
   ///   Performs near/far clipping equal to VVisibilityData::IsClipped, but takes LOD hysteresis thresholding into account
   inline bool IsClipped(VLODHysteresisType_e eType, int iElementID, int iLODLevel, const VVisibilityData* pVisData, int iFilterMask,
@@ -117,21 +203,18 @@ public:
     VASSERT(pVisData);
     
     m_pStates[eType]->EnsureSize(iElementID + 1);
-    return IsClipped(eType, m_pStates[eType]->GetDataPtr()[iElementID], iLODLevel, pVisData, iFilterMask, vCameraPos, fLODScaleSqr);
+    return IsClipped(eType, m_pStates[eType]->GetDataPtr()[iElementID], iLODLevel, pVisData, iFilterMask, vCameraPos, fLODScaleSqr, pVisData->GetNearClipDistance(), pVisData->GetFarClipDistance());
   }
 
   /// \brief
   ///   Performs near/far clipping equal to VVisibilityData::IsClipped, but takes LOD hysteresis thresholding into account
   inline bool IsClipped(VLODHysteresisType_e eType, StateValue& stateValue, int iLODLevel, const VVisibilityData* pVisData, int iFilterMask,
-                        const hkvVec3& vCameraPos, float fLODScaleSqr)
+                        const hkvVec3& vCameraPos, float fLODScaleSqr, float fNearPlane, float fFarPlane)
   {
     VASSERT(pVisData);
 
     if ((pVisData->GetVisibleBitmask() & iFilterMask) == 0 || pVisData->GetClipMode(VIS_EXCLUDED_FROM_VISTEST | VIS_IS_INACTIVE))
       return true;
-
-    if (fLODScaleSqr < 0.0f)
-      return false;
 
     int iLODMode = pVisData->GetClipMode();
     float fDistSqr;
@@ -141,15 +224,9 @@ public:
       case VIS_LOD_TEST_NONE:
         return false;
       case VIS_LOD_TEST_CLIPPOSITION:
-        fDistSqr = vCameraPos.getDistanceToSquared(pVisData->GetClipReference());
-        break;
-      case VIS_LOD_TEST_CLIPPOSITION | VIS_LOD_TEST_APPLYLODSCALING:
         fDistSqr = vCameraPos.getDistanceToSquared(pVisData->GetClipReference()) * fLODScaleSqr;
         break;
       case VIS_LOD_TEST_BOUNDINGBOX:
-        fDistSqr = pVisData->GetBoundingBox().getDistanceToSquared(vCameraPos);
-        break;
-      case VIS_LOD_TEST_BOUNDINGBOX | VIS_LOD_TEST_APPLYLODSCALING:
         fDistSqr = pVisData->GetBoundingBox().getDistanceToSquared(vCameraPos) * fLODScaleSqr;
         break;
       default:
@@ -157,11 +234,9 @@ public:
         return false;
     }
 
-    float fNearPlane = pVisData->GetNearClipDistance();
-    float fFarPlane = pVisData->GetFarClipDistance();
     const float fThreshold = GetThreshold(eType);
 
-    VLODHysteresisStates_e eState = (VLODHysteresisStates_e)(stateValue & 3);
+    VLODHysteresisStates_e eState = (VLODHysteresisStates_e)(stateValue & STATE_MASK);
 
     switch (eState)
     {
@@ -219,7 +294,7 @@ public:
       }
     }
 
-    stateValue = (stateValue & ~3) | (StateValue)eState;
+    stateValue = (stateValue & ~STATE_MASK) | (StateValue)eState;
     bool bClipped = ((fNearPlane > 0.0f) && (fDistSqr < (fNearPlane * fNearPlane))) ||
                     ((fFarPlane > 0.0f) && (fDistSqr >= (fFarPlane * fFarPlane)));
 
@@ -227,18 +302,31 @@ public:
       // Move current frame's visibility state to last frame's one
       // Note this is only required for LOD dissolve feature of simulation package, so no need to support it on other platforms than PC
       const StateValue mask = V_BIT(VIS_CURR_FRAME_SHIFT) | V_BIT(VIS_LAST_FRAME_SHIFT);
-      const StateValue shiftedValue = ((stateValue & mask) << 1);
+      const StateValue shiftedValue = ((stateValue & mask) << 1); // move current state to old state by shifting the mask one to right
       stateValue = (stateValue & ~mask) | shiftedValue;
       if (bClipped)
         stateValue |= V_BIT(VIS_CURR_FRAME_SHIFT);
 
-      int iLastLODLevel = (stateValue & 0x3c) >> 2;
-      stateValue = (stateValue & ~0x3c) | (iLODLevel << 2);
+      int iLastLODLevel = (stateValue >> LOD_LEVEL_SHIFT) & LOD_LEVEL_MASK;
       if (iLastLODLevel != iLODLevel)
         stateValue |= V_BIT(VIS_LAST_FRAME_SHIFT);
     #endif //WIN32
 
+    stateValue = (stateValue & ~(LOD_LEVEL_MASK << LOD_LEVEL_SHIFT)) | (iLODLevel << LOD_LEVEL_SHIFT);
+
     return bClipped;
+  }
+
+  /// \brief
+  ///   Performs simple near/far clip test, where 1, 0 or -1 is returned based on the current distance to the near resp. far plane
+  inline static int GetClipStatus(float fDistSqr, float fNearPlane, float fFarPlane)
+  {
+    if ((fNearPlane > 0.0f) && (fDistSqr < (fNearPlane * fNearPlane)))
+      return +1;
+    else if (((fFarPlane > 0.0f) && (fDistSqr >= (fFarPlane * fFarPlane))))
+      return -1;
+
+    return 0;
   }
 
   #ifdef WIN32
@@ -271,7 +359,7 @@ protected:
 #endif //_VISAPIVISIBILITYLODHYSTERESIS_HPP_INCLUDED_
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

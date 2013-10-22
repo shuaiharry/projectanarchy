@@ -13,60 +13,55 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConstraint.hpp>
 
 /// \brief
-///   Descriptor for vHavok PointToPath constraint.
+///   Descriptor for vHavokPhysics PointToPath constraint.
 class vHavokPointToPathConstraintDesc : public vHavokConstraintDesc
 {
 public:
   VHAVOK_IMPEXP vHavokPointToPathConstraintDesc();
 
-  VHAVOK_IMPEXP virtual void Reset();
+  VHAVOK_IMPEXP virtual void Reset() HKV_OVERRIDE;
 
-  V_DECLARE_SERIAL_DLLEXP( vHavokPointToPathConstraintDesc, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokPointToPathConstraintDesc, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 public:
   hkvVec3 m_vPathPivot;       ///< Specifies the position of the linear path in world space
   hkvVec3 m_vPathDirection;   ///< Specifies the normalized direction of the linear path
-  float m_fPathLength;             ///< The length of the linear path
-  float m_fFriction;               ///< The friction magnitude
+  float m_fPathLength;        ///< The length of the linear path
+  float m_fFriction;          ///< The friction magnitude
 
 private:
   static const unsigned int s_iSerialVersion;
 };
 
-
-// ----------------------------------------------------------------------------
-// vHavokPointToPathConstraint
-// ----------------------------------------------------------------------------
-
 /// \brief
-///   Implementation of the vHavok PointToPath constraint. 
+///   Implementation of the vHavokPhysics PointToPath constraint. 
 ///   (Currently only linear paths are supported)
 class vHavokPointToPathConstraint : public vHavokConstraint
 {
 public:
   // serialization and type management
-  V_DECLARE_SERIAL_DLLEXP( vHavokPointToPathConstraint, VHAVOK_IMPEXP )
-    VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokPointToPathConstraint, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 protected:
-  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData();
-  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc();
-  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, vHavokConstraintDesc const& desc);
+  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, 
+    vHavokConstraintDesc const& desc) HKV_OVERRIDE;
 public:
-  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc);
+  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc) HKV_OVERRIDE;
 
 private:
-  static const unsigned int s_iSerialVersion;
-
   vHavokPointToPathConstraintDesc m_savedPointToPathDesc;  ///< Saved PointToPath constraint desc
 
+  static const unsigned int s_iSerialVersion;
 };
 
 #endif //V_HAVOK_POINTTOPATH_CONSTRAINT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

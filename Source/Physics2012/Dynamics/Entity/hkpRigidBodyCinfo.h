@@ -9,8 +9,8 @@
 #define HKDYNAMICS_ENTITY_HKRIGIDBODYCINFO_XML_H
 
 #include <Physics2012/Collide/Agent/Collidable/hkpCollidableQualityType.h>
+#include <Physics2012/Dynamics/Common/hkpMaterial.h>
 #include <Physics2012/Dynamics/Motion/hkpMotion.h>
-#include <Physics2012/Dynamics/Entity/hkpEntity.h>
 
 class hkpHandleCollection;
 class hkLocalFrame;
@@ -210,7 +210,7 @@ class hkpRigidBodyCinfo
 #endif // HKDYNAMICS_ENTITY_HKRIGIDBODYCINFO_XML_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

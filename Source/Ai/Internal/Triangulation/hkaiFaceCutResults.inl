@@ -79,9 +79,10 @@ inline int hkaiFaceCutResults::getRequiredSize(int numPolys, int numEdges)
 	// This might reserve more vertex data than it needs
 	
 	// Pad up so that the vectors are aligned
-	const int reserveSize = HK_NEXT_MULTIPLE_OF(sizeof(hkVector4), polyDataSize) + numEdges * sizeof(hkVector4);
+	const int numVerts = HK_NEXT_MULTIPLE_OF(4, numEdges);
+	const int reserveSize = HK_NEXT_MULTIPLE_OF(sizeof(hkVector4), polyDataSize) + numVerts * sizeof(hkVector4);
 #ifdef HK_ARCH_PS3SPU
-	return (reserveSize > hkThreadMemorySpu::MEMORY_MAX_SIZE_LARGE_BLOCK) ? HK_INT32_MAX :  hkThreadMemorySpu::getInstance().getAllocatedSize(HK_NULL, reserveSize);
+	return (reserveSize > hkMemoryRouterSpuUtil::MEMORY_MAX_SIZE_LARGE_BLOCK) ? HK_INT32_MAX :  hkMemoryRouterSpuUtil::getAllocatedSize(HK_NULL, reserveSize);
 #else
 	return reserveSize;
 #endif
@@ -159,7 +160,7 @@ inline hkUint32* hkaiFaceCutResults::init(int numPolys, int numEdges)
 {
 #ifdef HK_PLATFORM_SPU
 #	ifdef HK_PLATFORM_PS3_SPU
-		const int maxAllocationAllowed = hkThreadMemorySpu::MEMORY_MAX_SIZE_LARGE_BLOCK;
+		const int maxAllocationAllowed = hkMemoryRouterSpuUtil::MEMORY_MAX_SIZE_LARGE_BLOCK;
 #	else
 		const int maxAllocationAllowed = hkThreadMemory::MEMORY_MAX_SIZE_LARGE_BLOCK;	
 #	endif
@@ -216,7 +217,7 @@ inline const hkVector4* hkaiFaceCutResults::getVertexStart() const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

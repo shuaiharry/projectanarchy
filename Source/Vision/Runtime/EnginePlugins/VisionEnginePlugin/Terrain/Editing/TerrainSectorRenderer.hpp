@@ -22,7 +22,7 @@
 class VTerrainSectorRenderLoop : public VisionRenderLoop_cl
 {
 public:
-  TERRAIN_IMPEXP VTerrainSectorRenderLoop(int iResX, int iResY);
+  TERRAIN_IMPEXP VTerrainSectorRenderLoop(int iResX, int iResY, bool bBakedLightmaps);
   TERRAIN_IMPEXP virtual ~VTerrainSectorRenderLoop();
 
   void SetSector(VTerrainSector* pSector)
@@ -35,6 +35,7 @@ public:
   TERRAIN_IMPEXP virtual void OnDoRenderLoop(void *pUserData);
 
   int m_iResX, m_iResY;
+  bool m_bBakedLightmaps;
   VisStaticGeometryInstanceCollection_cl m_AllInst;
   VTerrainSector *m_pSector;
   VisBitmap_cl *m_pTargetData;
@@ -56,7 +57,7 @@ public:
 class VTerrainSectorRenderer : public VRefCounter
 {
 public:
-  TERRAIN_IMPEXP VTerrainSectorRenderer(VTerrain *pOwner, int iRes=512, int iBorderWidth=4);
+  TERRAIN_IMPEXP VTerrainSectorRenderer(VTerrain *pOwner, int iRes=512, int iBorderWidth=4, bool bBakedLightmaps=true);
   TERRAIN_IMPEXP virtual ~VTerrainSectorRenderer();
 
   TERRAIN_IMPEXP void SetSector(VTerrainSector *pSector);
@@ -83,7 +84,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

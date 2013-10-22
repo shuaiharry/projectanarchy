@@ -915,7 +915,7 @@ bool VisParticleGroupDescriptor_cl::DataExchangeXML(TiXmlElement *pRoot, bool bW
   TiXmlElement *pGroup = XMLHelper::SubNode(pRoot,"group",bWrite);
   if (pGroup)
   {
-    int eTopology = bWrite ? (int)m_eTopology : PARTICLE_TOPOLOGY_UNKNOWN;
+    int eTopology = bWrite ? (int)m_eTopology : (int)PARTICLE_TOPOLOGY_UNKNOWN;
     const int eTopologies[6] = {PARTICLE_TOPOLOGY_BILLBOARDS,PARTICLE_TOPOLOGY_STRETCH_VELOCITY,PARTICLE_TOPOLOGY_STRETCH_FIXLENGTH,PARTICLE_TOPOLOGY_RINGWAVE,PARTICLE_TOPOLOGY_MESH,PARTICLE_TOPOLOGY_TRAIL};
     const char* szTopologies[6] = {"Billboards","StretchVelocity","StretchFixLength","RingWave","Mesh","Trail"};
     XMLHelper::Exchange_Enum(pGroup,"topology",eTopology,sizeof(eTopologies)/sizeof(eTopologies[0]),szTopologies,eTopologies,bWrite);
@@ -1356,7 +1356,7 @@ void VisParticleDescriptorList_cl::SerializeX( VArchive &ar, VisParticleEffectFi
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

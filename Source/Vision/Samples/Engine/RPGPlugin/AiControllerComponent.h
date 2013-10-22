@@ -34,68 +34,97 @@ public:
   // Constructor needs to be public for FORCE_LINKDYNCLASS on mobile
   RPG_AiControllerComponent();
 
-protected:
+  bool CanAttack() const;
+
+  void SetLastAttackTime(float lastAttackTime) { m_lastAttackTime = lastAttackTime; }
+
+  virtual bool TryMeleeAttack();
+
+  virtual bool TryRangedAttack();
+
+  // RPG_ControllerComponent
+  bool TryAoeAttack() HKV_OVERRIDE;
+
+//protected:
   //@{
   // Common utility methods
-  void SetTarget(RPG_DamageableEntity* target);
-  RPG_DamageableEntity* GetTarget();
-  void ClearTarget();
-  bool HasTarget() const;
   bool HasValidTarget() const;
   bool HasLineOfSightToTarget() const;
   bool HasLineOfSightToTarget(bool& left, bool& center, bool& right) const;
   //@}
 
   //@{
-  // State Handling
-  virtual void SelectState() {}   // override in child classes
-  virtual void UpdateState(float const deltaTime);
-  RPG_AIState_e GetState() const;
-  bool IsInState(RPG_AIState_e state) const;
-  bool SwitchState(RPG_AIState_e newState);
-  virtual bool CanEnterState(RPG_AIState_e newState) {return true;}
-  //@}
-
-  //@{
-  // Commonly-Used States
-  virtual void UpdateSpawning(float const deltaTime);
-  virtual void UpdateWandering(float const deltaTime) {};
-  virtual void UpdateChallenging(float const deltaTime);
-  virtual void UpdateMovingToPosition(float const deltaTime) {};
-  virtual void UpdateMeleeAttacking(float const deltaTime) {};
-  virtual void UpdateRangedAttacking(float const deltaTime) {};
-  virtual void UpdateAoeAttacking(float const deltaTime) {};
-  virtual void UpdateFleeing(float const deltaTime) {};
-  virtual void UpdateHealing(float const deltaTime) {};
-  //@}
-
-  //@{
   // Common utility methods
   bool AcquireTarget();
-  bool IsValidTargetInAggroRange() const;
-  bool FleeFromPosition(hkvVec3 const& targetPosition, float const fleeDistance = 300.f);
   //@}
 
-  void DebugDisplayStateInformation() const;
+  float m_lastAttackTime;
+  float m_minAttackInterval;
 
-  // RPG_AiControllerComponent
-  void ServerTick(float deltaTime) HKV_OVERRIDE;
-
-protected:
-  RPG_AIState_e m_aiState;
-  bool m_isFirstStateUpdate;
-  float m_stateStartTime;
-  RPG_DamageableEntity *m_target;
+  float m_fleeRange;
 
 private:
   V_DECLARE_SERIAL_DLLEXP(RPG_AiControllerComponent, RPG_PLUGIN_IMPEXP);
   V_DECLARE_VARTABLE(RPG_AiControllerComponent, RPG_PLUGIN_IMPEXP);
 };
 
+namespace RPG_AiControllerState
+{
+  // MeleeAttacking
+  class MeleeAttacking : public RPG_ControllerStateBase
+  {
+    void OnEnterState(RPG_ControllerComponent *controller) HKV_OVERRIDE;
+
+    void OnProcessAnimationEvent(RPG_ControllerComponent *controller, hkbEvent const& animationEvent) HKV_OVERRIDE;
+
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "AiController::MeleeAttacking"; }
+  };
+
+  // RangedAttacking
+  class RangedAttacking : public RPG_ControllerStateBase
+  {
+    void OnEnterState(RPG_ControllerComponent *controller) HKV_OVERRIDE;
+
+    void OnExitState(RPG_ControllerComponent *controller) HKV_OVERRIDE;
+
+    void OnProcessAnimationEvent(RPG_ControllerComponent *controller, hkbEvent const& animationEvent) HKV_OVERRIDE;
+
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "AiController::RangedAttacking"; }
+  };
+
+  // AoeAttacking
+  class AoeAttacking : public RPG_ControllerStateBase
+  {
+    void OnEnterState(RPG_ControllerComponent *controller) HKV_OVERRIDE;
+
+    void OnExitState(RPG_ControllerComponent *controller) HKV_OVERRIDE;
+
+    void OnProcessAnimationEvent(RPG_ControllerComponent *controller, hkbEvent const& animationEvent) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "AiController::AoeAttacking"; }
+  };
+
+  // Challenging
+  class Challenging : public RPG_ControllerStateBase
+  {
+    void OnEnterState(RPG_ControllerComponent *controller) HKV_OVERRIDE;
+
+    void OnProcessAnimationEvent(RPG_ControllerComponent *controller, hkbEvent const& animationEvent) HKV_OVERRIDE;
+
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "AiController::Challenging"; }
+  };
+}
+
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

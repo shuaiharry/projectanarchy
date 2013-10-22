@@ -46,7 +46,7 @@ public:
 							m_maxTransformTrackIndex(-1),
 							m_numBones(0),
 							m_numPartitionIndices(0),
-							m_masterWeight(1.0f),
+							m_masterWeight(1),
 							m_perBoneWeights(HK_NULL),
 							m_trackToBoneMapping(HK_NULL),
 							m_partitionIndices(HK_NULL),
@@ -76,7 +76,7 @@ public:
 		FloatBlendParameters() : m_floatTracksIn(HK_NULL),
 							m_maxFloatTrackIndex(-1),
 							m_numFloatSlots(0),
-							m_masterWeight(1.0f),
+							m_masterWeight(1),
 							m_perFloatTrackWeights(HK_NULL),
 							m_floatTrackToFloatSlotMapping(HK_NULL)
 		{}
@@ -123,7 +123,7 @@ public:
 		/// \param numBones Ignore all tracks mapping to bone >= numBones.  Note that this is the number of bones you want to sample, not the index of a bone
 		/// \param numTracks Total number of tracks in the animation
 		/// \param hasPartitions Whether or not to use partitions
-	static hkUint32 HK_CALL getMaxTrackIndex(const hkInt16* trackToBoneMapping, const hkUint8* perTrackWeights, hkUint32 numBones, hkUint32 numTracks, hkBool hasPartitions = false);
+	static hkInt32 HK_CALL getMaxTrackIndex(const hkInt16* trackToBoneMapping, const hkUint8* perTrackWeights, hkUint32 numBones, hkUint32 numTracks, hkBool hasPartitions = false);
 
 		/// Scales the m_translation component of each given hkQsTransform.
 		/// Useful when changing the size of a character dynamically
@@ -138,7 +138,7 @@ public:
 #endif // HK_BLEND_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

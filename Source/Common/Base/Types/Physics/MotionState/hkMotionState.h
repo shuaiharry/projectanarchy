@@ -20,7 +20,7 @@ extern const class hkClass hkMotionStateClass;
 	/// of the body at time t1.
 class hkMotionState
 {
-	// +version(2)
+	// +version(3)
 	public:
 		
 		HK_DECLARE_REFLECTION();
@@ -51,7 +51,7 @@ class hkMotionState
 		hkTransform m_transform;
 
 			// a swept transform
-		class hkSweptTransform m_sweptTransform;
+		class hkSweptTransform m_sweptTransform; //+overridetype(hkVector4[5])
 
 	public:
 		
@@ -89,7 +89,7 @@ class hkMotionState
 #endif // HK_MATH_MOTION_STATE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

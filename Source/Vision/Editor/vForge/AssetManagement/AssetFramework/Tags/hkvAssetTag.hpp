@@ -6,7 +6,7 @@
  *
  */
 
-/// \file VAssetTag.hpp
+/// \file hkvAssetTag.hpp
 
 #ifndef VASSETTAG_HPP_INCLUDED
 #define VASSETTAG_HPP_INCLUDED
@@ -18,7 +18,7 @@ ANALYSIS_IGNORE_ALL_END
 class hkvAssetTagsHelper;
 
 /// \brief
-///   The VAssetTag class stores for each tag defined in the hkvAssetTagManager
+///   The hkvAssetTag class stores for each tag defined in the hkvAssetTagManager
 ///   whether it is set or not.
 ///
 /// The tags are stored via a bitfield that maps to the tags defined in the hkvAssetTagManager.
@@ -68,7 +68,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

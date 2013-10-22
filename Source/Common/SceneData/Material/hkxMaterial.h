@@ -21,13 +21,16 @@ extern const class hkClass hkxMaterialClass;
 class hkxMaterial : public hkxAttributeHolder
 {
 	//+vtable(true)
-	//+version(4)
+	//+version(5)
 	public:
 
 		HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_SCENE_DATA );
 		HK_DECLARE_REFLECTION();
 	
-		hkxMaterial() {}
+		hkxMaterial()
+		:	m_userData(0)
+		{}
+
 		hkxMaterial(hkFinishLoadedObjectFlag f) : hkxAttributeHolder(f), m_name(f), m_stages(f), m_subMaterials(f), m_extraData(f), m_properties(f) {}
 		virtual ~hkxMaterial();
 
@@ -47,17 +50,20 @@ class hkxMaterial : public hkxAttributeHolder
 				/// 
 			TEX_DISPLACEMENT,
 				/// 
-			TEX_SPECULAR, // Specular Level map
+			TEX_SPECULAR,			// Specular Level map
 				/// 
-			TEX_SPECULARANDGLOSS, // Specular Level map with the Gloss (power) in the Alpha channel
+			TEX_SPECULARANDGLOSS,	// Specular Level map with the Gloss (power) in the Alpha channel
 				///
-			TEX_OPACITY, // Opacity (transparency) map. Normally not used, just use the alpha channel in one of the diffuse maps instead.
+			TEX_OPACITY,			// Opacity (transparency) map. Normally not used, just use the alpha channel in one of the diffuse maps instead.
 				/// 
-			TEX_EMISSIVE, // Emissive (self illumination) map
+			TEX_EMISSIVE,			// Emissive (self illumination) map
 				///
 			TEX_REFRACTION,
 				///	
-			TEX_GLOSS, // Specular Power map, normally not used (alpha in specmap quicker)
+			TEX_GLOSS,				// Specular Power map, normally not used (alpha in specmap quicker)
+				///
+			TEX_DOMINANTS,			// Dominant data for displacement mapping
+
 				///
 			TEX_NOTEXPORTED
 		};
@@ -190,20 +196,23 @@ class hkxMaterial : public hkxAttributeHolder
 			/// extra material info such as a shader (FX file or whatever, usually a hkxMaterialEffect if it comes from our exporters, or a hkxMaterialShaderSet if specific single pass shader sets)
 		hkRefVariant m_extraData;
 
-      // material mapping information (used by Vision etc)
-    hkReal m_uvMapScale[2];  //+default(1.f,1.f)
-    hkReal m_uvMapOffset[2]; //+default(0.f,0.f) 
-    hkReal m_uvMapRotation;  //+default(0.f)
-    hkEnum<UVMappingAlgorithm, hkUint32> m_uvMapAlgorithm; //+default(2)
+		// Material mapping information (used by Vision etc)
+		hkReal m_uvMapScale[2];  //+default(1.f,1.f)
+		hkReal m_uvMapOffset[2]; //+default(0.f,0.f) 
+		hkReal m_uvMapRotation;  //+default(0.f)
+		hkEnum<UVMappingAlgorithm, hkUint32> m_uvMapAlgorithm; //+default(2)
 
-    // Specular multiplier for material for the Vision engine
-    hkReal m_specularMultiplier;
+		// Specular multiplier for material for the Vision engine
+		hkReal m_specularMultiplier;
 
-    //Specular exponent for materials for the Vision engine
-    hkReal m_specularExponent;
+		// Specular exponent for materials for the Vision engine
+		hkReal m_specularExponent;
 
-		//Transparency setting for materials in the Vision engine
+		// Transparency setting for materials in the Vision engine
 		hkEnum<Transparency, hkUint8> m_transparency;
+
+		// User data to get passed to shader
+		hkUlong m_userData;	  //+default(0)
 
 	protected:
 
@@ -214,7 +223,7 @@ class hkxMaterial : public hkxAttributeHolder
 #endif // HKSCENEDATA_MATERIAL_HKXMATERIAL_HKCLASS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

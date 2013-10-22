@@ -123,11 +123,15 @@ class hkbLookAtModifier : public hkbModifier
 
 			/// Index of the head bone. If this is not -1, it overrides the character boneInfo.
 		hkInt16 m_headIndex;	//+default(-1)
-								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")+hk.Description("The head bone.")
+								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+								//+hk.Description("The head bone.")
+								//+hk.Ui(group="Look At Bones")
 
 			/// Index of the neck bone. If this is not -1, it overrides the character boneInfo.
 		hkInt16 m_neckIndex;	//+default(-1)
-								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")+hk.Description("The neck bone.")
+								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+								//+hk.Description("The neck bone.")
+								//+hk.Ui(group="Look At Bones")
 
 			/// Whether or not the IK is on (if off it will fade out).
 		hkBool m_isOn;	//+default(true)
@@ -166,7 +170,7 @@ class hkbLookAtModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

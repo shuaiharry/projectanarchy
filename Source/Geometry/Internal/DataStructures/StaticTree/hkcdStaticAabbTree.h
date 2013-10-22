@@ -49,6 +49,12 @@ public:
 		/// Find the closest leaf in the tree. The collector's callback is triggered for each leaf that is closer to the current smallest distance, starting at maxDistance.
 	hkUint32 getClosestPoint( hkVector4Parameter point, hkSimdRealParameter maxDistance, hkcdAabbTreeQueries::ClosestPointCollector* collector, hkVector4& closestPointOut ) const;
 
+		/// Finds all pairs of overlapping leaves.
+	void getAllPairs( hkcdAabbTreeQueries::AllPairsCollector* collector ) const;
+
+		/// Finds all leaves in this tree that overlap with leaves in the other tree.
+	void getAllPairs( const hkcdStaticAabbTree* otherTree, hkcdAabbTreeQueries::AllPairsCollector* collector ) const;
+
 		/// Returns the size (in bytes) of the tree.
 	int getMemoryFootPrint() const;
 
@@ -73,7 +79,7 @@ protected:
 #endif // HK_STATIC_TREE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

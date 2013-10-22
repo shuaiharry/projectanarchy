@@ -13,7 +13,7 @@
 #include <Physics/Constraint/Visualize/Drawer/hkpPrimitiveDrawer.h>
 
 
-class hkpConstraintDrawer 
+class hkpConstraintDrawer
 {
 	public:
 
@@ -42,7 +42,7 @@ class hkpConstraintDrawer
 	protected:
 
 		void drawPivots(int id, int tag);
-		
+
 		void drawBodyFrames(int id, int tag);
 
 		void updateCommonParameters(const hkTransform& attLocalToWorld, const hkTransform& refLocalToWorld);
@@ -95,7 +95,7 @@ class hkpConstraintDrawer
 		{
 			return m_numArcSegments;
 		}
-		
+
 	protected:
 
 		// world positions
@@ -115,7 +115,7 @@ class hkpConstraintDrawer
 #endif // HKP_CONSTRAINT_DRAWER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

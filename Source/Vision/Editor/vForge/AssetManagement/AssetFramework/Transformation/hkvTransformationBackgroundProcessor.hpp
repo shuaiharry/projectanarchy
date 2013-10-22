@@ -44,31 +44,25 @@ struct hkvBackgroundTransformationInput
 struct hkvBackgroundTransformationOutput
 {
   hkvBackgroundTransformationOutput() :
-    m_asset(HK_NULL), m_sourceFileChanged(false), m_successful(false), m_numOutputsWritten(0)
+    m_asset(HK_NULL), m_successful(false), m_numOutputsWritten(0)
   {
   }
   
   hkvBackgroundTransformationOutput(const hkvBackgroundTransformationOutput& rhs) :
-    m_asset(rhs.m_asset), m_sourceFileChanged(rhs.m_sourceFileChanged), 
-    m_successful(rhs.m_successful), m_numOutputsWritten(rhs.m_numOutputsWritten)
+    m_asset(rhs.m_asset), m_successful(rhs.m_successful), m_numOutputsWritten(rhs.m_numOutputsWritten)
   {
-    m_messages = rhs.m_messages;
   }
 
   hkvBackgroundTransformationOutput& operator=(const hkvBackgroundTransformationOutput& rhs)
   {
     m_asset = rhs.m_asset;
-    m_sourceFileChanged = rhs.m_sourceFileChanged;
     m_successful = rhs.m_successful;
     m_numOutputsWritten = rhs.m_numOutputsWritten;
-    m_messages = rhs.m_messages;
   }
 
   hkRefPtr<hkvAsset> m_asset;
-  bool m_sourceFileChanged;
   bool m_successful;
   hkUint32 m_numOutputsWritten;
-  hkArray<hkvTransformationMessage> m_messages;
 };
 
 
@@ -84,10 +78,15 @@ private:
   hkvTransformationBackgroundProcessor(const hkvTransformationBackgroundProcessor&);
   hkvTransformationBackgroundProcessor& operator=(const hkvTransformationBackgroundProcessor&);
 public:
-  VOVERRIDE ~hkvTransformationBackgroundProcessor();
+  virtual ~hkvTransformationBackgroundProcessor();
+
+  void setAddTransformedToRCS(bool addTransformed);
 
 protected:
+  virtual void onRetryCountExceeded(const hkvBackgroundTransformationInput& input) HKV_OVERRIDE;
+
   virtual void onStopping() HKV_OVERRIDE;
+  virtual void beforeClearInputs() HKV_OVERRIDE;
 
   virtual hkvBackgroundProcessingResult process(const hkvBackgroundTransformationInput& input, hkvBackgroundTransformationOutput& output) HKV_OVERRIDE;
 
@@ -115,7 +114,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

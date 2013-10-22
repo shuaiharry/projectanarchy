@@ -520,7 +520,7 @@ public:
   /// of the shadow-casting objects. To compute the shadow volumes, the bounding boxes of the shadow-casting objects are extruded
   /// by a certain range in the light's direction.
   ///
-  /// This range is computed as the height of the object's bounding box multiplied by the shadow box extrusion multiplier passed
+  /// This range is computed as the longest axis of the object's bounding box multiplied by the shadow box extrusion multiplier passed
   /// into this method.
   ///
   /// \param fMultiplier
@@ -637,7 +637,7 @@ protected:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

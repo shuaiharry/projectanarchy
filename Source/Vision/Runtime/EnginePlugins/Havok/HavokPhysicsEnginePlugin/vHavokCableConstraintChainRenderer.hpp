@@ -46,8 +46,8 @@ public:
   VHAVOK_IMPEXP void SetConstraintChain(vHavokConstraintChain *pConstraintChain);
 
 public:
-  VHAVOK_IMPEXP VOVERRIDE void ThinkFunction();
-  VHAVOK_IMPEXP VOVERRIDE void EditorThinkFunction() { ThinkFunction(); }
+  VHAVOK_IMPEXP virtual void ThinkFunction() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void EditorThinkFunction() HKV_OVERRIDE { ThinkFunction(); }
 
 private:
   vHavokConstraintChain *m_pConstraintChain; ///< The constraint chain used to update the model
@@ -65,9 +65,12 @@ private:
 class vHavokCableConstraintChainRenderer
 : public vHavokConstraintChainRendererBase
 {
-  /// @name Constructor / Destructor
-  //@{
 public:
+  ///
+  /// @name Constructor / Destructor
+  /// @{
+  ///
+
   /// \brief
   ///   Constructor for this constraint chain renderer component.
   /// \param iComponentFlags
@@ -76,55 +79,78 @@ public:
   ///   IVObjectComponent::IVObjectComponent
   VHAVOK_IMPEXP vHavokCableConstraintChainRenderer(
     int iComponentFlags=VIS_OBJECTCOMPONENTFLAG_NONE);
-  //@}
 
-  /// @name Base Class Overrides
-  //@{
+  ///
+  /// @}
+  ///
+
 protected:
-  VOVERRIDE void CommonDeinit();  
-  VOVERRIDE bool DoInit();
-  VOVERRIDE void OnUpdate();
-  VOVERRIDE void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
-  //@}
+  ///
+  /// @name Base Class Overrides
+  /// @{
+  ///
 
-  /// @name Model/Entity Handling
-  //@{
+  virtual void CommonDeinit() HKV_OVERRIDE;
+  virtual bool DoInit() HKV_OVERRIDE;
+  virtual void OnUpdate() HKV_OVERRIDE;
+  virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
+
 private:
-  bool RebuildModel();
-  //@}
+  ///
+  /// @name Model/Entity Handling
+  /// @{
+  ///
 
-  /// @name Serialization
-  //@{
+  bool RebuildModel();
+
+  ///
+  /// @}
+  ///
+
 public:
+  ///
+  /// @name Serialization
+  /// @{
+  ///
+
   V_DECLARE_SERIAL_DLLEXP( vHavokCableConstraintChainRenderer, VHAVOK_IMPEXP)
   V_DECLARE_VARTABLE(vHavokCableConstraintChainRenderer, VHAVOK_IMPEXP)
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
-  //@}
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
-  /// @name Attributes exposed to vForge
-  //@{
+  ///
+  /// @}
+  ///
+
 public:  
+  ///
+  /// @name Attributes exposed to vForge
+  /// @{
+  ///
+
   int VerticesPerRing; ///< Number of vertices in each of the rings that form the cable's outline
   int RingsPerLink;    ///< Number of vertex rings defining the cable's outline for each chain link
   VString ModelFile;   ///< Model file from which the material definition for the cable's surface is taken
   BOOL CastDynamicShadows;   ///< If enabled dynamic shadow is rendered for cable
-  //@}
 
-  /// @name Internal Attributes
-  //@{
+  ///
+  /// @}
+  ///
+
 private:
   VDynamicMeshPtr m_spChainMesh; ///< The generated cable mesh
   VSmartPtr<vHavokCableConstraintChainEntity> m_spChainEntity; ///< The entity for updating the cable bone state
   unsigned int m_iLastKnownNumLinks; ///< The last known number of chain links
   static const unsigned int s_iSerialVersion; ///< The current serialization version for objects of this class.
-  //@}
 };
-
 
 #endif //V_HAVOK_CABLE_CONSTRAINT_CHAIN_RENDERER_H_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

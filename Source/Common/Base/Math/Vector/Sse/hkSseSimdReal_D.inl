@@ -471,6 +471,19 @@ HK_FORCE_INLINE void hkSimdDouble64::zeroIfTrue( hkVector4dComparisonParameter c
 	m_real = _mm_andnot_pd(comp.m_mask.xy, m_real);
 }
 
+HK_FORCE_INLINE void hkSimdDouble64::setClampedZeroOne( hkSimdDouble64Parameter a )
+{
+	// This ensures that if a is NAN, clamped will be 1 afterwards	
+	const __m128d one = *(const hkSingleDouble64*)(g_vectordConstants + HK_QUADREAL_1);
+	__m128d GT = _mm_cmpgt_pd( one, a.m_real );
+#if HK_SSE_VERSION >= 0x41
+	__m128d clamped = _mm_blendv_pd(one, a.m_real, GT);
+#else
+	__m128d clamped = _mm_or_pd( _mm_and_pd(GT, a.m_real), _mm_andnot_pd(GT, one) );
+#endif
+	m_real = _mm_max_pd(_mm_setzero_pd(), clamped);
+}
+
 HK_FORCE_INLINE void hkSimdDouble64::setMin(  hkSimdDouble64Parameter a, hkSimdDouble64Parameter b ) 
 {
 	m_real = _mm_min_pd( a.m_real, b.m_real );
@@ -1087,7 +1100,7 @@ HK_FORCE_INLINE void hkSimdDouble64::store(  hkFloat16 *p ) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

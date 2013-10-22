@@ -143,12 +143,12 @@ void vHavokCpuJobThreadPool::processAllJobs( hkJobQueue* queue, hkJobType firstJ
 	}
 }
 
-bool vHavokCpuJobThreadPool::isProcessing()
+bool vHavokCpuJobThreadPool::isProcessing() const
 {
 	return m_isRunning;
 }
 
-int vHavokCpuJobThreadPool::getNumThreads()
+int vHavokCpuJobThreadPool::getNumThreads() const
 {
 	return m_sharedThreadData.m_numThreads;
 }
@@ -393,7 +393,7 @@ static void* HK_CALL hkWorkerThreadFunc(void *v)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

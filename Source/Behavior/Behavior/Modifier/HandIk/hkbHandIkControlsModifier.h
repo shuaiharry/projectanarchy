@@ -74,7 +74,7 @@ class hkbHandIkControlsModifier : public hkbModifier
 				/// The index of the hand.  This is an index into the array of hands defined in the hkbHandIkModifier.
 			hkInt32 m_handIndex;	//+default(0)
 									//+hk.RangeInt32(absmin=0,absmax=3)
-									//+hk.Description("The index of the hand.  This is an index into the array of hands defined in the hkbHandIkModifier.")
+									//+hk.Description("The index of the hand.  This is an index into the array of hands defined in the Hand IK properties of the character.")
 
 				/// Enable this hand for IK. Make sure you provide valid data when this is set to true. 
 			hkBool m_enable; //+default(false)
@@ -91,7 +91,7 @@ class hkbHandIkControlsModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

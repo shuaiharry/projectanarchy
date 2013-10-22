@@ -76,7 +76,8 @@ public: // Interface
   ASSETFRAMEWORK_IMPEXP virtual hkUint32 getTypeIndex() const = 0;
   
   ASSETFRAMEWORK_IMPEXP virtual bool hasStaticTarget() const { return false; }
-  ASSETFRAMEWORK_IMPEXP virtual void getRelativeStaticTargetPath(const hkvAsset& asset, hkStringBuf& out_path) const { }
+  ASSETFRAMEWORK_IMPEXP virtual bool getRelativeStaticTargetPath(const hkvAsset& asset, hkStringBuf& out_path) const { return false; }
+  ASSETFRAMEWORK_IMPEXP bool getAbsoluteStaticTargetPath(const hkvAsset& asset, hkStringBuf& out_path) const;
 
   ASSETFRAMEWORK_IMPEXP virtual bool executeTransformation(const hkvTransformationInput& input, hkvTransformationOutput& output) const = 0;
   ASSETFRAMEWORK_IMPEXP virtual bool queryOutputFileSpecs(const hkvTransformationInput& input, hkvTransformationOutput& output) const = 0;
@@ -133,7 +134,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

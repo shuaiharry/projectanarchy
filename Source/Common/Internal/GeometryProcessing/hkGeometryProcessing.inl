@@ -339,7 +339,7 @@ HKGP_FORCE_INLINE hkBool32	hkGeometryProcessing::circumCenter(hkVector4Parameter
 	hkVector4	ba; ba.setSub(b,a);
 	hkVector4	ca; ca.setSub(c,a);
 	hkVector4	bc; bc.setCross(ba,ca);
-	hkSimdReal	det = bc.lengthSquared<3>() * hkSimdReal_2;
+	hkSimdReal	det = bc.lengthSquared<3>(); det.add(det);
 	if((det * det) > eps)
 	{
 		hkVector4	nums;
@@ -372,7 +372,7 @@ HKGP_FORCE_INLINE hkBool32	hkGeometryProcessing::circumCenter(hkVector4Parameter
 	hkVector4	db; db.setCross(da,ba);
 	hkVector4	cd; cd.setCross(ca,da);
 
-	hkSimdReal	det = cd.dot<3>(ba) * hkSimdReal_2;
+	hkSimdReal	det = cd.dot<3>(ba); det.add(det);
 
 	if((det * det) > eps)
 	{
@@ -430,6 +430,16 @@ HKGP_FORCE_INLINE hkUlong		hkGeometryProcessing::makeSymmetricHash(A a,B b)
 		return(makeHash(a,b));
 	else
 		return(makeHash(b,a));
+}
+
+//
+HK_FORCE_INLINE hkVector4		hkGeometryProcessing::evaluateBarycentricCoordinates(hkVector4Parameter baryCenter, hkVector4Parameter a, hkVector4Parameter b, hkVector4Parameter c)
+{
+	hkVector4 x;
+	x.setMul(a, baryCenter.getComponent<0>());
+	x.addMul(b, baryCenter.getComponent<1>());
+	x.addMul(c, baryCenter.getComponent<2>());
+	return x;
 }
 
 //
@@ -505,7 +515,7 @@ HK_FORCE_INLINE void hkGeometryProcessing::LocalArrayAllocator<T, CAPACITY>::cle
 {
 	// call dtor on all objects
 	const int size = (int) (m_next - m_data);
-	hkArrayUtil::destruct<T>(m_data, size, typename hkIsPodType<T>::type());
+	hkArrayUtil::destruct<T>(m_data, size, typename  hkTrait::IsPodType<T>::type());
 	m_next = m_data;
 }
 
@@ -579,7 +589,7 @@ inline hkVector4	hkGeometryProcessing::minimizeN_R(int steps, int maxDepth, hkRe
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

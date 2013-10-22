@@ -51,6 +51,8 @@ enum VParamType
     V_TYPE_ENTITY_KEY,
     V_TYPE_REFERENCE,
     V_TYPE_SURFACE,
+
+    V_TYPE_POINTER,
     
     //animatable controllers (future)
     V_TYPE_FIRST_CTRL = 200,
@@ -73,7 +75,7 @@ enum VParamType
 #endif // DC_VPARAMTYPE_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

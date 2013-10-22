@@ -24,7 +24,7 @@ class VAnimatedCollisionMesh : public IVCollisionMesh
 public:
   VAnimatedCollisionMesh(VisAnimConfig_cl *pAnimConfig, VBaseMesh *pMesh, VisCollisionMeshSource_e eSource);
 
-  VOVERRIDE ~VAnimatedCollisionMesh();
+  virtual ~VAnimatedCollisionMesh();
 
   VISION_APIFUNC virtual VBaseSubmesh **GetTriangleSubmeshPtr(bool bForceCreate = false) HKV_OVERRIDE;
   VISION_APIFUNC virtual unsigned char *GetTriangleFlagsPtr(bool bForceCreate = false) HKV_OVERRIDE;
@@ -62,7 +62,7 @@ protected:
 #endif //VISAPICOLLISIONMESHENTITY_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -7,6 +7,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -15,7 +16,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Windows.Forms;
+using AssetManagerManaged;
 using CSharpFramework;
+using CSharpFramework.AssetManagement;
 using CSharpFramework.Contexts;
 using CSharpFramework.Controls;
 using CSharpFramework.Dialogs;
@@ -27,19 +30,17 @@ using CSharpFramework.Scene;
 using CSharpFramework.Serialization;
 using CSharpFramework.Shapes;
 using CSharpFramework.ShortCuts;
+using CSharpFramework.View;
 using CSharpFramework.Visitors;
 using Editor.Actions;
 using Editor.Dialogs;
 using Editor.View;
+using Editor.Vision;
 using Editor.VisionSpecific;
+using ManagedBase;
 using ManagedFramework;
 // NUnit includes
 using NUnit.Core;
-using CSharpFramework.View;
-using AssetManagerManaged;
-using ManagedBase;
-using CSharpFramework.AssetManagement;
-using Editor.Vision;
 
 namespace Editor
 {
@@ -142,7 +143,7 @@ namespace Editor
     private ToolStripMenuItem Menu_Engine_PurgeResources;
     private ToolStripSeparator toolStripMenuItem16;
     private ToolStripMenuItem Menu_Engine_SaveScreenshot;
-    private ToolStripMenuItem Menu_Engine_SaveScreenshotAs;
+    private ToolStripMenuItem Menu_Engine_ScreenshotSettings;
     private ToolStripMenuItem Menu_StaticLighting_ActiveTool;
     private ToolStripMenuItem Menu_StaticLighting_ActiveTool_Dummy;
     private ToolStripMenuItem Menu_StaticLighting_EditSettings;
@@ -296,44 +297,6 @@ namespace Editor
 
     private GoogleAnalyticsTracker _GATracker;
 
-    private void ShowEula()
-    {
-      string sAcceptedEulaToken = Path.Combine(EditorManager.GetDirectory(EditorManager.DirectoryType.UserDataPath), "UserAcceptedEula.token");
-
-      if (System.IO.File.Exists(sAcceptedEulaToken))
-        return;
-
-      using (EULA EulaDlg = new EULA())
-      {
-        EulaDlg.ShowDialog();
-
-        if (!EulaDlg.HasAcceptedEula())
-        {
-          MessageBox.Show("You rejected the Project Anarchy EULA.\nvForge will now close.", "vForge", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-          Close();
-        }
-        else
-        {
-          try
-          {
-            System.IO.File.WriteAllText(sAcceptedEulaToken, "The Project Anarchy EULA has been accepted by this user.");
-          }
-          catch(Exception e)
-          {
-            MessageBox.Show("Failed to write this file: \n'" + sAcceptedEulaToken + "'\nPlease make sure vForge has the necessary access rights to create this file.", "vForge", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-          }
-        }
-      }
-    }
-
-    #else
-
-    private void ShowEula()
-    {
-      // nothing to do in non-Anarchy builds
-    }
-
-
     #endif
 
 
@@ -370,6 +333,10 @@ namespace Editor
         this.mainMenu.Items.Remove(Menu_Tests);
       }
 
+      // Initialize managed framework
+      ManagedFramework.ManagedFramework.OneTimeInit();
+
+      // Initialize editor plugins
       EditorManager.InitPlugins(Application.StartupPath);
 
       EditorManager.EngineManager.SetExecutablePath(Path.GetFullPath(Application.StartupPath));
@@ -393,7 +360,6 @@ namespace Editor
       Scene2DView.RelevantObjects.Add(ZoneActionProvider.ACTION_PROVIDER); // register one global instance
 
       // Initialize Remote Manager
-      ManagedFramework.ManagedFramework.OneTimeInit();
       InitializeRemoteManager(); 
    
       // Initially update status bar
@@ -412,12 +378,22 @@ namespace Editor
 
       // hotkeys:
       ShortCutConfig shortcuts = EditorManager.ShortCuts;
-      shortcuts.Add(new GizmoModeShortCut(Keys.W, ShapeDragMode.MOVE));
-      shortcuts.Add(new GizmoModeShortCut(Keys.E, ShapeDragMode.ROTATE));
-      shortcuts.Add(new GizmoModeShortCut(Keys.R, ShapeDragMode.UNIFORMSCALE));
-      shortcuts.Add(new GizmoModeShortCut(Keys.None, ShapeDragMode.LINK));
-      shortcuts.Add(new GizmoSwitchShortCut(Keys.Q));
-      shortcuts.Add(new CameraStyleShortCut(Keys.None, EditorSettingsBase.CameraStyle_e.MaxStyle)); 
+      shortcuts.Add(new GizmoModeShortCut(Keys.W, ShapeDragMode.MOVE, false));
+      shortcuts.Add(new GizmoModeShortCut(Keys.E, ShapeDragMode.ROTATE, false));
+      shortcuts.Add(new GizmoModeShortCut(Keys.R, ShapeDragMode.UNIFORMSCALE, false));
+      shortcuts.Add(new GizmoModeShortCut(Keys.None, ShapeDragMode.LINK, false));      
+      shortcuts.Add(new GizmoSwitchShortCut(Keys.Q, true, false));
+      shortcuts.Add(new GizmoSwitchShortCut(Keys.Shift | Keys.Q, false, false));
+
+      // Alternate gizmo mode shortcuts to use with WASD fly mode controls
+      shortcuts.Add(new GizmoModeShortCut(Keys.D1, ShapeDragMode.MOVE, true));
+      shortcuts.Add(new GizmoModeShortCut(Keys.D2, ShapeDragMode.ROTATE, true));
+      shortcuts.Add(new GizmoModeShortCut(Keys.D3, ShapeDragMode.UNIFORMSCALE, true));
+      shortcuts.Add(new GizmoModeShortCut(Keys.D4, ShapeDragMode.LINK, true));
+      shortcuts.Add(new GizmoSwitchShortCut(Keys.F1, true, true));
+      shortcuts.Add(new GizmoSwitchShortCut(Keys.Shift | Keys.F1, false, true));
+
+	    shortcuts.Add(new CameraStyleShortCut(Keys.None, EditorSettingsBase.CameraStyle_e.MaxStyle)); 
       shortcuts.Add(new CameraStyleShortCut(Keys.None, EditorSettingsBase.CameraStyle_e.MayaStyle)); 
       shortcuts.Add(new CameraStyleShortCut(Keys.None, EditorSettingsBase.CameraStyle_e.MiddleMouseOrbitSelection)); 
       shortcuts.Add(new CameraStyleShortCut(Keys.None, EditorSettingsBase.CameraStyle_e.MiddleMousePan)); 
@@ -432,17 +408,17 @@ namespace Editor
       shortcuts.Add(new PerspectiveModeShortCut(VisionViewBase.ProjectionMode_e.Right, Keys.None));
 
       shortcuts.Add(new MenuItemShortCut(Menu_File_New_Scene, Keys.None));
-      shortcuts.Add(new MenuItemShortCut(Menu_File_Open_Scene, Keys.None));
+      shortcuts.Add(new MenuItemShortCut(Menu_File_Open_Scene, Keys.Control | Keys.O));
       shortcuts.Add(new MenuItemShortCut(Menu_File_Save_Scene, Keys.Control | Keys.S));
       shortcuts.Add(new MenuItemShortCut(Menu_File_Save_SceneAs, Keys.None));
-      shortcuts.Add(new MenuItemShortCut(Menu_File_Export_Scene,Keys.None));
+      shortcuts.Add(new MenuItemShortCut(Menu_File_Export_Scene, Keys.Control | Keys.E));
       shortcuts.Add(new MenuItemShortCut(Menu_Edit_FindShapes, Keys.Control | Keys.F));
-      shortcuts.Add(new MenuItemShortCut(Menu_Play_Animate,Keys.None));
-      shortcuts.Add(new MenuItemShortCut(Menu_Play_RunInEditor,Keys.None));
-      shortcuts.Add(new MenuItemShortCut(Menu_Play_PlayTheGame,Keys.None));
+      shortcuts.Add(new MenuItemShortCut(Menu_Play_Animate, Keys.F5));
+      shortcuts.Add(new MenuItemShortCut(Menu_Play_RunInEditor, Keys.Shift | Keys.F5));
+      shortcuts.Add(new MenuItemShortCut(Menu_Play_PlayTheGame, Keys.Control | Keys.F5));
       shortcuts.Add(new MenuItemShortCut(Menu_Engine_ReloadResources,Keys.None));
       shortcuts.Add(new MenuItemShortCut(Menu_Engine_SaveScreenshot,Keys.None));
-      shortcuts.Add(new MenuItemShortCut(Menu_Engine_SaveScreenshotAs,Keys.None));
+      shortcuts.Add(new MenuItemShortCut(Menu_Engine_ScreenshotSettings,Keys.None));
       shortcuts.Add(new MenuItemShortCut(Menu_StaticLighting_EditSettings, Keys.None));
 
       shortcuts.Add(new ReservedShortCut("Menu File", Keys.Alt | Keys.F));
@@ -626,9 +602,12 @@ namespace Editor
 #if HK_ANARCHY
       // Initialize the tracker which listens to the necessary editor events to ensure correct stats tracking
       _GATracker = new GoogleAnalyticsTracker();
-#endif
 
-      ShowEula();
+      if (!EULA.ShowEula())
+        Close();
+
+      UpdateDlg.CheckForUpdates();
+#endif
 
       // Show startup dialog (when there are command line arguments do not show the startup dialog)
       if (!TestManager.IsRunning && !EditorManager.SilentMode && EditorManager.Settings.OpenStartupDialog && CommandLineArgs.Length == 0)
@@ -735,7 +714,7 @@ namespace Editor
       this.Menu_Engine_PurgeResources = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripMenuItem16 = new System.Windows.Forms.ToolStripSeparator();
       this.Menu_Engine_SaveScreenshot = new System.Windows.Forms.ToolStripMenuItem();
-      this.Menu_Engine_SaveScreenshotAs = new System.Windows.Forms.ToolStripMenuItem();
+      this.Menu_Engine_ScreenshotSettings = new System.Windows.Forms.ToolStripMenuItem();
       this.Menu_StaticLighting = new System.Windows.Forms.ToolStripMenuItem();
       this.Menu_StaticLighting_ActiveTool = new System.Windows.Forms.ToolStripMenuItem();
       this.Menu_StaticLighting_ActiveTool_Dummy = new System.Windows.Forms.ToolStripMenuItem();
@@ -1457,7 +1436,7 @@ namespace Editor
             this.Menu_Engine_PurgeResources,
             this.toolStripMenuItem16,
             this.Menu_Engine_SaveScreenshot,
-            this.Menu_Engine_SaveScreenshotAs});
+            this.Menu_Engine_ScreenshotSettings});
       this.Menu_Engine.Name = "Menu_Engine";
       this.Menu_Engine.Size = new System.Drawing.Size(55, 20);
       this.Menu_Engine.Text = "E&ngine";
@@ -1584,14 +1563,14 @@ namespace Editor
       this.Menu_Engine_SaveScreenshot.Text = "Save Screenshot";
       this.Menu_Engine_SaveScreenshot.Click += new System.EventHandler(this.Menu_Engine_Screenshot_Click);
       // 
-      // Menu_Engine_SaveScreenshotAs
+      // Menu_Engine_ScreenshotSettings
       // 
-      this.Menu_Engine_SaveScreenshotAs.Image = global::Editor.Properties.Resources.toolbar_screenshot;
-      this.Menu_Engine_SaveScreenshotAs.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-      this.Menu_Engine_SaveScreenshotAs.Name = "Menu_Engine_SaveScreenshotAs";
-      this.Menu_Engine_SaveScreenshotAs.Size = new System.Drawing.Size(192, 22);
-      this.Menu_Engine_SaveScreenshotAs.Text = "Save Screenshot As";
-      this.Menu_Engine_SaveScreenshotAs.Click += new System.EventHandler(this.Menu_Engine_ScreenshotAs_Click);
+      this.Menu_Engine_ScreenshotSettings.Image = global::Editor.Properties.Resources.toolbar_screenshot;
+      this.Menu_Engine_ScreenshotSettings.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+      this.Menu_Engine_ScreenshotSettings.Name = "Menu_Engine_ScreenshotSettings";
+      this.Menu_Engine_ScreenshotSettings.Size = new System.Drawing.Size(192, 22);
+      this.Menu_Engine_ScreenshotSettings.Text = "Screenshot settings...";
+      this.Menu_Engine_ScreenshotSettings.Click += new System.EventHandler(this.Menu_Engine_ScreenshotSettings_Click);
       // 
       // Menu_StaticLighting
       // 
@@ -1670,7 +1649,7 @@ namespace Editor
       // 
       this.Menu_Options_Settings.Image = global::Editor.Properties.Resources.toolbar_settings;
       this.Menu_Options_Settings.Name = "Menu_Options_Settings";
-      this.Menu_Options_Settings.Size = new System.Drawing.Size(145, 22);
+      this.Menu_Options_Settings.Size = new System.Drawing.Size(152, 22);
       this.Menu_Options_Settings.Text = "Settings";
       this.Menu_Options_Settings.Click += new System.EventHandler(this.menu_Extras_Settings_Click);
       // 
@@ -1678,28 +1657,28 @@ namespace Editor
       // 
       this.Menu_Options_Hotkeys.Image = global::Editor.Properties.Resources.toolbar_hotkeys;
       this.Menu_Options_Hotkeys.Name = "Menu_Options_Hotkeys";
-      this.Menu_Options_Hotkeys.Size = new System.Drawing.Size(145, 22);
+      this.Menu_Options_Hotkeys.Size = new System.Drawing.Size(152, 22);
       this.Menu_Options_Hotkeys.Text = "Hotkeys";
       this.Menu_Options_Hotkeys.Click += new System.EventHandler(this.menu_Extras_Hotkeys_Click);
       // 
       // toolStripMenuItem17
       // 
       this.toolStripMenuItem17.Name = "toolStripMenuItem17";
-      this.toolStripMenuItem17.Size = new System.Drawing.Size(142, 6);
+      this.toolStripMenuItem17.Size = new System.Drawing.Size(149, 6);
       // 
       // Menu_Options_ShowPlugins
       // 
       this.Menu_Options_ShowPlugins.Image = global::Editor.Properties.Resources.toolbar_plugins;
       this.Menu_Options_ShowPlugins.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
       this.Menu_Options_ShowPlugins.Name = "Menu_Options_ShowPlugins";
-      this.Menu_Options_ShowPlugins.Size = new System.Drawing.Size(145, 22);
+      this.Menu_Options_ShowPlugins.Size = new System.Drawing.Size(152, 22);
       this.Menu_Options_ShowPlugins.Text = "Show Plugins";
       this.Menu_Options_ShowPlugins.Click += new System.EventHandler(this.Menu_Engine_ShowPlugins_Click);
       // 
       // toolStripMenuItem18
       // 
       this.toolStripMenuItem18.Name = "toolStripMenuItem18";
-      this.toolStripMenuItem18.Size = new System.Drawing.Size(142, 6);
+      this.toolStripMenuItem18.Size = new System.Drawing.Size(149, 6);
       // 
       // Menu_Remote
       // 
@@ -2282,7 +2261,7 @@ namespace Editor
       this.ToolBar_SaveScreenshotAs.Name = "ToolBar_SaveScreenshotAs";
       this.ToolBar_SaveScreenshotAs.Size = new System.Drawing.Size(175, 22);
       this.ToolBar_SaveScreenshotAs.Text = "Save Screenshot As";
-      this.ToolBar_SaveScreenshotAs.Click += new System.EventHandler(this.Menu_Engine_ScreenshotAs_Click);
+      this.ToolBar_SaveScreenshotAs.Click += new System.EventHandler(this.Menu_Engine_ScreenshotSettings_Click);
       // 
       // ToolBar_Tools_LastSeparator
       // 
@@ -2423,7 +2402,7 @@ namespace Editor
       // statusPanel_Main
       // 
       this.statusPanel_Main.Name = "statusPanel_Main";
-      this.statusPanel_Main.Size = new System.Drawing.Size(474, 18);
+      this.statusPanel_Main.Size = new System.Drawing.Size(505, 18);
       this.statusPanel_Main.Spring = true;
       this.statusPanel_Main.Text = "statusPanel_Main";
       // 
@@ -2436,7 +2415,7 @@ namespace Editor
       // 
       this.statusPanel_TransformProgress.AutoSize = false;
       this.statusPanel_TransformProgress.Name = "statusPanel_TransformProgress";
-      this.statusPanel_TransformProgress.Size = new System.Drawing.Size(220, 21);
+      this.statusPanel_TransformProgress.Size = new System.Drawing.Size(280, 21);
       // 
       // toolStripSeparator3
       // 
@@ -2617,8 +2596,7 @@ namespace Editor
     ResourceViewerPanel resourceViewerPanel = null;
     ActionRecorderPanel actionRecorderPanel = null;
     AssetBrowserPanel assetBrowserPanel = null;
-
-    //CollectionPanel collectionPanel = null; // deactivated for now, will come in a later release
+    CollectionPanel collectionPanel = null;
 
     //InteractiveHelpPanel interactiveHelpPanel = null;
 
@@ -2654,8 +2632,8 @@ namespace Editor
       assetBrowserPanel.ShowDockable();
 
       // deactivated for now, will come in a later release
-      //collectionPanel = new CollectionPanel(EditorManager.ApplicationLayout.DockingArea);
-      //collectionPanel.ShowDockable();
+      collectionPanel = new CollectionPanel(EditorManager.ApplicationLayout.DockingArea);
+      collectionPanel.ShowDockable();
 
       // Create Dockable Property Panel
       propertyPanel1 = new Editor.PropertyPanel(EditorManager.ApplicationLayout.DockingArea);
@@ -3322,9 +3300,7 @@ namespace Editor
     {
       // Shutdown the unmanaged code part of the browser panel.
       assetBrowserPanel.DeInit();
-
-      // deactivated for now, will come in a later release
-      //collectionPanel.DeInit();
+      collectionPanel.DeInit();
     }
 
     private void ApplicationLayout_ActiveLayoutChanged(object sender, LayoutManager.ActiveLayoutChangedArgs e)
@@ -4003,6 +3979,9 @@ namespace Editor
         sceneName = fileDlg.FileName;
       }
 
+      // Update last scene directory based on most recently opened scene
+      EditorManager.Settings.LastSceneDirectory = (new FileInfo(sceneName)).DirectoryName;
+     
       // loads the scene if possible
       if (LoadScene(sceneName, false))
       {
@@ -4087,14 +4066,57 @@ namespace Editor
       }
     }
 
-    // export the scene
+    // Export the scene
     private void Menu_File_ExportScene_Click(object sender, System.EventArgs e)
     {
-      // Export the scene
-      if (EditorManager.Scene==null)
+      EditorScene scene = EditorManager.Scene as EditorScene;
+
+      if (scene == null)
+      {
         return;
+      }
+
+      List<string> assetProfiles = new List<string>();
+
+      // Open export dialog
+      using(ExportDialog dlg = new ExportDialog())
+      {
+        EditorManager.Scene.CurrentExportProfile.ExportedLayersFromScene(); // retrieve current status
+        dlg.Settings = EditorManager.Scene.CurrentExportProfile; // clones the settings
+        dlg.AutoSaveExportProfile = scene.Settings.AutoSaveExportProfile;
+
+        // Show dialog
+        if (dlg.ShowDialog() != DialogResult.OK)
+        {
+          return;
+        }
+
+        // Get back settings
+        scene.CurrentExportProfile = dlg.Settings;
+
+        scene.Settings.ExportProfileName = EditorManager.Scene.CurrentExportProfile.ProfileName;
+        scene.Settings.AutoSaveExportProfile = dlg.AutoSaveExportProfile;
+
+        if (dlg.ExportActiveProfileOnly)
+        {
+          assetProfiles.Add(EditorManager.ProfileManager.GetActiveProfile().ToString());
+        }
+        else
+        {
+          foreach (IProfileManager.Profile profile in EditorManager.ProfileManager.GetProfiles())
+          {
+            if (scene.CurrentExportProfile.SelectedAssetProfiles.IsProfileSet(profile.ToString()))
+            {
+              assetProfiles.Add(profile.ToString());
+            }
+          }
+        }
+      }
+
+      EditorManager.EngineManager.CheckLightGridDataExists();
+
       EditorManager.GUI.UIUpdateLock++; //lock the UI, so there will be no updates during export
-      EditorManager.Scene.ExportScene(null, true);
+      scene.ExportScene(null, assetProfiles);
       EditorManager.GUI.UIUpdateLock--; //unlock the UI again
     }
 
@@ -4110,7 +4132,7 @@ namespace Editor
       
       // Do the export
       EditorManager.GUI.UIUpdateLock++; //lock the UI, so there will be no updates during export
-      EditorManager.Scene.ExportScene(null, false);
+      EditorManager.Scene.ExportScene(null, null);
       EditorManager.GUI.UIUpdateLock--; //unlock the UI again
 
       // Restore the export profile
@@ -4852,7 +4874,7 @@ namespace Editor
       Menu_Engine_ReloadResources.Enabled = bHasScene;
       Menu_Engine_PurgeResources.Enabled = bHasScene;
       Menu_Engine_SaveScreenshot.Enabled = bHasScene;
-      Menu_Engine_SaveScreenshotAs.Enabled = bHasScene;
+      Menu_Engine_ScreenshotSettings.Enabled = bHasScene;
       Menu_Engine_ShowResources.Enabled = bInitialized;
       Menu_Options_ShowPlugins.Enabled = true;
       
@@ -5020,49 +5042,17 @@ namespace Editor
     {
       if (!EditorManager.EngineManager.IsInitialized())
         return;
-      
-      try
-      {
-        EditorManager.EngineManager.SaveScreenShot(null);
-        EditorApp.ActiveView.UpdateView(true); // redraws view port in order to cause a back buffer swap
-        EditorManager.ShowMessageBox(this, "Screenshot saved.", "Saving screenshot", MessageBoxButtons.OK, MessageBoxIcon.Information);
-      }
-      catch (Exception ex)
-      {
-        EditorManager.DumpException(ex);
-        EditorManager.ShowMessageBox(this, "Saving screenshot failed.\n\nDetailed message:\n" + ex.Message, "Saving screenshot", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
+
+      ScreenshotDlg.SaveScreenshot(EditorApp.Scene.Settings.ScreenCaptureSettings);
     }
 
-    private void Menu_Engine_ScreenshotAs_Click(object sender, System.EventArgs e)
+    private void Menu_Engine_ScreenshotSettings_Click(object sender, System.EventArgs e)
     {
       if (!EditorManager.EngineManager.IsInitialized())
         return;
-      SaveFileDialog dlg = new SaveFileDialog();
- 
-      dlg.Filter = "BMP files (*.bmp)|*.bmp|JPEG files (*.jpg)|*.jpg"  ;
-      dlg.FilterIndex = 1;
-      dlg.RestoreDirectory = true;
-      dlg.CheckPathExists = true;
-      dlg.AddExtension = true;
-      dlg.DefaultExt = "bmp";
-      dlg.OverwritePrompt = true;
-      dlg.Title = "Save Screenshot";
-
-      if(dlg.ShowDialog() == DialogResult.OK)
-      { 
-        try
-        {
-          EditorManager.EngineManager.SaveScreenShot(dlg.FileName);
-          EditorApp.ActiveView.UpdateView(true); // redraws view port in order to cause a back buffer swap
-          EditorManager.ShowMessageBox(this, "Screenshot saved to:\n" + dlg.FileName, "Saving screenshot", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        catch (Exception ex)
-        {
-          EditorManager.DumpException(ex);
-          EditorManager.ShowMessageBox(this, "Saving screenshot failed.\n\nDetailed message:\n" + ex.Message, "Saving screenshot", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-      }
+    
+      ScreenshotDlg dialog = new ScreenshotDlg();
+      dialog.ShowDialog();
     }
 
     #endregion
@@ -5303,15 +5293,15 @@ namespace Editor
       bool haveDX9Profile = false;
       foreach (IProfileManager.Profile profile in EditorManager.ProfileManager.GetProfiles())
       {
-        if (profile._platform == targetPlatform)
+        if (profile.GetPlatform() == targetPlatform)
           haveTargetProfile = true;
-        if (profile._platform == TargetDevice_e.TARGETDEVICE_DX9)
+        if (profile.GetPlatform() == TargetDevice_e.TARGETDEVICE_DX9)
           haveDX9Profile = true;
       }
 
-      bool haveValidProfile = haveTargetProfile && (currentProfile._platform == targetPlatform);
+      bool haveValidProfile = haveTargetProfile && (currentProfile.GetPlatform() == targetPlatform);
       if (!haveTargetProfile)
-        haveValidProfile = haveDX9Profile && (currentProfile._platform == TargetDevice_e.TARGETDEVICE_DX9);
+        haveValidProfile = haveDX9Profile && (currentProfile.GetPlatform() == TargetDevice_e.TARGETDEVICE_DX9);
 
       if (!haveValidProfile)
       {
@@ -5336,7 +5326,7 @@ namespace Editor
         return;
 
       String targetPath = EditorManager.Project.ProjectDir + Path.ChangeExtension(EditorManager.Scene.FileName, null) + @".vscene";
-      bool bSuccess = EditorApp.Scene.ExportScene(targetPath, exportProfile._name);
+      bool bSuccess = EditorApp.Scene.ExportScene(targetPath, new List<string> { exportProfile.ToString() });
       if (!bSuccess)
       {
         EditorManager.ShowMessageBox(this, "Could not export scene for PS3.");
@@ -5351,7 +5341,7 @@ namespace Editor
       }
 
 
-      String vsceneFileName = Path.ChangeExtension(EditorApp.Scene.FileName, exportProfile._name + ".vscene");
+      String vsceneFileName = Path.ChangeExtension(EditorApp.Scene.FileName, exportProfile.ToString() + ".vscene");
 
       // we need to remove the last "\" of the scenedir else the following quote will not be recognized correctly
       String sceneDir = EditorManager.Project.ProjectDir;
@@ -5388,7 +5378,7 @@ namespace Editor
         return;
 
       String targetPath = EditorManager.Project.ProjectDir + Path.ChangeExtension(EditorManager.Scene.FileName, null) + @".vscene";
-      bool bSuccess = EditorApp.Scene.ExportScene(targetPath, exportProfile._name);
+      bool bSuccess = EditorApp.Scene.ExportScene(targetPath, new List<string> { exportProfile.ToString() });
       if (!bSuccess)
       {
         EditorManager.ShowMessageBox(this, "Could not export scene for Xbox360.");
@@ -5405,7 +5395,7 @@ namespace Editor
       SetRemoteCommonDirectory();
 
       String networkPath = @"net:\smb\"+EditorManager.Settings.RemoteFileSharingProjectDirectoryXbox360;
-      String vsceneFileName = Path.ChangeExtension(EditorApp.Scene.FileName, exportProfile._name + ".vscene");
+      String vsceneFileName = Path.ChangeExtension(EditorApp.Scene.FileName, exportProfile.ToString() + ".vscene");
 
       bool bLaunchRes = EditorManager.RemoteManagerXbox360.LoadScene(networkPath, vsceneFileName);
       if (!bLaunchRes)
@@ -5453,14 +5443,14 @@ namespace Editor
         return;
       }
 
-      bool bSuccess = EditorApp.Scene.ExportSceneNotSaveSettings(vscenePath, exportProfile._name);
+      bool bSuccess = EditorApp.Scene.ExportSceneNotSaveSettings(vscenePath, new List<string> { exportProfile.ToString() });
       if (!bSuccess)
       {
         EditorManager.ShowMessageBox(this, "Could not export scene for Xbox360.");
         return;
       }
 
-      String exportedPath = Path.ChangeExtension(vscenePath, exportProfile._name + ".vscene");
+      String exportedPath = Path.ChangeExtension(vscenePath, exportProfile.ToString() + ".vscene");
 
       String projectPath = Path.GetDirectoryName(EditorApp.Project.PathName) + @"\*.*";
 
@@ -5481,7 +5471,7 @@ namespace Editor
 
       String remoteDirectory = Path.Combine(EditorManager.Settings.RemoteTempDirectoryXbox360, Path.GetFileName(EditorApp.Project.PathName));
       remoteDirectory = Path.Combine(@"D:\", remoteDirectory);
-      String vsceneFileName = Path.ChangeExtension(EditorApp.Scene.FileName, exportProfile._name + ".vscene");
+      String vsceneFileName = Path.ChangeExtension(EditorApp.Scene.FileName, exportProfile.ToString() + ".vscene");
 
       bool bModeRes = EditorManager.RemoteManagerXbox360.SetEditorMode(EditorManager.Mode.EM_NONE);
       if (!bModeRes)
@@ -5882,15 +5872,47 @@ namespace Editor
             if (System.IO.File.Exists(startupGuideDirectory))
               Process.Start(startupGuideDirectory);
             else
-              EditorManager.ShowMessageBox(this, "The Startup Guide could not be found at the predefined location (\"" +  startupGuideDirectory + "\"). Please make sure the Vison SDK is installed properly.", "Loading Startup Guide Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            {
+              if (TestManager.Helpers.TestDataDirExists)
+                EditorManager.ShowMessageBox(this, "The Startup Guide is only available in the installed SDK.", "Loading Startup Guide Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+              else
+                EditorManager.ShowMessageBox(this, "The Startup Guide could not be found at the predefined location (\"" + startupGuideDirectory + "\"). Please make sure the Vision SDK is installed properly.", "Loading Startup Guide Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
           }
           break;
         case StartupDlg.StartupResult_e.LoadStartupProject:
           {
             if (System.IO.File.Exists(startupProject))
+            {
               LoadProject(startupProject, true);
+            }
             else
-              EditorManager.ShowMessageBox(this, "The Startup Project could not be found at the predefined location. Please make sure the Vison SDK is installed properly.", "Loading Startup Project Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            {
+              if (TestManager.Helpers.TestDataDirExists)
+              {
+                EditorManager.ShowMessageBox(this, "The Startup Project is located in a different directory within the repository to avoid people accidentally modifying it. If you need to modify the Startup Project you can find it in 'Docs/Vision/Documentation/StartupGuide/Startup_Tutorial_Project/Assets'", "Loading Startup Project Disallowed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+              }
+              else
+              {
+#if HK_ANARCHY
+                EditorManager.ShowMessageBox(this, "The Startup Project could not be found at the predefined location. Please run the Anarchy Download Manager, select to download and install the 'Startup Guide Assets' and try again.", "Loading Startup Project Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+#else
+                string sStartupGuideAssets;
+                try
+                {
+                  string sProductVersion = Application.ProductVersion;
+                  string[] parts = sProductVersion.Split('.');
+                  sStartupGuideAssets = string.Format("'Havok_Vision_StartupGuideAssets_{0}_{1}_{2}.zip'", parts[0], parts[1], parts[2]);
+                }
+                catch
+                {
+                  sStartupGuideAssets = "'Startup Guide Assets'";
+                }
+
+                EditorManager.ShowMessageBox(this, "The Startup Project could not be found at the predefined location. Please download the " + sStartupGuideAssets + " from the Havok download center, extract it to the root of the SDK and try again.", "Loading Startup Project Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+#endif
+              }
+            }
           }
           break;
         case StartupDlg.StartupResult_e.OpenSampleMap:
@@ -5949,7 +5971,7 @@ namespace Editor
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130731)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

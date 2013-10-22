@@ -17,6 +17,9 @@ typedef hkUint16 hkContactPointId;
 	/// Define an invalid contact point. Typically this is one which is not yet allocated by the hkpContactMgr
 #define HK_INVALID_CONTACT_POINT (0xffff)
 
+	/// Enable this to assert all setting of point position and normal are not storing NaNs
+//#define HK_CONTACT_POINT_NAN_CHECKS
+
 /// Contact point position, normal and distance. NOTE: All data is in World Space.
 ///
 /// The class uses two hkVector4 variables, and stores the distance for the contact point
@@ -50,9 +53,6 @@ class hkContactPoint
 			/// Get the position of the contact point.
 		inline const hkVector4& getPosition() const;
 
-			/// Get the position of the contact point.
-		inline hkVector4& getPosition();
-
 			/// Set the position.
 		inline void setPosition(const hkVector4& position);
 
@@ -61,9 +61,6 @@ class hkContactPoint
  
 			/// Get a reference to the normal and distance.
 		inline const hkVector4& getSeparatingNormal() const;
-
-			/// Get a non-const reference to the normal and distance.
-		inline hkVector4& getSeparatingNormal();
 
 			/// Sets the normal and separating plane component.
 		inline void setSeparatingNormal( const hkVector4& normal, hkReal dist );
@@ -119,7 +116,7 @@ class hkContactPoint
 #endif // HK_MATH_CONTACT_POINT_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

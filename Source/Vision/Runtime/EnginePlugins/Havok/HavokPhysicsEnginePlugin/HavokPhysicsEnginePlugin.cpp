@@ -19,6 +19,11 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokPointToPathConstraint.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokPointToPlaneConstraint.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokPulleyConstraint.hpp>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokBallAndSocketConstraintChain.hpp>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokStiffSpringConstraintChain.hpp>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConstraintChainRenderingData.hpp>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokTriggerVolume.hpp>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokBlockerVolumeComponent.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/VThrowItemComponent.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scripting/VScriptIncludes.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/VLineFollowerComponent.hpp>
@@ -185,6 +190,11 @@ void vHavok_cl::OnInitEnginePlugin()
   FORCE_LINKDYNCLASS(vHavokPointToPathConstraint);
   FORCE_LINKDYNCLASS(vHavokPointToPlaneConstraint);
   FORCE_LINKDYNCLASS(vHavokPulleyConstraint);
+  FORCE_LINKDYNCLASS(vHavokBallAndSocketConstraintChain);
+  FORCE_LINKDYNCLASS(vHavokStiffSpringConstraintChain);
+  FORCE_LINKDYNCLASS(vHavokConstraintChainRenderingData);
+  FORCE_LINKDYNCLASS(vHavokTriggerVolume);
+  FORCE_LINKDYNCLASS(vHavokBlockerVolumeComponent);
   FORCE_LINKDYNCLASS(VThrowItemComponent);
   FORCE_LINKDYNCLASS(VLineFollowerComponent);
   FORCE_LINKDYNCLASS(VFpsCameraEntity);
@@ -237,7 +247,7 @@ static void EnsureHavokScriptRegistration()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

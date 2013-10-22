@@ -63,21 +63,23 @@ namespace hkaIndividualBlenderUtilities
 
 HK_FORCE_INLINE void HK_CALL hkaIndividualBlenderUtilities::blendSlerp1( hkQsTransform& dst, const hkQsTransform& srcL, const hkQsTransform& srcR, hkReal alpha )
 {
-	dst.m_translation.setInterpolate4( srcL.m_translation, srcR.m_translation, alpha );
-	dst.m_rotation.setSlerp( srcL.m_rotation, srcR.m_rotation, alpha );
-	dst.m_scale.setInterpolate4( srcL.m_scale, srcR.m_scale, alpha );
+	hkSimdReal a; a.setFromFloat(alpha);
+	dst.m_translation.setInterpolate( srcL.m_translation, srcR.m_translation, a );
+	dst.m_rotation.setSlerp( srcL.m_rotation, srcR.m_rotation, a );
+	dst.m_scale.setInterpolate( srcL.m_scale, srcR.m_scale, a );
 }
 
-HK_FORCE_INLINE void HK_CALL hkaIndividualBlenderUtilities::blendQLerp1( hkQsTransform& dst, const hkQsTransform& srcL, const hkQsTransform& srcR, hkReal alpha )
+HK_FORCE_INLINE void HK_CALL hkaIndividualBlenderUtilities::blendQLerp1( hkQsTransform& dst, const hkQsTransform& srcL, const hkQsTransform& srcR, hkReal alphaR )
 {
-	dst.m_translation.setInterpolate4( srcL.m_translation, srcR.m_translation, alpha );
-	const hkReal dot = srcL.m_rotation.m_vec.dot4( srcR.m_rotation.m_vec );
-	const hkReal beta = dot >= 0 ? ( 1.0f - alpha ) : ( alpha - 1.0f );
+	hkSimdReal alpha; alpha.setFromFloat(alphaR);
+	dst.m_translation.setInterpolate( srcL.m_translation, srcR.m_translation, alpha );
+	const hkSimdReal dot = srcL.m_rotation.m_vec.dot<4>( srcR.m_rotation.m_vec );
+	hkSimdReal beta; beta.setSelect(dot.greaterEqualZero(), hkSimdReal_1 - alpha, alpha - hkSimdReal_1);
 	hkVector4 tmp;
-	tmp.setMul4( alpha, srcR.m_rotation.m_vec );
-	tmp.addMul4( beta,  srcL.m_rotation.m_vec );
+	tmp.setMul( alpha, srcR.m_rotation.m_vec );
+	tmp.addMul( beta,  srcL.m_rotation.m_vec );
 	dst.m_rotation.m_vec = tmp;
-	dst.m_scale.setInterpolate4( srcL.m_scale, srcR.m_scale, alpha );
+	dst.m_scale.setInterpolate( srcL.m_scale, srcR.m_scale, alpha );
 }
 
 
@@ -126,35 +128,73 @@ HK_FORCE_INLINE void HK_CALL hkaIndividualBlenderUtilities::computeBlendFactorAn
 	// weightR == 0  |  w = weightL                      |  w = 0              
     //               |  beta = 0                         |  beta = alpha  
 
-	if ( weightL > 0.0f )
+#if (HK_CONFIG_SIMD == HK_CONFIG_SIMD_ENABLED)
+	const hkSimdReal alphaS = hkSimdReal::fromFloat(alpha);
+	const hkSimdReal weightLS = hkSimdReal::fromFloat(weightL);
+	const hkSimdReal weightRS = hkSimdReal::fromFloat(weightR);
+
+	const hkVector4Comparison wR_gt0 = weightRS.greaterZero();
+
+	hkSimdReal alphaOutS1, weightOutS1;
 	{
-		if ( weightR > 0.0f )
+		// first col
+		const hkVector4Comparison L_gt_R = weightLS.greater(weightRS);
+		hkSimdReal alphaTmp; alphaTmp.setSelect(L_gt_R, alphaS * ( weightRS / weightLS ), hkSimdReal_1 - ( hkSimdReal_1 - alphaS ) * ( weightLS / weightRS ));
+		hkSimdReal weightTmp = ( hkSimdReal_1 - alphaTmp ) * weightLS + alphaTmp * weightRS;
+
+		alphaOutS1.setSelect(wR_gt0, alphaTmp, hkSimdReal_0);
+		weightOutS1.setSelect(wR_gt0, weightTmp, weightLS);
+	}
+
+	hkSimdReal alphaOutS2, weightOutS2;
+	{
+		// second col
+		weightOutS2.setSelect(wR_gt0, weightRS, hkSimdReal_0);
+		alphaOutS2.setSelect(wR_gt0, hkSimdReal_1, alphaS);
+	}
+
+	hkSimdReal alphaOutS, weightOutS;
+	{
+		const hkVector4Comparison wL_gt0 = weightLS.greaterZero();
+		alphaOutS.setSelect(wL_gt0, alphaOutS1, alphaOutS2);
+		weightOutS.setSelect(wL_gt0, weightOutS1, weightOutS2);
+	}
+
+	alphaOutS.store<1>(&alphaOut);
+	weightOutS.store<1>(&weightOut);
+#else
+	if ( weightL > hkReal(0) )
+	{
+		// first col
+		if ( weightR > hkReal(0) )
 		{
 			alphaOut = weightL > weightR ?
 				alpha * ( weightR / weightL ) :
-				1.0f - ( 1.0f - alpha ) * ( weightL / weightR );
+				hkReal(1) - ( hkReal(1) - alpha ) * ( weightL / weightR );
 
-			weightOut = ( 1.0f - alphaOut ) * weightL + alphaOut * weightR;
+			weightOut = ( hkReal(1) - alphaOut ) * weightL + alphaOut * weightR;
 		}
 		else
 		{
 			weightOut = weightL;
-			alphaOut = 0.0f;
+			alphaOut = hkReal(0);
 		}
 	}
 	else
 	{
-		if ( weightR > 0.0f )
+		// second col
+		if ( weightR > hkReal(0) )
 		{
 			weightOut = weightR;
-			alphaOut = 1.0f;
+			alphaOut = hkReal(1);
 		}
 		else
 		{
-			weightOut = 0.0f;
+			weightOut = hkReal(0);
 			alphaOut = alpha;
 		}
 	}
+#endif
 }
 
 
@@ -169,18 +209,19 @@ HK_FORCE_INLINE void HK_CALL hkaIndividualBlenderUtilities::computeBlendFactorAn
 	weightOut = weightL;
 }
 
-HK_FORCE_INLINE void HK_CALL hkaIndividualBlenderUtilities::qlerp( hkQuaternion& dst, const hkQuaternion& srcL, const hkQuaternion& srcR, hkReal alpha )
+HK_FORCE_INLINE void HK_CALL hkaIndividualBlenderUtilities::qlerp( hkQuaternion& dst, const hkQuaternion& srcL, const hkQuaternion& srcR, hkReal alphaR )
 {
-	const hkReal dot = srcL.m_vec.dot4( srcR.m_vec );
-	const hkReal beta = ( 1.0f - alpha ) * ( dot < 0 ? -1.0f : 1.0f );
+	const hkSimdReal dot = srcL.m_vec.dot<4>( srcR.m_vec );
+	const hkSimdReal alpha = hkSimdReal::fromFloat(alphaR);
+	hkSimdReal beta; beta.setFlipSign(hkSimdReal_1 - alpha, dot.lessZero());
 	hkQuaternion tmp;
-	tmp.m_vec.setMul4( alpha, srcR.m_vec );
-	tmp.m_vec.addMul4( beta, srcL.m_vec );
+	tmp.m_vec.setMul( alpha, srcR.m_vec );
+	tmp.m_vec.addMul( beta, srcL.m_vec );
 	dst = tmp;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

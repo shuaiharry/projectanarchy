@@ -15,7 +15,7 @@
 // Only use Havok Script on platforms that support it
 #if defined( HK_PLATFORM_WIN32 ) || defined( HK_PLATFORM_X64 ) || defined( HK_PLATFORM_PS3_PPU ) || defined( HK_PLATFORM_XBOX360 ) || \
 	defined( HK_PLATFORM_RVL ) || defined( HK_PLATFORM_MAC386 ) || defined( HK_PLATFORM_IOS ) || defined( HK_PLATFORM_WIIU ) || defined( HK_PLATFORM_LINUX ) || \
-	defined( HK_PLATFORM_PSVITA ) || defined( HK_PLATFORM_ANDROID ) || defined( HK_PLATFORM_PS4 )
+	defined( HK_PLATFORM_PSVITA ) || defined( HK_PLATFORM_ANDROID ) || defined( HK_PLATFORM_PS4 ) || defined( HK_PLATFORM_DURANGO ) || defined ( HK_PLATFORM_TIZEN )
 
 	// Havok Script is enabled on these platforms
 	#define HKB_CONFIG_HAVOK_SCRIPT HKB_HAVOK_SCRIPT_ENABLED
@@ -34,7 +34,7 @@
 #endif // HKB_LUA_DEFINES_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -198,9 +198,9 @@ HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkgpTopology);
 		HKGP_FORCE_INLINE EDGE			flip() const;
 		
 		/// apply the functor 'fnc' to this edge fan.
-		/// FNC must implement 'bool operator()(Edge&)' , if true is returned, the application is stopped.
+		/// FNC must implement 'bool operator()(Edge&)' , if false is returned, the function application is stopped and this method returns false.
 		template <typename FNC>
-		HKGP_FORCE_INLINE void			applyFan(FNC& fnc) const;
+		HKGP_FORCE_INLINE bool			applyFan(FNC& fnc) const;
 
 		/// check if two edges share a triangle.
 		HKGP_FORCE_INLINE static bool	shareTriangle(const Edge& a,const Edge& b)	{ return	a.triangle()		==	b.triangle()		||
@@ -227,7 +227,7 @@ HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkgpTopology);
 #endif // HKGP_TOPOLOGY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

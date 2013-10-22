@@ -14,7 +14,6 @@
 #include <Ai/Internal/SegmentCasting/hkaiGeometrySegmentCaster.h>
 #include <Ai/Internal/SegmentCasting/hkaiNavMeshInstanceSegmentCaster.h>
 
-class hkBitField;
 class hkaiTraversalAnnotationLibrary;
 struct hkaiTraversalAnalysisContext;
 struct hkaiTraversalAnalysisSettings;
@@ -22,6 +21,7 @@ template<typename KeyType> class hkObjectCache;
 struct hkKeyPair;
 class hkaiNavMeshInstance;
 class hkaiTraversalAnalyzer;
+class hkBitField;
 
 struct hkaiTraversalAnalysisInput : public hkReferencedObject
 {
@@ -129,7 +129,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

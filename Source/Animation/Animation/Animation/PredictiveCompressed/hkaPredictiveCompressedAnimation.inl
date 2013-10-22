@@ -88,7 +88,7 @@ HK_FORCE_INLINE const hkReal* hkaPredictiveCompressedAnimation::getArray(FloatAr
 HK_FORCE_INLINE int hkaPredictiveCompressedAnimation::getArrayLength(IntArrayID x) const
 {
 	// there are a few dummy elems at the end of the data arrays
-	enum { EXTRA_ELEMS = 16 / sizeof(hkInt16) };
+	enum { EXTRA_ELEMS = sizeof(hkVector4) / sizeof(hkInt16) };
 	int start = m_intArrayOffsets[x];
 	int end = (x == NUM_INT_ARRAYS - 1) ? (m_intData.getSize() - EXTRA_ELEMS) : m_intArrayOffsets[x+1];
 	return end - start;
@@ -97,7 +97,7 @@ HK_FORCE_INLINE int hkaPredictiveCompressedAnimation::getArrayLength(IntArrayID 
 HK_FORCE_INLINE int hkaPredictiveCompressedAnimation::getArrayLength(FloatArrayID x) const
 {
 	// there are a few dummy elems at the end of the data arrays
-	enum { EXTRA_ELEMS = 16 / sizeof(hkInt16) };
+	enum { EXTRA_ELEMS = sizeof(hkVector4) / sizeof(hkReal) };
 	int start = m_floatArrayOffsets[x];
 	int end = (x == NUM_FLOAT_ARRAYS - 1) ? (m_floatData.getSize() - EXTRA_ELEMS) : m_floatArrayOffsets[x+1];
 	return end - start;
@@ -121,7 +121,7 @@ HK_FORCE_INLINE hkInt32 hkaPredictiveCompressedAnimation::getNumFloatSlots() con
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

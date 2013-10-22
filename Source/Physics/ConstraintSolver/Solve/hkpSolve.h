@@ -46,10 +46,10 @@ struct hkpImpulseLimitBreachedHeader
 };
 
 
-extern "C"  
+extern "C"
 {
 	// info pretty much read only, but cannot be shared between threads, returns !=0 if solved
-	bool HK_CALL hkSolveConstraints( const hkpSolverInfo& info, hkpJacobianSchema *schemas,  hkpVelocityAccumulator * accumulators, hkpSolverElemTemp* temp );	
+	bool HK_CALL hkSolveConstraints( const hkpSolverInfo& info, hkpJacobianSchema *schemas,  hkpVelocityAccumulator * accumulators, hkpSolverElemTemp* temp );
 
 	void HK_CALL hkSolveApplyGravityByTheSteps( const hkpSolverInfo& info, hkpVelocityAccumulator* accumulators, hkpVelocityAccumulator* accumulatorsEnd );
 
@@ -68,7 +68,7 @@ extern "C"
 #if ! defined (HK_PLATFORM_HAS_SPU)
 	void HK_CALL hkExportImpulsesAndRhs( const hkpSolverInfo& i, const hkpSolverElemTemp* temp, const hkpJacobianSchema *schemas, const hkpVelocityAccumulator* accums );
 #elif defined (HK_PLATFORM_SPU)
-	void HK_CALL hkExportImpulsesAndRhs( const hkpSolverInfo& i, const hkpSolverElemTemp* temp, const hkpJacobianSchema *schemas, const hkpJacobianSchema *schemasPpu, 
+	void HK_CALL hkExportImpulsesAndRhs( const hkpSolverInfo& i, const hkpSolverElemTemp* temp, const hkpJacobianSchema *schemas, const hkpJacobianSchema *schemasPpu,
 										 const hkpVelocityAccumulator* accums, hkSpuDmaReader* schemaReader , hkSpuDmaReader* elemTempReader, hkPadSpu<int>& numImpulseLimitsBreachedOut );
 #else
 	void HK_CALL hkExportImpulsesAndRhs( const hkpSolverInfo& i, const hkpSolverElemTemp* temp, const hkpJacobianSchema *schemas, const hkpVelocityAccumulator* accums, hkUint16* accumulatorInterIndicesArray );
@@ -100,7 +100,7 @@ extern "C"
 #endif // HKP_CONSTRAINT_SOLVE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

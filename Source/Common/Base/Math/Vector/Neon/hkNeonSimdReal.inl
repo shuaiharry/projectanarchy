@@ -362,6 +362,14 @@ HK_FORCE_INLINE void hkSimdFloat32::setSelect( hkVector4fComparisonParameter com
 	m_real = vbsl_f32( vget_low_u32(comp.m_mask), trueValue.m_real, falseValue.m_real );
 }
 
+HK_FORCE_INLINE void hkSimdFloat32::setClampedZeroOne( hkSimdFloat32Parameter a )
+{
+	// This ensures that if a is NAN, clamped will be 1 afterwards	
+	const hkVector4fComparison maxValGtA = hkSimdFloat32_1.greater(a);
+	hkSimdFloat32 clamped; clamped.setSelect(maxValGtA, a, hkSimdFloat32_1);
+	setMax(hkSimdFloat32_0, clamped);
+}
+
 HK_FORCE_INLINE void hkSimdFloat32::zeroIfFalse( hkVector4fComparisonParameter comp )
 {
 	HK_MATH_ASSERT(0xc78f08e, comp.allAreSet() || (comp.getMask() == hkVector4ComparisonMask::MASK_NONE), "illegal compare mask");
@@ -999,7 +1007,7 @@ HK_FORCE_INLINE void hkSimdFloat32::store(  hkFloat16 *p ) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

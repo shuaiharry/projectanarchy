@@ -16,8 +16,11 @@
 class hkXmlPackfileWriter : public hkPackfileWriter
 {
 	public:
-	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
+		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		hkXmlPackfileWriter(const Options & options = Options());
+
+		/// Current version number for Xml packfiles.
+		static const hkUint32 CURRENT_FILE_VERSION;
 
 			/// Save the contents to the given stream with the given options.
 		virtual hkResult save( hkStreamWriter* stream, const Options& options );
@@ -26,7 +29,7 @@ class hkXmlPackfileWriter : public hkPackfileWriter
 #endif // HK_XML_PACKFILE_WRITER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

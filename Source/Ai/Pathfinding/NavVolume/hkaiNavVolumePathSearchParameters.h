@@ -10,6 +10,7 @@
 #define HK_AI_PATHFINDING_NAVVOLUME_PATH_SEARCH_PARAMETERS_H
 
 #include <Common/Base/Math/Vector/hkPackedVector3.h>
+#include <Ai/Pathfinding/Astar/Search/hkaiSearchParams.h>
 
 class hkaiAstarCostModifier;
 class hkaiAstarEdgeFilter;
@@ -19,55 +20,9 @@ class hkaiAstarEdgeFilter;
 /// This input data may apply to a batch of path requests.
 struct hkaiNavVolumePathSearchParameters
 {
-	// +version(3)
+	// +version(4)
 	HK_DECLARE_REFLECTION();
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI_ASTAR, hkaiNavVolumePathSearchParameters );
-
-	//
-	// Memory control defaults
-	//	Default values for controlling search memory usage are given in two variants:
-	//	* Default values for single-threaded, synchronous requests (via hkaiVolumePathfindingUtil::findPath)
-	//	  These default values are generously large, and can be reduced to conserve memory.
-	//	* default values for multi-threaded, asynchronous requests (via hkaiNavVolumeAStarJob)
-	//	  These default values are sized for executing searches on the SPUs, and cannot be increased
-	//	  for jobs processed on the SPU.
-	//
-
-	enum ElementSizes
-	{
-#ifndef HK_REAL_IS_DOUBLE
-		OPENSET_ELEMENT_SIZE = 8, // hkaiHeapOpenSet::IndexCostPair
-		SEARCH_STATE_ELEMENT_SIZE = 16 + 2, // sizeof(hkaiSearchStateNode) + sizeof(hkInt16)
-#else
-		OPENSET_ELEMENT_SIZE = 16, // hkaiHeapOpenSet::IndexCostPair
-		SEARCH_STATE_ELEMENT_SIZE = 32 + 2, // sizeof(hkaiSearchStateNode) + sizeof(hkInt16)
-#endif
-		SEARCH_STATE_OVERHEAD = 512 // sizeof(hkInt16)*256
-	};
-
-	enum
-	{
-		OPEN_SET_SINGLE_THREADED_NUM_ELEMENTS = 16384,
-		SEARCH_STATE_SINGLE_THREADED_NUM_ELEMENTS = 2*OPEN_SET_SINGLE_THREADED_NUM_ELEMENTS,
-
-		OPEN_SET_MULTI_THREADED_NUM_ELEMENTS = 1024,
-		SEARCH_STATE_MULTI_THREADED_NUM_ELEMENTS = 2*OPEN_SET_MULTI_THREADED_NUM_ELEMENTS,
-	};
-
-	/// Memory defaults for single-threaded, synchronous requests
-	enum MemoryDefaultsSingleThreaded
-	{
-		OPEN_SET_SIZE_SINGLE_THREADED				= OPEN_SET_SINGLE_THREADED_NUM_ELEMENTS               * OPENSET_ELEMENT_SIZE                              /* 131072 */,
-		SEARCH_STATE_SIZE_SINGLE_THREADED			= SEARCH_STATE_SINGLE_THREADED_NUM_ELEMENTS           * SEARCH_STATE_ELEMENT_SIZE + SEARCH_STATE_OVERHEAD /* 590336 */,
-	};
-
-	/// Memory defaults for multi-threaded, asynchronous requests
-	enum MemoryDefaultsMultiThreaded
-	{
-		OPEN_SET_SIZE_MULTI_THREADED				= OPEN_SET_MULTI_THREADED_NUM_ELEMENTS               * OPENSET_ELEMENT_SIZE                              /*  8192 */,
-		SEARCH_STATE_SIZE_MULTI_THREADED			= SEARCH_STATE_MULTI_THREADED_NUM_ELEMENTS           * SEARCH_STATE_ELEMENT_SIZE + SEARCH_STATE_OVERHEAD /* 37376 */,
-	};
-
 
 	hkaiNavVolumePathSearchParameters();
 	hkaiNavVolumePathSearchParameters(hkFinishLoadedObjectFlag f);
@@ -90,6 +45,7 @@ struct hkaiNavVolumePathSearchParameters
 		/// based on the hkaiAgentTraversalInfo
 	const hkaiAstarEdgeFilter* m_edgeFilter; //+nosave
 
+		/// How line of sight should be checked during the search.
 	enum LineOfSightFlags 
 	{
 		/// Don't perform any line-of-sight check before A*
@@ -123,13 +79,11 @@ struct hkaiNavVolumePathSearchParameters
 	// but may cause the search to terminate early
 	//
 
-		/// Maximum memory for nodes stored the open set, in bytes. A value of 0 will use the appropriate default.
-		/// Note that the open set size can be considerably lower than the search state size, since the open set can never
-		/// grow larger than the search state, and nodes in the open set are half the size of search state nodes (8 vs. 16)
-	int m_maxOpenSetSizeBytes; //+default(0)
+		/// Maximum memory size for the search.
+	hkaiSearchParameters::BufferSizes m_bufferSizes;
 
-		/// Maximum memory for nodes stored if the search state, in bytes. A value of 0 will use the appropriate default.
-	int m_maxSearchStateSizeBytes; //+default(0)
+	/// Internal determinism check
+	inline void checkDeterminism() const;
 };
 
 #include <Ai/Pathfinding/NavVolume/hkaiNavVolumePathSearchParameters.inl>
@@ -137,7 +91,7 @@ struct hkaiNavVolumePathSearchParameters
 #endif // HK_AI_PATHFINDING_NAVVOLUME_PATH_SEARCH_PARAMETERS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

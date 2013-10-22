@@ -29,13 +29,13 @@ class hkMeshToSceneDataConverter
 {
     public:
             /// Converts a hkMeshBody into a hkxNode
-        static hkxNode* HK_CALL convert(const hkMeshBody* body, hkxMaterial** materials, int numMaterials);
+        static hkxNode* HK_CALL convertBody(hkxScene* scene, const hkMeshBody* body);
 
 			/// Converts a hkMeshShape into a hkxMesh
-		static hkxMesh* HK_CALL convert(const hkMeshShape* shape, hkxMaterial** materials, int numMaterials);
+		static hkxMesh* HK_CALL convertShape(hkxScene* scene, const hkMeshShape* shape);
 
 			/// Converts a hkMeshMaterial into a hkxMaterial
-		static hkxMaterial* HK_CALL convert( const hkMeshMaterial* material );
+		static hkxMaterial* HK_CALL convertMaterial(hkxScene* scene, const hkMeshMaterial* material);
 
             /// Converts a hkVertexBuffer into a hkxVertexBuffer
         static hkxVertexBuffer* HK_CALL convertVertexBuffer( hkMeshVertexBuffer* buf );
@@ -55,7 +55,7 @@ class hkMeshToSceneDataConverter
 #endif // HK_MESH_TO_SCENE_DATA_CONVERTER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

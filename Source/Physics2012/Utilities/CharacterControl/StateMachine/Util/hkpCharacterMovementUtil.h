@@ -20,6 +20,16 @@ class hkpCharacterMovementUtil
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_UTILITIES, hkpCharacterMovementUtil::hkpMovementUtilInput );
 
+			/// Signifies the space the desired velocity is defined in
+			enum DesiredVelocitySpace
+			{
+				SURFACE_SPACE = 0,
+				WORLD_SPACE,
+				DEFAULT_SPACE = SURFACE_SPACE,
+			};
+
+			// Ctor.
+			hkpMovementUtilInput() : m_desiredVelocitySpace(DEFAULT_SPACE) {}
 
 			/// Forward direction in world space
 			hkVector4 m_forward;
@@ -33,7 +43,7 @@ class hkpCharacterMovementUtil
 			/// Our current velocity in world space
 			hkVector4 m_currentVelocity;
 
-			/// Our desired velocity in the surface frame
+			/// Our desired velocity in world space OR surface frame (see m_desiredVelocityInSurfaceFrame)
 			hkVector4 m_desiredVelocity;
 
 			/// Velocity of the surface we're standing on in world space
@@ -48,18 +58,19 @@ class hkpCharacterMovementUtil
 			/// Limit the maximum acceleration of the character
 			hkReal m_maxVelocityDelta;
 
-
+			/// The space the desired velocity is defined in
+			hkEnum<DesiredVelocitySpace, hkUint8> m_desiredVelocitySpace;
 		};
 
 		/// Calculate a new output velocity based on the input
-		static void HK_CALL calculateMovement(const hkpMovementUtilInput& input, hkVector4& velocityOut);
+		static void HK_CALL calculateMovement( const hkpMovementUtilInput& input, hkVector4& velocityOut );
 
 };
 
 #endif // HK_CHARACTER_MOVEMENT_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

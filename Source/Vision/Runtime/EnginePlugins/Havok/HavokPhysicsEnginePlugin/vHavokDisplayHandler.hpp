@@ -8,10 +8,6 @@
 
 /// \file vHavokDisplayHandler.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKDISPLAYHANDLER_HPP_INCLUDED
 #define VHAVOKDISPLAYHANDLER_HPP_INCLUDED
 
@@ -24,15 +20,11 @@
 #include <Physics2012/Utilities/VisualDebugger/Viewer/Collide/hkpShapeDisplayViewer.h>
 #include <Common/Base/Config/hkConfigVersion.h>
 
-// -------------------------------------------------------------------------- //
-// HAVOK DISPLAY GEOMETRY                                                     //
-// -------------------------------------------------------------------------- //
-
 ///
 /// \brief
-///   Class that represents a display geometry constructed from a Havok geometry to
-///   enable debug rendering in Vision. It consists of a mesh instance that has
-///   a highlighting shader applied.
+///   Class that represents a display geometry constructed from a Havok Physics geometry to
+///   enable debug rendering in Vision. It consists of a mesh instance that has a 
+///   highlighting shader applied.
 ///
 class vHavokDisplayGeometry: public VRefCounter
 {
@@ -46,7 +38,6 @@ public:
   {
     float pos[3];   ///< Vertex data (x, y, z)
   };
-
 
   ///
   /// @name Constructor / Destructor
@@ -80,21 +71,18 @@ public:
   /// 
   ~vHavokDisplayGeometry();
 
-
   ///
   /// @}
   ///
-
 
   ///
   /// @name Display Helper
   /// @{
   ///
 
-
   /// 
   /// \brief
-  ///   Creates a compiled shader technique for this Havaok display geometry. Basically
+  ///   Creates a compiled shader technique for this Havok Display geometry. Basically
   ///   a wireframe highlighting shader.
   /// 
   /// \param iColor
@@ -102,107 +90,94 @@ public:
   ///
   VCompiledTechnique *CreateHighlightEffect(VColorRef iColor);
 
-
   /// 
   /// \brief
   ///   Sets the visibility state of this Havok Display Geometry.
   /// 
   /// \param bVisible
-  ///   If TRUE, display geometry is set to be visible.
+  ///   If TRUE, display geometry is visible.
   ///
-  /// \see
+  /// \sa
   ///   vHavokDisplayHandler::SetVisible
   /// 
   void SetVisible(BOOL bVisible);
 
-
   /// 
   /// \brief
-  ///   Gets the visibility state of this Havok Display Geometry.
+  ///   Returns the visibility state of this HavokDisplay Geometry.
   /// 
   /// \return 
   ///   BOOL: If TRUE, display geometry is visible.
   ///
-  /// \see
+  /// \sa
   ///   vHavokDisplayHandler::IsVisible
   /// 
   BOOL IsVisible() const;
-
   
   /// 
   /// \brief
-  ///   Sets the wireframe highlighting color of this Havok Display Geometry.
+  ///   Sets the wireframe highlighting color of this HavokDisplay Geometry.
   /// 
   /// \param iColor
   ///   New Color of the highlighting wireframe effect.
   ///
-  /// \see
+  /// \sa
   ///   vHavokDisplayHandler::SetColor
   /// 
   void SetColor(VColorRef iColor);
 
-
   /// 
   /// \brief
-  ///   Sets the owner object of this Havok Display Geometry.
+  ///   Sets the owner object of this HavokDisplay Geometry.
   /// 
   /// \param pOwner
-  ///   Owner object of this Havok Display Geometry.
+  ///   Owner object of this HavokDisplay Geometry.
   ///
   void SetOwner(VisObject3D_cl *pOwner);
-
 
   ///
   /// @}
   ///
-
-
 
   ///
   /// @name Update
   /// @{
   ///
 
-
   /// 
   /// \brief
-  ///   Updates the position and rotation of this Havok dispay geometry. Called by vHavokDisplayHandler.
+  ///   Updates the position and rotation of this HavokDisplay geometry. 
+  ///
+  /// Called by vHavokDisplayHandler.
   /// 
   /// \param transform
   ///   Reference of new transform of the Havok geometry.
   ///
-  /// \see
+  /// \sa
   ///   vHavokDisplayHandler::updateGeometry
   ///
   void UpdateTransform(const hkTransform &transform);
-
 
   ///
   /// @}
   ///
 
-  hkUlong m_ID;                                 ///< ID of the geometry (address of the hkpCollidable this geometry was created from)
+  hkUlong m_ID;       ///< ID of the geometry (address of the hkpCollidable this geometry was created from)
 
-  VisMeshBufferObject_cl* GetMeshInstance (void) const { return m_spMeshInstance; }
+  VisMeshBufferObject_cl* GetMeshInstance () const 
+  { 
+    return m_spMeshInstance; 
+  }
 
 private:
-
-  VisMeshBufferObjectPtr m_spMeshInstance;    ///< Mesh buffer object for the physics shape representation
-  hkvVec3 m_vPos;                        ///< Current position of the mesh buffer object
-  hkvMat3 m_vRot;                     ///< Current rotation matrix of the mesh buffer object
-
+  VisMeshBufferObjectPtr m_spMeshInstance;    ///< Mesh buffer object for the physics shape representation.
+  hkvVec3 m_vPos;                             ///< Current position of the mesh buffer object.
+  hkvMat3 m_vRot;                             ///< Current rotation matrix of the mesh buffer object.
 };
-
-
-
-// -------------------------------------------------------------------------- //
-// HAVOK DISPLAY GEOMETRY LIST                                                //
-// -------------------------------------------------------------------------- //
-
 
 /// 
 /// \brief
-///   Collection of all Havok Display Geometries hold by the Havok Display Handler.
+///   Collection of all Havok Display Geometries held by the HavokDisplay Handler.
 /// 
 class vHavokDisplayGeometryList
 {
@@ -210,13 +185,16 @@ public:
   /// \brief
   ///   Default constructor.
   vHavokDisplayGeometryList();
+
 private:
   /// \brief
-  ///   Disallows copy construction.
+  ///   Not copyable.
   vHavokDisplayGeometryList(vHavokDisplayGeometryList const&);
+
   /// \brief
-  ///   Disallows assignment.
+  ///   Not copyable.
   vHavokDisplayGeometryList& operator=(vHavokDisplayGeometryList const&);
+
 public:
   /// \brief
   ///   Destructor.
@@ -224,6 +202,7 @@ public:
 
   /// \brief
   ///   Adds a display geometry to this collection.
+  ///
   /// \param pGeometry
   ///   the geometry to add
   void Add(vHavokDisplayGeometry *pGeometry);
@@ -231,8 +210,9 @@ public:
   /// \brief
   ///   Ensures that this collection can be expanded to the given capacity 
   ///   without having to grow the internal list while adding elements.
+  ///
   /// \param iCapacity
-  ///   the capacity to reserve
+  ///   The capacity to reserve.
   ///
   /// Calls to this function are merely hints. Adding elements will succeed as 
   /// well without ensuring sufficient capacity first, but may be slower due to
@@ -241,73 +221,73 @@ public:
 
   /// \brief
   ///   Returns the size of this collection.
-  /// \return
-  ///   the size of this collection
   unsigned int GetSize() const;
 
   /// \brief
-  ///   returns whether this collection contains a display geometry with the 
-  ///   specified ID that is visible.
+  ///   returns if this collection contains one or more display geometries with the
+  ///   specified ID, only if at least one of these is visible.
+  ///
   /// \param iID
   ///   ID of the display geometries
-  /// \return
-  ///   \c TRUE if this collection contains one or more display geometries with the
-  ///   specified ID, and at least one of these is visible; \c FALSE otherwise
-  BOOL IsVisible(unsigned int iID) const;
+  ///
+  BOOL IsVisible(hkUlong iID) const;
 
   /// \brief
   ///   Removes all display geometries with the specified ID from this collection.
+  ///
   /// \param iID
   ///   ID of the display geometries to remove
-  void Remove(unsigned int iID);
+  ///
+  void Remove(hkUlong iID);
 
   /// \brief
   ///   Sets the color of all display geometries in this collection matching the
   ///   specified ID.
+  ///
   /// \param iID
   ///   ID of the display geometries
   /// \param iColor
   ///   color to set
-  void SetColor(unsigned int iID, VColorRef iColor);
+  ///
+  void SetColor(hkUlong iID, VColorRef iColor);
 
   /// \brief
   ///   Sets the owner of all display geometries in this collection matching the
   ///   specified ID.
+  ///
   /// \param iID
   ///   ID of the display geometries
   /// \param pOwner
   ///   owner to set
-  void SetOwner(unsigned int iID, VisObject3D_cl *pOwner);
+  ///
+  void SetOwner(hkUlong iID, VisObject3D_cl *pOwner);
 
   /// \brief
   ///   Sets the visibility of all display geometries in this collection matching the
   ///   specified ID.
+  ///
   /// \param iID
   ///   ID of the display geometries
   /// \param bVisible
   ///   visibility flag
-  void SetVisible(unsigned int iID, BOOL bVisible);
+  ///
+  void SetVisible(hkUlong iID, BOOL bVisible);
 
   /// \brief
   ///   Updates the transform of all display geometries in this collection matching the
   ///   specified ID.
+  ///
   /// \param iID
   ///   ID of the display geometries
   /// \param transform
   ///   transform to set
-  void UpdateTransform(unsigned int iID, const hkTransform &transform);
+  ///
+  void UpdateTransform(hkUlong iID, const hkTransform &transform);
 
 private:
   DynArray_cl<vHavokDisplayGeometry*> m_List; ///< The list of geometries managed by this instance
-  unsigned int m_iSize; ///< The number of geometries managed by this instance
+  unsigned int m_iSize;                       ///< The number of geometries managed by this instance
 };
-
-
-
-// -------------------------------------------------------------------------- //
-// HAVOK DISPLAY HANDLER                                                      //
-// -------------------------------------------------------------------------- //
-
 
 /// 
 /// \brief
@@ -316,13 +296,10 @@ private:
 class vHavokDisplayHandler: public VRefCounter, public hkDebugDisplayHandler, public IHavokStepper
 {
 public:
-
-
   ///
   /// @name Constructor / Destructor
   /// @{
   ///
-   
 
   ///
   /// \brief
@@ -331,279 +308,300 @@ public:
   /// Initializes the Havok Display Handler.
   /// 
   /// \param pPhysicsWorld
-  ///   The Havok physics world object. Container for the simulation's physical objects.
+  ///   The Havok Physics world object. Container for the simulation's physical objects.
   ///
   vHavokDisplayHandler(hkpWorld* pPhysicsWorld);
   
-
   ///
   /// \brief
   ///   Destructor
   ///
-  /// De-initializes the Havok Display Handler.
+  /// De-initializes the HavokDisplay Handler.
   ///
-  VOVERRIDE ~vHavokDisplayHandler();
-
+  virtual ~vHavokDisplayHandler();
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name hkDebugDisplayHandler Virtual Overrides
   /// @{
   ///
-  
 
   ///
   /// \brief
   ///   Adds a list of geometries to the display world managed by this display handler. 
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult addGeometry(const hkArrayBase<hkDisplayGeometry *> &geometries, const hkTransform &transform, hkUlong id, int tag, hkUlong shapeIdHint, hkGeometry::GeometryType geomType) HKV_OVERRIDE;
+  virtual hkResult addGeometry(const hkArrayBase<hkDisplayGeometry *> &geometries, const hkTransform &transform, 
+    hkUlong id, int tag, hkUlong shapeIdHint, hkGeometry::GeometryType geomType) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Adds a geometry to the display world managed by this display handler. 
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult addGeometry(hkDisplayGeometry *geometry, hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
+  virtual hkResult addGeometry(hkDisplayGeometry *geometry, hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Adds an instance of a geometry that has already been added to 
   ///   the display world managed by this display handler. 
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult addGeometryInstance(hkUlong originalInstanceId, const hkTransform& transform, hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
-
+  virtual hkResult addGeometryInstance(hkUlong originalInstanceId, const hkTransform& transform, hkUlong id, 
+    int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Updates the transform of a body in the display world.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult updateGeometry(const hkTransform &transform, hkUlong id, int tag) HKV_OVERRIDE;
+  virtual hkResult updateGeometry(const hkTransform &transform, hkUlong id, int tag) HKV_OVERRIDE;
 
 #if (HAVOK_SDK_VERSION_MAJOR >= 2010)
   ///
   /// \brief
   ///   Updates the transform of a body in the display world.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult updateGeometry(const hkMatrix4& transform, hkUlong id, int tag) HKV_OVERRIDE;
+  virtual hkResult updateGeometry(const hkMatrix4& transform, hkUlong id, int tag) HKV_OVERRIDE;
 #endif
 
   ///
   /// \brief
-  ///   Removes a geometry from the display world managed by this display handler. 
-  ///   See Havok documentation for detailed information.
+  ///   Removes a geometry from the display world managed by this display handler.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult removeGeometry(hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
+  virtual hkResult removeGeometry(hkUlong id, int tag, hkUlong shapeIdHint) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Sets the visibility of a given child geometry in a display object.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult setGeometryVisibility(int geometryIndex, bool isEnabled, hkUlong id, int tag) HKV_OVERRIDE;
+  virtual hkResult setGeometryVisibility(int geometryIndex, bool isEnabled, hkUlong id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Sets the color of a geometry previously added to the display world. 
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult setGeometryColor( hkColor::Argb color, hkUlong id, int tag) HKV_OVERRIDE;
+  virtual hkResult setGeometryColor(hkColor::Argb color, hkUlong id, int tag) HKV_OVERRIDE;
 
   /// \brief
   ///   Sets the transparency of a geometry previously added to the display world.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult setGeometryTransparency(float alpha, hkUlong id, int tag) HKV_OVERRIDE;
+  virtual hkResult setGeometryTransparency(float alpha, hkUlong id, int tag) HKV_OVERRIDE;
 
   /// \brief
-  ///   Set whether or not a geometry is pickable.
-  ///   See Havok documentation for detailed information.
+  ///   Set whether a geometry is pickable.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult setGeometryPickable( hkBool isPickable, hkUlong id, int tag ) HKV_OVERRIDE;
+  virtual hkResult setGeometryPickable( hkBool isPickable, hkUlong id, int tag ) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Updates the camera from the display world managed by this display handler.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult updateCamera(const hkVector4& from, const hkVector4& to, const hkVector4& up, hkReal nearPlane, hkReal farPlane, hkReal fov, const char* name) HKV_OVERRIDE;
+  virtual hkResult updateCamera(const hkVector4& from, const hkVector4& to, const hkVector4& up, 
+    hkReal nearPlane, hkReal farPlane, hkReal fov, const char* name) HKV_OVERRIDE;
   
-
   ///
   /// \brief
   ///   Updates the behavior from the display world managed by this display handler.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult updateBehavior(const hkArrayBase< int > &wordVarIdx, const hkArrayBase< int > &wordStack, const hkArrayBase< int > &quadVarIdx, const hkArrayBase< hkVector4 > &quadStack, const hkArrayBase< char * > &activeNodes, const hkArrayBase< int > &activeStateIds, const hkArrayBase< int > &activeTransitions, const hkArrayBase< hkQsTransform > &transforms);
+  virtual hkResult updateBehavior(const hkArrayBase<int> &wordVarIdx, const hkArrayBase<int> &wordStack, 
+    const hkArrayBase<int> &quadVarIdx, const hkArrayBase<hkVector4> &quadStack, 
+    const hkArrayBase<char *> &activeNodes, const hkArrayBase<int> &activeStateIds, 
+    const hkArrayBase<int> &activeTransitions, const hkArrayBase<hkQsTransform> &transforms);
 
   ///
   /// \brief
   ///   Puts a display point into the display buffer for display in the next frame.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayPoint(const hkVector4& position, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-  
+  virtual hkResult displayPoint(const hkVector4& position, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Puts a display line into the display buffer for display in the next frame.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayLine(const hkVector4& start, const hkVector4& end, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-  
+  virtual hkResult displayLine(const hkVector4& start, const hkVector4& end, hkColor::Argb color, 
+    int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Puts a display triangle into the display buffer for display in the next frame.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayTriangle(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-
+  virtual hkResult displayTriangle(const hkVector4& a, const hkVector4& b, const hkVector4& c, 
+    hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Outputs user text to the display.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayText(const char* text, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-    
+  virtual hkResult displayText(const char* text, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Outputs 3D text. Same as displayText() but with position.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult display3dText(const char* text, const hkVector4& pos, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+  virtual hkResult display3dText(const char* text, const hkVector4& pos, hkColor::Argb color, 
+    int id, int tag) HKV_OVERRIDE;
 
   // compatibility with VisionIntegration branch
 #if defined(HAVOK_SDK_VERSION_MAJOR) && (HAVOK_SDK_VERSION_MAJOR >= 2012)
   ///
   /// \brief
-  /// Puts a display point in 2D [-1..1] normalized windows coordinates into the display buffer for display in the next frame.
-  ///   See Havok documentation for detailed information.
+  ///   Puts a display point in 2D [-1..1] normalized windows coordinates into the display buffer for 
+  ///   display in the next frame. 
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayPoint2d(const hkVector4& position, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+  virtual hkResult displayPoint2d(const hkVector4& position, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
-  /// Puts a display line in 2D [-1..1] normalized windows coordinates into the display buffer for display in the next frame.
-  ///   See Havok documentation for detailed information.
+  ///   Puts a display line in 2D [-1..1] normalized windows coordinates into the display buffer for display in 
+  ///   the next frame.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayLine2d(const hkVector4& start, const hkVector4& end, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+  virtual hkResult displayLine2d(const hkVector4& start, const hkVector4& end, hkColor::Argb color, 
+    int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
-  /// Puts a display triangle in 2D [-1..1] normalized windows coordinates into the display buffer for display in the next frame.
-  ///   See Havok documentation for detailed information.
+  ///   Puts a display triangle in 2D [-1..1] normalized windows coordinates into the display 
+  ///   buffer for display in the next frame.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayTriangle2d(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+  virtual hkResult displayTriangle2d(const hkVector4& a, const hkVector4& b, const hkVector4& c, 
+    hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
-  /// Outputs text in 2D [-1..1] normalized windows coordinates. Also scales the text wrt the font size using sizeScale.
-  ///   See Havok documentation for detailed information.
+  ///   Outputs text in 2D [-1..1] normalized windows coordinates. Also scales the text wrt the 
+  ///   font size using sizeScale.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayText2d(const char* text, const hkVector4& pos, hkReal sizeScale, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+  virtual hkResult displayText2d(const char* text, const hkVector4& pos, hkReal sizeScale, 
+    hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
 #endif
 
   ///
   /// \brief
   ///   Display general annotation data. 
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayAnnotation(const char* text, int id, int tag) HKV_OVERRIDE;
-
+  virtual hkResult displayAnnotation(const char* text, int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Displays the geometries.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, const hkTransform& transform, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
+  virtual hkResult displayGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, const hkTransform& transform, 
+    hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
     
-
   ///
   /// \brief
   ///   Displays the geometries without transform.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult displayGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, hkColor::Argb color, int id, int tag) HKV_OVERRIDE;
-
+  virtual hkResult displayGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, hkColor::Argb color, 
+    int id, int tag) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Send memory statistics dump.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult sendMemStatsDump(const char* data, int length) HKV_OVERRIDE;
-
+  virtual hkResult sendMemStatsDump(const char* data, int length) HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Ensures that the current immediate mode display information will be preserved 
   ///   and merged with all new immediate mode data for the next step/frame.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE hkResult holdImmediate() HKV_OVERRIDE;
-
+  virtual hkResult holdImmediate() HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Batch update speed increases.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE void lockForUpdate() HKV_OVERRIDE;
-  
+  virtual void lockForUpdate() HKV_OVERRIDE;
 
   ///
   /// \brief
   ///   Unlock for Update.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE void unlockForUpdate() HKV_OVERRIDE;
-
+  virtual void unlockForUpdate() HKV_OVERRIDE;
 
   /// \brief
   ///   Implements IHavokStepper.
-  ///   See Havok documentation for detailed information.
+  ///   See Havok Physics documentation for detailed information.
   ///
-  VOVERRIDE void Step(float dt) HKV_OVERRIDE;
-
+  virtual void Step(float dt) HKV_OVERRIDE;
 
 #if (HAVOK_SDK_VERSION_MAJOR >= 2010)
+  /// \brief
+  ///   Adds a mesh to the display world managed by this display handler.
+  virtual hkResult addMesh(hkMeshBody* mesh, hkUlong id, int tag) 
+  { 
+    return HK_FAILURE; 
+  }
 
-  /// Adds a mesh to the display world managed by this display handler.
-  VOVERRIDE hkResult addMesh(hkMeshBody* mesh, hkUlong id, int tag) { return HK_FAILURE; }
+  /// \brief
+  ///   Removes a mesh from the display world managed by this display handler.
+  virtual hkResult removeMesh(hkUlong id, int tag) 
+  { 
+    return HK_FAILURE; 
+  }
 
-  /// Removes a mesh from the display world managed by this display handler.
-  VOVERRIDE hkResult removeMesh(hkUlong id, int tag) { return HK_FAILURE; }
+  /// \brief
+  ///   Updates the root transform of a mesh with a hkMatrix4.
+  virtual hkResult updateMesh( const hkMatrix4& transform, hkUlong id, int tag ) 
+  { 
+    return HK_FAILURE; 
+  }
 
-  /// Updates the root transform of a mesh with a hkMatrix4.
-  VOVERRIDE hkResult updateMesh( const hkMatrix4& transform, hkUlong id, int tag )  { return HK_FAILURE; }
+  /// \brief
+  ///   Updates the skin of a mesh given a pose using hkMatrix4s.
+  virtual hkResult skinMeshes(hkUlong* ids, int numIds, const hkMatrix4* poseModel, int numPoseModel, 
+    const hkMatrix4& worldFromModel, int tag )
+  { 
+    return HK_FAILURE; 
+  }
 
-  /// Updates the skin of a mesh given a pose using hkMatrix4s.
-  VOVERRIDE hkResult skinMeshes(hkUlong* ids, int numIds, const hkMatrix4* poseModel, int numPoseModel, const hkMatrix4& worldFromModel, int tag )  { return HK_FAILURE; }
+  /// \brief
+  ///   Skins a body in the display world. Only geometries of type hkDisplayMesh can be skinned.
+  virtual hkResult skinGeometry(hkUlong* ids, int numIds, const hkMatrix4* poseModel, int numPoseModel, 
+    const hkMatrix4& worldFromModel, int tag)
+  { 
+    return HK_FAILURE; 
+  }
 
-  /// Skins a body in the display world. Only geometries of type hkDisplayMesh can be skinned.
-  VOVERRIDE hkResult skinGeometry(hkUlong* ids, int numIds, const hkMatrix4* poseModel, int numPoseModel, const hkMatrix4& worldFromModel, int tag ) { return HK_FAILURE; }
 #endif
 
   ///
   /// @}
   ///
 
-
   ///
   /// @name Display Helper
   /// @{
   ///
-
   
   /// 
   /// \brief
@@ -615,11 +613,10 @@ public:
   /// \param bVisible
   ///   If TRUE, display geometry is set to be visible.
   ///
-  /// \see
+  /// \sa
   ///   vHavokDisplayHandler::SetVisible
   /// 
   void SetVisible(hkUlong id, BOOL bVisible);
-
   
   /// 
   /// \brief
@@ -636,7 +633,6 @@ public:
   /// 
   BOOL IsVisible(hkUlong id) const;
 
-
   /// 
   /// \brief
   ///   Sets the wireframe highlighting color of the Havok Display Geometry identified by the given ID.
@@ -652,42 +648,41 @@ public:
   /// 
   void SetColor(hkUlong id, VColorRef iColor);
 
-
   /// 
   /// \brief
-  ///   Sets the owner object so we can attach the Havok shape to it
+  ///   Sets the owner object so we can attach the Havok Physics shape to it
   /// 
   /// \param id
   ///   ID of the geometry (address of the hkpCollidable this geometry was created from).
   ///
   /// \param pOwner
-  ///   Owner object of the Havok component.
+  ///   Owner object of the Havok Physics component.
   ///
   /// \see
   ///   vHavokDisplayHandler::SetColor
   /// 
   void SetOwner(hkUlong id, VisObject3D_cl *pOwner);
 
-  inline hkArray<hkProcessContext*>& getContexts() { return m_contexts; }
-
+  inline hkArray<hkProcessContext*>& getContexts() 
+  { 
+    return m_contexts; 
+  }
 
   ///
   /// @}
   ///
 
 private:
-
-  hkpPhysicsContext* m_pContext;                  ///< Physics Context that holds all physics viewer
+  hkpPhysicsContext* m_pContext;                  ///< Physics Context that holds all physics viewers
   hkArray<hkProcess*> m_pLocalProcesses;          ///< Local Processes handled by this display handler
   vHavokDisplayGeometryList m_Geometries;         ///< List of all geometries in the physics world
   hkArray<hkProcessContext*> m_contexts;
-
 };
 
 #endif // VHAVOKDISPLAYHANDLER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

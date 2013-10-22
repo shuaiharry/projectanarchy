@@ -275,6 +275,7 @@ namespace VisionEditorPlugin.Dialogs
       this.MaximumSize = new System.Drawing.Size(432, 154);
       this.MinimizeBox = false;
       this.MinimumSize = new System.Drawing.Size(432, 85);
+      this.ShowInTaskbar = false;
       this.Name = "BillboardContextDlg";
       this.Text = "Billboards";
       this.toolStrip1.ResumeLayout(false);

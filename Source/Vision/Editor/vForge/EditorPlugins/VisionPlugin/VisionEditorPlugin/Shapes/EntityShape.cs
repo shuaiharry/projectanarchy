@@ -264,7 +264,7 @@ namespace VisionEditorPlugin.Shapes
     /// <summary>
     /// For entities the parenting mode is usually SceneGraphScaled, unless there is a VFORGE_USE_NATIVE_PARENTING flag in the native VARTABLE
     /// </summary>
-    protected virtual ParentingModes ParentingMode
+    protected override ParentingModes ParentingMode
     {
       get
       {
@@ -980,6 +980,36 @@ namespace VisionEditorPlugin.Shapes
       {
         ObjectKey = value;
       }
+    }
+
+    // Only allow positive scaling
+    // (Min value of 1e-18 works well with Havok Physics)
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleX
+    {
+      get { return base.ScaleX; }
+      set { base.ScaleX = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleY
+    {
+      get { return base.ScaleY; }
+      set { base.ScaleY = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleZ
+    {
+      get { return base.ScaleZ; }
+      set { base.ScaleZ = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float UniformScaling
+    {
+      get { return base.UniformScaling; }
+      set { base.UniformScaling = value; }
     }
 
     #endregion
@@ -2386,7 +2416,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

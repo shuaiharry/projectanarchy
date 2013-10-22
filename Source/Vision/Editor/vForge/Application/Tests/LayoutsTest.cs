@@ -30,7 +30,7 @@ namespace Editor.Tests
     public void LayoutTest()
     {
       // Load a scene
-      TestManager.Helpers.OpenSceneFromFile(TestManager.Helpers.TestDataDir + @"\PhysXBinding\JointMuseum.scene");
+      TestManager.Helpers.OpenSceneFromFile(TestManager.Helpers.TestDataDir + @"\HavokBinding\JointMuseum.scene");
 
       // Store the current layout
       Layout OldLayout = EditorManager.ApplicationLayout.ActiveLayout;
@@ -53,8 +53,9 @@ namespace Editor.Tests
         Application.DoEvents();
       }
 
+#if !HK_ANARCHY
       // load a deferred scene to make sure the deferred renderer behaves nicely as well
-      TestManager.Helpers.OpenSceneFromFile(TestManager.Helpers.TestDataDir + @"\PhysXBinding\JointMuseum_Deferred.scene");
+      TestManager.Helpers.OpenSceneFromFile(TestManager.Helpers.TestDataDir + @"\HavokBinding\JointMuseum_Deferred.scene");
 
       // first go through all layouts once
       for (int i = 0; i < Layouts.Length; i++)
@@ -69,7 +70,7 @@ namespace Editor.Tests
         EditorManager.ApplicationLayout.ActiveLayout = Layouts[R.Next(Layouts.Length)];
         Application.DoEvents();
       }
-
+#endif
       // cleanup
       TestManager.Helpers.CloseActiveProject();
 
@@ -81,7 +82,7 @@ namespace Editor.Tests
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

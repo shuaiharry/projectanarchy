@@ -9,7 +9,7 @@
 #ifndef vHavokProfiler_h__
 #define vHavokProfiler_h__
 
-#ifndef _VISION_DOC
+#if !defined(_VISION_DOC)
 
 class vHavokProfiler : public hkExternalJobProfiler
 {
@@ -38,9 +38,6 @@ public:
     m_jobTypeStrings[HK_JOB_TYPE_CHARACTER_PROXY]               =  Vision::Profiling.GetFreeElementID();
     m_jobTypeStrings[HK_JOB_TYPE_VEHICLE]                       =  Vision::Profiling.GetFreeElementID();
     m_jobTypeStrings[HK_JOB_TYPE_COLLIDE_STATIC_COMPOUND]       =  Vision::Profiling.GetFreeElementID();
-    m_jobTypeStrings[HK_JOB_TYPE_NP_CONSTRAINT_SETUP]           =  Vision::Profiling.GetFreeElementID();
-    m_jobTypeStrings[HK_JOB_TYPE_NP_SOLVER]                     =  Vision::Profiling.GetFreeElementID();
-    m_jobTypeStrings[HK_JOB_TYPE_NP_COLLIDE]                    =  Vision::Profiling.GetFreeElementID();
     m_jobTypeStrings[HK_JOB_TYPE_USER_0]                        =  Vision::Profiling.GetFreeElementID();
 
     Vision::Profiling.AddElement(m_jobTypeStrings[HK_JOB_TYPE_DYNAMICS]                      , "Dynamics", TRUE, pGroup);
@@ -62,13 +59,8 @@ public:
     Vision::Profiling.AddElement(m_jobTypeStrings[HK_JOB_TYPE_CHARACTER_PROXY]               , "CharacterProxy", TRUE, pGroup);
     Vision::Profiling.AddElement(m_jobTypeStrings[HK_JOB_TYPE_VEHICLE]                       , "Vehicle", TRUE, pGroup);
     Vision::Profiling.AddElement(m_jobTypeStrings[HK_JOB_TYPE_COLLIDE_STATIC_COMPOUND]       , "CollideStaticCompound", TRUE, pGroup);
-    Vision::Profiling.AddElement(m_jobTypeStrings[HK_JOB_TYPE_NP_CONSTRAINT_SETUP]           , "NpConstraintSetup", TRUE, pGroup);
-    Vision::Profiling.AddElement(m_jobTypeStrings[HK_JOB_TYPE_NP_SOLVER]                     , "NpSolver", TRUE, pGroup);
-    Vision::Profiling.AddElement(m_jobTypeStrings[HK_JOB_TYPE_NP_COLLIDE]                    , "NpCollide", TRUE, pGroup);
     Vision::Profiling.AddElement(m_jobTypeStrings[HK_JOB_TYPE_USER_0]                        , "User", TRUE, pGroup);
   }
-
-#endif // _VISION_DOC
 
   virtual ~vHavokProfiler()
   {
@@ -95,13 +87,15 @@ public:
   int m_jobTypeStrings[HK_JOB_TYPE_HAVOK_MAX + 1];
 };
 
+#endif // !_VISION_DOC
+
 HK_COMPILE_TIME_ASSERT(HK_JOB_TYPE_DYNAMICS == 0);
-HK_COMPILE_TIME_ASSERT(HK_JOB_TYPE_HAVOK_MAX == 22); // If this fails then there are new job types to add to the above table
+HK_COMPILE_TIME_ASSERT(HK_JOB_TYPE_HAVOK_MAX == 19); // If this fails then there are new job types to add to the above table
 
 #endif // vHavokProfiler_h__
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

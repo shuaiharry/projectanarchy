@@ -23,13 +23,21 @@ inline void hkaiPathfindingJob::atomicIncrementAndReleaseSemaphore() const
 	}
 }
 
-HK_FORCE_INLINE hkaiDirectedGraphAStarJob::hkaiDirectedGraphAStarJob( const hkaiStreamingCollection& collection )
+HK_FORCE_INLINE hkaiDirectedGraphAStarJob::hkaiDirectedGraphAStarJob( const hkaiStreamingCollection& collection, const hkaiStreamingCollection* hierarchyCollection )
 :	hkaiPathfindingJob( JOB_PATHFINDING_DIRECTED_GRAPH_ASTAR, sizeof(*this)),
 	m_commands(HK_NULL),
 	m_numCommands(0)
 {
 	m_jobSpuType = HK_JOB_SPU_TYPE_DISABLED;	/// Set this job to PPU only, to conserve SPU code space
 	m_streamingSectionInfo = collection.getInstanceInfoPtr();
+	if(hierarchyCollection)
+	{
+		m_hierarchySectionInfo = hierarchyCollection->getInstanceInfoPtr();
+	}
+	else
+	{
+		m_hierarchySectionInfo = HK_NULL;
+	}
 }
 
 inline void hkaiDirectedGraphAStarCommand::init()
@@ -161,7 +169,7 @@ inline void hkaiNavMeshLineOfSightCommand::init()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

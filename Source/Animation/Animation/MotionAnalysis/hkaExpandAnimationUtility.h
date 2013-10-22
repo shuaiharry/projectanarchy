@@ -19,18 +19,18 @@ public:
 
 
 	hkaExpandAnimationUtility( const class hkaAnimationBinding* binding, const class hkaSkeleton* skeleton );
-	hkaExpandAnimationUtility( class hkaAnimatedSkeleton* character, hkReal duration, int numSamples );
+	hkaExpandAnimationUtility( class hkaAnimatedSkeleton* character, hkSimdRealParameter duration, int numSamples );
 
 	hkVector4 getPosition( hkInt16 bone, int frame ) const;
 
-	hkReal getDuration() const;
+	hkSimdReal getDuration() const;
 	hkInt32 getNumBones() const;
 	hkInt32 getNumFrames() const;
 
 private:
 
 	hkArray< hkVector4 > m_positions;
-	hkReal m_duration;
+	hkSimdReal m_duration;
 	hkInt32 m_numBones;
 };
 
@@ -38,7 +38,7 @@ private:
 #endif // HK_EXPAND_ANIMATION_UTILITY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

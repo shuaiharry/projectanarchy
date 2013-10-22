@@ -85,14 +85,19 @@ inline void hkaiEdgePathSteeringUtil::calcTangentDirs(
 
 	// Now, think back to pt1LenSq. There's actually a chance that it's negative, if p is inside the circle.
 	// In this case, there is no tangent, but we should still do something other than ignore the situation. 
-	// Our strategy will be to output atDir as the tangent. This is equivalent to shrinking the circle until 
-	// the point is on its border. We're doing it here because the math is easier than doing it earlier AND
-	// if we do it later we might throw up a floating point exception when we do that sqrt down there.
+	// Our strategy will be to output a small multiple of atDir as the tangent. 
+	// This is equivalent to shrinking the circle until the point is on its 
+	// border. We're doing it here because the math is easier than doing it 
+	// earlier AND if we do it later we might throw up a floating point 
+	// exception when we do that sqrt down there.
+
+	static const hkQuadReal insideLenFactorsQuad = HK_QUADREAL_CONSTANT(1.0e-4f,1.0e-4f,0.0f,0.0f);
+	hkVector4 insideLenFactors; insideLenFactors.m_quad = insideLenFactorsQuad;
 
 	hkVector4Comparison insideCircle = pt1LenSq_pt2LenSq_pt1LenSq_pt2LenSq.lessEqualZero();
 	at1LenSq_at2LenSq_ap1LenSq_ap2LenSq.setSelect(
 		insideCircle,
-		hkVector4::getConstant<HK_QUADREAL_1100>(),
+		insideLenFactors,
 		at1LenSq_at2LenSq_ap1LenSq_ap2LenSq);
 
 	// Do our sqrt, and then multiply by the PC.len^-1 we kept from earlier. Now these are [0,pcLen].
@@ -204,7 +209,7 @@ hkBool32 hkaiEdgePathSteeringUtil::inCapsule( hkVector4 const& p, hkVector4 cons
 
 	hkSimdReal t = c1c2.dot<3>(c1p);
 	t.mul(c1c2LenInvSq);
-	t.setClamped(t, hkSimdReal_0, hkSimdReal_1);
+	t.setClampedZeroOne(t);
 
 	hkSimdReal r;
 	r.setInterpolate(r1, r2, t);
@@ -221,7 +226,7 @@ hkBool32 hkaiEdgePathSteeringUtil::inCapsule( hkVector4 const& p, hkVector4 cons
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

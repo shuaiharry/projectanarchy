@@ -27,11 +27,11 @@ class hkLeakDetectAllocator : public hkMemoryAllocator
 
 		void quit();
 
-		virtual void* blockAlloc( int numBytes );
-		virtual void blockFree( void* p, int numBytes );
-		virtual void* bufAlloc( int& reqNumInOut );
-		virtual void bufFree( void* p, int num );
-		virtual void* bufRealloc( void* pold, int oldNum, int& reqNumInOut );
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
+		virtual void* bufAlloc( int& reqNumInOut ) HK_OVERRIDE;
+		virtual void bufFree( void* p, int num ) HK_OVERRIDE;
+		virtual void* bufRealloc( void* pold, int oldNum, int& reqNumInOut ) HK_OVERRIDE;
 
 		struct AllocInfo
 		{
@@ -42,8 +42,8 @@ class hkLeakDetectAllocator : public hkMemoryAllocator
 			hkBool isBuf;
 		};
 
-		virtual void getMemoryStatistics( MemoryStatistics& out );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void getMemoryStatistics( MemoryStatistics& out ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
 			/// Output all the currently allocated pointers by allocation location, indented by tabs.
 			/// Use tabview to view this file as a tree.
@@ -87,7 +87,7 @@ class hkLeakDetectAllocator : public hkMemoryAllocator
 #endif //HKBASE_hkLeakDetectAllocator_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

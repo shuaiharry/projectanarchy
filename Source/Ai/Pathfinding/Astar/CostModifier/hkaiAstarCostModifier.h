@@ -13,6 +13,8 @@
 #include <Ai/Pathfinding/NavMesh/hkaiNavMeshEdgePairInfo.h>
 #include <Ai/Pathfinding/NavVolume/hkaiNavVolumeInstance.h>
 #include <Ai/Pathfinding/NavVolume/hkaiNavVolumeCellPairInfo.h>
+#include <Ai/Pathfinding/Graph/hkaiDirectedGraphNodePairInfo.h>
+#include <Ai/Pathfinding/NavMesh/Streaming/hkaiStreamingCollection.h>
 
 extern const class hkClass hkaiAstarCostModifierClass;
 
@@ -35,11 +37,14 @@ class hkaiAstarCostModifier : public hkReferencedObject
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI);
 		HK_DECLARE_REFLECTION();
 
+			/// Maximum modifier size on SPU.
 		enum
 		{
 			MAX_SIZE_FOR_SPU = 256
 		};
 
+			/// Whether the cost modifier is an hkaiDefaultAstarCostModifier or a user-specified one.
+			/// This is used to fix up the vtable on SPU, otherwise it is unused.
 		enum CostModifierType
 		{
 			COST_MODIFIER_DEFAULT,
@@ -99,6 +104,26 @@ class hkaiAstarCostModifier : public hkReferencedObject
 			const hkSimdReal m_adjacentCost;
 		};
 
+			/// Context structure for the getModifiedCost callback on directed graphs.
+		struct DirectedGraphGetModifiedCostCallbackContext
+		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI,hkaiAstarCostModifier::DirectedGraphGetModifiedCostCallbackContext);
+
+			inline DirectedGraphGetModifiedCostCallbackContext( const hkaiStreamingCollection::InstanceInfo* streamingInfo, const hkaiAgentTraversalInfo& agentInfo, 
+				const hkaiDirectedGraphNodePairInfo& nodeEdgeInfo, hkSimdRealParameter searchPathCost, hkSimdRealParameter edgeCost );
+
+			/// Accessor for the graphs(s)
+			const hkaiStreamingCollection::InstanceInfo* const m_streamingInfo;
+			/// Traversal info for the A* search
+			const hkaiAgentTraversalInfo& m_agentInfo;
+			/// Information on the Node->Edge->Node to check
+			const hkaiDirectedGraphNodePairInfo& m_nodeEdgeInfo;
+			/// Cost of the whole search path up to this node pair
+			const hkSimdReal m_searchPathCost;
+			/// Euclidean cost from current node to the adjacent node
+			const hkSimdReal m_edgeCost;
+		};
+
 
 			/// Returns the modified cost of walking through the pair of edges (and through the face).
 			/// Note that if costs are being changed, line-of-sight checks during A* should be disabled. Leaving
@@ -113,6 +138,9 @@ class hkaiAstarCostModifier : public hkReferencedObject
 			/// hkaiNavVolumePathSearchParameters::CHECK_LINE_OF_SIGHT_IF_NO_COST_MODIFIER will handle this intelligently.
 		virtual hkSimdReal getModifiedCost( const NavVolumeGetModifiedCostCallbackContext& context ) const;
 
+			/// Returns the modified cost of walking through the from one node to the adjacent one.			
+		virtual hkSimdReal getModifiedCost( const DirectedGraphGetModifiedCostCallbackContext& context ) const;
+
 		static hkaiAstarCostModifier* getFromMainMemory(const hkaiAstarCostModifier* costModifier);
 };
 
@@ -121,7 +149,7 @@ class hkaiAstarCostModifier : public hkReferencedObject
 #endif // HK_AI_NAV_MESH_COST_MODIFIER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

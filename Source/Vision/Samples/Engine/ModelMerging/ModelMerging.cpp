@@ -62,7 +62,7 @@ VISION_INIT
 #endif
 
   // Init the application
-  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, szSceneFile /*SampleScene*/, VSAMPLE_INIT_DEFAULTS | VSAMPLE_ALIGNLOGOALTERNATIVE, iX, iY ))
+  if (!spApp->InitSample("Maps\\SimpleGround" /*DataDir*/, szSceneFile /*SampleScene*/, VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_ALIGNLOGOALTERNATIVE, iX, iY ))
     return false;
 
   return true;
@@ -185,7 +185,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

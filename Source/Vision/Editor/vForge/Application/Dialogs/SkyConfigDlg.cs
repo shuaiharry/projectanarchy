@@ -327,8 +327,8 @@ namespace Editor.Dialogs
       this.DialogCaptionBar.BackColor = System.Drawing.SystemColors.Window;
       this.DialogCaptionBar.Caption = "Sky Properties";
       this.DialogCaptionBar.CompactView = false;
-      this.DialogCaptionBar.Description = "Here you can specify the sky shader and its properties that is used in your scene" +
-          ", add sky layers and specify the respective properties for each sky layer.";
+      this.DialogCaptionBar.Description = 
+        "The sky layer setup, the sky shader and the respective properties for the scene can be specified here.";
       this.DialogCaptionBar.Dock = System.Windows.Forms.DockStyle.Top;
       this.DialogCaptionBar.Image = ((System.Drawing.Image)(resources.GetObject("DialogCaptionBar.Image")));
       this.DialogCaptionBar.Location = new System.Drawing.Point(0, 0);
@@ -419,6 +419,7 @@ namespace Editor.Dialogs
       // SkyConfigDlg
       // 
       this.AcceptButton = this.button_OK;
+      this.ShowInTaskbar = false;
       this.AutoScaleBaseSize = new System.Drawing.Size(6, 15);
       this.CancelButton = this.button_Cancel;
       this.ClientSize = new System.Drawing.Size(802, 595);
@@ -577,9 +578,9 @@ namespace Editor.Dialogs
       if (SkyConfig!=null)
       {
         int iSelIndex = SelectedLayerIndex;
-        button_LayerDown.Enabled = iSelIndex >= 0 && iSelIndex < SkyConfig.LayerCount-1;
+        button_LayerDown.Enabled = iSelIndex >= 0 && iSelIndex < SkyConfig.Layers.Count - 1;
         button_LayerUp.Enabled = iSelIndex > 0;
-        button_AddLayer.Enabled = SkyConfig.LayerCount < SkyConfig.MAX_LAYER_COUNT;
+        button_AddLayer.Enabled = SkyConfig.Layers.Count < SkyConfig.MAX_LAYER_COUNT;
         button_RemoveLayer.Enabled = ListView_Layers.SelectedIndices.Count==1;
       } 
       else
@@ -591,17 +592,15 @@ namespace Editor.Dialogs
       }
     }
 
-
-    static bool bLayerCountReported = false;
-
     private void button_AddLayer_Click(object sender, System.EventArgs e)
     {
-      int iIndex = SkyConfig.Layers.Add(new SkyLayer());
-      if (SkyConfig.LayerCount > 4 && !bLayerCountReported)
+      if (SkyConfig.Layers.Count >= 4)
       {
-        bLayerCountReported = true;
-        EditorManager.ShowMessageBox("More than 4 layers are supported but a custom shader is needed to blend additional layers.", "More than 4 Sky Layers", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        EditorManager.ShowMessageBox("More than 4 layers are not supported.", "More than 4 Sky Layers", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return;
       }
+
+      int iIndex = SkyConfig.Layers.Add(new SkyLayer());
 
       FillLayerList(iIndex);
       SkyConfig.Update();
@@ -840,7 +839,7 @@ namespace Editor.Dialogs
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

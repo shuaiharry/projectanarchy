@@ -7,6 +7,7 @@
  */
 #ifndef HK_BLOCKSTREAM_BLOCK_H
 #define HK_BLOCKSTREAM_BLOCK_H
+
 class hkBlockStreamAllocator;
 
 namespace hkBlockStreamBase 
@@ -27,7 +28,7 @@ namespace hkBlockStreamBase
 	#if defined( HK_TINY_SPU_ELF )
 			BLOCK_TOTAL_SIZE = 512, 
 	#elif defined(HK_PLATFORM_HAS_SPU)
-			BLOCK_TOTAL_SIZE = 1024*2, 
+			BLOCK_TOTAL_SIZE = 1024, 
 	#elif defined(HK_PLATFORM_CTR)
 			BLOCK_TOTAL_SIZE = 512, 
 	#else
@@ -50,7 +51,7 @@ namespace hkBlockStreamBase
 		HK_FORCE_INLINE void setHeaderToZero();
 
 		/// Read-only and read-write access to the beginning of the data int the block.
-		HK_FORCE_INLINE void*		begin();	
+		HK_FORCE_INLINE void*		begin();
 		HK_FORCE_INLINE const void* begin() const; 
 
 		/// Returns a pointer past the end of the block;
@@ -74,26 +75,29 @@ namespace hkBlockStreamBase
 		HK_FORCE_INLINE void atomicDecreaseElementCount( int numElementsToFree );
 
 	protected:
+
 		/// This variable stores two 16-bits integers, respectively the number of elements that have yet not been
 		/// consumed, and the number of bytes used in the block. They should be accessed by the get and set functions.
 		/// numElements needs to be atomically decreased by Consumers, but atomic operations are only guaranteed
 		/// on 32 bits int on every platform, so that's why it's stored in the least 16 significant bits.
-		HK_ALIGN16( hkUint32 m_numElementsAndBytesUsed );	
+		HK_ALIGN16( hkUint32 m_numElementsAndBytesUsed );
 
 	public:
+
 		int						m_blockIndexInStream;		///< The index of this block in a stream
 		Block*					m_next;						///< Next block in this linked list
-		hkBlockStreamAllocator* m_allocator;				///< for debugging check and reporting
-		Stream*					m_debugBlockStream;			///< for debugging checks and reporting
-		HK_ALIGN_REAL( hkUchar  m_data[ BLOCK_DATA_SIZE ] );///< the actual data
+		hkBlockStreamAllocator* m_allocator;				///< For debugging check and reporting
+		Stream*					m_blockStream;				///< Filled in only in debug, used for debugging checks and reporting
+		HK_ALIGN_REAL( hkUchar  m_data[ BLOCK_DATA_SIZE ] );///< The actual data
 	};
-
 }
+
 #include <Common/Base/Container/BlockStream/hkBlockStreamBaseBlock.inl>
+
 #endif // HK_BLOCKSTREAM_BLOCK_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

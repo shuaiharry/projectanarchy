@@ -29,7 +29,7 @@ RPG_Boss::RPG_Boss()
 void RPG_Boss::InitializeCharacterEffects()
 {
   // @todo: this is a bit of an off-topic place for this. Organize better once we data-drive this bit.
-  m_projectileMeshFilename = "Effects/ProjectileStandIn.model";
+  m_projectileMeshFilename = "Models/Effects/ProjectileStandIn.model";
   RPG_CharacterEffect_e effectType;
 
   //const VString& fmodEventGroup = "Characters/Boss";
@@ -98,8 +98,15 @@ VType* RPG_Boss::GetControllerComponentType()
   return V_RUNTIME_CLASS(RPG_BossAiControllerComponent);
 }
 
+void RPG_Boss::OnDeserializationCallback(VSerializationContext const& context)
+{
+  RPG_AiCharacter::OnDeserializationCallback(context);
+
+  RPG_GameManager::s_instance.SetBossEntity(this);
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

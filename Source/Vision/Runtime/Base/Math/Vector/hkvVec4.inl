@@ -212,11 +212,11 @@ HKV_FORCE_INLINE hkvResult hkvVec4::normalizeIfNotZero (float fEpsilon /* = HKVM
   return HKV_SUCCESS;
 }
 
-HKV_FORCE_INLINE float hkvVec4::normalizedEnsureUnitLength ()
+HKV_FORCE_INLINE float hkvVec4::normalizedEnsureUnitLength (float fEpsilon /* = HKVMATH_EPSILON */, const hkvVec4& vFallback /* = hkvVec4(1.0f, 0.0f, 0.0f, 0.0f) */)
 {
-  if ((isZero (HKVMATH_EPSILON)) || (!isValid ()))
+  if ((isZero (fEpsilon)) || (!isValid ()))
   {
-    set (1, 0, 0, 0);
+    *this = vFallback;
     return 0.0f;
   }
 
@@ -401,7 +401,7 @@ HKV_FORCE_INLINE const hkvVec4 operator/ (const hkvVec4& lhs, float f)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

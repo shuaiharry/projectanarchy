@@ -97,7 +97,7 @@ vHavokTriggerVolume::vHavokTriggerVolume(VHavokTriggerVolumeShapeType_e eShapeTy
   Havok_ShapeType = eShapeType;
   Havok_MotionType = VHavokTriggerVolumeMotionType_FIXED; 
   Havok_QualityType = VHavokTriggerVolumeQualityType_FIXED;
-  Havok_CollisionLayer = 1;
+  Havok_CollisionLayer = vHavokPhysicsModule::HK_LAYER_COLLIDABLE_STATIC;
   Havok_CollisionGroup = 0;
   Havok_SubSystemId = 0;
   Havok_SubSystemDontCollideWith = 0;
@@ -148,30 +148,35 @@ void vHavokTriggerVolume::CommonInit()
   // Get scaling vector from custom volume object
   hkvVec3 vScale = pCustomVolume->GetScale();
 
-  if (pMesh)
-  {  
-    // Check whether the static mesh has enough vertices
-    if (pMesh->GetNumOfVertices()<3)
-      return;
-
-    // Check whether the static mesh has valid size
-	const hkvAlignedBBox& bbox = pMesh->GetBoundingBox();
-	hkVector4 bbox_min; vHavokConversionUtils::VisVecToPhysVec_noscale(bbox.m_vMin, bbox_min);
-	hkVector4 bbox_max; vHavokConversionUtils::VisVecToPhysVec_noscale(bbox.m_vMax, bbox_max);
-	hkVector4 bbox_extent; bbox_extent.setSub(bbox_max,bbox_min); bbox_extent.mul(vHavokConversionUtils::GetVision2HavokScaleSIMD());
-
-	hkVector4 meshTol; meshTol.setAll(hkReal((Havok_ShapeType==VHavokTriggerVolumeShapeType_CONVEX) ? HKVIS_CONVEX_SHAPE_TOLERANCE : HKVIS_MESH_SHAPE_TOLERANCE));
-	hkVector4Comparison notLargeEnough = bbox_extent.less(meshTol);
-	if (notLargeEnough.anyIsSet<hkVector4ComparisonMask::MASK_XYZ>())
-    {
-      Vision::Error.Warning("Initializing vHavokTriggerVolume with a static mesh with undersized extents (%.4f, %4f, %.4f)", 
-                            bbox_extent(0), bbox_extent(1), bbox_extent(2));
-      return;
-    }
-  }
-  else 
+  if (!pMesh)
   {
     Vision::Error.Warning("Initializing vHavokTriggerVolume with a NULL static mesh");
+    return;
+  }
+
+  // Check whether the static mesh has enough vertices
+  if (pMesh->GetNumOfTriangles() < 1)
+  {
+    return;
+  }
+
+  // Check whether the static mesh has valid size
+  const hkvAlignedBBox& bbox = pMesh->GetBoundingBox();
+  hkVector4 bbox_min; vHavokConversionUtils::VisVecToPhysVec_noscale(bbox.m_vMin, bbox_min);
+  hkVector4 bbox_max; vHavokConversionUtils::VisVecToPhysVec_noscale(bbox.m_vMax, bbox_max);
+  hkVector4 bbox_scale; vHavokConversionUtils::VisVecToPhysVec_noscale(vScale, bbox_scale);
+
+  bbox_scale.mul(vHavokConversionUtils::GetVision2HavokScaleSIMD());
+
+  hkVector4 bbox_extent; bbox_extent.setSub(bbox_max,bbox_min); bbox_extent.mul(bbox_scale);
+
+  hkVector4 meshTol; meshTol.setAll(hkReal((Havok_ShapeType==VHavokTriggerVolumeShapeType_CONVEX) ? HKVIS_CONVEX_SHAPE_TOLERANCE : HKVIS_MESH_SHAPE_TOLERANCE));
+  hkVector4Comparison notLargeEnough = bbox_extent.less(meshTol);
+  if (notLargeEnough.anyIsSet<hkVector4ComparisonMask::MASK_XYZ>())
+  {
+    const char *szMeshFilename = (pMesh->GetFilename()!=NULL) ? pMesh->GetFilename() : "Unnamed";
+    Vision::Error.Warning("Initializing vHavokTriggerVolume with a static mesh [%s] with undersized extents (%.4f, %4f, %.4f)", 
+      szMeshFilename, bbox_extent(0), bbox_extent(1), bbox_extent(2));
     return;
   }
 
@@ -329,7 +334,6 @@ bool vHavokTriggerVolume::CreateHkTriggerVolume(VisStaticMesh_cl* pMesh, const h
     UpdateVision2Havok();
     m_pModule->AddTriggerVolume(this);
   }
-
   return true;
 }
 
@@ -340,7 +344,7 @@ void vHavokTriggerVolume::RemoveHkTriggerVolume()
 
   // If we still have an owner, then remove the trigger volume from the Havok world
   if (GetOwner() != NULL)
-    m_pModule->RemoveTriggerVolume(this);
+    m_pModule->RemoveTriggerVolume(this);  
 
   m_pTriggerVolume->removeReference();
   m_pTriggerVolume->getTriggerBody()->removeReference();
@@ -547,9 +551,10 @@ hkpRigidBody* vHavokTriggerVolume::GetHkTriggerBody()const
 
 void vHavokTriggerVolume::SetDebugRendering(BOOL bEnable)
 {
-  VVERIFY_OR_RET(m_pTriggerVolume);
-
   Debug_Render = bEnable;
+
+  if (m_pTriggerVolume == NULL)
+    return;
 
   vHavokPhysicsModule* pInstance = vHavokPhysicsModule::GetInstance();
 
@@ -583,9 +588,10 @@ void vHavokTriggerVolume::SetDebugRendering(BOOL bEnable)
 
 void vHavokTriggerVolume::SetDebugColor(VColorRef color)
 {
-  VVERIFY_OR_RET(m_pTriggerVolume);
-
   Debug_Color = color;
+
+  if (m_pTriggerVolume == NULL)
+    return;
 
   // Get ID (cast from collidable pointer as its is used for display geometry ID)
   hkpWorld* world = vHavokPhysicsModule::GetInstance()? vHavokPhysicsModule::GetInstance()->GetPhysicsWorld() : HK_NULL;
@@ -625,8 +631,6 @@ BOOL vHavokTriggerVolume::CanAttachToObject(VisTypedEngineObject_cl *pObject, VS
 
 void vHavokTriggerVolume::SetOwner(VisTypedEngineObject_cl *pOwner)
 {
-  IVObjectComponent::SetOwner(pOwner);
-
   // Do not initialize the component in case our module is not active
   if (!m_pModule)
   {
@@ -637,6 +641,8 @@ void vHavokTriggerVolume::SetOwner(VisTypedEngineObject_cl *pOwner)
   // Add or remove from manager according to whether we have an owner or not
   if (pOwner)
   {
+    IVObjectComponent::SetOwner(pOwner);
+
     // Use matrix directly instead of euler angles when doing real physics, as Euler
     // angles are slower and less accurate. Before, however, ensure that the object's
     // rotation matrix is current.
@@ -665,6 +671,8 @@ void vHavokTriggerVolume::SetOwner(VisTypedEngineObject_cl *pOwner)
     // Remove shape from cache
     vHavokShapeFactory::RemoveShape(m_szShapeCacheId);
     m_szShapeCacheId = NULL;
+
+    IVObjectComponent::SetOwner(NULL);
   }
 }
 
@@ -767,21 +775,27 @@ void vHavokTriggerVolume::Serialize( VArchive &ar )
       VASSERT((pMesh != NULL)&&(pMesh->IsLoaded())) 
 
       // Get shape
-      VASSERT(m_pTriggerVolume != NULL); 
-      m_pModule->MarkForRead();  
-      const hkpShape *pShape = m_pTriggerVolume->getTriggerBody()->getCollidable()->getShape();
-      m_pModule->UnmarkForRead();
-
-      // Cache shape to HKT file
-      if (pShape->getClassType() == &hkvConvexVerticesShapeClass)
+      if (m_pTriggerVolume == NULL)
       {
-        bool shrinkToFit = false; // would be better if true, but for back compat leave false
-        vHavokCachedShape::SaveConvexShape(pMesh, pCustomVolume->GetScale(), shrinkToFit, (hkvConvexVerticesShape*)pShape);
+        Vision::Error.Warning("vHavokTriggerVolume: Internal trigger volume missing on export.");
       }
       else
       {
-        vHavokCachedShape::SaveMeshShape(pMesh, pCustomVolume->GetScale(), 
-          VisStaticMeshInstance_cl::VIS_COLLISION_BEHAVIOR_CUSTOM, VIS_WELDING_TYPE_NONE, (hkvBvCompressedMeshShape*)pShape);
+        m_pModule->MarkForRead();  
+        const hkpShape *pShape = m_pTriggerVolume->getTriggerBody()->getCollidable()->getShape();
+        m_pModule->UnmarkForRead();
+
+        // Cache shape to HKT file
+        if (pShape->getClassType() == &hkvConvexVerticesShapeClass)
+        {
+          bool shrinkToFit = false; // would be better if true, but for back compat leave false
+          vHavokCachedShape::SaveConvexShape(pMesh, pCustomVolume->GetScale(), shrinkToFit, (hkvConvexVerticesShape*)pShape);
+        }
+        else
+        {
+          vHavokCachedShape::SaveMeshShape(pMesh, pCustomVolume->GetScale(), 
+            VisStaticMeshInstance_cl::VIS_COLLISION_BEHAVIOR_CUSTOM, VIS_WELDING_TYPE_NONE, (hkvBvCompressedMeshShape*)pShape);
+        }
       }
     }
   }
@@ -800,19 +814,25 @@ void vHavokTriggerVolume::OnDeserializationCallback(const VSerializationContext 
 // -------------------------------------------------------------------------- //
 
 START_VAR_TABLE(vHavokTriggerVolume, IVObjectComponent, "Havok Trigger Volume Component", VVARIABLELIST_FLAGS_NONE, "Havok Trigger Volume" )
-  DEFINE_VAR_ENUM     (vHavokTriggerVolume, Havok_ShapeType, "Geometry used for Physics", "Convex Hull","Convex Hull/Mesh", 0, 0);
-  DEFINE_VAR_ENUM     (vHavokTriggerVolume, Havok_MotionType, "Type of Physics:\nFixed - Collides but doesn't move\nKeyframed - Can be moved", "Fixed", "Fixed/Keyframed", 0, 0);
-  DEFINE_VAR_ENUM     (vHavokTriggerVolume, Havok_QualityType, "Quality type of collidable. Does not affect fixed trigger volumes! Default: Automatic assignment by motion type", "Auto", "Auto/Fixed/Keyframed/Keyframed_Reporting", 0, 0);
-  DEFINE_VAR_INT      (vHavokTriggerVolume, Havok_CollisionLayer, "Defines the collision layer this Trigger Volume is assigned to.", "1", 0,0);
-  DEFINE_VAR_INT      (vHavokTriggerVolume, Havok_CollisionGroup, "Defines the collision group this Trigger Volume is assigned to.", "0", 0,0);
-  DEFINE_VAR_INT      (vHavokTriggerVolume, Havok_SubSystemId, "Defines the sub system ID of this Trigger Volume.", "0", 0,0);
-  DEFINE_VAR_INT      (vHavokTriggerVolume, Havok_SubSystemDontCollideWith, "Defines the sub system ID this Trigger Volume should not collide with.", "0", 0,0);
+  DEFINE_VAR_ENUM     (vHavokTriggerVolume, Havok_ShapeType, "Geometry used for Physics. Note that if 'Mesh' is selected, objects are only detected as being 'inside' the volume when touching the faces of the mesh.", "Convex Hull","Convex Hull/Mesh", 0, 0);
+  DEFINE_VAR_ENUM     (vHavokTriggerVolume, Havok_MotionType, "Type of Physics:\nFixed - Detects collisions, but doesn't move\nKeyframed - Can be moved", "Fixed", "Fixed/Keyframed", 0, 0);
+  DEFINE_VAR_ENUM     (vHavokTriggerVolume, Havok_QualityType,
+    "Quality type of collidable. Does not affect fixed trigger volumes!\n"
+    "Auto - Default, automatic assignment by motion type\n"
+    "Fixed - Use this for fixed trigger volumes.\n"
+    "Keyframed - Use this for keyframed trigger volumes.\n"
+    "Keyframed_Reporting - Use this for keyframed trigger volumes to additionally detect trigger events from static and other keyframed objects.", 
+    "Auto", "Auto/Fixed/Keyframed/Keyframed_Reporting", 0, 0);
+  DEFINE_VAR_INT      (vHavokTriggerVolume, Havok_CollisionLayer, "Defines the collision layer this Trigger Volume is assigned to.\n"COLLISION_LAYER_NUMBER_VARTABLE_DESCRIPTION, "2", 0, "Clamp(0, 31)");
+  DEFINE_VAR_INT      (vHavokTriggerVolume, Havok_CollisionGroup, "Defines the collision group this Trigger Volume is assigned to.", "0", 0, "Clamp(0, 65535)");
+  DEFINE_VAR_INT      (vHavokTriggerVolume, Havok_SubSystemId, "Defines the sub system ID of this Trigger Volume.", "0", 0, "Clamp(0, 31)");
+  DEFINE_VAR_INT      (vHavokTriggerVolume, Havok_SubSystemDontCollideWith, "Defines the sub system ID this Trigger Volume should not collide with.", "0", 0, "Clamp(0, 31)");
   DEFINE_VAR_BOOL     (vHavokTriggerVolume, Debug_Render, "Enables/Disables Physics Debug Rendering.", "FALSE", 0, 0);
   DEFINE_VAR_COLORREF (vHavokTriggerVolume, Debug_Color, "Color of this Trigger Volume when Debug Rendering is active.", "0,0,255,255", 0, NULL);
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

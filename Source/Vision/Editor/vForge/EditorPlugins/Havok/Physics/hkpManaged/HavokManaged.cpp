@@ -116,12 +116,16 @@ namespace HavokManaged
       return false;
     }
 
-    static void EnableDebugRendering (bool bRigidBodies, bool bRagdolls, bool bCharacterControlers, bool bTriggerVolumes, bool bStaticMeshes)
+    static void EnableDebugRendering (bool bRigidBodies, bool bRagdolls, bool bCharacterControlers, 
+      bool bTriggerVolumes, bool bBlockerVolumes, bool bStaticMeshes)
     {
       vHavokPhysicsModule *pInst = vHavokPhysicsModule::GetInstance();
 
-      if (pInst)
-        pInst->EnableDebugRendering (bRigidBodies, bRagdolls, bCharacterControlers, bTriggerVolumes, bStaticMeshes);
+      if (pInst != NULL)
+      {
+        pInst->EnableDebugRendering (bRigidBodies, bRagdolls, bCharacterControlers, 
+          bTriggerVolumes, bBlockerVolumes, bStaticMeshes);
+      }
     }
 
     static void ResetWorldSettings()
@@ -210,11 +214,20 @@ namespace HavokManaged
         pInst->UpdateGroupsCollision();
       }
     }
+
+    static void SetVisualDebuggerPort( int port )
+    {
+      if (vHavokPhysicsModule *pInst = vHavokPhysicsModule::GetInstance())
+      {
+        pInst->SetVisualDebuggerPort(port);
+      }
+    }
+
   }; 
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

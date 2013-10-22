@@ -307,7 +307,14 @@ public:
   inline bool IsDead() const {return m_bIsDead;}
   ///\brief
   ///Indicates whether the layer's lifetime is used up
-  inline bool IsLifeTimeOver() {if (m_bInfiniteLifeTime) return false;return (m_fLifeTime<0.f);}
+  inline bool IsLifeTimeOver()
+  {
+    if (m_bInfiniteLifeTime)
+      return false;
+
+    return (m_fLifeTime<0.f);
+  }
+
   ///\brief
   ///Marks the layer as finished, i.e. no new particles are spawned. As soon as all particles have disappeared, the layer can be destroyed.
   inline void SetFinished() 
@@ -392,8 +399,13 @@ public:
   {
     // make sure the task has finished because it might also affect the bounding box
     EnsureUpdaterTaskFinished();
+    
+    //(1) current implmentation:
     m_BoundingBox.setInvalid();
     InflateBoundingBox(true);
+
+    //(2) consider switching over to:
+    //CalcCurrentBoundingBox();
   }
 
   ///\brief
@@ -448,19 +460,28 @@ public:
 
   ///\brief
   ///Returns the updated bounding box. The return pointer can be NULL
-  inline const hkvAlignedBBox *GetCurrentBoundingBox();
+  inline const hkvAlignedBBox *CalcCurrentBoundingBox();
 
   ///\brief
   ///Sets simulation flag. If false, the layer is also simulated when it is not visible; If true, the layer will only be simulated when visible.
-  inline void SetHandleWhenVisible(bool bStatus) {m_bHandleWhenVisible=bStatus;}
+  inline void SetHandleWhenVisible(bool bStatus) 
+  {
+    m_bHandleWhenVisible = bStatus;
+  }
 
   ///\brief
   ///Gets simulation flag. If false, the layer is also simulated when it is not visible; If true, the layer is only simulated when it is visible.
-  inline bool GetHandleWhenVisible() { return m_bHandleWhenVisible; }
+  inline bool GetHandleWhenVisible() 
+  { 
+    return m_bHandleWhenVisible; 
+  }
 
   ///\brief
   ///Returns true if the particle group was rendered in the last frame. Returns false otherwise.
-  inline bool WasRecentlyRendered() { return (m_iLastRenderFrame == Vision::Game.GetUpdateSceneCount() - 1); }
+  inline bool WasRecentlyRendered() 
+  { 
+    return (m_uiLastRenderFrame == Vision::Video.GetFrameCount()-1); 
+  }
 
   ///\brief
   ///Sets an ambient color that might contribute to the per-frame color
@@ -530,6 +551,10 @@ public:
   ///The w component is not used
   inline hkvVec4 GetSizeMultiplier() {return m_vSizeMultiplier;}
 
+  ///\brief
+  ///Gets the topology of the particle group. See VIS_PARTICLE_TOPOLOGY_e.
+  inline VIS_PARTICLE_TOPOLOGY_e GetTopology() const {return (VIS_PARTICLE_TOPOLOGY_e)m_eTopology; }
+
 protected:
   // VisObject3D_cl class overrides
   virtual void OnObject3DChanged(int iO3DFlags) HKV_OVERRIDE;
@@ -546,6 +571,8 @@ private:
   friend class VisParticleEmitter_cl;
   friend class VisParticleEffectFile_cl;
   friend class HandleParticlesTask_cl;
+  friend class VParticleDesaturationShaderpass;
+  friend class VParticleDesaturationManager;
 
   void InitGroup(bool bSpawnParticles, int iGeneration=0);
   void CopyParentPosition();
@@ -660,6 +687,10 @@ private:
 
   // task
   HandleParticlesTask_cl *m_pHandlingTask;       ///< pointer to simulation task
+
+  #ifdef WIN32
+    void* m_pParticleDesaturationGroup;           ///< pointer to particle desaturation group used by simulation package
+  #endif
 };
 
 
@@ -944,6 +975,17 @@ public:
   /// The particle effect resource 
   inline VisParticleEffectFile_cl* GetSourceEffect() const {return m_spSourceFXFile;}
 
+  ///\brief
+  /// Returns the own cached light grid color
+  ///
+  ///\returns
+  /// Pointer to the lightgrid colors
+  inline const hkvVec3* GetCachedLightgridColors() const { return m_OwnLGColors; }
+
+  ///\brief
+  /// Sets whether to use light grid or not
+  inline const void SetUseLightgrid(bool bUse) { m_bUseLightgrid = bUse; }
+
   ///
   /// @name Network related
   /// @{
@@ -967,7 +1009,7 @@ public:
   PARTICLE_IMPEXP virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB) HKV_OVERRIDE;
   PARTICLE_IMPEXP VisParticleEffect_cl();
 
-private:
+protected:
   PARTICLE_IMPEXP virtual void Serialize( VArchive &ar ) HKV_OVERRIDE;
   PARTICLE_IMPEXP virtual void OnSerialized(VArchive &ar) HKV_OVERRIDE;
   PARTICLE_IMPEXP virtual VBool WantsDeserializationCallback(const VSerializationContext &context) HKV_OVERRIDE
@@ -1009,7 +1051,7 @@ private:
 ///\brief
 /// Collection class for refcounted particle effect instances
 ///
-///This class adds convenience functions to perform simulation (Tick) or Pruge the list
+///This class adds convenience functions to perform simulation (Tick) or purge the list
 class VisParticleEffectCollection_cl : public VRefCountedCollection<VisParticleEffect_cl>
 {
 public:
@@ -1112,7 +1154,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

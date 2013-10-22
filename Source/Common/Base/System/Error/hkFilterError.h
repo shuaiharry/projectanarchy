@@ -27,7 +27,7 @@
 #endif
 
 /// Error handler used to filter a specific error message, optionally transferring execution to a given jump location.
-/// All other messages and method calls are forwarded to the previously installed error handler.
+/// Messages are optionally forwarded to the previously installed error handler.
 class hkFilterError : public hkError
 {
 	//+hk.MemoryTracker(ignore=True)
@@ -39,7 +39,7 @@ public:
 #endif
 	HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 
-	hkFilterError() : m_prevHandler(HK_NULL) {}	
+	hkFilterError( bool fwdFilteredMessage = false, bool fwdOtherMessages = true  ) : m_prevHandler(HK_NULL), m_fwdFilteredMessage(fwdFilteredMessage), m_fwdOtherMessages(fwdOtherMessages) {}	
 
 	/// Replaces current error handler instance while maintaining a reference to it to forward 
 	/// all calls that are not filtered. If a jumpBuffer is provided, the jumpBuffer must be valid
@@ -77,12 +77,14 @@ private:
 	Message m_message;
 	int m_id;
 	hkBool m_messageRaised;
+	hkBool m_fwdFilteredMessage;
+	hkBool m_fwdOtherMessages;
 };
 
 #endif // HK_FILTER_ERROR
 
 /*
- * Havok SDK - Base file, BUILD(#20130725)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

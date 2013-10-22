@@ -8,11 +8,6 @@
 
 /// \file vHavokFileStreamAccess.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
-
 #ifndef VHAVOKFILESTREAMACCESS_HPP_INCLUDED
 #define VHAVOKFILESTREAMACCESS_HPP_INCLUDED
 
@@ -27,21 +22,19 @@
 class vHavokStreamWriter : public hkStreamWriter
 {
 public:
-  /// \fn vHavokStreamWriter(const char *pFileName)
-  ///
-  /// \brief  Constructor. 
+  /// \brief  
+  ///   Constructor. 
   ///
   /// \param pFileName
-  ///  The destination filename
+  ///   The destination filename
   ///
   VHAVOK_IMPEXP vHavokStreamWriter(const char* pFileName);
 
-  /// \fn vHavokStreamWriter(IVFileOutStream* pStream)
-  ///
-  /// \brief  Constructor.
+  /// \brief  
+  ///   Constructor.
   ///
   /// \param pStream
-  ///  The destination stream
+  ///   The destination stream
   ///
   VHAVOK_IMPEXP vHavokStreamWriter(IVFileOutStream* pStream);
 
@@ -51,23 +44,20 @@ public:
   ///   Writes data to the stream and returns the number of bytes written.
 	///
   /// \param pBuffer
-  ///  The buffer containing the data
+  ///   The buffer containing the data
   ///
   /// \param iByteCount
-  ///  The number of bytes to write
+  ///   The number of bytes to write
   ///
-  VHAVOK_IMPEXP virtual int write(const void* pBuffer, int iByteCount);
+  VHAVOK_IMPEXP virtual int write(const void* pBuffer, int iByteCount) HKV_OVERRIDE;
 
 	/// \brief
-  ///   Returns false if EOF has been reached or some other error.
+  ///   Returns false if EOF has been reached or if an error occurred.
   ///
-  VHAVOK_IMPEXP virtual hkBool isOk() const;
+  VHAVOK_IMPEXP virtual hkBool isOk() const HKV_OVERRIDE;
 
-  
 protected:
-
   IVFileOutStream* m_pOutStream;
-
 };
 
 /// \brief
@@ -75,21 +65,19 @@ protected:
 class vHavokStreamReader : public hkStreamReader
 {
 public:
-  /// \fn vHavokStreamReader(const char *pFileName)
-  ///
-  /// \brief  Constructor. 
+  /// \brief  
+  ///   Constructor. 
   ///
   /// \param pFileName
   ///  The source filename
   ///
   VHAVOK_IMPEXP vHavokStreamReader(const char* pFileName);
 
-  /// \fn vHavokStreamReader(IVFileInStream* pStream)
-  ///
-  /// \brief  Constructor.
+  /// \brief  
+  ///   Constructor.
   ///
   /// \param pStream
-  ///  The source stream
+  ///   The source stream
   ///
   VHAVOK_IMPEXP vHavokStreamReader(IVFileInStream* pStream);
 
@@ -104,23 +92,21 @@ public:
   /// \param iByteCount
   ///   The number of bytes to write
   ///
-  VHAVOK_IMPEXP virtual int read(void* pBuffer, int iByteCount);
+  VHAVOK_IMPEXP virtual int read(void* pBuffer, int iByteCount) HKV_OVERRIDE;
 
 	/// \brief
-  ///   Returns false if EOF has been reached or some other error.
+  ///   Returns false if EOF has been reached or if an error occurred.
   ///
-  VHAVOK_IMPEXP virtual hkBool isOk() const;
+  VHAVOK_IMPEXP virtual hkBool isOk() const HKV_OVERRIDE;
 
 protected:
-
   IVFileInStream* m_pInStream;
-
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

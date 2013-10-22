@@ -9,14 +9,26 @@
 #include <Vision/Samples/Engine/BasicAnimation/BasicAnimationPCH.h>
 #include <Vision/Samples/Engine/BasicAnimation/SimpleSkeletalAnimatedObject.h>
 
-
-// animation event IDs
 const float BONE_HIGHLIGHT_FADEOUTTIME = 0.5f;
 
-SimpleSkeletalAnimatedObject_cl::SimpleSkeletalAnimatedObject_cl(void)
+SimpleSkeletalAnimatedObject_cl::SimpleSkeletalAnimatedObject_cl()
+  : m_spNormalizeMixerNode(NULL)
+  , m_spLayerMixerNode(NULL)
+  , m_spSingleAnimControl(NULL)
+  , m_spBoneModifierNode(NULL)
+  , m_iHeadBoneIndex(-1)
+  , m_iNeckBoneIndex(-1)
+  , m_iMixerInputWalk(-1), m_iMixerInputRun(-1)
+  , m_sHighlightedBoneName()
+  , m_fBoneHighlightDuration(0.0f)
+  , m_iAnimEventFootStepLeft(-1)
+  , m_iAnimEventFootStepRight(-1)
+  , m_eSampleMode(MODE_SINGLEANIM)
+  , m_pLookAtTarget(NULL)
+  , m_fLookAtRotationPhase(0.0f)
+  , m_RelativeHeadOrientation()
+  , m_CurrentNeckRotation()
 {
-  pLookAtTarget = NULL;
-  fLookAtRotationPhase = NULL;
 }
 
 void SimpleSkeletalAnimatedObject_cl::InitFunction()
@@ -25,29 +37,39 @@ void SimpleSkeletalAnimatedObject_cl::InitFunction()
 
   SetCastShadows(TRUE);
 
-  ANIMEVENT_FOOTSTEP_LEFT   = Vision::Animations.RegisterEvent("footstep_left");
-  ANIMEVENT_FOOTSTEP_RIGHT  = Vision::Animations.RegisterEvent("footstep_right");
+  m_iAnimEventFootStepLeft = Vision::Animations.RegisterEvent("footstep_left");
+  m_iAnimEventFootStepRight = Vision::Animations.RegisterEvent("footstep_right");
 
-  IncOrientation(90.f,0.f,0.f);
+  IncOrientation(90.0f, 0.0f, 0.0f);
+}
 
+void SimpleSkeletalAnimatedObject_cl::DeInitFunction()
+{
+  ClearData();
 }
 
 void SimpleSkeletalAnimatedObject_cl::SetActivate(bool bStatus) 
 {
-  SetVisibleBitmask(bStatus ? 0xffffffff:0);
   SetCastShadows(bStatus);
-  if (pLookAtTarget) pLookAtTarget->SetVisibleBitmask(bStatus ? 0xffffffff:0);
+  SetVisibleBitmask(bStatus ? 0xffffffff : 0);
 
-  if(bStatus == true)
-    SetMode(sampleMode);
+  if (m_pLookAtTarget != NULL) 
+    m_pLookAtTarget->SetVisibleBitmask(bStatus ? 0xffffffff : 0);
+
+  if (bStatus)
+  {
+    SetMode(m_eSampleMode);
+  }
   else
+  {
     SetAnimConfig(NULL);
+  }
 }
 
 void SimpleSkeletalAnimatedObject_cl::SetMode(SampleMode_e newMode)
 {
   ClearData();
-  sampleMode = newMode;
+  m_eSampleMode = newMode;
 
   switch (newMode)
   {
@@ -68,8 +90,8 @@ void SimpleSkeletalAnimatedObject_cl::SetMode(SampleMode_e newMode)
   }
 
   // disable motion delta for this sample
-  if( GetAnimConfig() )
-    GetAnimConfig()->SetFlags(GetAnimConfig()->GetFlags() & (~APPLY_MOTION_DELTA));
+  if (GetAnimConfig() != NULL)
+    GetAnimConfig()->SetFlags(GetAnimConfig()->GetFlags() & ~APPLY_MOTION_DELTA);
 }
 
 void SimpleSkeletalAnimatedObject_cl::ClearData()
@@ -79,12 +101,10 @@ void SimpleSkeletalAnimatedObject_cl::ClearData()
   m_spLayerMixerNode = NULL;
   m_spSingleAnimControl = NULL;
   m_spBoneModifierNode = NULL;
-  fBoneHighlightDuration = 0.f;
-  V_SAFE_REMOVE(pLookAtTarget);
-  fLookAtRotationPhase = 0.f;
+  m_fBoneHighlightDuration = 0.f;
+  V_SAFE_REMOVE(m_pLookAtTarget);
+  m_fLookAtRotationPhase = 0.f;
 }
-
-
 
 bool SimpleSkeletalAnimatedObject_cl::GetHeadRotation(const hkvVec3 &vTargetPos, hkvQuat &targetRot, float fMaxViewAngle)
 {
@@ -119,13 +139,13 @@ bool SimpleSkeletalAnimatedObject_cl::GetHeadRotation(const hkvVec3 &vTargetPos,
     return false;
   }
 
-  // create a lookat-3x3 matrix from the bone position and the target position (both are in object space)
+  // create a LookAt-3x3 matrix from the bone position and the target position (both are in object space)
   // This orientation is later used to replace(!) the head bone in local space (VIS_REPLACE_BONE|VIS_LOCAL_SPACE flags)
   hkvMat3 lookatMatrix(hkvNoInitialization);
-  lookatMatrix.setLookInDirectionMatrix (targetObjectspace - boneObjectspace);
+  lookatMatrix.setLookInDirectionMatrix(targetObjectspace - boneObjectspace);
 
   //  Apply our custom rotation matrix that tells the bone to focus with the eyes and not with the back of the head :-)
-  lookatMatrix = lookatMatrix.multiply (m_RelativeHeadOrientation);
+  lookatMatrix = lookatMatrix.multiply(m_RelativeHeadOrientation);
 
   // Invert the parents object matrix rotation to cancel out all parent bone orientations
   hkvMat3 parentObject = parentObjectMatrix.getRotationalPart();
@@ -141,13 +161,12 @@ bool SimpleSkeletalAnimatedObject_cl::GetHeadRotation(const hkvVec3 &vTargetPos,
   return true;
 }
 
-  
 void SimpleSkeletalAnimatedObject_cl::UpdateLookatHeadRotation(float fTimeDelta)
 {
   hkvQuat targetRotation;
 
   // evaluate the target rotation
-  GetHeadRotation(pLookAtTarget->GetPosition(), targetRotation, 75.f);
+  GetHeadRotation(m_pLookAtTarget->GetPosition(), targetRotation, 75.f);
 
   hkvVec3 vForwards(0.0f, -1.0f, 0.0f);
   hkvVec3 vFrom = m_CurrentNeckRotation.transform(vForwards);
@@ -160,11 +179,9 @@ void SimpleSkeletalAnimatedObject_cl::UpdateLookatHeadRotation(float fTimeDelta)
 
   // Our new bone orientation defines the rotation absolute.
   // Thus our modify mode must be VIS_REPLACE_BONE and VIS_LOCAL_SPACE
-  GetAnimConfig()->GetFinalResult()->SetCustomBoneRotation(m_iHeadBoneIndex, m_CurrentNeckRotation, VIS_REPLACE_BONE|VIS_LOCAL_SPACE);
-
+  GetAnimConfig()->GetFinalResult()->SetCustomBoneRotation(m_iHeadBoneIndex, m_CurrentNeckRotation, 
+    VIS_REPLACE_BONE|VIS_LOCAL_SPACE);
 }
-
-
 
 void SimpleSkeletalAnimatedObject_cl::ThinkFunction()
 {
@@ -172,28 +189,28 @@ void SimpleSkeletalAnimatedObject_cl::ThinkFunction()
   if (GetAnimConfig() == NULL)
     return;
 
-  float dtime = Vision::GetTimer()->GetTimeDifference();
+  const float dtime = Vision::GetTimer()->GetTimeDifference();
 
   // highlight the bone after animation event
-  if (fBoneHighlightDuration > 0.0f && !sHighlightedBoneName.IsEmpty())
+  if (m_fBoneHighlightDuration > 0.0f && !m_sHighlightedBoneName.IsEmpty())
   {
-    int iColorVal = (int) (fBoneHighlightDuration / BONE_HIGHLIGHT_FADEOUTTIME * 255.0f);
-    DrawBoneBoundingBox(sHighlightedBoneName, VColorRef(iColorVal,iColorVal, 0), 2.f);
-    fBoneHighlightDuration -= Vision::GetTimer()->GetTimeDifference();
+    int iColorVal = static_cast<int>(m_fBoneHighlightDuration / BONE_HIGHLIGHT_FADEOUTTIME * 255.0f);
+    DrawBoneBoundingBox(m_sHighlightedBoneName, VColorRef(iColorVal,iColorVal, 0), 2.f);
+    m_fBoneHighlightDuration -= Vision::GetTimer()->GetTimeDifference();
   }
 
-  // update the lookat
-  if (sampleMode==MODE_LOOKAT)
+  // update the LookAt
+  if (m_eSampleMode == MODE_LOOKAT)
   {
-    VASSERT(pLookAtTarget);
+    VASSERT(m_pLookAtTarget);
 
     // rotate the object around the character
-    fLookAtRotationPhase = hkvMath::mod (fLookAtRotationPhase+dtime*0.7f, hkvMath::pi () * 2.0f);
-    hkvVec3 vNewPos(100.f*hkvMath::sinRad (fLookAtRotationPhase),100.f*hkvMath::cosRad (fLookAtRotationPhase),160.f);
+    m_fLookAtRotationPhase = hkvMath::mod (m_fLookAtRotationPhase + dtime*0.7f, hkvMath::pi() * 2.0f);
+    hkvVec3 vNewPos(100.f*hkvMath::sinRad (m_fLookAtRotationPhase), 100.0f*hkvMath::cosRad(m_fLookAtRotationPhase), 160.0f);
     vNewPos += GetPosition();
-    pLookAtTarget->SetPosition(vNewPos);
+    m_pLookAtTarget->SetPosition(vNewPos);
 
-    // update the lookat orientation
+    // update the LookAt orientation
     UpdateLookatHeadRotation(dtime);
   }
 }
@@ -205,20 +222,18 @@ void SimpleSkeletalAnimatedObject_cl::MessageFunction(int iID, INT_PTR iParamA, 
   {
     INT_PTR iEventID = iParamA;
 
-    if (iEventID==ANIMEVENT_FOOTSTEP_LEFT)
+    if (iEventID == m_iAnimEventFootStepLeft)
     {
-      sHighlightedBoneName = "skeleton1:LeftFoot";
-      fBoneHighlightDuration = BONE_HIGHLIGHT_FADEOUTTIME;
+      m_sHighlightedBoneName = "skeleton1:LeftFoot";
+      m_fBoneHighlightDuration = BONE_HIGHLIGHT_FADEOUTTIME;
     }
-    else if (iEventID==ANIMEVENT_FOOTSTEP_RIGHT)
+    else if (iEventID == m_iAnimEventFootStepRight)
     {
-      sHighlightedBoneName = "skeleton1:RightFoot";
-      fBoneHighlightDuration = BONE_HIGHLIGHT_FADEOUTTIME;
+      m_sHighlightedBoneName = "skeleton1:RightFoot";
+      m_fBoneHighlightDuration = BONE_HIGHLIGHT_FADEOUTTIME;
     }
   }
 }
-
-
 
 //
 //                              *** MODE: START SINGLE ANIMATION ***
@@ -233,29 +248,28 @@ void SimpleSkeletalAnimatedObject_cl::StartSingleAnimation(bool bLooped)
   m_spSingleAnimControl = VisAnimConfig_cl::StartSkeletalAnimation(this, "Walk", iFlags);
 }
 
-
-
 //
 //                              *** MODE: BLEND TWO ANIMATIONS ***
 //
 
-
 void SimpleSkeletalAnimatedObject_cl::SetBlendWalkToRun(bool bDirection)
 {
   const float fBlendTime = 0.4f;
-  VASSERT(GetMode()==MODE_BLENDTWOANIMS);
-  if (bDirection) // walk to run
+  VASSERT(GetMode() == MODE_BLENDTWOANIMS);
+
+  // walk to run
+  if (bDirection) 
   {
     m_spNormalizeMixerNode->EaseIn(m_iMixerInputRun, fBlendTime, true);
     m_spNormalizeMixerNode->EaseOut(m_iMixerInputWalk, fBlendTime, true);
   }
-  else // run to walk
+  // run to walk
+  else 
   {
     m_spNormalizeMixerNode->EaseOut(m_iMixerInputRun, fBlendTime, true);
     m_spNormalizeMixerNode->EaseIn(m_iMixerInputWalk, fBlendTime, true);
   }
 }
-
 
 void SimpleSkeletalAnimatedObject_cl::BlendTwoAnimations()
 {
@@ -276,14 +290,19 @@ void SimpleSkeletalAnimatedObject_cl::BlendTwoAnimations()
   VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateSkeletalConfig(pMesh, &pFinalSkeletalResult);
 
   // get skeletal animation sequence
-  VisSkeletalAnimSequence_cl* pAnimSequenceWalk = (VisSkeletalAnimSequence_cl*)pMesh->GetSequence("Walk", VIS_MODELANIM_SKELETAL);
-  VisSkeletalAnimSequence_cl* pAnimSequenceRun = (VisSkeletalAnimSequence_cl*)pMesh->GetSequence("Run", VIS_MODELANIM_SKELETAL);
-  if(!pAnimSequenceWalk || !pAnimSequenceRun)
+  VisSkeletalAnimSequence_cl* pAnimSequenceWalk = static_cast<VisSkeletalAnimSequence_cl*>(
+    pMesh->GetSequence("Walk", VIS_MODELANIM_SKELETAL));
+  VisSkeletalAnimSequence_cl* pAnimSequenceRun = static_cast<VisSkeletalAnimSequence_cl*>(
+    pMesh->GetSequence("Run", VIS_MODELANIM_SKELETAL));
+
+  if(pAnimSequenceWalk == NULL || pAnimSequenceRun == NULL)
     return;
 
   // create two animation controls: walk and run (use a helper function for creating them)
-  VSmartPtr<VisSkeletalAnimControl_cl> spWalkAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), pAnimSequenceWalk, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
-  VSmartPtr<VisSkeletalAnimControl_cl> spRunAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), pAnimSequenceRun, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+  VSmartPtr<VisSkeletalAnimControl_cl> spWalkAnimControl = VisSkeletalAnimControl_cl::Create(
+    pMesh->GetSkeleton(), pAnimSequenceWalk, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+  VSmartPtr<VisSkeletalAnimControl_cl> spRunAnimControl = VisSkeletalAnimControl_cl::Create(
+    pMesh->GetSkeleton(), pAnimSequenceRun, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
 
   // create the mixer node that blends the two animations
   // (set initial weight to show walk animation only)
@@ -299,7 +318,6 @@ void SimpleSkeletalAnimatedObject_cl::BlendTwoAnimations()
   SetBlendWalkToRun(true);
 }
 
-
 //
 //                              *** MODE: LISTEN TO EVENTS ***
 //
@@ -307,16 +325,16 @@ void SimpleSkeletalAnimatedObject_cl::BlendTwoAnimations()
 void SimpleSkeletalAnimatedObject_cl::ListenToEvents()
 {
   // start a simple skeletalanimation
-  VSmartPtr<VisSkeletalAnimControl_cl> spAnimControl = VisAnimConfig_cl::StartSkeletalAnimation(this, "Walk", VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS);
+  VSmartPtr<VisSkeletalAnimControl_cl> spAnimControl = VisAnimConfig_cl::StartSkeletalAnimation(
+    this, "Walk", VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS);
   spAnimControl->SetSpeed(0.5f);
 
   // register two animation events (time: when feet touch floor)
   VisAnimEventList_cl *pEventList = spAnimControl->GetEventList();
-  pEventList->AddEvent(0.26f, ANIMEVENT_FOOTSTEP_RIGHT);
-  pEventList->AddEvent(0.76f, ANIMEVENT_FOOTSTEP_LEFT);
+  pEventList->AddEvent(0.26f, m_iAnimEventFootStepRight);
+  pEventList->AddEvent(0.76f, m_iAnimEventFootStepLeft);
   spAnimControl->AddEventListener(this);
 }
-
 
 //
 //                              *** MODE: SET ANIMATION TIME ***
@@ -325,13 +343,13 @@ void SimpleSkeletalAnimatedObject_cl::ListenToEvents()
 void SimpleSkeletalAnimatedObject_cl::SetAnimationTime()
 {
   // start a simple skeletal animation
-  m_spSingleAnimControl = VisAnimConfig_cl::StartSkeletalAnimation(this, "Walk", VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS);
+  m_spSingleAnimControl = VisAnimConfig_cl::StartSkeletalAnimation(
+    this, "Walk", VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS);
   m_spSingleAnimControl->Pause();
 
   // set the animation time manually
   m_spSingleAnimControl->SetCurrentSequenceTime(0.79f);
 }
-
 
 //
 //                              *** MODE: LAYER TWO ANIMATIONS ***
@@ -358,15 +376,20 @@ void SimpleSkeletalAnimatedObject_cl::LayerTwoAnimations()
   VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateSkeletalConfig(pMesh, &pFinalSkeletalResult);
 
   // get skeletal animation sequence
-  VisSkeletalAnimSequence_cl* pAnimSequenceWalkDagger = (VisSkeletalAnimSequence_cl*)pMesh->GetSequence("Walk_Dagger", VIS_MODELANIM_SKELETAL);
-  VisSkeletalAnimSequence_cl* pAnimSequenceDrawDagger = (VisSkeletalAnimSequence_cl*)pMesh->GetSequence("Draw_Dagger", VIS_MODELANIM_SKELETAL);
-  if(!pAnimSequenceWalkDagger || !pAnimSequenceDrawDagger)
+  VisSkeletalAnimSequence_cl* pAnimSequenceWalkDagger = static_cast<VisSkeletalAnimSequence_cl*>(
+    pMesh->GetSequence("Walk_Dagger", VIS_MODELANIM_SKELETAL));
+  VisSkeletalAnimSequence_cl* pAnimSequenceDrawDagger = static_cast<VisSkeletalAnimSequence_cl*>(
+    pMesh->GetSequence("Draw_Dagger", VIS_MODELANIM_SKELETAL));
+
+  if (pAnimSequenceWalkDagger == NULL || pAnimSequenceDrawDagger == NULL)
     return;
 
   // Create the two animation controls: WalkDagger: full body animation; DrawDagger: upper body animation.
   // Use a helper function to create the animation controls.
-  VSmartPtr<VisSkeletalAnimControl_cl> spWalkDaggerAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), pAnimSequenceWalkDagger, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
-  VSmartPtr<VisSkeletalAnimControl_cl> spDrawDaggerAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), pAnimSequenceDrawDagger, VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+  VSmartPtr<VisSkeletalAnimControl_cl> spWalkDaggerAnimControl = VisSkeletalAnimControl_cl::Create(
+    pMesh->GetSkeleton(), pAnimSequenceWalkDagger, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+  VSmartPtr<VisSkeletalAnimControl_cl> spDrawDaggerAnimControl = VisSkeletalAnimControl_cl::Create(
+    pMesh->GetSkeleton(), pAnimSequenceDrawDagger, VSKELANIMCTRL_DEFAULTS, 1.0f, true);
 
   // create the layer node which layers the two animations
   m_spLayerMixerNode = new VisAnimLayerMixerNode_cl(pMesh->GetSkeleton());
@@ -376,9 +399,11 @@ void SimpleSkeletalAnimatedObject_cl::LayerTwoAnimations()
   // set a per bone weighting list for the DrawDagger (upper body) slot in the mixer. It shall overlay the
   // upper body of the character and thus only influence the upper body bones.
   int iBoneCount = pSkeleton->GetBoneCount();
-  VASSERT(iBoneCount<256);
+  VASSERT(iBoneCount < 256);
+
   float fPerBoneWeightingList[256];
   memset(fPerBoneWeightingList, 0, sizeof(float)*iBoneCount);
+
   pSkeleton->SetBoneWeightRecursive(1.f, pSkeleton->GetBoneIndexByName("skeleton1:Spine"), fPerBoneWeightingList);
   m_spLayerMixerNode->ApplyPerBoneWeightingMask(iMixerInputDrawDagger, iBoneCount, fPerBoneWeightingList);
 
@@ -389,7 +414,6 @@ void SimpleSkeletalAnimatedObject_cl::LayerTwoAnimations()
   // fade-in the upper body animation
   //m_spLayerMixerNode->EaseIn(iMixerInputDrawDagger, 0.4f, true);
 }
-
 
 //
 //                              *** MODE: FORWARD KINEMATICS ***
@@ -408,20 +432,22 @@ void SimpleSkeletalAnimatedObject_cl::ForwardKinematics()
   // The translation of the neck bone is set on the bone modifier node.
   //
 
-  // create a new AnimConfig instance
+  // Create a new AnimConfig instance
   VDynamicMesh *pMesh = GetMesh();
   VisAnimFinalSkeletalResult_cl* pFinalSkeletalResult;
   VisAnimConfig_cl* pConfig = VisAnimConfig_cl::CreateSkeletalConfig(pMesh, &pFinalSkeletalResult);
 
-  // get skeletal animation sequence
-  VisSkeletalAnimSequence_cl* pAnimSequenceWalk = (VisSkeletalAnimSequence_cl*)pMesh->GetSequence("Walk", VIS_MODELANIM_SKELETAL);
-  if(!pAnimSequenceWalk)
+  // Get skeletal animation sequence.
+  VisSkeletalAnimSequence_cl* pAnimSequenceWalk = 
+    static_cast<VisSkeletalAnimSequence_cl*>(pMesh->GetSequence("Walk", VIS_MODELANIM_SKELETAL));
+  if (pAnimSequenceWalk == NULL)
     return;
 
-  // create the animation control to play the walk animation (via a helper function)
-  VSmartPtr<VisSkeletalAnimControl_cl> spWalkAnimControl = VisSkeletalAnimControl_cl::Create(pMesh->GetSkeleton(), pAnimSequenceWalk, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
+  // Create the animation control to play the walk animation (via a helper function).
+  VSmartPtr<VisSkeletalAnimControl_cl> spWalkAnimControl = VisSkeletalAnimControl_cl::Create(
+    pMesh->GetSkeleton(), pAnimSequenceWalk, VANIMCTRL_LOOP|VSKELANIMCTRL_DEFAULTS, 1.0f, true);
 
-  // create the bone modifier node that translates the head bone. Set the animation control instance
+  // Create the bone modifier node that translates the head bone. Set the animation control instance
   // as the input for this node.
   m_spBoneModifierNode = new VisAnimBoneModifierNode_cl(pMesh->GetSkeleton());
   m_spBoneModifierNode->SetModifierInput(spWalkAnimControl);
@@ -439,8 +465,6 @@ void SimpleSkeletalAnimatedObject_cl::ForwardKinematics()
   // The bone modifier node is now part of the animation tree. You can at any time update the translation
   // on the bone modifier. The animation system will take care of generating the proper final result.
 }
-
-
 
 void SimpleSkeletalAnimatedObject_cl::LookAt()
 {
@@ -465,18 +489,17 @@ void SimpleSkeletalAnimatedObject_cl::LookAt()
   m_RelativeHeadOrientation.setFromEulerAngles (90, 0, 270);
 
   // create an entity that rotates around the model
-  pLookAtTarget = Vision::Game.CreateEntity("VisBaseEntity_cl",hkvVec3(0,0,0),"Models\\MagicBall.model");
-  fLookAtRotationPhase = 0.f;
+  m_pLookAtTarget = Vision::Game.CreateEntity("VisBaseEntity_cl", hkvVec3(0,0,0), "Models\\MagicBall.model");
+  m_fLookAtRotationPhase = 0.f;
 }
 
+V_IMPLEMENT_SERIAL(SimpleSkeletalAnimatedObject_cl, VisBaseEntity_cl, 0, Vision::GetEngineModule());
 
-
-V_IMPLEMENT_SERIAL( SimpleSkeletalAnimatedObject_cl, VisBaseEntity_cl, 0, Vision::GetEngineModule() );
 START_VAR_TABLE(SimpleSkeletalAnimatedObject_cl, VisBaseEntity_cl, "SimpleSkeletalAnimatedObject_cl", 0, "Models\\Warrior\\Warrior.model")
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

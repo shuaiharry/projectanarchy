@@ -16,6 +16,7 @@
 
 HK_CLASS(hkcdDynamicAabbTree)
 HK_CLASS(hkcdStaticAabbTree)
+HK_STRUCT(hkcdAdf)
 HK_STRUCT(hkcdDynamicTreeAnisotropicMetric)
 HK_STRUCT(hkcdDynamicTreeBalanceMetric)
 HK_STRUCT(hkcdDynamicTreeCentroidMetric)
@@ -47,6 +48,9 @@ HK_STRUCT(hkcdDynamicTreeTreehkcdDynamicTreeDynamicStorage16)
 HK_STRUCT(hkcdDynamicTreeTreehkcdDynamicTreeDynamicStorage32)
 HK_STRUCT(hkcdDynamicTreeTreehkcdDynamicTreeDynamicStorageInt16)
 HK_STRUCT(hkcdDynamicTreeTreehkcdDynamicTreeDynamicStoragePtr)
+HK_STRUCT(hkcdFourAabb)
+HK_STRUCT(hkcdSimdTree)
+HK_STRUCT(hkcdSimdTreeNode)
 HK_STRUCT(hkcdStaticMeshTreeBase)
 HK_STRUCT(hkcdStaticMeshTreeBasePrimitive)
 HK_STRUCT(hkcdStaticMeshTreeBasePrimitiveDataRunBaseunsignedshort)
@@ -80,7 +84,7 @@ HK_STRUCT(hkcdStaticTreeTreehkcdStaticTreeDynamicStorage5)
 HK_STRUCT(hkcdStaticTreeTreehkcdStaticTreeDynamicStorage6)
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -8,10 +8,6 @@
 
 /// \file vHavokVisionShapes.h
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKVISIONSHAPES_H_INCLUDED
 #define VHAVOKVISIONSHAPES_H_INCLUDED
 
@@ -22,6 +18,7 @@
 #include <Physics2012/Collide/Shape/HeightField/SampledHeightField/hkpSampledHeightFieldShape.h>
 #include <Physics2012/Collide/Shape/HeightField/TriSampledHeightField/hkpTriSampledHeightFieldCollection.h>
 #include <Physics2012/Collide/Shape/HeightField/TriSampledHeightField/hkpTriSampledHeightFieldBvTreeShape.h>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokPhysicsImportExport.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Important notes:
@@ -31,7 +28,7 @@
 // - Havok parser currently can't parse .hpp files.
 // - LLVM assumes that parsed header files do not include any platform-specific headers. Since Vision headers
 //   do include platform-specific headers (e.g. for windows), headers that contain reflected custom classes 
-//   can't in general can't include Vision-specific header files, i.e. can't use Vision data types.
+//   can't in general include Vision-specific header files, i.e. can't use Vision data types.
 // - All reflected Vision class types must be registered to the Havok reflection system after the base system
 //   has been initialized (see vHavokPhysicsModule.cpp, Line 670).
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,8 +52,10 @@ public:
 
   /// \brief
   ///   Constructor
-  hkvConvexVerticesShape(hkInt64 iFileTime, const hkStridedVertices& vertices, const hkpConvexVerticesShape::BuildConfig& config=hkpConvexVerticesShape::BuildConfig())
-    : hkpConvexVerticesShape(vertices, config), m_iFileTime(iFileTime)
+  hkvConvexVerticesShape(hkInt64 iFileTime, const hkStridedVertices& vertices, 
+    const hkpConvexVerticesShape::BuildConfig& config=hkpConvexVerticesShape::BuildConfig())
+    : hkpConvexVerticesShape(vertices, config)
+    , m_iFileTime(iFileTime)
   {
   }
 
@@ -68,7 +67,7 @@ public:
   }
 
   /// \brief
-  ///   Returns system time at which corresponding .vcolmesh had been exported.
+  ///   Returns system time at which corresponding .vcolmesh has been exported.
   HK_FORCE_INLINE hkInt64 GetFileTime() const
   {
     return m_iFileTime;
@@ -76,10 +75,10 @@ public:
 
   /// \brief
   ///   hkReferencedObject implementation.
-  virtual const hkClass* getClassType() const HK_OVERRIDE { return &hkvConvexVerticesShapeClass; }
+  VHAVOK_IMPEXP virtual const hkClass* getClassType() const HK_OVERRIDE; 
 
 private:
-  hkInt64 m_iFileTime; // system time at which corresponding .vcolmesh had been exported
+  hkInt64 m_iFileTime; ///< system time at which corresponding .vcolmesh has been exported
 
 };
 
@@ -171,14 +170,13 @@ public:
 
   /// \brief
   ///   hkReferencedObject implementation.
-  virtual const hkClass* getClassType() const HK_OVERRIDE { return &hkvBvCompressedMeshShapeClass; }
+  VHAVOK_IMPEXP virtual const hkClass* getClassType() const HK_OVERRIDE;
 
 private:
   hkInt64 m_iFileTime; // system time at which corresponding .vcolmesh had been exported
   hkvMeshMaterialCache m_materials;
 
 };
-
 
 // -------------------------------------------------------------------------- //
 // hkvSampledHeightFieldShape                                                
@@ -195,6 +193,7 @@ extern const hkTypeInfo hkvSampledHeightFieldShapeTypeInfo;
 /// \note 
 ///   For this to work on SPU you will need to set the two function ptrs instead of the virtual 
 ///   functions and of course dma in the VTerrainSector.
+///
 class hkvSampledHeightFieldShape: public hkpSampledHeightFieldShape
 {
   // +version(0)
@@ -231,7 +230,7 @@ public:
 
   /// \brief
   ///   hkReferencedObject implementation.
-  virtual const hkClass* getClassType() const HK_OVERRIDE { return &hkvSampledHeightFieldShapeClass; }
+  VHAVOK_IMPEXP virtual const hkClass* getClassType() const HK_OVERRIDE;
 
 private:
   const VTerrainSector *m_pSector; // +nosave 
@@ -242,10 +241,10 @@ private:
 
 };
 
-
 // -------------------------------------------------------------------------- //
 // hkvTriSampledHeightFieldCollection                                                
 // -------------------------------------------------------------------------- //
+
 extern const hkClass hkvTriSampledHeightFieldCollectionClass;
 extern const hkTypeInfo hkvTriSampledHeightFieldCollectionTypeInfo;
 
@@ -276,7 +275,7 @@ public:
 
   /// \brief
   ///   hkReferencedObject implementation.
-  virtual const hkClass* getClassType() const HK_OVERRIDE { return &hkvTriSampledHeightFieldCollectionClass; }
+  VHAVOK_IMPEXP virtual const hkClass* getClassType() const HK_OVERRIDE;
 
 private:
   // two masks that represent hole and non-hole material
@@ -292,7 +291,6 @@ private:
   hkBitField m_tileHoleMask;
 
 };
-
 
 // -------------------------------------------------------------------------- //
 // hkvTriSampledHeightFieldBvTreeShape                                                
@@ -327,18 +325,19 @@ public:
 
   /// \brief
   ///   hkpShape interface implementation.
-  virtual void castRayWithCollector(const hkpShapeRayCastInput& input, const hkpCdBody& cdBody, hkpRayHitCollector& collector) const HK_OVERRIDE;
+  virtual void castRayWithCollector(const hkpShapeRayCastInput& input, const hkpCdBody& cdBody, 
+    hkpRayHitCollector& collector) const HK_OVERRIDE;
 
   /// \brief
   ///   hkReferencedObject implementation.
-  virtual const hkClass* getClassType() const HK_OVERRIDE { return &hkvTriSampledHeightFieldBvTreeShapeClass; }
+  VHAVOK_IMPEXP virtual const hkClass* getClassType() const HK_OVERRIDE;
 
 };
 
 #endif // VHAVOKVISIONSHAPES_H_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

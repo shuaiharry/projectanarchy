@@ -32,6 +32,7 @@ class hkaiGeometryExtrudeUtil
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI, hkaiGeometryExtrudeUtil );
 		typedef hkaiEdgeGeometry::Edge Edge;
 
+			/// A map used to reorder indices.
 		struct IndexMap
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI, IndexMap );
@@ -55,7 +56,10 @@ class hkaiGeometryExtrudeUtil
 
 
 			/// Extrudes using the 'silhouette' of the input geometry
-        static hkResult HK_CALL silhouetteExtrude(const hkaiEdgeGeometry& geom, const hkVector4& extrudeDirection, hkaiEdgeGeometry& geomOut);
+        static hkResult HK_CALL silhouetteExtrudeDeprecated(const hkaiEdgeGeometry& geom, const hkVector4& extrudeDirection, hkaiEdgeGeometry& geomOut);
+		
+			/// Extrudes using the 'silhouette' of the input geometry. Reuses storage between calls.
+		hkResult HK_CALL silhouetteExtrudeImplDeprecated(const hkaiEdgeGeometry& geom, const hkVector4& extrudeDirection, hkaiEdgeGeometry& geomOut);
 		
 			/// Extrudes using the 'silhouette' of the input geometry. Reuses storage between calls.
 		hkResult HK_CALL silhouetteExtrudeImpl(const hkaiEdgeGeometry& geom, const hkVector4& extrudeDirection, hkaiEdgeGeometry& geomOut);
@@ -76,7 +80,7 @@ class hkaiGeometryExtrudeUtil
 #endif // HKAI_GEOMETRY_EXTRUDE_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

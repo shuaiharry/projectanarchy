@@ -795,6 +795,7 @@ class hkFlags
 	template <> struct hkSpuStorage<void*> { typedef vec_uint4 StorageType; typedef unsigned PromoteType; };
 	template <> struct hkSpuStorage<int> { typedef vec_int4 StorageType; typedef int PromoteType; };
 	template <> struct hkSpuStorage<unsigned> { typedef vec_uint4 StorageType; typedef unsigned PromoteType; };
+	template <> struct hkSpuStorage<hkUint64> { typedef vec_ullong2 StorageType; typedef hkUint64 PromoteType; };
 	template <> struct hkSpuStorage<bool> { typedef vec_uint4 StorageType; typedef unsigned PromoteType; };
 	template <> struct hkSpuStorage<float> { typedef vec_float4 StorageType; typedef float PromoteType; };
 	template <> struct hkSpuStorage<hkBool> { typedef vec_int4 StorageType; typedef hkBool PromoteType; };
@@ -1114,7 +1115,7 @@ struct hkCountOfBadArgCheck
 #endif // HKBASE_HKBASETYPES_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

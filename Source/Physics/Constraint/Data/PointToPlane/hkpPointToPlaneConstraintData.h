@@ -20,9 +20,9 @@ class hkpPointToPlaneConstraintData : public hkpConstraintData
 {
 	public:
 
-		enum 
+		enum
 		{
-			SOLVER_RESULT_LIN_0	= 0,	// linear constraint 
+			SOLVER_RESULT_LIN_0	= 0,	// linear constraint
 			SOLVER_RESULT_MAX	= 1
 		};
 
@@ -53,20 +53,24 @@ class hkpPointToPlaneConstraintData : public hkpConstraintData
 		};
 
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
-			
+
 		/// Constructor.
 		hkpPointToPlaneConstraintData();
-		
+
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		hkpPointToPlaneConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
+
+#endif
 
 		/// Sets the point-to-plane up with world space information.
 		/// \param pivotW Specifies both the origin point for the constraining plane, and bodyB's pivot point, specified in world space.
 		/// \param planeNormalW Specifies the normal direction of the constraining plane, specified in world space.
-		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, 
+		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
 								const hkVector4& pivotW, const hkVector4& planeNormalW);
 
 		/// Sets the point-to-plane up with body space information.
@@ -88,7 +92,7 @@ class hkpPointToPlaneConstraintData : public hkpConstraintData
 		virtual void getConstraintInfo( ConstraintInfo& infoOut ) const ;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
+
 	public:
 
 		HK_ALIGN_REAL( Atoms m_atoms );
@@ -98,7 +102,7 @@ class hkpPointToPlaneConstraintData : public hkpConstraintData
 #endif // HKP_POINT_TO_PLANE_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

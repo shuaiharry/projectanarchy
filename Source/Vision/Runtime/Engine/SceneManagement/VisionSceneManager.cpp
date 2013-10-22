@@ -40,6 +40,7 @@ IVisSceneManager_cl::IVisSceneManager_cl()
 {
   m_pStreamingReferenceObject = NULL;
   m_pLastTestedZone = NULL;
+  m_bHandleRepositioning = true;
 }
 
 IVisSceneManager_cl::~IVisSceneManager_cl() 
@@ -465,7 +466,7 @@ void VisionSceneManager_cl::HandleZones(float fTimeDelta)
   const hkvVec3 vCamPos = pCamera->GetPosition();
 
   // check for repositioning:
-  if (m_RepositionInfo.SupportsRepositioning())
+  if (m_bHandleRepositioning && m_RepositionInfo.SupportsRepositioning())
   {
     if (m_RepositionInfo.HandleRepositioning(pCamera))
       RepositionAllZones();
@@ -741,7 +742,7 @@ bool VisionSceneManager_cl::PurgeResources(__int64 iEndTime)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

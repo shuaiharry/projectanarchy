@@ -8,12 +8,13 @@
 #ifndef HK_PRODUCT_FEATURES_H
 #define HK_PRODUCT_FEATURES_H
 
-	/// Singleton class whose constructor by default registers all product features.
 	/// The initialize function is generated as a side effect of #include <Common/Base/Config/hkProductFeatures.cxx>
-namespace hkProductFeatures
+class hkProductFeatures
 {
-	void HK_CALL initialize();
-}
+	public:
+
+		static void HK_CALL initialize();
+};
 
 // You only need to look further if you're doing something specialized.
 // Mostly you'll just use the macros in hkProductFeatures.inl to control
@@ -29,59 +30,10 @@ namespace hkProductFeatures
 	extern void HK_CALL hkFeature_serializeDeprecatedPre700();
 #endif
 
-//
-// Physics
-//
-#ifdef HK_FEATURE_PRODUCT_PHYSICS_2012
-		/// Register height field collision agent
-	extern void HK_CALL hkpHeightFieldAgent_registerSelf();
-
-		/// Calculate accurate inertia tensor for convex hulls, otherwise calculate based on their bounding boxes
-	extern void HK_CALL hkpAccurateInertiaTensorComputer_registerSelf();
-
-		/// You'll need at least one simulation type for most of the functions in hkpWorld
-	extern void HK_CALL hkpSimulation_registerSelf();
-	extern void HK_CALL hkpContinuousSimulation_registerSelf();
-	#if (HK_CONFIG_THREAD != HK_CONFIG_SINGLE_THREADED)
-	extern void HK_CALL hkpMultiThreadedSimulation_registerSelf();
-	#endif
-
-		/// Register the broad phase types
-	extern void HK_CALL hkp3AxisSweep_registerSelf();
-	extern void HK_CALL hkpTreeBroadPhase_registerSelf();
-
-		/// Register the raycast function for sampled height fields
-	extern void HK_CALL hkpSampledHeightField_registerDdaRayCastFunction();
-	extern void HK_CALL hkpSampledHeightField_registerCoarseTreeRayCastFunction();
-	extern void HK_CALL hkpSampledHeightField_registerAllRayCastFunctions();
-
-#endif
-
-#ifdef HK_FEATURE_PRODUCT_DESTRUCTION_2012
-	extern void HK_CALL hkdCutoutFractureRuntimeFracture_registerSelf();
-	extern void HK_CALL hkdDecomposeFractureRuntimeFracture_registerSelf();
-	extern void HK_CALL hkdPieFractureRuntimeFracture_registerSelf();
-	extern void HK_CALL hkdRandomSplitFractureRuntimeFracture_registerSelf();
-	extern void HK_CALL hkdScriptedFractureRuntimeFracture_registerSelf();
-	extern void HK_CALL hkdSliceFractureRuntimeFracture_registerSelf();
-	extern void HK_CALL hkdSplitInHalfFractureRuntimeFracture_registerSelf();
-	extern void HK_CALL hkdVoronoiFractureRuntimeFracture_registerSelf();
-	extern void HK_CALL hkdWoodFractureRuntimeFracture_registerSelf();
-
-	extern void HK_CALL hkdDecorateFractureFaceActionImpl_registerSelf();
-	extern void HK_CALL hkdConvexDecompositionActionImpl_registerSelf();
-	extern void HK_CALL hkdDecalMapActionImpl_registerSelf();
-	extern void HK_CALL hkdGlueFixedPiecesActionImpl_registerSelf();
-	extern void HK_CALL hkdSplitByPhysicsIslandsActionImpl_registerSelf();
-
-	extern void HK_CALL hkdFractureUtilRetriangulateRecursively_registerSelf();
-	extern void HK_CALL registerDestructionRuntime();
-#endif
-
 #endif//HK_PRODUCT_FEATURES_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

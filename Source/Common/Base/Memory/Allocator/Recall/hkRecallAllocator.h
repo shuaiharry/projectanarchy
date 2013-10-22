@@ -22,11 +22,11 @@ class hkRecallAllocator : public hkMemoryAllocator
 		hkRecallAllocator(hkMemoryAllocator* a);
 
 		void init(hkMemoryAllocator* a);
-		virtual void* blockAlloc( int numBytes );
-		virtual void blockFree( void* p, int numBytes );
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
 
-		virtual void getMemoryStatistics( hkMemoryAllocator::MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void getMemoryStatistics( hkMemoryAllocator::MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 		virtual void resetPeakMemoryStatistics();
 
 		struct Header
@@ -48,7 +48,7 @@ class hkRecallAllocator : public hkMemoryAllocator
 
 	protected:
 
-		hkCriticalSection m_criticalSection;
+		mutable hkCriticalSection m_criticalSection;
 		hkMemoryAllocator* m_alloc;
 		MemoryStatistics m_stats;
 		Header* m_head;
@@ -57,7 +57,7 @@ class hkRecallAllocator : public hkMemoryAllocator
 #endif // HK_RECALL_ALLOCATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

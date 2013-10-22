@@ -11,8 +11,8 @@
 
 extern const class hkClass hkaiVolumeClass;
 
-class hkBitField;
 struct hkGeometry;
+class hkBitField;
 
 /// The hkaiVolume class is an interface used to describe a volume object. This can be used to describe:
 /// - An area where a character shouldn't directly interact (a carver). See hkaiNavMeshGenerationSettings::m_carvers and hkaiNavVolumeGenerationSettings::m_carvers.
@@ -62,7 +62,7 @@ class hkaiVolume : public hkReferencedObject
 #endif // HKAI_VOLUME_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -13,38 +13,53 @@
 
 class vHavokBehaviorResource;
 
+/// \brief
+///   Resource manager for behavior project resources. 
+///
+/// A global instance of this manager can be accessed via vHavokBehaviorResourceManager::GetInstance().
 class vHavokBehaviorResourceManager : public VisResourceManager_cl
 {
 public:
 
-	/// Constructor / Destructor / Global Accessor
-	vHavokBehaviorResourceManager();
-	VOVERRIDE ~vHavokBehaviorResourceManager();
-	VHAVOKBEHAVIOR_IMPEXP static vHavokBehaviorResourceManager* GetInstance() {return &g_GlobalManager;}
+  ///
+	/// @name Constructor / Destructor / Global Accessor
+  /// @{
+  ///
 
-	/// should be called at plugin initialization time
+	vHavokBehaviorResourceManager();
+	virtual ~vHavokBehaviorResourceManager();
+	VHAVOKBEHAVIOR_IMPEXP static vHavokBehaviorResourceManager* GetInstance() { return &g_GlobalManager; }
+
+  ///
+  /// @}
+  ///
+
+  /// \brief
+	///   Called at plugin initialization time.
 	void OneTimeInit();
-	/// should be called at plugin de-initialization time
+
+  /// \brief
+	///   Called at plugin de-initialization time,
 	void OneTimeDeInit();
 
-	/// Virtual function that should be implemented by each resource manager to create a resource 
-	VHAVOKBEHAVIOR_IMPEXP VOVERRIDE VManagedResource *CreateResource(const char *szFilename, VResourceSnapshotEntry *pExtraInfo);
-
-	/// Returns the project asset manager
+  /// \brief
+	///   Returns the project asset manager.
 	hkbProjectAssetManager* GetProjectAssetManager() const;
 
-protected:
-	/// one global instance of our manager
-	static vHavokBehaviorResourceManager g_GlobalManager;
+  VHAVOKBEHAVIOR_IMPEXP virtual VManagedResource *CreateResource(const char *szFilename, 
+    VResourceSnapshotEntry *pExtraInfo) HKV_OVERRIDE;
 
-	/// The project asset manager used to load assets
-	hkbProjectAssetManager* m_projectAssetManager;
+protected:
+
+  static vHavokBehaviorResourceManager g_GlobalManager; ///< one global instance of our manager
+
+  hkbProjectAssetManager* m_projectAssetManager;        ///< The project asset manager used to load assets
 };
 
 #endif	// __VHAVOK_BEHAVIOR_RESOURCE_MANAGER_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

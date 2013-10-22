@@ -25,8 +25,11 @@
 class vHavokChainConstraintChainRenderer
   : public vHavokConstraintChainRendererBase
 {
+  ///
   /// @name Constructor / Destructor
-  //@{
+  /// @{
+  ///
+
 public:
   /// \brief
   ///   Constructor for this constraint chain renderer component.
@@ -36,52 +39,76 @@ public:
   ///   IVObjectComponent::IVObjectComponent
   VHAVOK_IMPEXP vHavokChainConstraintChainRenderer(
     int iComponentFlags=VIS_OBJECTCOMPONENTFLAG_NONE);
-  //@}
 
-  /// @name Base Class Overrides
-  //@{
+  ///
+  /// @}
+  ///
+
 protected:
-  VOVERRIDE void CommonDeinit();  
-  VOVERRIDE bool DoInit();
-  VOVERRIDE void OnRender();
-  VOVERRIDE void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
-  //@}
+  ///
+  /// @name Base Class Overrides
+  /// @{
+  ///
 
-  /// @name Model/Entity Handling
-  //@{
+  virtual void CommonDeinit() HKV_OVERRIDE;
+  virtual bool DoInit() HKV_OVERRIDE;
+  virtual void OnRender() HKV_OVERRIDE;
+  virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
+
 private:
+  ///
+  /// @name Model/Entity Handling
+  /// @{
+  ///
+
   void DrawEntity(VPassType_e ePassType);
   bool ReloadModel();
-  //@}
 
-  /// @name Serialization
-  //@{
+  ///
+  /// @}
+  ///
+
 public:
-  V_DECLARE_SERIAL_DLLEXP( vHavokChainConstraintChainRenderer, VHAVOK_IMPEXP)
+  ///
+  /// @name Serialization
+  /// @{
+  ///
+
+  V_DECLARE_SERIAL_DLLEXP(vHavokChainConstraintChainRenderer, VHAVOK_IMPEXP)
   V_DECLARE_VARTABLE(vHavokChainConstraintChainRenderer, VHAVOK_IMPEXP)
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
-  //@}
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
+  ///
+  /// @}
+  ///
+
+public: 
+  ///
   /// @name Attributes exposed to vForge
-  //@{
-public:  
-  VString ModelFile;    ///< Model file from which the material definition for the cable's surface is taken
-  hkvVec3 Scaling; ///< Scaling of the model used for rendering of the chain links
-  //@}
+  /// @{
+  ///
 
-  /// @name Internal Attributes
-  //@{
+  VString ModelFile;    ///< Model file from which the material definition for the cable's surface is taken
+  hkvVec3 Scaling;      ///< Scaling of the model used for rendering of the chain links
+
+  ///
+  /// @}
+  ///
+
 private:
   VDynamicMeshPtr m_spChainMesh; ///< The mesh for chain link rendering
   VSmartPtr<VisBaseEntity_cl> m_spChainEntity; ///< The entity for chain rendering
   static const unsigned int s_iSerialVersion; ///< The current serialization version for objects of this class.
-  //@}
 };
 
 #endif //V_HAVOK_CHAIN_CONSTRAINT_CHAIN_RENDERER_H_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -116,7 +116,9 @@ namespace Editor.Actions
     /// </summary>
     public override void Do()
     {
-      CommonInit(_shapes, _mode, _axis, _includeShapes);
+      if (ActionList.Count == 0) // initialize
+        CommonInit(_shapes, _mode, _axis, _includeShapes);
+
       if (base.Valid)
         base.Do();
     }
@@ -131,6 +133,19 @@ namespace Editor.Actions
         if (_shapes != null && _shapes.Count > 0)
           return true;
         return false;
+      }
+    }
+
+    /// <summary>
+    /// Override IsIdentity property of Group action since
+    /// actions are only created when performing the action (not in the constructor).
+    /// The group action would return IsIdentiy = true before performing the action.
+    /// </summary>
+    public override bool IsIdentity
+    {
+      get
+      {
+        return !Valid;
       }
     }
 
@@ -247,7 +262,7 @@ namespace Editor.Actions
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

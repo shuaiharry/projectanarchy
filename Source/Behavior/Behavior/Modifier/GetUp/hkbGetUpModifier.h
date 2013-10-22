@@ -87,16 +87,19 @@ class hkbGetUpModifier : public hkbModifier
 		hkInt16 m_rootBoneIndex;	//+default(-1)
 									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL")
 									//+hk.Description("The root bone used for pose matching.  Pose matching uses three bone from the ragdoll skeleton which are assumed to be representative of the pose.  The L-shaped skeleton between these three bones is matched to determine similar poses.")
+									//+hk.Ui(group="Pose Matching Bones")
 
 			/// A second (ragdoll) bone used for pose matching.  If this is -1, the index is taken from the character's hkbBoneInfo.
 		hkInt16 m_otherBoneIndex;	//+default(-1)
 									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL")
 									//+hk.Description("A second bone used for pose matching.")
+									//+hk.Ui(group="Pose Matching Bones")
 
 			/// A third (ragdoll) bone used for pose matching.  If this is -1, the index is taken from the character's hkbBoneInfo.
 		hkInt16 m_anotherBoneIndex;	//+default(-1)
 									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL")
 									//+hk.Description("A third bone used for pose matching.")
+									//+hk.Ui(group="Pose Matching Bones")
 
 	private:
 
@@ -122,7 +125,7 @@ class hkbGetUpModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

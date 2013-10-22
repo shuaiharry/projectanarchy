@@ -37,26 +37,35 @@ inline hkReal hkaiPointCloudSilhouetteGenerator::getWeldTolerance() const
 	return m_weldTolerance;
 }
 
-inline void hkaiPointCloudSilhouetteGenerator::setLocalPoints(const hkArrayBase<hkVector4>& points)
+#ifndef HK_PLATFORM_SPU
+void hkaiPointCloudSilhouetteGenerator::updatedLocalPoints()
 {
 	m_localPointsChanged = true;
+	hkAabbUtil::calcAabb( m_localPoints.begin(), m_localPoints.getSize(), m_localAabb );
+	invalidateCachedSilhouettes();
+}
+
+
+inline void hkaiPointCloudSilhouetteGenerator::setLocalPoints(const hkArrayBase<hkVector4>& points)
+{
 	m_localPoints = points;
 
 	// Keep the size array empty, since we're using all the points.
 	m_silhouetteSizes.clear();
-
-	hkAabbUtil::calcAabb( m_localPoints.begin(), m_localPoints.getSize(), m_localAabb );
+	
+	updatedLocalPoints();
 }
 
 inline void hkaiPointCloudSilhouetteGenerator::setLocalPointDataUserFree(const hkVector4* pointData, int numPoints)
 {
 	// Have to const_cast here, but we never modify the local points
 	m_localPoints.setDataUserFree( const_cast<hkVector4*>(pointData), numPoints, numPoints );
-	m_localPointsChanged = true;
 	m_silhouetteSizes.setSize(1);
 	m_silhouetteSizes[0] = m_localPoints.getSize();
-	hkAabbUtil::calcAabb( m_localPoints.begin(), m_localPoints.getSize(), m_localAabb );
+	
+	updatedLocalPoints();
 }
+#endif
 
 inline const hkArray<hkVector4>& hkaiPointCloudSilhouetteGenerator::getLocalPoints() const
 {
@@ -90,7 +99,7 @@ inline int hkaiPointCloudSilhouetteGenerator::getSizeOfChildSilhouette( int i ) 
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

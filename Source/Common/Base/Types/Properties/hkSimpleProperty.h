@@ -156,12 +156,18 @@ class hkSimpleProperty
 // Stored quality type used in Behavior Physics Bridges
 #define HK_PROPERTY_STORED_MOTION_INFO 0x1402
 
+// Mass of the rigid body retrieved by Behavior Physics Bridges
+#define HK_PROPERTY_BODY_MASS 0x1403
+
+// hkLocalFrame stored for a rigid body by Np Behavior Physics Bridge
+#define HK_PROPERTY_BODY_LOCAL_FRAME 0x1404
+
 #define HK_PROPERTY_EPHYSICS_BODY 0x1500
 
 #endif // HK_PROPERTY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

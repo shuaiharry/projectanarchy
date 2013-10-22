@@ -39,20 +39,20 @@ class hkp1dConstraintMotorInfo
 
 		// <todo> not used in position motor
 		/// position target for the current frame.
-		hkPadSpu<hkReal>	m_targetPosition;  
-	
+		hkPadSpu<hkReal>	m_targetPosition;
+
 		/// The target velocity
 		hkPadSpu<hkReal>	m_targetVelocity;
-	
+
 		/// max force that can be applied
 		hkPadSpu<hkReal>	m_maxForce;
-	
+
 		/// max force that can be applied in the reverse direction
 		hkPadSpu<hkReal>	m_minForce;
-	
+
 		/// The relative stiffness of the motor between 0..1
 		hkPadSpu<hkReal>	m_tau;
-	
+
 		/// The relative damping of the motor between 0..1
 		hkPadSpu<hkReal>	m_damping;
 };
@@ -67,13 +67,13 @@ class hkpConstraintMotorInput: public hkp1dBilateralConstraintStatus
 
 		/// delta time information about the solver (
 		hkPadSpu<const class hkpConstraintQueryStepInfo*> m_stepInfo;
-	
+
 		/// information from the last step
 		class hkpSolverResults m_lastResults;
-	
+
 		/// new target minus old target
 		hkPadSpu<hkReal> m_deltaTarget;
-	
+
 		/// old target minus current position
 		hkPadSpu<hkReal> m_positionError;
 };
@@ -110,7 +110,7 @@ extern "C"
 #endif // HKP_MOTOR_CONSTRAINT_INFO_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

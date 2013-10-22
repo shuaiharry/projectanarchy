@@ -232,33 +232,6 @@ inline hkVector4* hkaiNavMesh::getVertexPtr()
 
 #ifndef HK_PLATFORM_SPU
 
-template<typename DATA>
-HK_FORCE_INLINE void hkaiNavMesh::copyUserData( DATA* dst, const DATA* src, int striding )
-{
-	// Special-case the 0 and 1
-	if (striding == 1)
-	{
-		*dst = *src;
-	}
-	else if (striding == 0)
-	{
-		return;
-	}
-	else
-	{
-		for (int i=0; i<striding; i++)
-		{
-			dst[i] = src[i];
-		}
-	}
-}
-
-template< typename DATA >
-HK_FORCE_INLINE void hkaiNavMesh::copyUserData( hkArrayBase<DATA>& dataArray, int dstIndex, int srcIndex, int striding)
-{
-	copyUserData( dataArray.begin() + dstIndex*striding, dataArray.begin() + srcIndex*striding, striding);
-}
-
 inline const hkaiNavMesh::Face& hkaiNavMesh::getFace(hkaiNavMesh::FaceIndex fIdx) const
 {
 	return m_faces[fIdx]; 
@@ -400,7 +373,7 @@ inline bool hkaiNavMesh::isWallClimbing() const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

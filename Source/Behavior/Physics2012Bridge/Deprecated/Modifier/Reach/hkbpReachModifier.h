@@ -41,6 +41,8 @@ class hkbpReachModifier : public hkbModifier
 			// hkbNode interface implementation.
 		virtual bool isValid( const hkbCharacter* character, hkStringPtr& errorString ) const HK_OVERRIDE;
 
+			// hkbNode interface implementation.
+		virtual hkbNode* cloneNode( hkbBehaviorGraph& rootBehavior ) const HK_OVERRIDE;
 
 		///////////////////////////
 		// hkbModifier interface
@@ -168,7 +170,7 @@ class hkbpReachModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

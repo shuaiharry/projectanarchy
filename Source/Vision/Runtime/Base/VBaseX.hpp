@@ -125,6 +125,15 @@ extern bool g_bVBaseDeinitializing;
 
 #endif
 
+#ifdef _VISION_TIZEN
+
+  #include <osp/egl.h>
+  #include <osp/eglext.h>
+  #include <osp/gl2.h>
+  #include <osp/gl2ext.h>
+
+#endif
+
   
 #include <Vision/Runtime/Base/Graphics/Video/VVideoCaps.hpp>
 
@@ -133,7 +142,7 @@ extern bool g_bVBaseDeinitializing;
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

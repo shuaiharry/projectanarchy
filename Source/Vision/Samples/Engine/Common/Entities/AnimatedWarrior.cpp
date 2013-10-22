@@ -44,15 +44,14 @@
 // **************************************************
 AnimatedWarrior_cl::AnimatedWarrior_cl()
 {
-  m_bEnabled = true;
+  m_bEnabled = false;
   m_bModelValid = false;  // This prevents a crash in e.g. vForge if the model and animations are missing
 
   m_iPrimaryUpperBodyControlIndex = -1;
   m_spPrimaryFullBodyControl = NULL;
   m_pTorch = NULL;
-  m_pLayerMixer = NULL;
+  m_spLayerMixer = NULL;
   m_pNormalizeMixer = NULL;
-  m_spAnimConfig = NULL;
 
   // animation ID lookup
   m_pFullBodyAnimIDLookup[FBSTATETYPE_NORMAL] = CreateAnimIDLookupForStateType( FBSTATETYPE_NORMAL );
@@ -139,15 +138,11 @@ void AnimatedWarrior_cl::InitFunction()
   VisSkeleton_cl* pSkeleton = pMesh->GetSkeleton();
   VASSERT(pSkeleton);
 
-  VisAnimFinalSkeletalResult_cl* pFinalSkeletalResult;
-  m_spAnimConfig = VisAnimConfig_cl::CreateSkeletalConfig(pMesh, &pFinalSkeletalResult);
-  SetAnimConfig(m_spAnimConfig);
-
   // create mixer structure, we keep pointers on the mixers to add and remove inputs
-  m_pLayerMixer = new VisAnimLayerMixerNode_cl(pSkeleton);
-  pFinalSkeletalResult->SetSkeletalAnimInput(m_pLayerMixer);
+  m_spLayerMixer = new VisAnimLayerMixerNode_cl(pSkeleton);
+
   m_pNormalizeMixer = new VisAnimNormalizeMixerNode_cl(pSkeleton);
-  m_pLayerMixer->AddMixerInput(m_pNormalizeMixer, 1.f);
+  m_spLayerMixer->AddMixerInput(m_pNormalizeMixer, 1.f);
 
   //// create per bone weighting list for upper body
   int iBoneCount = pSkeleton->GetBoneCount();
@@ -163,8 +158,8 @@ void AnimatedWarrior_cl::InitFunction()
   {
     m_spUpperBodyControls[i] = new VisSkeletalAnimControl_cl(pSkeleton, VSKELANIMCTRL_DEFAULTS);
     m_spUpperBodyControls[i]->AddEventListener(this); // we want to receive all events from sequence and control
-    iMixerInputIndex = m_pLayerMixer->AddMixerInput(m_spUpperBodyControls[i], 0.f);
-    m_pLayerMixer->ApplyPerBoneWeightingMask(iMixerInputIndex, iBoneCount, fPerBoneWeightingList);
+    iMixerInputIndex = m_spLayerMixer->AddMixerInput(m_spUpperBodyControls[i], 0.f);
+    m_spLayerMixer->ApplyPerBoneWeightingMask(iMixerInputIndex, iBoneCount, fPerBoneWeightingList);
   }
   
   V_SAFE_DELETE_ARRAY(fPerBoneWeightingList);
@@ -175,7 +170,7 @@ void AnimatedWarrior_cl::InitFunction()
   SetFullBodyState(m_pFullBodyIdleState[FBSTATETYPE_NORMAL]);
   SetUpperBodyState(m_pUpperBodyIdleState);
 
-  // initialise variables for upperbody fadein/fadeout
+  // initialize variables for upperbody fadein/fadeout
   m_eUpperBodyFadeState = FADESTATE_NONE;
 
   // setup neck bone for head rotation
@@ -196,12 +191,17 @@ void AnimatedWarrior_cl::InitFunction()
   hkvQuat localRotation;
   localRotation.setFromEulerAngles (euler[2], euler[1], euler[0]); // pass as roll, pitch, yaw
   m_pTorch->Attach(this, "skeleton1:RightHand", localRotation, localTranslation);
+
+  SetEnabled(true);
 }
 
 void AnimatedWarrior_cl::DeInitFunction()
 {
-  V_SAFE_DISPOSEOBJECT( m_pTorch );
+  SetEnabled(false);
 
+  V_SAFE_DISPOSEOBJECT(m_pTorch);
+
+  m_spLayerMixer = NULL;
   m_spAnimConfig = NULL;
 }
 
@@ -222,8 +222,19 @@ void AnimatedWarrior_cl::SetEnabled(bool bEnabled)
     m_pCharacterController->SetEnabled(bEnabled ? TRUE : FALSE);
 #endif
 
+  VisAnimConfig_cl* pAnimConfig = GetAnimConfig();
+
   if (bEnabled)
   {
+    m_spAnimConfig = GetAnimConfig();
+    if (m_spAnimConfig == NULL)
+    {
+      m_spAnimConfig = VisAnimConfig_cl::CreateSkeletalConfig(GetMesh());
+      SetAnimConfig(m_spAnimConfig);
+    }
+    if (m_spAnimConfig->GetFinalResult() != NULL)
+      m_spAnimConfig->GetFinalResult()->SetSkeletalAnimInput(m_spLayerMixer);
+
     // Resume animation controls
     for (int i = 0; i < UPPERBODY_CONTROLCOUNT; i++)
       m_spUpperBodyControls[i]->Resume();
@@ -237,6 +248,9 @@ void AnimatedWarrior_cl::SetEnabled(bool bEnabled)
       m_spUpperBodyControls[i]->Pause();
     for (int i = 0; i < m_FullBodyControlList.Count(); i++)
       m_FullBodyControlList.GetAt(i)->Pause();
+
+    if (m_spAnimConfig != NULL && m_spAnimConfig->GetFinalResult() != NULL)
+      m_spAnimConfig->GetFinalResult()->SetSkeletalAnimInput(NULL);
   }
 }
 
@@ -372,12 +386,12 @@ void AnimatedWarrior_cl::BlendOverUpperBodyAnimation(float fBlendTime, int iNewS
     m_spUpperBodyControls[iNewIndex]->SetSpeed(fNewSpeed);
     m_spUpperBodyControls[iNewIndex]->SetCurrentSequencePosition(fCurrentPosition);
 
-    m_pLayerMixer->EaseIn(iNewIndex+1, fBlendTime, true);
+    m_spLayerMixer->EaseIn(iNewIndex+1, fBlendTime, true);
     m_iPrimaryUpperBodyControlIndex = iNewIndex;
   }
 
   if(iOldIndex>=0)
-    m_pLayerMixer->EaseOut(iOldIndex+1, fBlendTime, true);
+    m_spLayerMixer->EaseOut(iOldIndex+1, fBlendTime, true);
 }
 
 
@@ -385,7 +399,7 @@ void AnimatedWarrior_cl::BlendOutUpperBodyAnimation(float fBlendTime)
 {
   VASSERT((fBlendTime>=0.f)&&((m_iPrimaryUpperBodyControlIndex==0)||(m_iPrimaryUpperBodyControlIndex==1)));
 
-  m_pLayerMixer->EaseOut(m_iPrimaryUpperBodyControlIndex+1, fBlendTime, true);
+  m_spLayerMixer->EaseOut(m_iPrimaryUpperBodyControlIndex+1, fBlendTime, true);
 }
 
 
@@ -611,9 +625,9 @@ void AnimatedWarrior_cl::UpdateUpperBodyFade()
   if (m_eUpperBodyFadeState == FADESTATE_FADEIN)
   {
     // test for finished easing in
-    if (!m_pLayerMixer->IsEasingIn(m_iPrimaryUpperBodyControlIndex+1))
+    if (!m_spLayerMixer->IsEasingIn(m_iPrimaryUpperBodyControlIndex+1))
     {
-      VASSERT(m_pLayerMixer->GetCurrentEaseValue(m_iPrimaryUpperBodyControlIndex+1) >= 1.f);
+      VASSERT(m_spLayerMixer->GetCurrentEaseValue(m_iPrimaryUpperBodyControlIndex+1) >= 1.f);
       m_eUpperBodyFadeState = FADESTATE_NONE;
       TriggerEvent(EVENT_UPPERBODYFADEIN_FINISHED);
     }
@@ -621,9 +635,9 @@ void AnimatedWarrior_cl::UpdateUpperBodyFade()
   else if(m_eUpperBodyFadeState == FADESTATE_FADEOUT)
   {
     // test for finished easing out
-    if (!m_pLayerMixer->IsEasingOut(m_iPrimaryUpperBodyControlIndex+1))
+    if (!m_spLayerMixer->IsEasingOut(m_iPrimaryUpperBodyControlIndex+1))
     {
-      VASSERT(m_pLayerMixer->GetCurrentEaseValue(m_iPrimaryUpperBodyControlIndex+1) <= 0.f);
+      VASSERT(m_spLayerMixer->GetCurrentEaseValue(m_iPrimaryUpperBodyControlIndex+1) <= 0.f);
       m_eUpperBodyFadeState = FADESTATE_NONE;
       m_iPrimaryUpperBodyControlIndex = -1;
       TriggerEvent(EVENT_UPPERBODYFADEOUT_FINISHED);
@@ -704,8 +718,7 @@ bool AnimatedWarrior_cl::FullBodyIdleState::RotateLeft(float fRotationSpeed)
   // switch to rotate state immediately
   if(m_pEnt->GetFullBodyState()!=m_pEnt->m_pFullBodyRotateState[m_eStateType])
     m_pEnt->SetFullBodyState(m_pEnt->m_pFullBodyRotateState[m_eStateType]);
-//  else
-//    int iTest = 0;
+
   return m_pEnt->GetFullBodyState()->RotateLeft(fRotationSpeed);
 }
 
@@ -1219,7 +1232,7 @@ bool AnimatedWarrior_cl::FullBodyWalkBackwardsState::Arm()
 
 bool AnimatedWarrior_cl::UpperBodyState::IsBlending()
 {
-  return m_pEnt->m_pLayerMixer->IsEasingIn(m_pEnt->m_iPrimaryUpperBodyControlIndex);
+  return m_pEnt->m_spLayerMixer->IsEasingIn(m_pEnt->m_iPrimaryUpperBodyControlIndex);
 }
 
 
@@ -1439,7 +1452,7 @@ START_VAR_TABLE(AnimatedWarrior_cl, VisBaseEntity_cl, "Animated warrior characte
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

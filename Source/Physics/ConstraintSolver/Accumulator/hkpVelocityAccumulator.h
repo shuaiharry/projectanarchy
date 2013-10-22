@@ -13,7 +13,7 @@
 /// This is a simplified rigid body as it is used by the constraint solver.
 /// Note: This class has different purposes, whether it is used for setting up the constraint solver
 /// input (hkConstraintDate::buildJacobian()), or when it is used as a solver output.
-class hkpVelocityAccumulator 
+class hkpVelocityAccumulator
 {
 	public:
 
@@ -70,7 +70,7 @@ class hkpVelocityAccumulator
 
 		//
 		//	Solver input accessors
-		// 
+		//
 
 			/// Sets the center of mass in world space. Works in both contexts!
 		void setCenterOfMassInWorld(const hkVector4& worldCenterOfMass)
@@ -163,7 +163,7 @@ class hkpVelocityAccumulator
 			HK_ASSERT(0x5d9b1d6a, m_context == ACCUMULATOR_CONTEXT_SOLVER);
 			return (const hkQuaternion&)m_scratch2;
 		}
-		
+
 			// Convert the accumulator for use in a solver
 		HK_FORCE_INLINE void convertToSolverType()
 		{
@@ -175,7 +175,7 @@ class hkpVelocityAccumulator
 			getSumLinearVel().setZero();
 			getSumAngularVel().setZero();
 		}
-		
+
 	public:		// internal, public needed for HK_COMPILE_TIME_ASSERT
 
 		hkVector4  m_scratch0;
@@ -218,7 +218,7 @@ class hkpVelocityAccumulator2 : public hkpVelocityAccumulator
 #endif // HKP_VELOCITY_ACCUMULATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

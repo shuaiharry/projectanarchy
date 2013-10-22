@@ -9,13 +9,11 @@
 #define HKAI_NAVIGATION_MESH_GENERATION_SETTINGS_H
 
 #include <Ai/Internal/NavMesh/hkaiNavMeshSimplificationUtils.h>
-#include <Ai/Pathfinding/Common/hkaiVolume.h>
+#include <Ai/Internal/NavMesh/hkaiNavMeshEdgeMatchingParams.h>
 #include <Ai/Pathfinding/Common/hkaiMaterialPainter.h>
 #include <Common/Base/Reflection/Attributes/hkAttributes.h>
 
 extern const class hkClass hkaiNavMeshGenerationSettingsOverrideSettingsClass;
-
-extern const class hkClass hkaiNavMeshGenerationSettingsEdgeMatchingParametersClass;
 
 extern const class hkClass hkaiNavMeshGenerationSettingsRegionPruningSettingsClass;
 
@@ -28,7 +26,7 @@ class hkaiVolume;
 /// This input structure controls all of the major settings for automatic nav mesh generation
 struct hkaiNavMeshGenerationSettings
 {
-	// +version(24)
+	// +version(25)
 	HK_DECLARE_REFLECTION();
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, hkaiNavMeshGenerationSettings);
 
@@ -55,94 +53,8 @@ struct hkaiNavMeshGenerationSettings
 		ConstructionFlags m_flags;
 	};
 
-		/// Tolerances for edge matching. This is used to connect edges then might not be exact, e.g., two stairs
-	struct EdgeMatchingParameters
-	{
-		// +version(7)
-		HK_DECLARE_REFLECTION();
-		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, EdgeMatchingParameters);
+	typedef hkaiNavMeshEdgeMatchingParameters EdgeMatchingParameters;
 
-		EdgeMatchingParameters();
-		EdgeMatchingParameters(hkFinishLoadedObjectFlag f) {}
-
-		/// The maximum step height
-		hkReal m_maxStepHeight;	//+default(.5f)
-								//+hk.RangeReal(absmin=0,softmax=10)
-								//+hk.Description("The maximum vertical distance allowed between edges.")
-								//+hk.Semantics("DISTANCE")
-
-		/// Maximum allowed separation when considering connecting a pair of edges
-		hkReal m_maxSeparation;		//+default(.1f)
-									//+hk.RangeReal(absmin=0,softmax=10)
-									//+hk.Description("The maximum horizontal distance allowed between edges.")
-									//+hk.Semantics("DISTANCE")
-
-		/// Maximum allowed overhang when considering connecting a pair of edges
-		hkReal m_maxOverhang;	//+default(1e-2f)
-								//+hk.RangeReal(absmin=0,softmax=10)
-								//+hk.Description("The maximum overhang allowed between edges.")
-								//+hk.Semantics("DISTANCE")
-
-		/// Maximum amount that a face can be behind the opposite edge.
-		hkReal m_behindFaceTolerance;	//+default(1e-4f)
-										//+hk.RangeReal(absmin=0,softmax=1)
-										//+hk.Description("The maximum amount that a face can be behind the opposite edge.")
-										//+hk.Semantics("DISTANCE")
-
-		/// Minimum planar alignment required when considering connecting a pair of edges
-		hkReal m_cosPlanarAlignmentAngle;	//+default(0.99619472f)
-											//+hk.RangeReal(absmin=-1,absmax=1)
-											//+hk.Description("The minimum planar alignment required when considering connecting a pair of edges.")
-											//+hk.Semantics("COSINE_ANGLE")
-
-		/// Minimum vertical alignment required when considering connecting a pair of edges
-		hkReal m_cosVerticalAlignmentAngle;		//+default(.5f)
-												//+hk.RangeReal(absmin=-1,absmax=1)
-												//+hk.Description("The minimum vertical alignment required when considering connecting a pair of edges.")
-												//+hk.Semantics("COSINE_ANGLE")
-
-		/// Minimum overlap required when considering connecting a pair of edges
-		hkReal m_minEdgeOverlap;	//+default(.02f)
-									//+hk.RangeReal(absmin=0,softmin=1)
-									//+hk.Description("The minimum overlap required when considering connecting a pair of edges.")
-
-		/// Horizontal epsilon used for edge connection raycasts
-		hkReal m_edgeTraversibilityHorizontalEpsilon;	//+default(.01f)
-														//+hk.RangeReal(absmin=0,softmin=1)
-														//+hk.Description("Internal Use. Horizontal traversabilty-test epsilon")
-
-		/// Vertical epsilon used for edge connection raycasts
-		hkReal m_edgeTraversibilityVerticalEpsilon;	//+default(.01f)
-													//+hk.RangeReal(absmin=0,softmin=1)
-													//+hk.Description("Internal Use. Vertical traversabilty-test epsilon")
-
-		/// Minimum face normal alignment required when considering connecting a pair of edges (used for wall-climbing only)
-		hkReal m_cosClimbingFaceNormalAlignmentAngle;	//+default(-0.5f),
-														//+hk.RangeReal(absmin=-1,absmax=1)
-														//+hk.Description("The minimum face normal alignment required when considering connecting a pair of edges.")
-														//+hk.Semantics("COSINE_ANGLE")
-
-		/// Minimum edge alignment required when considering connecting a pair of edges (used for wall-climbing only)
-		hkReal m_cosClimbingEdgeAlignmentAngle;	//+default(0.99619472f)
-												//+hk.RangeReal(absmin=-1,absmax=1)
-												//+hk.Description("The minimum edge alignment required when considering connecting a pair of edges.")
-												//+hk.Semantics("COSINE_ANGLE")
-
-		/// In the case where two surfaces meet (e.g. a wall and a floor), if the angle between them is acute, they may be prevented from connecting.
-		/// To alleviate these issues, the normals of the two surfaces can be rotated slightly towards each other. This normal correction will be
-		/// performed if the angle between the surfaces is less than 90 degrees and greater than the angle (in radians) specified below. The default
-		/// value is 87 degrees which means that, for example, the edges where a wall at an angle of 88 degrees meets a floor will still get connected.
-		/// (This is used for wall-climbing only.)
-		hkReal m_minAngleBetweenFaces;	//+default(87.f*HK_REAL_DEG_TO_RAD)
-										//+hk.RangeReal(absmin=0,absmax=1.57)
-										//+hk.Description("The minimum allowed angle (in radians) between faces when considering connecting a pair of edges.")
-										//+hk.Semantics("ANGLE")
-
-		/// Tolerance used to determine when edges are parallel for the purposes of "partially" matching them.
-		/// In general, this doesn't need to be adjusted, but setting to HK_REAL_MAX will effectively disable this.
-		
-		hkReal m_edgeParallelTolerance; //+default(1e-5f)
-	};
 
 		/// How the character width (m_minCharacterWidth) is used to remove sections of the nav mesh.
 	enum CharacterWidthUsage
@@ -196,7 +108,7 @@ struct hkaiNavMeshGenerationSettings
 		hkReal m_maxWalkableSlope;
 
 			/// Edge matching parameters to be used in the region or for the material.
-		struct EdgeMatchingParameters m_edgeMatchingParams;
+		hkaiNavMeshEdgeMatchingParameters m_edgeMatchingParams;
 
 			/// Simplification settings to be used in the region or for the material.
 		struct hkaiNavMeshSimplificationUtils::Settings m_simplificationSettings;
@@ -227,6 +139,20 @@ struct hkaiNavMeshGenerationSettings
 									//+hk.Description("The maximum walkable slope. Stored in radians.")
 									//+hk.Semantics("ANGLE")
 
+		/// The winding of the walkable triangles with respect to the up vector.
+		/// Internally, Havok deals with counter-clockwise winding.
+		/// If clockwise winding is specified, the winding will be flipped on a copy of the input geometry.
+	enum TriangleWinding
+	{
+			/// Walkable triangles are wound counter-clockwise w.r.t. the up vector.
+		WINDING_CCW,
+			
+			/// Walkable triangles are wound clockwise w.r.t. the up vector.
+		WINDING_CW,
+	};
+
+	hkEnum< TriangleWinding, hkUint8 > m_triangleWinding; //+default(hkaiNavMeshGenerationSettings::WINDING_CCW)
+
 	/// The threshold for removal of 'degenerate' triangles after triangulation (but before shared edge identification and convexification)
 	hkReal m_degenerateAreaThreshold;
 
@@ -241,7 +167,7 @@ struct hkaiNavMeshGenerationSettings
 	int m_maxNumEdgesPerFace; //+default(255)
 
 	/// The edge matching params
-	struct EdgeMatchingParameters m_edgeMatchingParams;
+	hkaiNavMeshEdgeMatchingParameters m_edgeMatchingParams;
 
 		/// How conflicting edges are prioritized.
 	enum EdgeMatchingMetric
@@ -263,7 +189,7 @@ struct hkaiNavMeshGenerationSettings
 		/// Parameters to control how regions are removed from the nav mesh
 	struct RegionPruningSettings
 	{
-		// +version(1)
+		// +version(2)
 		HK_DECLARE_REFLECTION();
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, RegionPruningSettings);
 
@@ -273,6 +199,12 @@ struct hkaiNavMeshGenerationSettings
 		{
 
 		}
+
+			/// Computes the amount to expand face AABBs by
+		void getFaceAabbExpansion( hkVector4Parameter up, hkVector4& expansion ) const;
+
+			/// Determines whether the region's AABB is adjacent to the mesh boundary.
+		static bool HK_CALL isRegionNearBoundary( const hkAabb& regionAabb, const hkAabb& meshBoundary );
 
 			/// Any regions with area less than this threshold will be automatically removed
 		hkReal m_minRegionArea;		//+default(5.0f)
@@ -294,6 +226,10 @@ struct hkaiNavMeshGenerationSettings
 			/// Generally this should be left false to avoid unexpected regions above or below the main mesh.
 			/// However it may be desirable if connecting regions vertically, e.g. stories in a skyscraper.
 		hkBool m_preserveVerticalBorderRegions; //+default(false);
+
+			/// Whether or not to perform a pruning pass before CSG and triangulation.
+			/// This is highly recommended because it can eliminate large amounts of triangles from being processed.
+		hkBool m_pruneBeforeTriangulation; //+default(true)
 
 			/// If points are specified here, any regions not connected to the points will be removed
 		hkArray<hkVector4> m_regionSeedPoints;
@@ -431,7 +367,7 @@ protected:
 #endif	// HKAI_NAVIGATION_MESH_GENERATION_SETTINGS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

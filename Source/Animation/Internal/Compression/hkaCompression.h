@@ -31,14 +31,14 @@ public:
 	static const hkUint8* HK_CALL computePackedNurbsOffsets( const hkUint8* base, const hkUint32* p, hkUint32 o2, hkUint32 o3 );
 
 	/// hkaQuantizedAnimation utility.
-	static void HK_CALL sampleDynamicScalarsInternal( hkReal* poseOut, int numPoseOut, const hkUint16* elements, const hkReal* minimums, const hkReal* spans, const hkUint16* values, int n );
+	static void HK_CALL sampleDynamicScalarsInternal( hkReal* poseOut, int numPoseOut, const hkUint16* elements, const hkFloat32* minimums, const hkFloat32* spans, const hkUint16* values, int n );
 };
 
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

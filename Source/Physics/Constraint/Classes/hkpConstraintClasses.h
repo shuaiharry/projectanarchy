@@ -41,6 +41,7 @@ HK_CLASS(hkpSpringDamperConstraintMotor)
 HK_CLASS(hkpStiffSpringConstraintData)
 HK_CLASS(hkpVelocityConstraintMotor)
 HK_CLASS(hkpWheelConstraintData)
+HK_CLASS(hkpWheelFrictionConstraintData)
 HK_STRUCT(hkp2dAngConstraintAtom)
 HK_STRUCT(hkp3dAngConstraintAtom)
 HK_STRUCT(hkpAngConstraintAtom)
@@ -87,9 +88,13 @@ HK_STRUCT(hkpStiffSpringConstraintAtom)
 HK_STRUCT(hkpStiffSpringConstraintDataAtoms)
 HK_STRUCT(hkpTwistLimitConstraintAtom)
 HK_STRUCT(hkpWheelConstraintDataAtoms)
+HK_STRUCT(hkpWheelFrictionConstraintAtom)
+HK_STRUCT(hkpWheelFrictionConstraintAtomAxle)
+HK_STRUCT(hkpWheelFrictionConstraintDataAtoms)
+HK_STRUCT(hkpWheelFrictionConstraintDataRuntime)
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -35,10 +35,14 @@ inline void hkaiOverlapManager::Section::setFaceDirty( hkaiNavMesh::FaceIndex f,
 		{
 			hkIntRealPair oldPair = m_facePriorities.getElement(iter);
 			pair.m_value += oldPair.m_value;
+			m_facePriorities.updateElement( iter, pair );
+		}
+		else
+		{
+			HK_ON_DEBUG(hkBool32 isNewKey = ) m_facePriorities.insert(pair);
+			HK_ASSERT(0x5826735c, isNewKey);
 		}
 	}
-	
-	m_facePriorities.insert(pair);
 }
 
 inline void hkaiOverlapManager::Section::setFaceClean( hkaiNavMesh::FaceIndex f )
@@ -94,13 +98,18 @@ inline int hkaiOverlapManager::getMaxCutFacesPerStep( ) const
 	return m_maxCutFacesPerStep;
 }
 
+inline bool hkaiOverlapManager::isLimitingMaxCutFaces( ) const
+{
+	return m_maxCutFacesPerStep > 0;
+}
+
 inline const hkaiSilhouettePriorityController* hkaiOverlapManager::getSilhouettePriorityController() const
 {
 	return m_priorityController;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

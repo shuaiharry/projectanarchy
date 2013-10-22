@@ -10,8 +10,8 @@
 
 
 
-inline hkaiHierarchicalNavMeshHeuristic::hkaiHierarchicalNavMeshHeuristic( char* openSetStorage, int openSetStorageCount,  char* searchStorage, int searchStorageCount)
-:	m_coarseSearch(openSetStorage, openSetStorageCount, searchStorage, searchStorageCount),
+inline hkaiHierarchicalNavMeshHeuristic::hkaiHierarchicalNavMeshHeuristic( const hkaiSearchMemoryInfo& memInfo)
+:	m_coarseSearch(memInfo),
 	m_accessor(HK_NULL)
 {
 }
@@ -69,7 +69,7 @@ inline void hkaiHierarchicalNavMeshHeuristic::getEdgePosition( EdgeKey edgeId, h
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

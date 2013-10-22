@@ -108,14 +108,14 @@ void RPG_DestructibleEntity::DisposeObject()
 void RPG_DestructibleEntity::AddComponents()
 {
   // Add an attackable component if none was added in the editor
-  if (!static_cast<RPG_AttackableComponent*>(Components().GetComponentOfType(V_RUNTIME_CLASS(RPG_AttackableComponent))))
+  if (!Components().GetComponentOfType(V_RUNTIME_CLASS(RPG_AttackableComponent)))
   {
     RPG_AttackableComponent* attackableComponent = new RPG_AttackableComponent;
     AddComponent(attackableComponent);
   }
 
   // Add a rigid body component if none already exists
-  if (!Components().GetComponentOfType("vHavokRigidBody"))
+  if (!Components().GetComponentOfType(V_RUNTIME_CLASS(vHavokRigidBody)))
   {
     // Rigid Body
     vHavokRigidBody* rigidBody = new vHavokRigidBody;
@@ -161,7 +161,7 @@ void RPG_DestructibleEntity::SetDestroyed()
     RemoveComponent(attackableComponent);
   }
 
-  vHavokRigidBody* rigidBodyComponent = static_cast<vHavokRigidBody*>(Components().GetComponentOfType("vHavokRigidBody"));
+  vHavokRigidBody* rigidBodyComponent = static_cast<vHavokRigidBody*>(Components().GetComponentOfType(V_RUNTIME_CLASS(vHavokRigidBody)));
   if (rigidBodyComponent)
   {
     RemoveComponent(rigidBodyComponent);
@@ -172,7 +172,7 @@ void RPG_DestructibleEntity::SetDestroyed()
   CreateEffect(DEFX_Destroy, GetPosition(), GetOrientation());
 
   // remove collision if so instructed
-  if (m_removeCollisionAfterDestruction)
+  //if (m_removeCollisionAfterDestruction)
   {
     RemoveObstacle();
   }
@@ -238,57 +238,43 @@ void RPG_DestructibleEntity::StopEffect(RPG_DestructibleEntityEffect_e effectTyp
 
 void RPG_DestructibleEntity::AddObstacle()
 {
-  if(!Vision::Editor.IsPlaying())
+  VASSERT(!m_aiObstacle);
+  if(m_aiObstacle)
     return;
 
-  VASSERT(!m_aiBehavior);
-  if(m_aiBehavior)
+  vHavokRigidBody *rigidBody = vstatic_cast<vHavokRigidBody*>(Components().GetComponentOfType(V_RUNTIME_CLASS(vHavokRigidBody)));
+  VASSERT(rigidBody);
+  if(!rigidBody)
     return;
 
-  // Add AI obstacle
-  hkaiCharacter::Cinfo characterCinfo;
+  float const radius = RPG_VisionHavokConversion::VisionToHavokScalar(m_collisionRadius);
+
+  hkaiPhysics2012BodyObstacleGenerator *aiObstacle = new hkaiPhysics2012BodyObstacleGenerator(rigidBody->GetHkRigidBody());
   {
-    RPG_VisionHavokConversion::VisionToHavokPoint(GetPosition(), characterCinfo.m_initialPosition);
-    RPG_VisionHavokConversion::VisionToHavokDirection(GetDirection(), characterCinfo.m_initialForward);
-    characterCinfo.m_up = hkVector4::getConstant<HK_QUADREAL_0010>();
-    characterCinfo.m_avoidanceProperties = &s_AvoidanceProperties;
-    {
-      hkReal const radius = RPG_VisionHavokConversion::VisionToHavokScalar(m_collisionRadius);
-      {
-        characterCinfo.m_radius = radius;
-        characterCinfo.m_desiredSpeed = 0.0f;
-      }
-    }
+    aiObstacle->m_spheres.expandOne();
+    aiObstacle->m_spheres.back().m_sphere.setPositionAndRadius(hkVector4::getConstant<HK_QUADREAL_0>(), radius);
+
+    aiObstacle->setVelocityThreshold(0.0f);
+    aiObstacle->m_userData = (hkUlong)this;
+
+    m_aiObstacle = aiObstacle;
   }
 
-  m_aiCharacter = new hkaiCharacter(characterCinfo);
-  m_aiCharacter->removeReference();
-
-  hkaiPathFollowingBehavior::Cinfo behaviorCinfo;
-  m_aiBehavior = new hkaiPathFollowingBehavior(m_aiCharacter, vHavokAiModule::GetInstance()->GetAiWorld(), behaviorCinfo);
-  m_aiBehavior->removeReference();
-
-  vHavokAiModule::GetInstance()->getCharacterBehaviors().pushBack(m_aiBehavior);
+  vHavokAiModule::GetInstance()->GetAiWorld()->addObstacleGenerator(m_aiObstacle);
+  m_aiObstacle->removeReference();
 }
 
 void RPG_DestructibleEntity::RemoveObstacle()
 {
-  if(m_aiBehavior)
+  if(m_aiObstacle)
   {
-    int const aiBehaviorIndex = vHavokAiModule::GetInstance()->getCharacterBehaviors().indexOf(m_aiBehavior);
-    VASSERT(aiBehaviorIndex >= 0);
-    if(aiBehaviorIndex >= 0)
-    {
-      vHavokAiModule::GetInstance()->getCharacterBehaviors().removeAt(aiBehaviorIndex);
-    }
-
-    m_aiBehavior = NULL;
-    m_aiCharacter = NULL;
+    vHavokAiModule::GetInstance()->GetAiWorld()->removeObstacleGenerator(m_aiObstacle);
+    m_aiObstacle = NULL;
   }
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

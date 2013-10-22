@@ -127,6 +127,7 @@ public:
   void SetFloatVec4(int id, float val, const char* pIndex);
   VBool SetString(int id, const char *pValue, const char *pIndex = NULL);
   void SetEnum(int id, int val);
+  void SetPointer(int id, void* pPointer);
   void SetFlag(int id, int iFlag, VBool bState); ///<toggles flags on/off
   void SetFlag(int id, const char *pName, VBool bState); ///<toggles flags on/off
   void SetFlag(int id, int iFlag); ///<replaces flags
@@ -146,6 +147,7 @@ public:
   void  GetFloatVec4(int id, float *val);
   void  GetString(int id, VString &res, const char* pIndex = NULL);
   int   GetEnum(int id);
+  void* GetPointer(int id);
   int   GetFlag(int id); ///<get all the flags
   int   GetFlag(int id, int iFlag); ///<get a specific single flag or a combination of flags  
   int   GetFlag(int id, const char* szFlagName);  ///<get a specific single flag
@@ -226,7 +228,7 @@ protected:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -65,15 +65,19 @@ class hkpHingeConstraintData : public hkpConstraintData
 		};
 
 	public:
-		
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
 		/// Constructor.
 		hkpHingeConstraintData();
 
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		hkpHingeConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
+
+#endif
 
 		/// Set the data for a Hinge constraint with information given in body space.
 		/// \param pivotA The constraint pivot point, specified in bodyA space.
@@ -81,7 +85,7 @@ class hkpHingeConstraintData : public hkpConstraintData
 		/// \param axisA The hinge axis, specified in bodyA space.
 		/// \param axisB The hinge axis, specified in bodyB space.
 		void setInBodySpace(const hkVector4& pivotA, const hkVector4& pivotB, const hkVector4& axisA, const hkVector4& axisB);
-	
+
 		/// Set the data for a Hinge constraint with information given in world space.
 		/// \param bodyA The first rigid body transform
 		/// \param bodyB The second rigid body transform
@@ -128,7 +132,7 @@ class hkpHingeConstraintData : public hkpConstraintData
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
 
 	public:
-		
+
 		HK_ALIGN_REAL( Atoms m_atoms );
 };
 
@@ -136,7 +140,7 @@ class hkpHingeConstraintData : public hkpConstraintData
 #endif // HKP_HINGE_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

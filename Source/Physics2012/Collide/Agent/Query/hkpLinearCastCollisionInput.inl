@@ -15,7 +15,7 @@ hkpLinearCastCollisionInput::hkpLinearCastCollisionInput()
 void hkpLinearCastCollisionInput::setPathAndTolerance( const hkVector4& path, hkReal tolerance )
 {
 	m_path = path;
-	m_cachedPathLength = path.length<3>().getReal();
+	path.length<3>().store<1>(&m_cachedPathLength);
 	m_tolerance = tolerance;
 }
 
@@ -27,7 +27,7 @@ void hkpLinearCastCollisionInput::set( const hkpProcessCollisionInput& input)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

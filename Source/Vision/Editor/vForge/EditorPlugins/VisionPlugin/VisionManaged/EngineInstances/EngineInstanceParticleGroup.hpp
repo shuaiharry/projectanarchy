@@ -97,14 +97,17 @@ namespace VisionManaged
     void RemoveConstraint(EngineInstanceConstraint ^pConstraint);
     void RemoveAllConstraints();
 
+    void* GetParticleGroupPtr() { return (void*)m_pGroup; }
+
     static void SetPreviewType(ParticlePreviewType_e mode) {g_CurrentPreviewType = mode;}
+    static void SetPreviewLayer(int layer) {g_CurrentPreviewLayer = layer;}
 
   protected:
-    void RenderPreview_LayerProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
-    void RenderPreview_ParticleProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
-    void RenderPreview_EmitterProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
-    void RenderPreview_VisibilityProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
-    void RenderPreview_PhysicsProperties(VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
+    void RenderPreview_LayerProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
+    void RenderPreview_ParticleProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
+    void RenderPreview_EmitterProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
+    void RenderPreview_VisibilityProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
+    void RenderPreview_PhysicsProperties(int iLayer, VisionViewBase ^view, IVRenderInterface *pRI, ParticleGroupBase_cl *pGroup);
 
     // Allows a custom implementation to supply it's own particle instance objects for SetEffectFile()
     // (void* and managed types seem to be required for matching signatures in other libraries.)
@@ -122,6 +125,7 @@ namespace VisionManaged
     unsigned int m_uiRandomBaseSeed;
 
     static ParticlePreviewType_e g_CurrentPreviewType = ParticlePreviewType_e::None;
+    static int g_CurrentPreviewLayer = 0;
   };
 
 
@@ -202,7 +206,7 @@ namespace VisionManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

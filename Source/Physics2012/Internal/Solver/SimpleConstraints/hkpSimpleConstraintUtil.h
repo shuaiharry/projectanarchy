@@ -38,7 +38,7 @@ struct hkpSimpleConstraintInfo
 		hkReal getEnergy( const hkpBodyVelocity& vel ) const ;
 	};
 
-	BodyInfo m_bodyInfo[2];
+	HK_ALIGN_REAL(BodyInfo m_bodyInfo[2]);
 
 	/// first column is the normal direction, the other two columns are perpendicular.
 	hkRotation m_base;
@@ -121,7 +121,7 @@ extern "C"
 														hkpBodyVelocity& velA, hkpBodyVelocity& velB );
 
 	/// 
-	hkReal HK_CALL hkSimpleConstraintUtil_calcTotalEnergy( const hkpSimpleConstraintInfo& info, hkpBodyVelocity& velA, hkpBodyVelocity& velB );
+//	hkReal HK_CALL hkSimpleConstraintUtil_calcTotalEnergy( const hkpSimpleConstraintInfo& info, hkpBodyVelocity& velA, hkpBodyVelocity& velB );
 	
 	/// Collide two objects, returns the impulse in the normal direction.
 	hkReal  HK_CALL hkSimpleConstraintUtil_Collide(	const hkpSimpleConstraintInfo& info, hkpSimpleConstraintUtilCollideParams& params,
@@ -132,7 +132,7 @@ extern "C"
 #endif // HKP_SIMPLE_CONSTRAINT_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

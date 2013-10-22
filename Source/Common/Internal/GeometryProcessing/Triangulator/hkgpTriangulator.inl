@@ -675,8 +675,8 @@ inline void												TRIANGULATOR_TYP::setDomainFromPoints(const hkStridedVert
 		hkVector4 diff; diff.setSub(dmax,dmin);
 		hkVector4 minExtendV; minExtendV.setAll(minExtend);
 		const hkVector4Comparison diffLTminExtend = diff.less(minExtendV);
-		hkVector4 minSub; minSub.setSub(dmin,minExtendV);
-		hkVector4 maxAdd; maxAdd.setAdd(dmax,minExtendV);
+		hkVector4 minSub; minSub.setSub(dmin,minExtend);
+		hkVector4 maxAdd; maxAdd.setAdd(dmax,minExtend);
 		dmin.setSelect(diffLTminExtend, minSub, dmin);
 		dmax.setSelect(diffLTminExtend, maxAdd, dmax);
 	}
@@ -777,7 +777,7 @@ TRIANGULATOR_HDR
 HKGP_FORCE_INLINE void								TRIANGULATOR_TYP::transform(const Vertex* v, hkVector4& result) const
 {
 	hkIntVector vInt; 
-	vInt.loadNotAligned<2>((const hkUint32*)&v->m_x);
+	vInt.load<2,HK_IO_NATIVE_ALIGNED>((const hkUint32*)&v->m_x);
 	hkVector4 vReal;
 	vInt.convertS32ToF32(vReal);
 	vReal.zeroComponent<2>();
@@ -2493,7 +2493,7 @@ inline void				hkgpTriangulatorBase::DenseEdgeDataPolicy<EDGEDATA,ALLOCATOR>::pr
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -7,7 +7,7 @@
  */
 
 
-static HK_FORCE_INLINE void doBlendAddMul4(hkQsTransform* base, const hkQsTransform* sample, const hkVector4& sampleWeights)
+static HK_FORCE_INLINE void doBlendAddMul4(hkQsTransform* HK_RESTRICT base, const hkQsTransform* HK_RESTRICT sample, hkVector4Parameter sampleWeights)
 {
 	hkQsTransform b0, b1, b2, b3;
 	b0 = base[0];
@@ -21,24 +21,24 @@ static HK_FORCE_INLINE void doBlendAddMul4(hkQsTransform* base, const hkQsTransf
 	s2 = sample[2];
 	s3 = sample[3];
 
-	b0.blendAddMul(s0, sampleWeights.getSimdAt(0));
-	b1.blendAddMul(s1, sampleWeights.getSimdAt(1));
-	b2.blendAddMul(s2, sampleWeights.getSimdAt(2));
-	b3.blendAddMul(s3, sampleWeights.getSimdAt(3));
+	b0.blendAddMul(s0, sampleWeights.getComponent<0>());
+	b1.blendAddMul(s1, sampleWeights.getComponent<1>());
+	b2.blendAddMul(s2, sampleWeights.getComponent<2>());
+	b3.blendAddMul(s3, sampleWeights.getComponent<3>());
 
 	base[0] = b0;
 	base[1] = b1;
 	base[2] = b2;
 	base[3] = b3;
 }
-static HK_FORCE_INLINE void doBlendAddMul4(hkReal* base, const hkReal* sample, const hkVector4& sampleWeights)
+static HK_FORCE_INLINE void doBlendAddMul4(hkReal* HK_RESTRICT base, const hkReal* HK_RESTRICT sample, hkVector4Parameter sampleWeights)
 {
-	hkVector4 v; v.load4a(base);
-	hkVector4 s; s.load4a(sample);
-	v.addMul4(s, sampleWeights);
-	v.store4a(base);
+	hkVector4 v; v.load<4,HK_IO_NOT_CACHED>(base);
+	hkVector4 s; s.load<4,HK_IO_NOT_CACHED>(sample);
+	v.addMul(s, sampleWeights);
+	v.store<4,HK_IO_NOT_CACHED>(base);
 }
-static HK_FORCE_INLINE void doBlendSetMul4(hkQsTransform* base, const hkQsTransform* sample, const hkVector4& sampleWeights)
+static HK_FORCE_INLINE void doBlendSetMul4(hkQsTransform* HK_RESTRICT base, const hkQsTransform* HK_RESTRICT sample, hkVector4Parameter sampleWeights)
 {
 	hkQsTransform s0, s1, s2, s3;
 	s0 = sample[0];
@@ -46,10 +46,10 @@ static HK_FORCE_INLINE void doBlendSetMul4(hkQsTransform* base, const hkQsTransf
 	s2 = sample[2];
 	s3 = sample[3];
 
-	s0.blendWeight(sampleWeights.getSimdAt(0));
-	s1.blendWeight(sampleWeights.getSimdAt(1));
-	s2.blendWeight(sampleWeights.getSimdAt(2));
-	s3.blendWeight(sampleWeights.getSimdAt(3));
+	s0.blendWeight(sampleWeights.getComponent<0>());
+	s1.blendWeight(sampleWeights.getComponent<1>());
+	s2.blendWeight(sampleWeights.getComponent<2>());
+	s3.blendWeight(sampleWeights.getComponent<3>());
 
 	base[0] = s0;
 	base[1] = s1;
@@ -57,11 +57,11 @@ static HK_FORCE_INLINE void doBlendSetMul4(hkQsTransform* base, const hkQsTransf
 	base[3] = s3;
 }
 
-static HK_FORCE_INLINE void doBlendSetMul4(hkReal* base, const hkReal* sample, const hkVector4& sampleWeights)
+static HK_FORCE_INLINE void doBlendSetMul4(hkReal* HK_RESTRICT base, const hkReal* HK_RESTRICT sample, hkVector4Parameter sampleWeights)
 {
-	hkVector4 s; s.load4a(sample);
-	s.setMul4(s, sampleWeights);
-	s.store4a(base);
+	hkVector4 s; s.load<4,HK_IO_NOT_CACHED>(sample);
+	s.setMul(s, sampleWeights);
+	s.store<4,HK_IO_NOT_CACHED>(base);
 }
 
 
@@ -79,22 +79,19 @@ void HK_CALL hkaBlend::blendAddMul(	Type* base, hkReal* baseW,
 
 	HK_COMPILE_TIME_ASSERT(useSampleW || useSampleAlpha); // must be at least one blending parameter
 
-	HK_ASSERT2( 0x0ebd6e86, ( hkUlong( base ) & 0x0F ) == 0, "base must be 16 byte aligned" );
-	HK_ASSERT2( 0x1955457a, ( hkUlong( sample ) & 0x0F ) == 0, "sample must be 16 byte aligned." );
+	HK_ASSERT2( 0x0ebd6e86, ( hkUlong( base ) & (HK_REAL_ALIGNMENT-1) ) == 0, "base must be aligned for SIMD" );
+	HK_ASSERT2( 0x1955457a, ( hkUlong( sample ) & (HK_REAL_ALIGNMENT-1) ) == 0, "sample must be aligned for SIMD." );
 
 	if (useSampleW)
 	{
-		HK_ASSERT2( 0x109d48dc, ( hkUlong( baseW) & 0x0F ) == 0, "baseW must be 16 byte aligned." );
-		HK_ASSERT2( 0x1a8e0ebc, ( hkUlong( sampleW ) & 0x0F ) == 0, "sampleW must be 16 byte aligned." );
+		HK_ASSERT2( 0x109d48dc, ( hkUlong( baseW) & (HK_REAL_ALIGNMENT-1) ) == 0, "baseW must be aligned for SIMD." );
+		HK_ASSERT2( 0x1a8e0ebc, ( hkUlong( sampleW ) & (HK_REAL_ALIGNMENT-1) ) == 0, "sampleW must be aligned for SIMD." );
 	}
 	if (!useSampleAlpha)
 	{
-		HK_ASSERT(0xfd32ba31, sampleAlpha.getReal() == 1.0f);
+		HK_ASSERT(0xfd32ba31, sampleAlpha.getReal() == hkReal(1));
 	}
 
-
-	hkVector4 alphav;
-	alphav.setAll( sampleAlpha );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -107,11 +104,11 @@ void HK_CALL hkaBlend::blendAddMul(	Type* base, hkReal* baseW,
 		hkVector4 sampleWeights;
 		if (useSampleAlpha && useSampleW)
 		{
-			sampleWeights.setMul4(alphav, *sampleWV);
+			sampleWeights.setMul(sampleAlpha, *sampleWV);
 		}
 		else if (useSampleAlpha)
 		{
-			sampleWeights = alphav;
+			sampleWeights.setAll(sampleAlpha);
 		}
 		else if (useSampleW)
 		{
@@ -130,7 +127,7 @@ void HK_CALL hkaBlend::blendAddMul(	Type* base, hkReal* baseW,
 
 		if (useBase)
 		{
-			baseWV->setAdd4(*baseWV, sampleWeights);
+			baseWV->setAdd(*baseWV, sampleWeights);
 		}
 		else
 		{
@@ -172,10 +169,10 @@ static HK_FORCE_INLINE void doBlendAdditive4(hkQsTransform* base, const hkQsTran
 	a3.setMul( s3, b3 );
 
 	// interpolate between the original bones and the combined bones
-	b0.setInterpolate4(b0, a0, sampleWeights.getSimdAt(0));
-	b1.setInterpolate4(b1, a1, sampleWeights.getSimdAt(1));
-	b2.setInterpolate4(b2, a2, sampleWeights.getSimdAt(2));
-	b3.setInterpolate4(b3, a3, sampleWeights.getSimdAt(3));
+	b0.setInterpolate4(b0, a0, sampleWeights.getComponent<0>());
+	b1.setInterpolate4(b1, a1, sampleWeights.getComponent<1>());
+	b2.setInterpolate4(b2, a2, sampleWeights.getComponent<2>());
+	b3.setInterpolate4(b3, a3, sampleWeights.getComponent<3>());
 
 	base[0] = b0;
 	base[1] = b1;
@@ -203,20 +200,17 @@ void HK_CALL hkaBlend::blendAdditive(	Type* base,
 	HK_COMPILE_TIME_ASSERT(useSampleW || useSampleAlpha); // must be at least one blending parameter
 	HK_COMPILE_TIME_ASSERT(useBase); // you have to use the base pose
 
-	HK_ASSERT2( 0x0ebd6e86, ( hkUlong( base ) & 0x0F ) == 0, "base must be 16 byte aligned" );
-	HK_ASSERT2( 0x1955457a, ( hkUlong( sample ) & 0x0F ) == 0, "sample must be 16 byte aligned." );
+	HK_ASSERT2( 0x0ebd6e86, ( hkUlong( base ) & (HK_REAL_ALIGNMENT-1) ) == 0, "base must be aligned for SIMD" );
+	HK_ASSERT2( 0x1955457a, ( hkUlong( sample ) & (HK_REAL_ALIGNMENT-1) ) == 0, "sample must be aligned for SIMD." );
 
 	if (useSampleW)
 	{
-		HK_ASSERT2( 0x1a8e0ebc, ( hkUlong( sampleW ) & 0x0F ) == 0, "sampleW must be 16 byte aligned." );
+		HK_ASSERT2( 0x1a8e0ebc, ( hkUlong( sampleW ) & (HK_REAL_ALIGNMENT-1) ) == 0, "sampleW must be aligned for SIMD." );
 	}
 	if (!useSampleAlpha)
 	{
-		HK_ASSERT( 0xfd32ba31, sampleAlpha.getReal() == 1.0f );
+		HK_ASSERT( 0xfd32ba31, sampleAlpha.getReal() == hkReal(1) );
 	}
-
-	hkVector4 alphav;
-	alphav.setAll( sampleAlpha );
 
 	const int num = ( n + 3 ) / 4;
 
@@ -228,11 +222,11 @@ void HK_CALL hkaBlend::blendAdditive(	Type* base,
 		hkVector4 sampleWeights;
 		if (useSampleAlpha && useSampleW)
 		{
-			sampleWeights.setMul4(alphav, *sampleWV);
+			sampleWeights.setMul(sampleAlpha, *sampleWV);
 		}
 		else if (useSampleAlpha)
 		{
-			sampleWeights = alphav;
+			sampleWeights.setAll(sampleAlpha);
 		}
 		else if (useSampleW)
 		{
@@ -248,11 +242,12 @@ void HK_CALL hkaBlend::blendAdditive(	Type* base,
 	}
 }
 
-static HK_FORCE_INLINE void doBlendNormalize4(hkReal* floats, hkVector4Parameter weights, int nleft)
+static HK_FORCE_INLINE void doBlendNormalize4(hkReal* HK_RESTRICT floats, const hkReal* HK_RESTRICT weights)
 {
-	hkVector4 data; data.load4a(floats);
-	data.setDiv4(data, weights);
-	data.store4a(floats);
+	hkVector4 data; data.load<4,HK_IO_NOT_CACHED>(floats);
+	hkVector4 w; w.load<4,HK_IO_NOT_CACHED>(weights);
+	data.setDiv<HK_ACC_FULL,HK_DIV_IGNORE>(data, w);
+	data.store<4,HK_IO_NOT_CACHED>(floats);
 }
 
 namespace hkaBlend
@@ -260,16 +255,14 @@ namespace hkaBlend
 	template <>
 	void HK_FORCE_INLINE blendNormalize<hkReal>(hkReal* floats, hkReal* weights, int n)
 	{
-		HK_ASSERT2( 0x0ebd6e86, ( hkUlong( floats ) & 0x0F ) == 0, "transforms must be 16 byte aligned" );
-		HK_ASSERT2( 0x1955457a, ( hkUlong( weights ) & 0x0F ) == 0, "weights must be 16 byte aligned." );
-		hkVector4* weightV = reinterpret_cast<hkVector4*>(weights);
+		HK_ASSERT2( 0x0ebd6e86, ( hkUlong( floats ) & (HK_REAL_ALIGNMENT-1) ) == 0, "transforms must be aligned for SIMD" );
+		HK_ASSERT2( 0x1955457a, ( hkUlong( weights ) & (HK_REAL_ALIGNMENT-1) ) == 0, "weights must be aligned for SIMD." );
 		for (int i=0; i<n; i+=4)
 		{
-			hkVector4 w = *weightV;
-			doBlendNormalize4(floats, w, n - i);
+			doBlendNormalize4(floats, weights);
 
 			floats += 4;
-			weightV++;
+			weights += 4;
 		}
 	}
 
@@ -281,7 +274,7 @@ namespace hkaBlend
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -36,8 +36,9 @@ struct hkaiStreamingSet
 	typedef int CellIndex;
 	typedef int FaceIndex;
 	typedef int EdgeIndex;
+	typedef hkUint32 GraphEdgeData;
 
-
+		/// Information for a streaming connection between nav meshes.
 	struct NavMeshConnection
 	{
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, hkaiStreamingSet::NavMeshConnection);
@@ -55,19 +56,24 @@ struct hkaiStreamingSet
 		EdgeIndex m_oppositeEdgeIndex;	//+default(-1);
 	};
 
+		/// Information for a streaming connection between directed graphs.
 	struct GraphConnection
 	{
+			//+version(3)
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, hkaiStreamingSet::GraphConnection);
 		HK_DECLARE_REFLECTION();
-		HK_DECLARE_POD_TYPE();
 
+		GraphConnection();
 		HK_FORCE_INLINE NodeIndex getNodeIndex() const { return m_nodeIndex; }
 		HK_FORCE_INLINE NodeIndex getOppositeNodeIndex() const { return m_oppositeNodeIndex; }
 
-		NodeIndex m_nodeIndex;			//+default(-1);
-		NodeIndex m_oppositeNodeIndex;	//+default(-1);
+		NodeIndex		m_nodeIndex;			//+default(-1);
+		NodeIndex		m_oppositeNodeIndex;	//+default(-1);
+		GraphEdgeData	m_edgeData;				//+default(0);
+		hkHalf			m_edgeCost;
 	};
 
+		/// Information for a streaming connection between nav volumes.
 	struct VolumeConnection
 	{
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, hkaiStreamingSet::VolumeConnection);
@@ -85,6 +91,20 @@ struct hkaiStreamingSet
 
 	static hkResult HK_CALL _copy( hkArray<hkaiStreamingSet>& dst, const hkArrayBase<hkaiStreamingSet>& src );
 
+	//
+	// Internal determinism checks
+	// 
+	void checkDeterminism() const;
+	static void HK_CALL checkDeterminism( const hkArrayBase<hkaiStreamingSet>& sets );
+
+		/// Returns the index of the corresponding GraphConnection, or -1 if it isn't in the set.
+	int indexOfGraphConnection(int nodeIndex, int oppNodeIndex) const;
+		/// Returns whether or not corresponding GraphConnection exists.
+	bool containsGraphConnection(int nodeIndex, int oppNodeIndex) const;
+
+		/// Returns the index of the corresponding hkaiStreamingSet, or -1 if it isn't in the array.
+	static int HK_CALL indexOfStreamingSet( const hkArrayBase<hkaiStreamingSet>& sets, hkaiSectionUid thisUid, hkaiSectionUid oppositeUid);
+
 	hkaiSectionUid m_thisUid;		//+default( HKAI_INVALID_SECTION_UID );
 	hkaiSectionUid m_oppositeUid;	//+default( HKAI_INVALID_SECTION_UID );
 
@@ -93,11 +113,10 @@ struct hkaiStreamingSet
 	hkArray<VolumeConnection> m_volumeConnections;
 };
 
-
 #endif // HKAI_STREAMING_CONNECTION_SET_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

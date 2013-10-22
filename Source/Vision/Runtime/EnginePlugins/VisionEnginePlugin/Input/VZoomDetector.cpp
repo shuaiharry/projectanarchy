@@ -81,11 +81,11 @@ int VZoomDetector::GetRawControlValue(unsigned int uiControl)
   switch (uiControl)
   {
     case CT_TOUCH_ZOOM:
-      return (int)(m_fLastValue - m_fValue);
+      return (int)(m_fValue - m_fLastValue);
     case CT_TOUCH_ZOOM_IN:
-      return m_fLastValue > m_fValue ? (int)(m_fLastValue - m_fValue) : 0;
-    case CT_TOUCH_ZOOM_OUT:
       return m_fLastValue < m_fValue ? (int)(m_fValue - m_fLastValue) : 0;
+    case CT_TOUCH_ZOOM_OUT:
+      return m_fLastValue > m_fValue ? (int)(m_fLastValue - m_fValue) : 0;
   }
   return 0;
 }
@@ -102,7 +102,7 @@ const char* VZoomDetector::GetName()
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

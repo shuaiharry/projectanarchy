@@ -95,6 +95,17 @@ public:
   VBASE_IMPEXP virtual ~IVFileStreamManager();
 
   /// \brief
+  ///   Determines whether a specific data directory has support (i.e., a look-up table) for an asset
+  ///   profile.
+  /// \param pszProfileName
+  ///   the asset profile in question
+  /// \param pszDataDirectory
+  ///   the data directory to check
+  /// \return
+  ///   \c true if the data directory supports the asset profile, \c false if not
+  VBASE_IMPEXP bool IsAssetProfileSupported(const char* pszProfileName, const char* pszDataDirectory);
+
+  /// \brief
   ///   Initializes the asset library
   ///
   /// \return HKV_SUCCESS on success and HKV_FAILURE on failure
@@ -205,6 +216,20 @@ public:
 
 protected:
   /// \brief
+  ///   Helper structure for data exchange between the InternalOpen() method and its callers.
+  struct InternalOpenContext
+  {
+    InternalOpenContext()
+    {
+      m_szOriginalLookupName = NULL;
+    }
+
+    /// The file name that has been looked up originally. This is the name passed to the first
+    /// Open() call, before any asset lookup has taken place.
+    const char* m_szOriginalLookupName;
+  };
+
+  /// \brief
   ///   Opens an existing file for reading.
   /// 
   /// If this manager implementation is potentially used for streaming, this method 
@@ -216,14 +241,17 @@ protected:
   /// \param iFlags
   ///   see IVFileStreamManager::OpenFlags
   ///
+  /// \param ioc
+  ///   a context holding additional information about the open/lookup process
+  ///
   /// \return
   ///   Pointer to a new instance of a IVFileInStream for the opened file, or NULL, if the file
   ///   could not be opened.
-  virtual IVFileInStream* InternalOpen(const char* szFileName, int iFlags) = 0;
+  virtual IVFileInStream* InternalOpen(const char* szFileName, int iFlags, const InternalOpenContext& ioc) = 0;
   
-  IVFileInStream* CallInternalOpen(IVFileStreamManager& other, const char* szFileName, int iFlags)
+  IVFileInStream* CallInternalOpen(IVFileStreamManager& other, const char* szFileName, int iFlags, const InternalOpenContext& ioc)
   {
-    return other.InternalOpen(szFileName, iFlags);
+    return other.InternalOpen(szFileName, iFlags, ioc);
   }
 
   /// \brief
@@ -680,7 +708,7 @@ public:
   ///   The size of szDestBuffer. Must be greater than 1 in order to be able to read any characters.
   ///
   /// \returns
-  ///   Returns the number of characters written to szDestBuffer, including null termination.
+  ///   Returns the number of characters written to szDestBuffer, excluding null termination.
   VBASE_IMPEXP static int ReadLine(IVFileInStream* pInStream, char* szDestBuffer, int iMaxCount);
 
   ///
@@ -852,6 +880,16 @@ namespace AssetVariantKeys
   VBASE_IMPEXP void Add(const char* key);
 
   /// \brief
+  ///   Removes a variant key of the list of currently active variant keys.
+  ///
+  /// If the specified variant key is \c NULL, empty, or not present in the list of active variant
+  /// keys, this call has no effect.
+  ///
+  /// \param key
+  ///   the variant key to remove.
+  VBASE_IMPEXP void Remove(const char* key);
+
+  /// \brief
   ///   Returns the number of asset variant keys currently set.
   /// \return
   ///   the number of asset variant keys currently set
@@ -873,7 +911,7 @@ namespace AssetVariantKeys
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

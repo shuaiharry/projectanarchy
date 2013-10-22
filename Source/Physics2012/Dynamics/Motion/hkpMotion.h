@@ -97,9 +97,11 @@ public:
 
 	/// Set the mass of the rigid body. (Note: it is better to use setMassInv if possible).
 	virtual void setMass(hkReal m);
+	virtual void setMass(hkSimdRealParameter m);
 
 	/// Set the inverse mass of the rigid body.
 	virtual void setMassInv(hkReal mInv);
+	virtual void setMassInv(hkSimdRealParameter mInv);
 
 	/// Get the inertia tensor of the rigid body in local space.
 	virtual void getInertiaLocal(hkMatrix3& inertiaOut) const = 0;
@@ -370,7 +372,7 @@ public:
 #endif // HK_DYNAMICS2_MOTION_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -6,10 +6,10 @@
  *
  */
 
-/// \file hkvTextureTransformationHelper.hpp
+/// \file hkvTransformationHelper.hpp
 
-#ifndef HKV_TEXTURE_TRANSFORMATION_HELPER_HPP_INCLUDED
-#define HKV_TEXTURE_TRANSFORMATION_HELPER_HPP_INCLUDED
+#ifndef HKV_TRANSFORMATION_HELPER_HPP_INCLUDED
+#define HKV_TRANSFORMATION_HELPER_HPP_INCLUDED
 
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/hkvAssetStructs.hpp>
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/hkvIProperties.hpp>
@@ -28,28 +28,28 @@ private:
   hkvTransformationHelper& operator=(const hkvTransformationHelper&);
 
 public:
-  ASSETFRAMEWORK_IMPEXP static bool appendLookupTableEntries(const hkvAssetLibrary& library, const hkvAsset& asset, const hkvTransformationRule& rule, bool forEditor, bool assetPreviewMode, std::vector<hkvLookupTableEntry>& out_entries);
-  ASSETFRAMEWORK_IMPEXP static bool queryOutputFiles(const hkvAssetLibrary& library, const hkvAsset& asset, const hkvTransformationRule& rule, hkArray<hkStringPtr>& out_files);
-  ASSETFRAMEWORK_IMPEXP static hkvAssetOperationResult transformAsset(const hkvAssetLibrary& library, const hkvAsset& asset, 
-    const hkvTransformationRule& rule, hkArray<hkvTransformationMessage>& messages, 
+  ASSETFRAMEWORK_IMPEXP static bool appendLookupTableEntries(const hkvAsset& asset, const hkvTransformationRule& rule, bool forEditor, bool assetPreviewMode, std::vector<hkvLookupTableEntry>& out_entries);
+  ASSETFRAMEWORK_IMPEXP static bool queryOutputFiles(const hkvAsset& asset, const hkvTransformationRule& rule, hkArray<hkStringPtr>& out_files);
+  ASSETFRAMEWORK_IMPEXP static hkvAssetOperationResult transformAsset(hkvAsset& asset, 
+    const hkvTransformationRule& rule, hkArray<hkvAssetLogMessage>& messages, 
     hkvITransformationControlHost* controlHost = NULL, bool addTransformedToRCS = false);
 
 public:
   ASSETFRAMEWORK_IMPEXP static void filterRelevantProperties(const hkvPropertyList& properties, hkvPropertyList& out_properties);
 
 private:
-  static bool assetNeedsTransformation(const hkvAssetLibrary& library, const hkvAsset& asset, const hkvTransformationRule& rule);
-  static bool fillTargetFileInformation(const hkvAssetLibrary& library, const hkvAsset& asset, const hkvTransformationRule& rule, hkvTransformationInput& transformationInput);
-  static bool performTransformation(const hkvAssetLibrary& library, const hkvAsset& asset, const hkvTransformationRule& rule, 
-    hkArray<hkvTransformationMessage>& messages, hkvITransformationControlHost* controlHost, bool addTransformedToRCS);
-  static bool queryOutputFileSpecs(const hkvAssetLibrary& library, const hkvAsset& asset, const hkvTransformationRule& rule, bool includeEditorPreview, hkArray<hkvTransformationOutputFileSpec>& out_specs);
-  static bool staticTargetExists(const hkvAssetLibrary& library, const hkvAsset& asset, const hkvTransformationRule& rule);
+  static bool assetNeedsTransformation(const hkvAsset& asset, const hkvTransformationRule& rule);
+  static bool fillTargetFileInformation(const hkvAsset& asset, const hkvTransformationRule& rule, hkvTransformationInput& transformationInput);
+  static bool performTransformation(const hkvAsset& asset, const hkvTransformationRule& rule, 
+    hkArray<hkvAssetLogMessage>& messages, hkvITransformationControlHost* controlHost, bool addTransformedToRCS);
+  static bool queryOutputFileSpecs(const hkvAsset& asset, const hkvTransformationRule& rule, bool includeEditorPreview, hkArray<hkvTransformationOutputFileSpec>& out_specs);
+  static bool staticTargetExists(const hkvAsset& asset, const hkvTransformationRule& rule);
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

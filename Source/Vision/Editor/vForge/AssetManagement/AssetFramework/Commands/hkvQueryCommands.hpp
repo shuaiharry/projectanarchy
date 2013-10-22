@@ -30,86 +30,123 @@
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/hkvAssetDecl.hpp>
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/hkvAssetQuery.hpp>
 
+/// \brief
+///   Command for setting a property on all assets found by a query.
 struct hkvQueryCommandSetProperty
 {
-  //TODO:TOC HK_TOC_COMMAND();
-
+  /// \brief
+  ///   Input options
   struct Options
   {
-    //TODO:TOC HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, Options);
-    //TODO:TOC HK_DECLARE_REFLECTION();
+    /// \brief
+    ///   Initializes this options structure. See the member field documentation for the meaning
+    ///   of the parameters.
     Options(const hkvAssetQuery& query, const hkvProperty& prop, const hkArray<hkStringPtr>& path, hkUint32 stackIndex)
       : m_query(query), m_prop(prop), m_path(path), m_stackIndex(stackIndex) {}
 
-    const hkvAssetQuery& m_query;
-    const hkvProperty& m_prop;
-    const hkArray<hkStringPtr>& m_path;
-    hkUint32 m_stackIndex;
+    const hkvAssetQuery& m_query; ///< The query on whose assets to set the property
+    const hkvProperty& m_prop; ///< The property to set
+    const hkArray<hkStringPtr>& m_path; ///< The path to the property
+    hkUint32 m_stackIndex; ///< The index of the first relevant path element
   };
 
+  /// \brief
+  ///   Executes this command.
+  /// \param opts
+  ///   The input options for this execution
+  /// \return
+  ///   HK_SUCCESS if the command executed successfully; HK_FAILURE otherwise
   ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts);
 };
 
 
+/// \brief
+///   Command for setting or removing an existing tag on all assets found by a query.
 struct hkvQueryCommandSetTag
 {
-  //TODO:TOC HK_TOC_COMMAND();
-
+  /// \brief
+  ///   Input options
   struct Options
   {
-    //TODO:TOC HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, Options);
-    //TODO:TOC HK_DECLARE_REFLECTION();
+    /// \brief
+    ///   Initializes this options structure. See the member field documentation for the meaning
+    ///   of the parameters.
     Options(const hkvAssetQuery& query, bool state, hkUint32 tagIdx)
       : m_query(query), m_state(state), m_tagIdx(tagIdx) {}
 
-    const hkvAssetQuery& m_query;
-    hkBool m_state;
-    hkUint32 m_tagIdx;
+    const hkvAssetQuery& m_query; ///< The query on whose assets to set/remove the tag
+    hkBool m_state; ///< The new state of the tag (= whether it should be set)
+    hkUint32 m_tagIdx; ///< Index of the tag to set/remove
   };
 
+  /// \brief
+  ///   Executes this command.
+  /// \param opts
+  ///   The input options for this execution
+  /// \return
+  ///   HK_SUCCESS if the command executed successfully; HK_FAILURE otherwise
   ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts);
 };
 
 
+/// \brief
+///   Command for adding a named tag all assets found by a query. If the tag does not
+///   yet exist, it is created.
 struct hkvQueryCommandAddTag
 {
-  //TODO:TOC HK_TOC_COMMAND();
-
+  /// \brief
+  ///   Input options
   struct Options
   {
-    //TODO:TOC HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, Options);
-    //TODO:TOC HK_DECLARE_REFLECTION();
+    /// \brief
+    ///   Initializes this options structure. See the member field documentation for the meaning
+    ///   of the parameters.
     Options(const hkvAssetQuery& query, const char* tagName)
       : m_query(query), m_tagName(tagName) {}
 
-    const hkvAssetQuery& m_query;
-    hkStringPtr m_tagName;
+    const hkvAssetQuery& m_query; ///< The query to whose assets to add the tag
+    hkStringPtr m_tagName; ///< The tag to add
   };
 
+  /// \brief
+  ///   Executes this command.
+  /// \param opts
+  ///   The input options for this execution
+  /// \return
+  ///   HK_SUCCESS if the command executed successfully; HK_FAILURE otherwise
   ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts);
 };
 
 
+/// \brief
+///   Command for deleting a tag from the asset system
 struct hkvQueryCommandDeleteTag
 {
-  //TODO:TOC HK_TOC_COMMAND();
-
+  /// \brief
+  ///   Input options
   struct Options
   {
-    //TODO:TOC HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE, Options);
-    //TODO:TOC HK_DECLARE_REFLECTION();
+    /// \brief
+    ///   Initializes this options structure. See the member field documentation for the meaning
+    ///   of the parameters.
     Options(hkUint32 tagIdx)
       : m_tagIdx(tagIdx) {}
 
-    hkUint32 m_tagIdx;
+    hkUint32 m_tagIdx; ///< Index of the tag to delete
   };
 
+  /// \brief
+  ///   Executes this command.
+  /// \param opts
+  ///   The input options for this execution
+  /// \return
+  ///   HK_SUCCESS if the command executed successfully; HK_FAILURE otherwise
   ASSETFRAMEWORK_IMPEXP static hkResult execute(const Options& opts);
 };
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -17,13 +17,13 @@ public:
 
 	static void HK_CALL packQuaternions48( hkUint16 dst[ 12 ], const hkQuaternion& src0, const hkQuaternion& src1, const hkQuaternion& src2, const hkQuaternion& src3 );
 
-	static void HK_CALL unpackQuaternions48( hkQuaternion& dst0, hkQuaternion& dst1, hkQuaternion& dst2, hkQuaternion& dst3, const hkUint16 qq[ 12 ] );
+	static void HK_CALL unpackQuaternions48( hkVector4f& dst0, hkVector4f& dst1, hkVector4f& dst2, hkVector4f& dst3, const hkUint16 qq[ 12 ] );
 };
 
 #endif // HKANIMATION_ANIMATION_QUANTIZED_HKQUANTIZEDQUATERNION2_XML_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

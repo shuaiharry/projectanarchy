@@ -120,11 +120,11 @@ namespace TerrainEditorPlugin.Dialogs
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.ShowInTaskbar = false;
       this.Name = "ApplyHeightmapFilterDlg";
       this.Text = "Heightmap Filter";
       this.panel1.ResumeLayout(false);
       this.ResumeLayout(false);
-
     }
 
     #endregion

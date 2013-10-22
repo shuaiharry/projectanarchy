@@ -10,6 +10,7 @@
 #define HKAI_SILHOUETTE_REPLAY_VIEWER_H
 
 #include <Common/Visualize/hkProcess.h>
+#include <Common/Base/Container/BitField/hkBitField.h>
 #include <Ai/Visualize/VisualDebugger/Viewer/hkaiViewerBase.h>
 #include <Ai/Pathfinding/World/hkaiWorld.h>
 
@@ -38,6 +39,8 @@ public:
 	class ReplayEvent : public hkReferencedObject
 	{
 	public:
+
+			/// Replay event types.
 		enum ReplayEventType
 		{
 				/// Triggered when a world is first connected with the viewer.
@@ -128,7 +131,7 @@ public:
 	class SilhouettesSteppedEvent : public ReplayEvent
 	{
 	public:
-		// +version(2)
+		// +version(3)
 		HK_DECLARE_REFLECTION();
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI);
 
@@ -254,7 +257,7 @@ public:
 		/// These pointers should initiall be HK_NULL and will be set if a WorldConnectedEvent is received.
 		/// It is up to the user to remove the final reference from these when all events are finished.
 		/// The hkJobQueue and hkJobThreadPool are used to step the silhouettes in multithreaded mode if the original step was also multithreaded.
-	static void HK_CALL applyEventToWorld( hkaiSilhouetteRecorder::ReplayEvent& e, hkaiWorld*& world, hkJobQueue* jobQueue, hkJobThreadPool* threadPool );
+	static void HK_CALL applyEventToWorld( hkaiSilhouetteRecorder::ReplayEvent& e, hkRefPtr<hkaiWorld>& world, hkJobQueue* jobQueue, hkJobThreadPool* threadPool );
 
 public: // interface
 	
@@ -279,7 +282,7 @@ protected:
 	void navVolumeRemoved( const class hkaiWorld* world, const class hkaiNavVolumeInstance* volume ) HK_OVERRIDE;
 	void graphAdded( const class hkaiWorld* world, const class hkaiDirectedGraphInstance* graph ) HK_OVERRIDE;
 	void graphRemoved( const class hkaiWorld* world, const class hkaiDirectedGraphInstance* graph ) HK_OVERRIDE;
-	void preSilhouetteStepCallback(const hkaiWorld* world, hkaiWorld::StepThreading threading, const class hkBitField* sectionsToStep ) HK_OVERRIDE;
+	void preSilhouetteStepCallback(const hkaiWorld* world, hkaiWorld::StepThreading threading, const hkBitField* sectionsToStep ) HK_OVERRIDE;
 
 		/// Send the initial world information.
 	void connectWorld( const hkaiWorld* world  );
@@ -342,7 +345,7 @@ protected:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -29,16 +29,6 @@ class hkbUtils
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BEHAVIOR, hkbUtils );
 
-			/// Compute the validity of the given node in the context of the character.
-			///
-			/// \param node The node to test.
-			/// \param parentBehavior The immediate parent behavior that contains the node.
-			/// \param character The character to use as context.
-		static bool HK_CALL computeNodeValidity(	hkbNode* node,
-													hkbBehaviorGraph* parentBehavior,
-													hkbCharacter* character,
-													hkStringPtr& errorString );
-
 			/// Compute the validities of all nodes on the character.
 			/// Returns the number of invalid nodes found.
 			///
@@ -180,7 +170,7 @@ HK_FORCE_INLINE int hkbUtils::convertInternalIdToInternalId(	const hkbSymbolIdMa
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

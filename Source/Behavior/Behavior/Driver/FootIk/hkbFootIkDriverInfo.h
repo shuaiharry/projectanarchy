@@ -93,17 +93,21 @@ class hkbFootIkDriverInfo : public hkReferencedObject
 
 				/// Index of the hip bone.  If this is not -1, it overrides the character boneInfo.
 			hkInt16 m_hipIndex; //+default(-1)
-								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")+hk.Description("The hip bone.")
+								//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+								//+hk.Description("The hip bone.")
+								//+hk.Ui(group="Foot IK Bones")
 
 				/// Index of the knee bone.  If this is not -1, it overrides the character boneInfo.
 			hkInt16 m_kneeIndex;	//+default(-1)
-									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
+									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
 									//+hk.Description("The knee bone.")
+									//+hk.Ui(group="Foot IK Bones")
 
 				/// Index of the ankle bone.  If this is not -1, it overrides the character boneInfo.
 			hkInt16 m_ankleIndex;	//+default(-1)
-									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
+									//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
 									//+hk.Description("The ankle bone.")
+									//+hk.Ui(group="Foot IK Bones")
 			
 			Leg( hkFinishLoadedObjectFlag flag) {}
 		};
@@ -182,7 +186,7 @@ class hkbFootIkDriverInfo : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -25,11 +25,6 @@
 #include <Vision/Samples/Engine/RPGPlugin/HighlightableComponent.h>
 #include <Vision/Samples/Engine/RPGPlugin/AttackableComponent.h>
 
-#include <Vision/Samples/Engine/RPGPlugin/ActionHandler.h>
-#include <Vision/Samples/Engine/RPGPlugin/Action.h>
-#include <Vision/Samples/Engine/RPGPlugin/ActionMove.h>
-
-
 // TODO: correct AI header for ray query
 #include <Ai/Pathfinding/Character/Behavior/hkaiPathFollowingBehavior.h>
 
@@ -129,15 +124,7 @@ PlayerUIDialog::PlayerUIDialog(RPG_PlayerControllerComponent *playerController)
   , m_selectDestinationVFXInterval(0.1f)
   , m_lastSelectDestinationVFXTime(0.0f)
   , m_cursorTextureFilename("GUI/Textures/Mouse.dds")
-
-  , m_wasDown_PlayerMoveOrMelee(false)
-  , m_wasDown_PlayerRangedAttack(false)
-  , m_wasPressedTime(0.0f)
-
   , m_touchInput(NULL)
-  , m_lastTargetEntity(NULL)
-  , m_lastTargetPoint(0.0f, 0.0f, 0.0f)
-  , m_debugUI(false)
 {
 }
 
@@ -210,139 +197,54 @@ void PlayerUIDialog::OnTick(float deltaTime)
     return;
   }
 
-  HandleInput(characterEntity);
+  RPG_PlayerControllerInput input;
+  {
+    if(m_inputMap->GetTrigger(PI_PrimaryAction) > 0.0f)
+    {
+      if(m_inputMap->GetTrigger(PI_ShiftModifier) > 0.0f)
+      {
+        input.m_buttons |= RPG_PlayerControllerInput::B_RANGED;
+      }
+      else if(m_inputMap->GetTrigger(PI_SecondaryShiftModifier) > 0.0f)
+      {
+        input.m_buttons |= RPG_PlayerControllerInput::B_POWER;
+      }
+      else
+      {
+        input.m_buttons |= RPG_PlayerControllerInput::B_PRIMARY;
+      }
+    }
+
+    if(m_inputMap->GetTrigger(PI_SecondaryAction) > 0.0f)
+    {
+      input.m_buttons |= RPG_PlayerControllerInput::B_POWER;
+    }
+
+    if(m_inputMap->GetTrigger(PI_SpecialAction01) > 0.0f)
+    {
+      input.m_buttons |= RPG_PlayerControllerInput::B_AOE;
+    }
+
+    GetFirstAttackableEntityUnderCursor(input.m_targetEntity, input.m_targetPoint, characterEntity);
+    if(!input.m_targetEntity)
+    {
+      hkVector4 hitPoint, characterPos;
+      RPG_VisionHavokConversion::VisionToHavokPoint(characterEntity->GetPosition(), characterPos);
+      if(GetClosestPointOnNavMeshUnderCursor(hitPoint, characterPos))
+      {
+        RPG_VisionHavokConversion::HavokToVisionPoint(hitPoint, input.m_targetPoint);
+      }
+    }
+
+    m_playerController->SetInput(input);
+  }
+
   RPG_GuiManager::GetInstance()->OnTick(deltaTime);
 }
 
 VCursor *PlayerUIDialog::GetCurrentCursor(VGUIUserInfo_t& user)
 {
   return m_cursor;
-}
-
-
-// Input Handling
-void PlayerUIDialog::HandleInput(RPG_Character* characterEntity)
-{
-  VASSERT(characterEntity);
-
-  // TODO GDC hack; don't update input during spawn
-  if(characterEntity->GetActionHandler().IsPerformingAction(AT_Spawn))
-  {
-    m_wasDown_PlayerMoveOrMelee = false;
-    m_wasPressedTime = -1.f;
-    return;
-  }
-
-  // player control
-  if (m_inputMap->GetTrigger(PI_SpecialAction01))
-  {
-    ExecuteAoeAttack(characterEntity);
-  }
-  else if (m_inputMap->GetTrigger(PI_SecondaryAction))
-  {
-    ExecutePowerAttack(characterEntity);
-  }
-  else if (m_inputMap->GetTrigger(PI_PrimaryAction))
-  {
-    if (m_inputMap->GetTrigger(PI_ShiftModifier))
-    {
-      ExecuteOrContinueRangedAttack(characterEntity);
-    }
-    else if(m_inputMap->GetTrigger(PI_SecondaryShiftModifier))
-    {
-      ExecutePowerAttack(characterEntity);
-    }
-    else
-    {
-      ExecuteMoveOrMeleeAttack(characterEntity);
-    }
-  }
-  // cheats
-  if (m_inputMap->GetTrigger(PI_CheatUnlimitedHealth))
-  {
-    CheatToggleUnlimitedHealth();
-  }
-  else if (m_inputMap->GetTrigger(PI_CheatUnlimitedMana))
-  {
-    CheatToggleUnlimitedMana();
-  }
-
-#if (RPG_UI_SCALEFORM)
-  // gui control
-  if (m_inputMap->GetTrigger(PI_ToggleHud))
-  {
-    VASSERT(static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance()));
-    static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance())->ToggleHUD();
-  }
-  else if (m_inputMap->GetTrigger(PI_ToggleMinimap))
-  {
-    VASSERT(static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance()));
-    static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance())->ToggleMinimap();
-  }
-  else if (m_inputMap->GetTrigger(PI_ToggleCharacterDialog))
-  {
-    VASSERT(static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance()));
-    static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance())->ToggleCharacterDialog();
-  }
-  else if (m_inputMap->GetTrigger(PI_ToggleInventoryDialog))
-  {
-    VASSERT(static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance()));
-    static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance())->ToggleInventoryDialog();
-  }
-  else if (m_inputMap->GetTrigger(PI_ToggleTestPattern))
-  {
-    VASSERT(static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance()));
-    static_cast<RPG_GuiManager_Scaleform*>(RPG_GuiManager::GetInstance())->ToggleScaleformTestMovie("GUI\\Flash\\RPG_GUI_TestPattern.swf", true);  // test an arbitrary Scaleform movie
-  }
-#endif
-
-  else if (m_inputMap->GetTrigger(PI_TestEffect))
-  {
-    PlayTestEffect();
-  }
-  else if (m_inputMap->GetTrigger(PI_TestCameraShake))
-  {
-    RPG_EffectDefinition effectDef;
-    effectDef.m_cameraShakeAmplitude = 75.f;
-    effectDef.m_cameraShakeDuration = 0.1f;
-    RPG_GameManager::s_instance.CreateEffect(effectDef, hkvVec3(0.f, 0.f, 0.f));
-  }
-
-  HandleInputRelease(characterEntity); // do we have any concluding events we need to clean up?
-}
-
-void PlayerUIDialog::HandleInputRelease(RPG_Character* characterEntity)
-{
-  const bool primaryActionInputHeld = m_inputMap->GetTrigger(PI_PrimaryAction);
-  const bool shiftModifierHeld = m_inputMap->GetTrigger(PI_ShiftModifier);
-
-  // is player ending a primary action?
-  if (!primaryActionInputHeld && m_wasDown_PlayerMoveOrMelee)
-  {
-#ifdef _DEBUG
-    const VString msg = "Release Primary Action.";
-    Vision::Error.SystemMessage(msg.AsChar());
-    Vision::Message.Add(1, msg.AsChar());
-#endif
-
-    ReleaseMeleeAttack(characterEntity);
-    m_wasDown_PlayerMoveOrMelee = false;
-    m_wasPressedTime = -1.f;
-  }
-
-  // is player ending a ranged attack?
-  if ((!primaryActionInputHeld || !shiftModifierHeld) && m_wasDown_PlayerRangedAttack)
-  {
-#ifdef _DEBUG
-    const VString msg = "Release Primary Action.";
-    Vision::Error.SystemMessage(msg.AsChar());
-    Vision::Message.Add(1, msg.AsChar());
-#endif
-
-    ReleaseRangedAttack(characterEntity);
-    m_wasDown_PlayerRangedAttack = false;
-    m_wasPressedTime = -1.f;
-  }
 }
 
 bool PlayerUIDialog::GetClosestPointOnNavMeshUnderCursor(hkVector4& point, hkVector4 const& searchPoint)
@@ -434,347 +336,6 @@ bool PlayerUIDialog::GetFirstAttackableEntityUnderCursor(RPG_DamageableEntity*& 
     return true;
   }
   return false;
-}
-
-// Player Actions
-bool PlayerUIDialog::TrySpendMana(RPG_Character* characterEntity, int const manaCost)
-{
-  int const availableMana = characterEntity->GetCharacterStats().GetMana();
-  if (availableMana >= manaCost)
-  {
-    characterEntity->GetCharacterStats().SetMana(availableMana - manaCost);
-    // @todo: flash mana bar on spend
-    return true;
-  }
-  else
-  {
-    if (characterEntity->GetCharacterStats().HasUnlimitedMana())
-    {
-      characterEntity->GetCharacterStats().SetMana(characterEntity->GetCharacterStats().GetManaMax());
-      return true;
-    }
-    else
-    {
-      characterEntity->GetCharacterStats().LogCharacterEvent(CE_FailedManaSpend, Vision::GetTimer()->GetTime());
-      return false;
-    }
-  }
-}
-
-
-void PlayerUIDialog::ExecuteMoveOrMeleeAttack(RPG_Character* characterEntity)
-{
-  VASSERT(characterEntity);
-
-#if defined (SUPPORTS_MULTITOUCH) && (HAVOK_VISION_RESTRUCTURING) && !defined(_VISION_ANDROID)
-
-  // Wait 0.1 seconds in case player uses multi touch 
-  if (m_wasPressedTime < 0.f)
-  {
-    m_wasPressedTime = Vision::GetTimer()->GetTime();
-    return;
-  }
-  else if (Vision::GetTimer()->GetTime() - m_wasPressedTime < 0.1f)
-  {
-    return;
-  }
-
-#endif
-
-//#ifdef _DEBUG
-//  const VString msg = "Execute Primary Action.";
-//  //Vision::Error.SystemMessage(msg.AsChar());
-//  Vision::Message.Add(1, msg.AsChar());
-//#endif
-
-  const bool inputEdge = !m_wasDown_PlayerMoveOrMelee; // if primary action input is activated now, and wasn't previously, this is a press event.
-
-  // Get the location of the player input and information about any hit object
-  RPG_DamageableEntity* attackableEntity = NULL;
-  hkvVec3 targetPoint(0.0f, 0.0f, 0.0f);
-  GetFirstAttackableEntityUnderCursor(attackableEntity, targetPoint, characterEntity);
-
-  if(attackableEntity)
-  {
-    // Hit an object
-    if (inputEdge || attackableEntity != m_lastTargetEntity)
-    {
-      // Initial press event, or a continued press that slipped from one entity to another
-      TryMeleeAttack(characterEntity, attackableEntity);
-    }
-    else
-    {
-      // Continued hold
-      ContinueMeleeAttack(characterEntity, attackableEntity);
-    }
-  }
-  else
-  {
-    // No object hit
-    if (!characterEntity->IsAttacking())  // don't terminate an attack mid-swing
-    {
-      RequestMove(characterEntity, inputEdge);
-    }
-  }
-  m_lastTargetEntity = attackableEntity;
-  m_lastTargetPoint = targetPoint;
-  m_wasDown_PlayerMoveOrMelee = true;
-}
-
-void PlayerUIDialog::RequestMove(RPG_Character* characterEntity, bool spawnDestinationEffect)
-{
-  VASSERT(characterEntity);
-
-  hkVector4 hitPoint, characterPos;
-  RPG_VisionHavokConversion::VisionToHavokPoint(characterEntity->GetPosition(), characterPos);
-  if(GetClosestPointOnNavMeshUnderCursor(hitPoint, characterPos))
-  {
-    hkvVec3 vHitPoint;
-    RPG_VisionHavokConversion::HavokToVisionPoint(hitPoint, vHitPoint);
-
-    characterEntity->GetActionHandler().PerformAction(AT_Move, false, NULL, vHitPoint);
-
-    if(spawnDestinationEffect)
-      TrySpawnSelectDestinationEffect(vHitPoint);
-
-#ifdef _DEBUG
-    if (m_debugUI)
-    {
-      Vision::Message.DrawMessage3D("RequestPath", vHitPoint);
-    }
-#endif
-  }
-}
-
-void PlayerUIDialog::TrySpawnSelectDestinationEffect(hkvVec3 vHitPoint)
-{
-  // if a visual effect for this type has been specified, play it
-  if (!m_selectDestinationVFX.IsEmpty())
-  {
-    // don't blithely spawn a particle every tick
-    if (Vision::GetTimer()->GetTime() - m_lastSelectDestinationVFXTime >= m_selectDestinationVFXInterval)
-    {
-      RPG_VisionEffectHelper::CreateParticleEffect(m_selectDestinationVFX, vHitPoint);
-      m_lastSelectDestinationVFXTime = Vision::GetTimer()->GetTime();
-    }
-  }
-}
-
-void PlayerUIDialog::TryMeleeAttack(RPG_Character* characterEntity, RPG_DamageableEntity * const targetEntity)
-{ 
-  VASSERT(characterEntity);
-
-  const bool hitHighlightable = targetEntity->Components().GetComponentOfBaseType(V_RUNTIME_CLASS(RPG_HighlightableComponent));
-  const bool hitAttackable = targetEntity->Components().GetComponentOfBaseType(V_RUNTIME_CLASS(RPG_AttackableComponent));
-  //@debug: test log output
-  //Vision::Error.Warning(hitEntity->GetMesh()->GetFilename());
-
-  if (hitHighlightable || hitAttackable)
-  {
-    if (hitHighlightable)  //"(RPG) Highlightable"
-    {
-      //Vision::Error.Warning("(RPG) Highlightable");
-    }
-
-    if (hitAttackable)  //"(RPG) Attackable"
-    {
-      //Vision::Error.Warning("(RPG) Attackable");
-      if(characterEntity->IsTargetWithinAttackRange(targetEntity))
-      {
-        characterEntity->GetActionHandler().PerformAction(AT_MeleeAttack, true, targetEntity, hkvVec3(0, 0, 0), 0);
-      }
-      else
-      {
-        characterEntity->GetActionHandler().PerformAction(AT_Move, true, targetEntity, hkvVec3(0, 0, 0), MF_AttackRange);
-        characterEntity->GetActionHandler().PerformAction(AT_MeleeAttack, false, targetEntity);
-      }
-    }
-  }
-  else
-  {
-    // fall back to the move if the entity we hit wasn't a highlightable or attackable.
-    if (!characterEntity->IsAttacking())
-    {
-      RequestMove(characterEntity, true);
-    }
-  }
-}
-
-void PlayerUIDialog::ContinueMeleeAttack(RPG_Character* characterEntity, RPG_DamageableEntity * const targetEntity)
-{
-  VASSERT(characterEntity);
-  const bool hitHighlightable = targetEntity->Components().GetComponentOfBaseType(V_RUNTIME_CLASS(RPG_HighlightableComponent));
-  const bool hitAttackable = targetEntity->Components().GetComponentOfBaseType(V_RUNTIME_CLASS(RPG_AttackableComponent));
-  //@debug: test log output
-  //Vision::Error.Warning(hitEntity->GetMesh()->GetFilename());
-
-  if (hitHighlightable || hitAttackable)
-  {
-    if (hitHighlightable)  //"(RPG) Highlightable"
-    {
-      //Vision::Error.Warning("(RPG) Highlightable");
-
-#ifdef _DEBUG
-      if (m_debugUI)
-      {
-        Vision::Message.DrawMessage3D("(RPG) Highlightable", targetEntity->GetPosition());
-      }
-#endif
-    }
-
-    if (hitAttackable)  //"(RPG) Attackable"
-    {
-      // if player's holding down primary action input on an existing attack action, this sets its continue flag to true.
-      if (characterEntity->GetActionHandler().IsPerformingAction(AT_MeleeAttack))
-      {
-        characterEntity->GetActionHandler().SetActiveActionFlags(1);
-      }
-
-#ifdef _DEBUG
-      if (m_debugUI)
-      {
-        Vision::Message.DrawMessage3D("(RPG) Attackable", targetEntity->GetPosition() + hkvVec3(0.0f, 0.0f, 16.0f)); // (@hack: offset a little to avoid overwriting other component messages)
-      }
-#endif
-    }
-  }
-  else
-  {
-    if(!characterEntity->IsAttacking())
-    {
-      // fall back to the move if the entity we hit wasn't a highlightable or attackable.
-      RequestMove(characterEntity, false);
-    }
-  }
-}
-
-void PlayerUIDialog::ReleaseMeleeAttack(RPG_Character* characterEntity)
-{
-  VASSERT(characterEntity);
-  // player has released primary action input. Flip off the continue flag on his melee action.
-  if (characterEntity->GetActionHandler().IsPerformingAction(AT_MeleeAttack))
-  {
-    characterEntity->GetActionHandler().SetActiveActionFlags(0);
-  }
-}
-
-
-void PlayerUIDialog::ExecuteOrContinueRangedAttack(RPG_Character* characterEntity)
-{
-#ifdef _DEBUG
-  const VString msg = "Execute or Continue Ranged Attack.";
-  //Vision::Error.SystemMessage(msg.AsChar());
-  Vision::Message.Add(1, msg.AsChar());
-#endif
-
-  const bool inputEdge = !m_wasDown_PlayerRangedAttack; // if ranged attack input is activated now, and wasn't previously, this is a press event.
-
-  RPG_DamageableEntity* attackableEntity = NULL;
-  hkvVec3 targetPoint(0.0f, 0.0f, 0.0f);
-  GetFirstAttackableEntityUnderCursor(attackableEntity, targetPoint, characterEntity);
-  // TODO - intersect ray with horizontal plane at characterEntity's root node if this returns false
-  // TODO - modify static mesh target height based on normal of interaction point
-
-  if(inputEdge)
-  {
-    // Initial press event, or a continued press that slipped from one entity to another
-    ExecuteRangedAttack(characterEntity, attackableEntity, targetPoint);
-  }
-  else
-  {
-    if(attackableEntity != m_lastTargetEntity ||
-       !targetPoint.isIdentical(m_lastTargetPoint))
-    {
-      // updates interaction data for currently active ranged attack action
-      ExecuteRangedAttack(characterEntity, attackableEntity, targetPoint);
-    }
-
-    // continued hold
-    ContinueRangedAttack(characterEntity);
-  }
-  m_lastTargetEntity = attackableEntity;
-  m_lastTargetPoint = targetPoint;
-  m_wasDown_PlayerRangedAttack = true;
-}
-
-void PlayerUIDialog::ExecuteRangedAttack(RPG_Character* characterEntity, RPG_DamageableEntity* attackableEntity, hkvVec3 const& targetPoint)
-{
-  if (attackableEntity)
-  {
-      // Ranged attack against character
-    characterEntity->GetActionHandler().PerformAction(AT_RangedAttack, true, attackableEntity);
-    }
-    else
-    {
-      // Ranged attack against point
-    characterEntity->GetActionHandler().PerformAction(AT_RangedAttack, true, NULL, targetPoint);
-  }
-}
-
-void PlayerUIDialog::ContinueRangedAttack(RPG_Character* characterEntity)
-{
-  VASSERT(characterEntity);
-
-  // if player's holding down ranged attack input on an existing ranged attack action, this sets its continue flag to true.
-  if (characterEntity->GetActionHandler().IsPerformingAction(AT_RangedAttack))
-  {
-    characterEntity->GetActionHandler().SetActiveActionFlags(1);
-  }
-}
-
-void PlayerUIDialog::ReleaseRangedAttack(RPG_Character* characterEntity)
-{
-  VASSERT(characterEntity);
-  // player has released ranged attack input. Flip off the continue flag on his ranged attack action.
-  if (characterEntity->GetActionHandler().IsPerformingAction(AT_RangedAttack))
-  {
-    characterEntity->GetActionHandler().SetActiveActionFlags(0);
-  }
-}
-
-void PlayerUIDialog::ExecutePowerAttack(RPG_Character* characterEntity)
-{
-  VASSERT(characterEntity);
-
-  if (!characterEntity->IsDoingSpecialAttack())
-  {
-  if (TrySpendMana(characterEntity, characterEntity->GetCharacterActionData().GetPowerAttackManaCost())) // @todo: data-drive action mana costs
-  {
-    RPG_DamageableEntity* attackableEntity = NULL;
-    hkvVec3 targetPoint(0.0f, 0.0f, 0.0f);
-    if(GetFirstAttackableEntityUnderCursor(attackableEntity, targetPoint, characterEntity))
-    {
-      characterEntity->GetActionHandler().PerformAction(AT_PowerAttack, true, attackableEntity, targetPoint);
-    }
-    else
-    {
-      characterEntity->GetActionHandler().PerformAction(AT_PowerAttack, true, NULL, m_lastTargetPoint);
-    }
-    m_lastTargetEntity = attackableEntity;
-    m_lastTargetPoint = targetPoint;
-  }
-  }
-}
-
-void PlayerUIDialog::ExecuteAoeAttack(RPG_Character* characterEntity)
-{
-  VASSERT(characterEntity);
-
-  if (!characterEntity->IsDoingSpecialAttack())
-  {
-  if (TrySpendMana(characterEntity, characterEntity->GetCharacterActionData().GetAoeAttackManaCost())) // @todo: data-drive action mana costs
-  {
-    characterEntity->GetActionHandler().PerformAction(AT_AoeAttack, true);
-  }
-  }
-}
-
-void PlayerUIDialog::PlayTestEffect()
-{
-  RPG_Character *characterEntity = static_cast<RPG_Character *>(m_playerController->GetOwner());
-  VASSERT(characterEntity);
-  const hkvVec3 position = characterEntity->GetPosition();
-  RPG_VisionEffectHelper::PlayFmodSoundEvent("Characters/Barbarian", "Melee_Basic_Swing", position);  // first argument refers to event group names in the FMOD project specified by GameManager::FMOD_EVENT_PROJECT
 }
 
 void PlayerUIDialog::CheatToggleUnlimitedHealth()
@@ -873,7 +434,7 @@ hkvVec2 PlayerUIDialog::GetCursorPosition(IVGUIContext const *context) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

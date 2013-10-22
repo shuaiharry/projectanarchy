@@ -59,12 +59,24 @@ public:
 			/// Returns the distance squared to leaf, and sets closestPointOut to be the closest point on the leaf
 		virtual hkSimdReal processLeaf( hkUint32 leafKey, const hkAabb& leafAabb, hkVector4Parameter queryPoint, hkVector4& closestPointOut, hkSimdRealParameter closestDistanceSquared ) = 0;
 	};
+
+		/// Interface for all-pairs queries
+	class AllPairsCollector
+	{
+	public:
+
+		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI, AllPairsCollector );
+		AllPairsCollector() {}
+		virtual ~AllPairsCollector() {}
+
+		virtual void processPair( hkUint32 leafKeyA, const hkAabb& leafAabbA, hkUint32 leafKeyB, const hkAabb& leafAabbB ) = 0;
+	};
 };
 
 #endif //HKAI_TREE_QUERIES
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -9,6 +9,7 @@
 #define HK_BINARY_TAGFILE_READER_H
 
 #include <Common/Serialize/Tagfile/hkTagfileReader.h>
+#include <Common/Serialize/Tagfile/Binary/hkBinaryTagfileCommon.h>
 
 	/// Load a binary tagfile.
 class hkBinaryTagfileReader : public hkTagfileReader
@@ -20,12 +21,15 @@ class hkBinaryTagfileReader : public hkTagfileReader
 
 			/// Load the contents from the given stream.
 		virtual hkDataObject load( hkStreamReader* stream, hkDataWorld& world );
+
+			/// Reads a binary tagfile header from buffer.
+		hkResult readHeader(hkStreamReader* stream, hkBinaryTagfile::Header& out);
 };
 
 #endif // HK_BINARY_TAGFILE_READER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

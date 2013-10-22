@@ -26,23 +26,43 @@ public:
 
 public:
   /// \brief
+  ///   Settings for initializing a new instance of the class hkvBackgroundAssetHandling.
+  struct Config
+  {
+    Config()
+    {
+      m_numUpdateThreads = 0;
+      m_numTransformThreads = 0;
+      m_enableMonitoring = true;
+      m_addTransformedToRCS = false;
+      m_addThumbnailsToRCS = false;
+    }
+
+    ///   The number of threads for the asset updating background tasks. If a value < 1 is passed,
+    ///   the number of threads will be set to the number of physical processor cores - 1 (but at
+    ///   least 1).
+    int m_numUpdateThreads;
+
+    ///   Same as m_numUpdateThreads, but for asset transformation tasks.
+    int m_numTransformThreads;
+
+    ///   Whether to enable directory monitoring (either change monitoring or timed scans of the
+    ///   directory tree if the former is not possible). If disabled, only explicitly queued
+    ///   scans are executed.
+    bool m_enableMonitoring;
+
+    ///   Whether to add newly transformed assets to RCS.
+    bool m_addTransformedToRCS;
+
+    ///   Whether to add newly generated asset thumbnails to RCS.
+    bool m_addThumbnailsToRCS;
+  };
+
+  /// \brief
   ///   Initializes a new background asset handling subsystem (file system scans, asset updates,
-  ///   asset transforms)
-  ///
-  /// \param numUpdateThreads
-  ///   the number of threads for the asset updating background tasks. If a value < 1 is passed,
-  ///   the number of threads will be set to the number of physical processor cores - 1 (but at
-  ///   least 1).
-  /// \param numTransformThreads
-  ///   same as above, but for asset transformation tasks.
-  /// \param enableMonitoring
-  ///   whether to enable directory monitoring (either change monitoring or timed scans of the
-  ///   directory tree if the former is not possible). If disabled, only explicitly queued
-  ///   scans are executed.
-  /// \param addTransformedToRCS
-  ///   whether to add newly transformed assets to RCS
-  hkvBackgroundAssetHandling(int numUpdateThreads = 0, int numTransformThreads = 0, 
-    bool enableMonitoring = true, bool addTransformedToRCS = false);
+  ///   asset transforms).
+  hkvBackgroundAssetHandling(const Config& config);
+
 private:
   hkvBackgroundAssetHandling(const hkvBackgroundAssetHandling&);
   hkvBackgroundAssetHandling& operator=(const hkvBackgroundAssetHandling&);
@@ -52,6 +72,9 @@ public:
 public:
   bool getScanAllFoldersOnStart() const;
   void setScanAllFoldersOnStart(bool scan);
+
+  void setAddTransformedToRCS(bool addTransformed);
+  void setAddThumbnailsToRCS(bool addThumbnails);
 
   void start();
   void stop(bool keepCurrentWork);
@@ -75,12 +98,13 @@ private:
   hkvTransformationBackgroundProcessor* m_transformProcessor;
 
   bool m_scanAllFoldersOnStart;
+  bool m_wasKeepingCurrentWork;
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -171,9 +171,21 @@ HK_FORCE_INLINE void hkVector4d::setAdd(hkVector4dParameter v0, hkVector4dParame
 	m_quad = _mm256_add_pd(v0.m_quad, v1.m_quad);
 }
 
+HK_FORCE_INLINE void hkVector4d::setAdd(hkVector4dParameter v0, hkSimdDouble64Parameter v1)
+{
+	const hkQuadDouble64 s = _mm256_broadcast_pd(&v1.m_real);
+	m_quad = _mm256_add_pd(v0.m_quad, s);
+}
+
 HK_FORCE_INLINE void hkVector4d::setSub(hkVector4dParameter v0, hkVector4dParameter v1)
 {
 	m_quad = _mm256_sub_pd(v0.m_quad, v1.m_quad);
+}
+
+HK_FORCE_INLINE void hkVector4d::setSub(hkVector4dParameter v0, hkSimdDouble64Parameter v1)
+{
+	const hkQuadDouble64 s = _mm256_broadcast_pd(&v1.m_real);
+	m_quad = _mm256_sub_pd(v0.m_quad, s);
 }
 
 HK_FORCE_INLINE void hkVector4d::setMul(hkVector4dParameter v0, hkVector4dParameter v1)
@@ -2392,7 +2404,7 @@ HK_FORCE_INLINE void hkVector4d::store(hkFloat16* p) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

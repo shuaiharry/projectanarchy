@@ -170,14 +170,17 @@ public:
     return m_pSkinningResult;
   }
 
-  inline bool HasVertexAnimations() { return m_bContainsVertexAnimations; }
+  inline bool HasVertexAnimations() const 
+  { 
+    return m_bContainsVertexAnimations; 
+  }
 
 protected:
 
   void CheckForVertexAnimations();
 
 
-  unsigned int m_fLastFrameUpdatedVertexState;// last frame the state was updated
+  unsigned int m_fLastFrameUpdatedVertexState;///< last frame the state was updated
   VPList m_MeshDeformerList;                  ///< sorted list of mesh deformers, applied to mesh in same order
   VisAnimState_cl m_LocalAnimState;           ///< used to keep AnimState
 
@@ -193,7 +196,7 @@ protected:
 #endif //VIS_MESH_DEFORMER_STACK_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

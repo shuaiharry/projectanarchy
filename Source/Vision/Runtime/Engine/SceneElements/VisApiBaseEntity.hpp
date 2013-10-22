@@ -8,33 +8,31 @@
 
 /// \file VisApiBaseEntity.hpp
 
-#ifndef FR_DEFINE_VISAPIBASEENTITY
-#define FR_DEFINE_VISAPIBASEENTITY
-
-
+#ifndef VISAPIBASEENTITY_HPP_INCLUDED
+#define VISAPIBASEENTITY_HPP_INCLUDED
 
 #include <Vision/Runtime/Engine/System/ElementManager/VisApiElementManager.hpp>
 #include <Vision/Runtime/Engine/Physics/VisApiCollisionMesh.hpp>
 #include <Vision/Runtime/Engine/Animation/VisApiAnimConfig.hpp>
-#include <Vision/Runtime/Engine/Visibility/VisApiElementVisData.hpp>
 
 #include <Vision/Runtime/Base/Math/BoundingVolume/hkvAlignedBBox.h>
 #include <Vision/Runtime/Engine/Visibility/VisApiPortal.hpp>
 #include <Vision/Runtime/Engine/SceneElements/VisApiFrustum.hpp>
+#include <Vision/Runtime/Engine/SceneElements/VisApiContextCamera.hpp>
 #include <Vision/Runtime/Engine/Renderer/Material/VisApiSurface.hpp>
 #include <Vision/Runtime/Engine/Mesh/VisApiDynamicMesh.hpp>
 
-//Flags for entity settings 
-#define VISENTFLAG_UPDATE_ON_ANIM  1
-
+// Flags for entity settings 
+#define VISENTFLAG_UPDATE_ON_ANIM         V_BIT(0)
+#define VISENTFLAG_LOD_COMPONENT_ATTACHED V_BIT(1)
 
 #define VISENTFLAG_DEFAULT  (VISENTFLAG_UPDATE_ON_ANIM) ///< default flags
-
 
 #include <Vision/Runtime/Engine/Physics/IVisApiPhysicsObject.hpp>
 
 #include <Vision/Runtime/Engine/Renderer/OcclusionQuery/VisApiOcclusionQueryObject.hpp>
 #include <Vision/Runtime/Engine/Visibility/VisApiVisibilityData.hpp>
+#include <Vision/Runtime/Engine/Visibility/VisApiVisibilityLODHysteresis.hpp>
 
 struct VisTraceLineInfo_t;
 class VisRenderContext_cl;
@@ -42,7 +40,6 @@ class VLightmapPrimitive;
 class VLightmapSceneInfo;
 
 class VisFrustum_cl;
-
 
 /// \brief
 ///   Base class for dynamic objects in the scene
@@ -87,7 +84,6 @@ public:
   /// \sa VisGame_cl::CreateEntity
   VISION_APIFUNC VisBaseEntity_cl();
 
-
   /// \brief
   ///   Destructor (for internal usage only)
   /// 
@@ -98,7 +94,6 @@ public:
   /// \sa VisBaseEntity_cl::Remove
   /// \sa VisBaseEntity_cl::Free
   VISION_APIFUNC virtual ~VisBaseEntity_cl();
-
 
   /// \brief
   ///   Marks the entity as deleted.  
@@ -112,7 +107,6 @@ public:
   /// \sa VisBaseEntity_cl::Free
   VISION_APIFUNC void Remove();
 
-
   /// \brief
   ///   DEPRECATED - use DisposeObject instead
   /// 
@@ -125,8 +119,6 @@ public:
   ///   Overridden VisTypedEngineObject_cl function to remove this instance from the scene. Just
   ///   calls VisBaseEntity_cl::Free
   VISION_APIFUNC virtual void DisposeObject() HKV_OVERRIDE;
-
-
 
   ///
   /// @}
@@ -159,7 +151,6 @@ public:
   /// \sa VisBaseEntity_cl::DeInitFunction
   VISION_APIFUNC virtual void InitFunction();
 
-
   /// \brief
   ///   Override this function to deinitialize the entity.
   /// 
@@ -178,7 +169,6 @@ public:
   /// \sa VisBaseEntity_cl::ThinkFunction
   VISION_APIFUNC virtual void DeInitFunction();
 
-  
   /// \brief
   ///   Override this function to process your entity once per frame, after animations and physics
   ///   are applied
@@ -207,8 +197,10 @@ public:
   /// \sa VisBaseEntity_cl::SetThinkFunctionStatus
   /// \sa VisBaseEntity_cl::GetThinkFunctionStatus
   /// \sa VisBaseEntity_cl::EditorThinkFunction
-  VISION_APIFUNC virtual void ThinkFunction() { SetThinkFunctionStatus(FALSE); }
-  
+  VISION_APIFUNC virtual void ThinkFunction() 
+  { 
+    SetThinkFunctionStatus(FALSE); 
+  }
 
   /// \brief
   ///   Override this function to process your entity once per frame, before animations and physics
@@ -237,7 +229,10 @@ public:
   /// \sa VisBaseEntity_cl::ThinkFunction
   /// \sa VisBaseEntity_cl::SetPreThinkFunctionStatus
   /// \sa VisBaseEntity_cl::GetPreThinkFunctionStatus
-  VISION_APIFUNC virtual void PreThinkFunction() { SetPreThinkFunctionStatus(FALSE); }
+  VISION_APIFUNC virtual void PreThinkFunction() 
+  { 
+    SetPreThinkFunctionStatus(FALSE); 
+  }
 
   /// \brief
   ///   Overridable that is called for every entity every frame when inside the editor, regardless of Play-the-game status.
@@ -251,11 +246,9 @@ public:
   /// \sa VisBaseEntity_cl::ThinkFunction
   VISION_APIFUNC virtual void EditorThinkFunction() {}
 
-
   /// \brief
   ///   Overridden base class method to handle resource reloading messages.
   VISION_APIFUNC virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB) HKV_OVERRIDE;
-
 
   ///
   /// @}
@@ -266,14 +259,12 @@ public:
   /// @{
   ///
   
-  
   /// \brief
   ///   DEPRECATED, use RTTI instead
   inline const char *GetClassFullName() const
   {
     return this->GetTypeId()->m_lpszClassName;
   }
-  
   
   /// \brief
   ///   Gets the current entity key. 
@@ -307,8 +298,6 @@ public:
     return GetObjectKeySafe();
   }
 
-  
-
   /// \brief
   ///   Get the entity key as string (as VString). This overload should not be used as it allocates
   ///   string memory.
@@ -316,7 +305,6 @@ public:
   {
     res = m_sObjectKey;
   }
-
 
   /// \brief
   ///   Sets the entity key for this entity.
@@ -332,10 +320,6 @@ public:
   {
     SetObjectKey(key);
   }
-  
-
-
-
 
   ///
   /// @}
@@ -374,9 +358,9 @@ public:
   /// 
   /// \example
   ///   \code
-  ///   pEnt->SetMesh( "scientist.model" );
+  ///     pEnt->SetMesh( "scientist.model" );
   ///   \endcode
-  VISION_APIFUNC virtual BOOL SetMesh( const char *szMeshFile);
+  VISION_APIFUNC virtual BOOL SetMesh(const char *szMeshFile);
 
   /// \brief
   ///   Set the mesh for this entity (by pointer)
@@ -392,12 +376,22 @@ public:
   /// \param pMesh
   ///   pointer to the new mesh
   /// 
-  /// \return
-  ///   Nothing.
-  /// 
   /// \sa VisBaseEntity_cl::GetMesh
   /// \sa VisBaseEntity_cl::HasMesh
+  ///
   VISION_APIFUNC virtual void SetMesh(VDynamicMesh* pMesh);
+
+  /// \brief
+  ///   Set the mesh along with an animation config for this entity (by pointer)
+  ///
+  /// \param pMesh
+  ///   Pointer to the new mesh.
+  /// \param pAnimConfig
+  ///   Pointer to the animation config corresponding to the new mesh.
+  ///
+  /// \sa VisBaseEntity_cl::SetMesh
+  ///
+  VISION_APIFUNC virtual void SetMesh(VDynamicMesh* pMesh, VisAnimConfig_cl* pAnimConfig);
 
   /// \brief
   ///   Indicates whether a mesh is assigned to this entity
@@ -409,7 +403,6 @@ public:
   /// \sa VisBaseEntity_cl::GetMesh
   VISION_APIFUNC BOOL HasMesh() const;
 
- 
   /// \brief
   ///   Gets the current mesh of the entity
   /// 
@@ -439,7 +432,6 @@ public:
     return m_spMesh;
   }
 
- 
   ///
   /// @}
   ///
@@ -448,7 +440,6 @@ public:
   /// @name Bounding Box Related Functions
   /// @{
   ///
-
 
   /// \brief
   ///   Draw the bounding boxes for all bones of this entity
@@ -468,7 +459,6 @@ public:
   /// \sa VisBaseEntity_cl::DrawBoneBoundingBox
   /// \sa VisBaseEntity_cl::DrawBoundingBox
   VISION_APIFUNC void DrawBoneBoundingBoxes(VColorRef iColor = VColorRef(255,255,255), float lineWidth = 1.0f);
-
 
   /// \brief
   ///   Draw the bounding box for a single bone
@@ -491,7 +481,6 @@ public:
   /// \sa VisBaseEntity_cl::DrawBoneBoundingBoxes
   /// \sa VisBaseEntity_cl::DrawBoundingBox
   VISION_APIFUNC void DrawBoneBoundingBox(const char *boneName, VColorRef iColor = VColorRef(255, 255, 255), float lineWidth = 1.0f);
-
 
   /// \brief
   ///   Draw the collision bounding box of the entity
@@ -518,16 +507,12 @@ public:
   /// \sa VisBaseEntity_cl::DrawBoneBoundingBox
   VISION_APIFUNC BOOL DrawBoundingBox(BOOL bOriented, VColorRef iColor = VColorRef(255,255,255), float lineWidth = 1.0f);
 
-
-
-
-
   ///
   /// @}
   ///
 
   ///
-  /// @name Entity Setup and Initialisation
+  /// @name Entity Setup and Initialization
   /// @{
   ///
 
@@ -680,8 +665,6 @@ public:
   ///   Foreground objects may not contain any translucent surfaces.
   VISION_APIFUNC void SetAlwaysInForeGround(bool status = true);
 
-
-
   /// \brief
   ///   Sets the visible state of a specific submesh
   ///
@@ -726,6 +709,67 @@ public:
   }
 
   /// \brief
+  ///   Same functions than above, but taking additional near/far clipping into account
+  ///
+  /// \param iSubmesh
+  ///   The submesh index to query. This index must be in valid range [0..GetMesh()->GetSubmeshCount()-1]
+  ///
+  /// \param pSubmesh
+  ///   Pointer to the submesh to query. When NULL, the function returns false.
+  ///
+  /// \param pLODCamera
+  ///   Reference to a pointer of the LOD camera (or, when not present, the context camera) that is used for near/far clipping. When the pointer is NULL,
+  ///   the current LOD resp. context camera is determined and can be re-used in loops to increase performance.
+  ///
+  /// \param fLODScaleSqr
+  ///   Additional parameter that is passed on to VBaseGeometryInfo::IsNearOrFarClipped(). Scales the (squared) distance between the object to the camera.
+  ///   This allows to move the point at which the object is clipped closer to the camera or further away.
+  ///
+  /// \param pHystMan
+  ///   When using hysteresis, the pointer of the hysteresis manager, otherwise NULL.
+  ///
+  /// \returns
+  ///   The visible state of both the setting via SetSubmeshVisibleState and the near and far clipping test
+  ///
+  /// \sa VisBaseEntity_cl::SetSubmeshVisibleState
+  inline bool GetSubmeshVisibleState(int iSubmesh, VDynamicSubmesh* pSubmesh, const VisContextCamera_cl*& pLODCamera, float fLODScaleSqr, VLODHysteresisManager* pHystMan = NULL) const
+  {
+    if (pSubmesh == NULL)
+      return false;
+
+    VASSERT(iSubmesh>=0 && iSubmesh<m_spMesh->GetSubmeshCount());
+
+    if ((m_pSubmeshVisMaskPtr[iSubmesh>>5] & (1<<(iSubmesh&31))) > 0)
+    {
+      if (pHystMan != NULL)
+      {
+        return pHystMan->PerformDynamicSubmeshClipping(pSubmesh, GetNumber());
+      }
+      else
+      {
+        if (pSubmesh->GetGeometryInfoIndex() >= 0)
+        {
+          if (pLODCamera == NULL)
+          {
+            VisRenderContext_cl* pContext = VisRenderContext_cl::GetCurrentContext();
+            if (pContext->GetLODReferenceContext() != NULL && pContext->GetLODReferenceContext()->GetCamera() != NULL)
+              pLODCamera = pContext->GetLODReferenceContext()->GetCamera();
+            else
+              pLODCamera = pContext->GetCamera();
+          }
+
+          const VBaseGeometryInfo& geomInfo(pSubmesh->GetGeometryInfo());
+          return (pLODCamera == NULL || !geomInfo.IsNearOrFarClipped(pLODCamera->GetPosition() - GetPosition(), fLODScaleSqr));
+        }
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// \brief
   ///   Sets the visible state of all submeshes at the same time.
   ///
   /// The passed bitmask can be a NULL pointer to set all bits or it must hold GetMesh()->GetSubmeshCount() bits. So the passed array must
@@ -749,9 +793,8 @@ public:
   ///   Indicates whether any submesh on this instance is disabled. This flag might be used for rendering optimizations
   inline bool IsAnySubmeshDisabled() const
   {
-    return (statusFlags & VIS_STATUS_DISABLED_ANY_SUBMESH)>0;
+    return (statusFlags & VIS_STATUS_DISABLED_ANY_SUBMESH) != 0;
   }
-
 
   /// \brief
   ///   Specifies whether this entity casts a dynamic shadow.
@@ -782,11 +825,17 @@ public:
 
   /// \brief
   ///   Internal flag used by vForge. Does not affect realtime rendering at all.
-  inline void SetCastStaticShadows(bool bStatus) {m_bCastStaticShadows=bStatus;}
+  inline void SetCastStaticShadows(bool bStatus) 
+  {
+    m_bCastStaticShadows = bStatus;
+  }
 
   /// \brief
   ///   Internal flag used by vForge. Does not affect realtime rendering at all.
-  inline bool GetCastStaticShadows() const {return m_bCastStaticShadows;}
+  inline bool GetCastStaticShadows() const 
+  {
+    return m_bCastStaticShadows;
+  }
 
   /// \brief
   ///   Sets the collision accuracy for traceline operations against this entity.
@@ -812,7 +861,6 @@ public:
   ///   \endcode
   VISION_APIFUNC void SetTraceAccuracy(VisTraceAccuracy_e accuracy);
 
-
   /// \brief
   ///   Gets the current collision accuracy for traceline operations against this entity
   /// 
@@ -823,7 +871,6 @@ public:
   /// \sa VisBaseEntity_cl::SetCustomTraceBBox
   /// \sa VisBaseEntity_cl::SetTraceAccuracy
   VISION_APIFUNC VisTraceAccuracy_e GetTraceAccuracy() const;
-
   
   /// \brief
   ///   Sets the custom trace bounding box of the entity.
@@ -847,7 +894,6 @@ public:
   /// \sa VisBaseEntity_cl::GetTraceAccuracy
   /// \sa VisBaseEntity_cl::GetCustomTraceBBox
   VISION_APIFUNC void SetCustomTraceBBox(const hkvAlignedBBox *pCustomTraceBBox);
-
 
   /// \brief
   ///   Gets the custom trace bounding box of this entity
@@ -899,7 +945,6 @@ public:
   /// \sa VisBaseEntity_cl::GetTraceAccuracy
   /// \sa VisBaseEntity_cl::SetCustomTraceBBox
   inline unsigned int GetTracelineBitmask() const;
-
 
   /// \brief
   ///   Set the primary sorting key for the entity
@@ -986,7 +1031,6 @@ public:
   /// 
   /// \sa VisBaseEntity_cl::SetScaling
   VISION_APIFUNC const hkvVec3& GetScaling() const;
-
   
   /// \brief
   ///   Computes and returns the matrix transforming this entity to world space.
@@ -1010,7 +1054,6 @@ public:
   /// @name Flag-related Functions
   /// @{
   ///
- 
 
   /// \brief
   ///   Sets the custom flags of the entity
@@ -1021,7 +1064,6 @@ public:
   /// \param flags
   ///   new custom flags
   VISION_APIFUNC void SetCustomFlags(int flags);
-  
 
   /// \brief
   ///   Gets the custom flags of the entity
@@ -1031,7 +1073,6 @@ public:
   /// \return
   ///   int flags: current custom flags
   VISION_APIFUNC int GetCustomFlags() const;
-  
 
   /// \brief
   ///   Gets the status flags of the entity
@@ -1044,7 +1085,6 @@ public:
   ///    \li VIS_STATUS_FORCE_COLMESH_UPDATE: enforces a collision mesh update on the next request
   ///    \li VIS_STATUS_DISABLED_PRETHINKFUNCTION: prethinkfunction is disabled, won't be called anymore
   VISION_APIFUNC int GetStatusFlags() const;
-
 
   /// \brief
   ///   Set the status flags of the entity
@@ -1082,8 +1122,6 @@ public:
   /// outside the  game loop. 
   VISION_APIFUNC void UpdateEntityChangedStatus();
 
-
-
   /// \brief
   ///   Parses the variable string and updates the respective variable(s).
   /// 
@@ -1105,9 +1143,6 @@ public:
   ///   pEntity->SetVariablesByString("Radius=\"20.000\", Height=\"160.0000\" ");
   ///   \endcode
   VISION_APIFUNC BOOL SetVariablesByString(const char *szVarString, BOOL bUpdateEngine = TRUE);
-
-
-
 
   ///
   /// @}
@@ -1143,7 +1178,6 @@ public:
   /// 
   VISION_APIFUNC IVisPhysicsObject_cl *CreatePhysicsObject(bool bStatic=false);
 
-
   /// \brief
   ///   Releases the physics object of the entity
   /// 
@@ -1155,7 +1189,6 @@ public:
   /// \sa IVisPhysicsObject_cl
   /// \sa IVisPhysicsModule_cl
   VISION_APIFUNC void DeletePhysicsObject();
-
 
   /// \brief
   ///   Get the physics object of the entity
@@ -1172,8 +1205,6 @@ public:
   /// 
   VISION_APIFUNC IVisPhysicsObject_cl *GetPhysicsObject() const;
 
-
-
   /// \brief
   ///   Sets the physics object of the entity.
   /// 
@@ -1186,7 +1217,6 @@ public:
   /// \sa IVisPhysicsObject_cl
   /// \sa IVisPhysicsModule_cl
   VISION_APIFUNC void SetPhysicsObject(IVisPhysicsObject_cl *pPhysObj);
-
   
   ///
   /// @}
@@ -1196,8 +1226,6 @@ public:
   /// @name Misc
   /// @{
   ///
-
-
 
   /// \brief
   ///   Indicates whether the entity is marked as deleted.
@@ -1211,7 +1239,6 @@ public:
   /// \return
   ///   BOOL status : TRUE if the entity is marked as deleted
   inline BOOL IsRemoved() const;
-
 
   /// \brief
   ///   Gets the visibility status of this entity in the last rendered frame of the given render context.
@@ -1245,7 +1272,6 @@ public:
   ///   calculated
   VISION_APIFUNC BOOL WasVisibleInAnyLastFrame() const;
 
-
   /// \brief
   ///   Serializes the entity to the passed archive.
   /// 
@@ -1262,13 +1288,13 @@ public:
   /// 
   /// \param ar
   ///   The archive object to read from or write to
-  VISION_APIFUNC VOVERRIDE void Serialize( VArchive &ar );
+  VISION_APIFUNC virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 #ifdef SUPPORTS_SNAPSHOT_CREATION
   
   /// \brief
   ///   Overridden function that gets the resources used for this instance.
-  VISION_APIFUNC VOVERRIDE void GetDependencies(VResourceSnapshot &snapshot);
+  VISION_APIFUNC virtual void GetDependencies(VResourceSnapshot &snapshot) HKV_OVERRIDE;
 #endif
 
   /// \brief
@@ -1287,16 +1313,18 @@ public:
   ///   pEntity->GetCurrentVisBoundingBox(bBox);
   ///   Vision::Game.DrawBoundingBox(bBox);
   ///   \endcode
-  inline void GetCurrentVisBoundingBox(hkvAlignedBBox &Box) const { Box = m_BoundingBox; }
+  inline void GetCurrentVisBoundingBox(hkvAlignedBBox &Box) const 
+  { 
+    Box = m_BoundingBox; 
+  }
 
   /// \brief
   ///   Similar to GetCurrentVisBoundingBox, reducing overhead by returning a pointer to the
   ///   bounding box.
-  inline const hkvAlignedBBox *GetCurrentVisBoundingBoxPtr() const { return &m_BoundingBox; }
-
-
-  
-
+  inline const hkvAlignedBBox *GetCurrentVisBoundingBoxPtr() const 
+  { 
+    return &m_BoundingBox; 
+  }
 
   /// \brief
   ///   Sets the visibility bounding box of the entity for the next frame until RemoveCustomVisBoundingBox is called.
@@ -1354,7 +1382,6 @@ public:
   ///   Returns the matrix that has been set via SetCustomProjectionMatrixForForegroundObject, or
   ///   NULL
   VISION_APIFUNC const hkvMat4* GetCustomProjectionMatrixForForegroundObject() const;
-
 
   ///
   /// @}
@@ -1424,7 +1451,6 @@ public:
   /// 
   /// \sa VisBaseEntity_cl::SetAmbientColor
   VISION_APIFUNC VColorRef GetAmbientColor() const;
-
 
   /// \brief
   ///   Sets the 6 light grid colors for this entity
@@ -1519,17 +1545,15 @@ public:
 
   /// \brief
   ///   Overrides VVisibilityData::SetVisibleBitmask and additionally propagates message ID to all attached components
-  VISION_APIFUNC VOVERRIDE void SetVisibleBitmask(unsigned int iMask);
+  VISION_APIFUNC virtual void SetVisibleBitmask(unsigned int iMask) HKV_OVERRIDE;
    
   /// \brief
   ///   Non virtual override of VVisibilityData::SetFarClipDistance. For backwards compatibility it sets the LOD flag as well
   inline void SetFarClipDistance(float fClipDistance)
   {
     VVisibilityData::SetFarClipDistance(fClipDistance);
-    SetClipMode((m_fNearClipDistance>0.f || m_fFarClipDistance>0.f) ? VIS_LOD_TEST_BOUNDINGBOX : VIS_LOD_TEST_NONE);
+    SetClipMode((m_fNearClipDistance > 0.f || m_fFarClipDistance > 0.f) ? VIS_LOD_TEST_BOUNDINGBOX : VIS_LOD_TEST_NONE);
   }
-
-
 
   /// \brief
   ///   With this method, an entity can explicitly be excluded from the visibility test.
@@ -1554,9 +1578,8 @@ public:
   ///   BOOL: If TRUE, the entity is excluded from the visibility test.
   inline BOOL GetExcludeFromVisTest() const
   {
-    return (m_iPerformTestFlags&VIS_EXCLUDED_FROM_VISTEST)!=0 ? TRUE : FALSE;
+    return (m_iPerformTestFlags & VIS_EXCLUDED_FROM_VISTEST) != 0 ? TRUE : FALSE;
   }
-
 
   /// \brief
   ///   Enables or disables hardware occlusion query for this entity.
@@ -1575,12 +1598,11 @@ public:
       m_iPerformTestFlags &= ~VIS_EXCLUDED_FROM_OCCLUSIONQUERY;
   }
 
-
   /// \brief
   ///   Returns the status whether occlusion query is enabled for this entity. The return value does not consider other criteria such as polygon count
   inline BOOL GetExcludeFromOcclusionQueryTest() const
   {
-    return (m_iPerformTestFlags&VIS_EXCLUDED_FROM_OCCLUSIONQUERY)>0;
+    return (m_iPerformTestFlags & VIS_EXCLUDED_FROM_OCCLUSIONQUERY) != 0;
   }
 
   /// \brief
@@ -1600,7 +1622,10 @@ public:
   ///   bool: true if the entity is always in the foreground.
   /// 
   /// \sa SetAlwaysInForeGround
-  inline bool IsObjectAlwaysInForegroundEnabled() const { return m_bAlwaysInForeground; }
+  inline bool IsObjectAlwaysInForegroundEnabled() const 
+  { 
+    return m_bAlwaysInForeground; 
+  }
 
   /// \brief
   ///   Returns whether there are shaders for the given pass type assigned to the entity
@@ -1614,9 +1639,7 @@ public:
   ///   bool: true if there are shaders with the given pass type, false otherwise
   VISION_APIFUNC bool HasShadersForPass(VPassType_e ePassType) const;
 
-
   IMPLEMENT_OBJ_CLASS(VisBaseEntity_cl);
-
 
   ///
   /// @}
@@ -1627,17 +1650,14 @@ public:
   /// @{
   ///
 
-  
   /// \brief
   ///   Processes the VisObject3D_cl state flags and calls the ModSysNotifyFunctionHandle functions
   ///   on the children.
   inline void Handle();
 
-
   /// \brief
   ///   Resets the status flags
   inline void ResetStatusFlags();
-
 
   /// \brief
   ///   Updates the animation state of the animation configuration and applies the motion delta
@@ -1649,7 +1669,6 @@ public:
   /// 
   /// This is the case if either the position, orientation or animation changed.
   VISION_APIFUNC BOOL IsCoreUpdateRequired();
-
 
   ///
   /// @}
@@ -1675,7 +1694,6 @@ public:
   ///   m_wpRef->SetVisibleBitmask(0);
   ///   \endcode
   VISION_APIFUNC VWeakRefTarget<VisBaseEntity_cl>* GetWeakReference();
- 
 
   ///
   /// @}
@@ -1698,24 +1716,11 @@ public:
   /// 
   /// \param iO3DFlags
   ///   VisObject3D_cl::VISOBJECT3D_FLAGS flags indicating the modified components
-  VISION_APIFUNC VOVERRIDE void OnObject3DChanged(int iO3DFlags);
+  VISION_APIFUNC virtual void OnObject3DChanged(int iO3DFlags) HKV_OVERRIDE;
 
-  
   ///
   /// @}
   ///
-
-  /*
-  /// \brief
-  ///   Non-virtual override of VRefCounter::Release to Free the entity rather than deleting it.
-  VISION_APIFUNC void Release()
-  {
-    VASSERT(m_iRefCount>0);
-    m_iRefCount--;
-    if (m_iRefCount==0)
-      Free();
-  }
-*/
 
   /// \brief
   ///   SetAnimConfig sets an animation config on the entity.
@@ -1730,23 +1735,27 @@ public:
   ///   bool: True if setting the config was successful.
   VISION_APIFUNC bool SetAnimConfig(VisAnimConfig_cl* pAnimConfig);
 
-
   /// \brief
   ///   GetAnimConfig returns the currently set animation config of the entity.
   /// 
-  /// If you set the returned pointer on another entity it will be animated sychronized and use the
+  /// If you set the returned pointer on another entity it will be animated synchronized and use the
   /// same memory buffers.
   /// 
   /// \return
   ///   VisAnimConfig_cl* pAnimConfig: Pointer to the current config or NULL.
-  inline VisAnimConfig_cl* GetAnimConfig() const {return m_spAnimConfig;}
+  inline VisAnimConfig_cl* GetAnimConfig() const 
+  {
+    return m_spAnimConfig;
+  }
 
   /// \brief  Query if this entity uses vertex shader skinning. 
   ///
   /// \return true if vertex shader skinned, false if not. 
   ///
-  inline bool IsVertexShaderSkinned() const { return m_spAnimConfig ? (m_spAnimConfig->GetSkinningMode() == VIS_SKINNINGMODE_HARDWARE) : false; }
-
+  inline bool IsVertexShaderSkinned() const 
+  { 
+    return m_spAnimConfig ? (m_spAnimConfig->GetSkinningMode() == VIS_SKINNINGMODE_HARDWARE) : false; 
+  }
 
   /// \brief
   ///   Renders the current animated normals of the entity.
@@ -1774,7 +1783,6 @@ public:
   ///   Nothing.
   VISION_APIFUNC void DebugRenderTangents(VColorRef color=V_RGBA_YELLOW, float fLength=5.f);
 
-
   /// \brief
   ///   Draw the animated mesh in the current lod level
   /// 
@@ -1784,7 +1792,6 @@ public:
   /// \return
   ///   Nothing.
   VISION_APIFUNC void DebugRenderMesh(VColorRef iMeshColor);
-
 
   /// \brief
   ///   Helper function to calculate the bone translation and rotation in worldspace for this
@@ -1806,7 +1813,6 @@ public:
   ///   bool bResult: returns true for a valid bone transformation.
   VISION_APIFUNC bool GetBoneCurrentWorldSpaceTransformation(int iBoneIndex, hkvVec3& boneTranslation, hkvQuat &boneRotation);
 
-
   /// \brief
   ///   Helper function to calculate the bone translation and rotation in objectspace for this
   ///   entity.
@@ -1824,7 +1830,6 @@ public:
   ///   bool bResult: returns true for a valid bone transformation.
   VISION_APIFUNC bool GetBoneCurrentObjectSpaceTransformation(int iBoneIndex, hkvVec3& boneTranslation, hkvQuat &boneRotation);
 
-
   /// \brief
   ///   Helper function to calculate the bone translation and rotation in localspace for this
   ///   entity.
@@ -1841,7 +1846,6 @@ public:
   /// \return
   ///   bool bResult: returns true for a valid bone transformation.
   VISION_APIFUNC bool GetBoneCurrentLocalSpaceTransformation(int iBoneIndex, hkvVec3& boneTranslation, hkvQuat &boneRotation);
-
 
   /// \brief
   ///   Assigns a shader set to this entity
@@ -1877,7 +1881,6 @@ public:
   ///   VisShaderSet_cl *pShaderSet: Pointer to the shader set assigned to this entity
   VISION_APIFUNC VisShaderSet_cl *GetActiveShaderSet() const;
 
-
   /// \brief
   ///   Specifies an asynchronous preparation task for this entity.
   /// 
@@ -1889,14 +1892,20 @@ public:
   /// 
   /// \param pTask
   ///   Preparation task for this entity
-  VISION_APIFUNC void SetPreparationTask(VThreadedTask *pTask) { m_pPreparationTask = pTask; }
+  inline void SetPreparationTask(VThreadedTask *pTask) 
+  { 
+    m_pPreparationTask = pTask; 
+  }
 
   /// \brief
   ///   Returns the preparation task previously set with SetPreparationTask
   /// 
   /// \return
   ///   VThreadedTask *pTask: Preparation task for this entity
-  VISION_APIFUNC VThreadedTask *GetPreparationTask() const { return m_pPreparationTask; }
+  inline VThreadedTask *GetPreparationTask() const 
+  { 
+    return m_pPreparationTask; 
+  }
 
   /// \brief
   ///   Specifies whether an entity's animation should be updated even when the entity is not
@@ -1911,7 +1920,10 @@ public:
   /// \param bAlwaysUpdateAnimation
   ///   true if the animation should always be updated, false if the update should only be done
   ///   when the entity is visible.
-  VISION_APIFUNC void SetAlwaysUpdateAnimations(bool bAlwaysUpdateAnimation) { m_bAlwaysUpdateAnimation = bAlwaysUpdateAnimation; }
+  inline void SetAlwaysUpdateAnimations(bool bAlwaysUpdateAnimation) 
+  { 
+    m_bAlwaysUpdateAnimation = bAlwaysUpdateAnimation; 
+  }
 
   /// \brief
   ///   Returns the value set with SetAlwaysUpdateAnimations
@@ -1919,7 +1931,10 @@ public:
   /// \return
   ///   bool bAlwaysUpdateAnimation: true if the animation is always updated, false if the update
   ///   is only done when the entity is visible.
-  VISION_APIFUNC bool GetAlwaysUpdateAnimations() { return m_bAlwaysUpdateAnimation; }
+  inline bool GetAlwaysUpdateAnimations() const
+  { 
+    return m_bAlwaysUpdateAnimation; 
+  }
 
   ///
   /// @name Custom Materials
@@ -2019,16 +2034,24 @@ public:
   /// resetting tags) is a very fast operation.
   ///
   /// \sa VisEntityCollection_cl::GetTaggedEntries
-  inline void Tag() { m_iTagged = s_iEntityTagCtr; }
-
+  inline void Tag() 
+  { 
+    m_iTagged = s_iEntityTagCtr; 
+  }
 
   /// \brief
   ///   Returns whether an entity is tagged. This is a low-overhead operation.
-  inline bool IsTagged() const { return m_iTagged == s_iEntityTagCtr; }
+  inline bool IsTagged() const 
+  { 
+    return (m_iTagged == s_iEntityTagCtr); 
+  }
 
   /// \brief
   ///   Resets all entity tags. This is a low-overhead operation.
-  static inline void ResetTags() { s_iEntityTagCtr++; }
+  static inline void ResetTags() 
+  { 
+    s_iEntityTagCtr++; 
+  }
 
   ///
   /// @}
@@ -2097,7 +2120,10 @@ public:
 
   /// \brief
   ///   Returns the occlusion query object for this entity. Used for visibility determination.
-  VISION_APIFUNC inline const VisOcclusionQueryObject_cl &GetOccQueryObject() const { return m_OccQueryObject; }
+  inline const VisOcclusionQueryObject_cl &GetOccQueryObject() const 
+  { 
+    return m_OccQueryObject; 
+  }
 
   /// \brief
   ///   Sets the expected number of entities in your scene.
@@ -2126,26 +2152,65 @@ public:
   ///   Overridden method. Clears the motion delta of the entity and its current animation.
   VISION_APIFUNC virtual void ResetMotionDelta() HKV_OVERRIDE;
 
-  inline int GetLastTraceHit() { return lastTraceHit;}
-  inline void SetLastTraceHit(int iLastHit) { lastTraceHit = iLastHit;}
-  inline static unsigned int GetVisDataOffset() { return offsetof(VisBaseEntity_cl, m_BoundingBox); }
+  inline int GetLastTraceHit() const
+  { 
+    return lastTraceHit;
+  }
 
-  inline unsigned int GetRenderedTriangleCount() const { return m_iRenderedTriangleCount; }
-  inline void ResetRenderedTriangleCount() { m_iRenderedTriangleCount = 0; }
-  inline void AddRenderedTriangleCount(unsigned int iNum) { m_iRenderedTriangleCount += iNum; }
+  inline void SetLastTraceHit(int iLastHit) 
+  { 
+    lastTraceHit = iLastHit;
+  }
 
+  inline static unsigned int GetVisDataOffset()
+  { 
+    return offsetof(VisBaseEntity_cl, m_BoundingBox); 
+  }
+
+  inline unsigned int GetRenderedTriangleCount() const 
+  { 
+    return m_iRenderedTriangleCount; 
+  }
+
+  inline void ResetRenderedTriangleCount() 
+  { 
+    m_iRenderedTriangleCount = 0; 
+  }
+
+  inline void AddRenderedTriangleCount(unsigned int iNum) 
+  { 
+    m_iRenderedTriangleCount += iNum; 
+  }
 
   // internal use only
-  inline void SetTraceCount(unsigned int iCount) { m_iTraceCount = iCount;}
-  inline unsigned int GetTraceCount() const { return m_iTraceCount;}
-  inline unsigned int GetLastMoved() const { return m_iLastMoved; }
-  inline unsigned int GetLastChanged() const { return m_iLastChanged; }
+  inline void SetTraceCount(unsigned int iCount) 
+  { 
+    m_iTraceCount = iCount;
+  }
+
+  inline unsigned int GetTraceCount() const 
+  { 
+    return m_iTraceCount;
+  }
+
+  inline unsigned int GetLastMoved() const 
+  { 
+    return m_iLastMoved; 
+  }
+
+  inline unsigned int GetLastChanged() const 
+  { 
+    return m_iLastChanged; 
+  }
+
   VISION_APIFUNC void PrepareForRendering();
 
   #if defined(_VR_DX11)
-    inline VShaderConstantBuffer *GetLightGridConstantBuffer() { return &m_LightGridConstantBuffer; }
+    inline VShaderConstantBuffer *GetLightGridConstantBuffer() 
+    { 
+      return &m_LightGridConstantBuffer; 
+    }
   #endif
-
 
   ///
   /// @}
@@ -2156,13 +2221,12 @@ public:
   /// @{
   ///
 
-  VISION_APIFUNC int GetSynchronizationGroupList(const VNetworkViewContext &context, VNetworkSynchronizationGroupInstanceInfo_t *pDestList);
+  VISION_APIFUNC int GetSynchronizationGroupList(const VNetworkViewContext &context, 
+    VNetworkSynchronizationGroupInstanceInfo_t *pDestList);
 
   ///
   /// @}
   ///
-
-
 
 protected:
 
@@ -2170,6 +2234,9 @@ protected:
   friend class VisProfiling_cl;  
   friend class VisSurface_cl;
   friend class VisRenderStates_cl;
+  friend class VEntityLODComponent;
+  friend class VisionVisibilityCollector_cl;
+
   friend void GetObjectSimpleBoundingBox(int object, hkvAlignedBBox &boundingBox);
 
   // former entity loader functions:
@@ -2179,24 +2246,18 @@ protected:
   /// @name Entity Init / Deinit Functions
   /// @{
   ///
-
   
   /// \brief
   ///   Initialises the entity variables
   void InitVars(const hkvVec3& origin, const hkvVec3& orientation);
 
-
   /// \brief
   ///   Initialises the entity. Called from VisGame_cl::CreateEntity
   void Init(const hkvVec3& origin, const char *customMeshFile = NULL);
 
-
-
   /// \brief
   ///   Returns a new and free internal entity number
   int GetNewNumber();
-  
-
 
   /// \brief
   ///   Update attached children and the entity core status
@@ -2211,12 +2272,6 @@ protected:
   /// \brief
   ///   Get the number of the portal which is nearest to the entity
   int GetClosestPortalNumber() const;
-
-
-
-
-
-
 
   ///
   /// @}
@@ -2235,15 +2290,17 @@ protected:
   ///   Initialise all entity variables which contain information about the assigned mesh
   void InitModelRelatedVars();
   
-  
   /// \brief
   ///   Frees all entity variables which contain information about the assigned mesh
   void FreeModelRelatedVars();
 
-
   /// \brief
   ///   Internal function
   VISION_APIFUNC void CheckCollectionUpdate();
+
+  /// \brief
+  ///   Sends a message notifying all components that the mesh has changed.
+  void SendMeshChangedMessageToComponents();
 
   ///
   /// @}
@@ -2253,7 +2310,6 @@ protected:
   /// @name Currently Disabled Enitity Functions
   /// @{
   ///
-  
 
   /// \brief
   /// 
@@ -2263,7 +2319,6 @@ protected:
   /// \sa SetThinkFunctionStatus
   BOOL IsThinkFunctionEnabled();
 
-
   /// \brief
   /// 
   /// \return
@@ -2271,19 +2326,14 @@ protected:
   /// 
   /// \sa SetPreThinkFunctionStatus
   BOOL IsPreThinkFunctionEnabled();
-
-
  
   /// \brief
   ///   Draw the specified bone bounding boxes
   BOOL RenderCoreBoneBoundingBox(const char *boneName, VColorRef iColor, float lineWidth = 1.0f);
 
-
-
   void UpdateVisTraceRadius();
-//  void UpdateTextureAnimations();
-  void OnSubmeshVisibleStateMaskChanged();
 
+  void OnSubmeshVisibleStateMaskChanged();
 
   ///
   /// @}
@@ -2332,7 +2382,6 @@ protected:
     VShaderConstantBuffer m_LightGridConstantBuffer;
   #endif
 
-
   // Make sure the size of the following data is larger than sizeof(float) + sizeof(hkvVec3)
   // flags
 
@@ -2356,7 +2405,6 @@ protected:
   VColorRef    m_iAmbientColor;           
   hkvMat4* m_pCustomProjection;
   LightGridData_t m_LightGridData;        // TODO: Make this optional
-//  float        m_fLightmapGranularity;
 
   int m_iLightBitmask;
   float m_fMaxScaling;
@@ -2370,18 +2418,14 @@ protected:
 
   VISION_APIDATA static unsigned int s_iEntityTagCtr;
 
-
   ///
   /// @}
   ///
-
 };
 
 VISION_ELEMENTMANAGER_TEMPLATE_DECL(VisBaseEntity_cl)
 
-
 #include <Vision/Runtime/Engine/SceneElements/VisApiBaseEntity.inl>
-
   
 /// \brief
 ///   Class containing data used as a template when constructing a new entity instance
@@ -2436,10 +2480,10 @@ public:
 
 typedef VNameValueListParser<',', '=', 1024> VVariableStringParser;
 
-#endif // FR_DEFINE_VISAPIBASEENTITY
+#endif // VISAPIBASEENTITY_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -48,21 +48,56 @@ inline const hkVector4& hkaiCharacter::getUp() const
 
 inline void hkaiCharacter::setLinearAndAngularVelocity( hkVector4Parameter velocity )
 {
+	HK_WARN_ONCE(0x5a5a3202, 
+		"hkaiCharacter::setLinearAndAngularVelocity() is deprecated and will be "
+		"removed in a future release. Use setVelocity to set characters' "
+		"linear velocity. For characters with angular constraints, use "
+		"setAngularVelocity() if you need to manually adjust their angular "
+		"velocity.");
 	HK_ASSERT2(0x30fa05e1, velocity.isOk<4>(), "Character linear/angular velocity is invalid");
 	m_velocity = velocity;
 }
+
+inline void hkaiCharacter::setVelocity( hkVector4Parameter velocity )
+{
+	HK_ASSERT2(0x30fa05e2, velocity.isOk<3>(), "Character linear velocity is invalid");
+	m_velocity.setXYZ( velocity );
+}
+
 inline void hkaiCharacter::setLinearVelocity( hkVector4Parameter velocity )
 {
+	HK_WARN_ONCE(0x5a5a3201, 
+		"hkaiCharacter::setLinearVelocity() is deprecated and will be removed "
+		"in a future release. Use setVelocity() instead.");
 	HK_ASSERT2(0x30fa05e2, velocity.isOk<3>(), "Character linear velocity is invalid");
 	m_velocity.setXYZ( velocity );
 }
 
 inline const hkVector4& hkaiCharacter::getForward() const
 {
+	if(m_avoidanceProperties->m_movementProperties.m_kinematicConstraintType != hkaiMovementProperties::CONSTRAINTS_LINEAR_AND_ANGULAR)
+	{
+		HK_WARN_ONCE(0x5a5a3205, 
+			"hkaiCharacter::getForward() is deprecated for characters whose "
+			"kinematic constraint type is not CONSTRAINTS_LINEAR_AND_ANGULAR, "
+			"and will cause an assertion for these characters in a future "
+			"release. You should not get or set the forward vector for "
+			"characters whose constraint type is not CONSTRAINTS_LINEAR_AND_ANGULAR.");
+	}
 	return m_forward;
 }
+
 inline void hkaiCharacter::setForward(hkVector4Parameter forward)
 {
+	if(m_avoidanceProperties->m_movementProperties.m_kinematicConstraintType != hkaiMovementProperties::CONSTRAINTS_LINEAR_AND_ANGULAR)
+	{
+		HK_WARN_ONCE(0x5a5a3206, 
+			"hkaiCharacter::setForward() is deprecated for characters whose "
+			"kinematic constraint type is not CONSTRAINTS_LINEAR_AND_ANGULAR, "
+			"and will cause an assertion for these characters in a future "
+			"release. You should not get or set the forward vector for "
+			"characters whose constraint type is not CONSTRAINTS_LINEAR_AND_ANGULAR.");
+	}
 	HK_ASSERT2(0x30fa05e3, forward.isOk<3>(), "Character forward vector is invalid");
 	HK_ASSERT2(0x30fa05e4, forward.isNormalized<3>(), "Character forward vector is not normalized");
 	m_forward = forward;
@@ -288,7 +323,7 @@ inline void hkaiCharacter::setCurrentNavMeshFace(hkaiPackedKey faceKey)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

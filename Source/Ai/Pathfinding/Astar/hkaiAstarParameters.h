@@ -11,13 +11,14 @@
 	/// Basic output parameters for A* searches
 struct hkaiAstarOutputParameters
 {
-	//+version(1)
+	//+version(2)
 	HK_DECLARE_REFLECTION();
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_ASTAR, hkaiAstarOutputParameters);
 
 	hkaiAstarOutputParameters()
 	: m_numIterations(0)
 	, m_goalIndex(-1)
+	, m_pathLength(HK_REAL_MAX)
 	, m_status(SEARCH_IN_PROGRESS)
 	, m_terminationCause(NOT_TERMINATED)
 	{}
@@ -72,6 +73,12 @@ struct hkaiAstarOutputParameters
 		/// The index of the goal that was reached, or -1 if no goal reached
 	int m_goalIndex; //+default(-1)
 
+		/// Total A* path length. This includes extra modifications to the cost (e.g. hkaiAstarCostModifier),
+		/// but does not include e.g path smoothing on an nav mesh search.
+		/// If the search is unreachable, this will be HK_REAL_MAX.
+		/// If the search is terminated, it will be the distance to the best estimated node.
+	hkReal m_pathLength; //+default(HK_REAL_MAX)
+
 		/// The status of the search after it finished.
 	hkEnum<hkaiAstarOutputParameters::SearchStatus, hkUint8> m_status; //+default(hkaiAstarOutputParameters::SEARCH_IN_PROGRESS)
 
@@ -84,7 +91,7 @@ struct hkaiAstarOutputParameters
 #endif // HKAI_ASTAR_PARAMETERS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

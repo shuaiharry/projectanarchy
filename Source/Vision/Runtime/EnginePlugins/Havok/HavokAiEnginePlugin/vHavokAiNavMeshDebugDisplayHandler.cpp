@@ -10,7 +10,7 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokAiEnginePlugin/vHavokAiNavMeshDebugDisplayHandler.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConversionUtils.hpp>
 
-// Unhandled functions
+// Unhandled functions.
 hkResult vHavokAiNavMeshDebugDisplayHandler::addGeometry(const hkArrayBase<hkDisplayGeometry*>& geometries, const hkTransform& transform, hkUlong id, int tag, hkUlong shapeIdHint, hkGeometry::GeometryType geomType) { return HK_FAILURE; }
 hkResult vHavokAiNavMeshDebugDisplayHandler::addGeometry(hkDisplayGeometry* geometry, hkUlong id, int tag, hkUlong shapeIdHint) { return HK_FAILURE; }
 hkResult vHavokAiNavMeshDebugDisplayHandler::addGeometryInstance(hkUlong origianalGeomId, const hkTransform& transform, hkUlong id, int tag, hkUlong shapeIdHint) { return HK_FAILURE; }
@@ -60,7 +60,7 @@ hkResult vHavokAiNavMeshDebugDisplayHandler::display3dText(const char* text, con
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

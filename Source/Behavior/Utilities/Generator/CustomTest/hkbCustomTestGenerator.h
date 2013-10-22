@@ -11,6 +11,8 @@
 
 #include <Behavior/Behavior/Generator/ReferencePose/hkbReferencePoseGenerator.h>
 #include <Behavior/Behavior/Modifier/hkbModifier.h>
+#include <Behavior/Behavior/Character/hkbBoneIndexArray.h>
+#include <Behavior/Behavior/Character/hkbBoneWeightArray.h>
 #include <Behavior/Utilities/Physics/hkbPhysicsBaseTypes.h>
 
 extern const class hkClass hkbCustomTestGeneratorStruckClass;
@@ -20,7 +22,7 @@ extern const class hkClass hkbCustomTestGeneratorClass;
 	/// This custom generator demonstrates all of the public properties that HAT is capable of exposing.
 class hkbCustomTestGenerator : public hkbReferencePoseGenerator
 {
-	//+version(1)
+	//+version(2)
 	//+vtable(1)
 
 	public:
@@ -39,6 +41,9 @@ class hkbCustomTestGenerator : public hkbReferencePoseGenerator
 
 			// packfile constructor
 		hkbCustomTestGenerator( hkFinishLoadedObjectFlag flag );
+
+			// hkbBindable interface implementation.
+		virtual void collectBindables( hkbBindableCollector& collector ) HK_OVERRIDE;
 
 			// hkbNode interface implementation.
 		virtual hkbNode* cloneNode( hkbBehaviorGraph& rootBehavior ) const HK_OVERRIDE;
@@ -106,6 +111,31 @@ class hkbCustomTestGenerator : public hkbReferencePoseGenerator
 		hkbModifier* m_modifier1;
 		hkbModifier* m_modifier2;
 
+		// Bones
+
+		hkInt16 m_boneIndexOld; //+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NOT_VARIABLE")
+		hkInt16 m_boneIndex;	//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NOT_VARIABLE")
+								//+hk.Ui(group="Bone Index")
+
+		hkInt16 m_boneChainIndex0;	//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+									//+hk.Ui(group="Chain Indices")
+		hkInt16 m_boneChainIndex1;	//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+									//+hk.Ui(group="Chain Indices")
+		hkInt16 m_boneChainIndex2;	//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_CHAIN")
+									//+hk.Ui(group="Chain Indices")
+
+		hkInt16 m_boneGroupIndex0;	//+hkb.RoleAttribute("ROLE_BONE_INDEX")
+									//+hk.Ui(group="Group Indices")
+		hkInt16 m_boneGroupIndex1;	//+hkb.RoleAttribute("ROLE_BONE_INDEX")
+									//+hk.Ui(group="Group Indices")
+		hkInt16 m_boneGroupIndex2;	//+hkb.RoleAttribute("ROLE_BONE_INDEX")
+									//+hk.Ui(group="Group Indices")
+
+		hkRefPtr<hkbBoneWeightArray> m_boneWeightArray;
+		hkRefPtr<hkbBoneIndexArray> m_boneIndexArray; //+hkb.RoleAttribute("ROLE_BONE_INDEX")
+		
+		
+
 		// arrays should be supported
 		hkArray<hkBool> m_array_hkBool;
 		hkArray<int> m_array_int;
@@ -170,7 +200,7 @@ class hkbCustomTestGenerator : public hkbReferencePoseGenerator
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

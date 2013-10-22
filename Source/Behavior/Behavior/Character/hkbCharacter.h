@@ -20,6 +20,8 @@
 #include <Behavior/Utilities/Utils/hkbProjectAssetManager.h>
 #include <Behavior/Utilities/Physics/hkbPhysicsBaseTypes.h>
 
+#include <Common/Base/DebugUtil/DeterminismUtil/hkCheckDeterminismUtil.h>
+
 extern const class hkClass hkbCharacterClass;
 
 class hkaBoneAttachment;
@@ -329,8 +331,13 @@ class hkbCharacter : public hkReferencedObject
 
 			/// The asset manager this character was loaded with
 		hkRefPtr<hkbProjectAssetManager> m_assetManager; //+nosave
-					
+
 	public:
+
+#ifdef HK_ENABLE_DETERMINISM_CHECKS
+			/// Used for internal determinism testing.
+		hkInt32 getUid();
+#endif
 
 		hkbCharacter( hkFinishLoadedObjectFlag flag );
 };
@@ -340,7 +347,7 @@ class hkbCharacter : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

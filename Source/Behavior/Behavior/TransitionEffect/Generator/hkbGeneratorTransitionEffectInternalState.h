@@ -17,7 +17,7 @@
 class hkbGeneratorTransitionEffectInternalState : public hkReferencedObject
 {
 	//+vtable(1)
-	//+version(0)
+	//+version(1)
 	public:
 
 		HK_DECLARE_REFLECTION();
@@ -35,7 +35,7 @@ class hkbGeneratorTransitionEffectInternalState : public hkReferencedObject
 		hkReal m_effectiveBlendOutDuration;
 		hkEnum<hkbGeneratorTransitionEffect::ToGeneratorState,hkInt8> m_toGeneratorState;
 		hkBool m_echoTransitionGenerator;
-		hkBool m_echoToGenerator;
+		hkEnum< hkbTransitionEffect::SelfTransitionMode, hkInt8 > m_toGeneratorSelfTransitionMode;
 		hkBool m_justActivated;
 		hkBool m_updateActiveNodes;
 		hkEnum<hkbGeneratorTransitionEffect::Stage, hkInt8> m_stage;
@@ -44,7 +44,7 @@ class hkbGeneratorTransitionEffectInternalState : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

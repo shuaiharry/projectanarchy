@@ -12,7 +12,6 @@
 #include <Vision/Samples/Engine/RPGPlugin/GameManager.h>
 #include <Vision/Samples/Engine/RPGPlugin/PlayerCharacter.h>
 #include <Vision/Samples/Engine/RPGPlugin/VisionHavokConversion.h>
-#include <Vision/Samples/Engine/RPGPlugin/VisionUserMessages.h>
 
 #include <Vision/Runtime/Engine/Physics/IVisApiPhysicsModule.hpp>
 
@@ -62,11 +61,10 @@ namespace
 
 // RPG_AiControllerComponent
 RPG_AiControllerComponent::RPG_AiControllerComponent()
-  : RPG_ControllerComponent()
-  , m_aiState(ST_None)
-  , m_isFirstStateUpdate(true)
-  , m_stateStartTime(0.0f)
-  , m_target(NULL)
+  : RPG_ControllerComponent(),
+  m_lastAttackTime(0.0f),
+  m_minAttackInterval(3.0f),
+  m_fleeRange(300.0f)
 {
 }
 
@@ -75,82 +73,44 @@ V_IMPLEMENT_SERIAL(RPG_AiControllerComponent, RPG_ControllerComponent, 0, &g_RPG
 START_VAR_TABLE(RPG_AiControllerComponent, RPG_ControllerComponent, "(RPG) AI Controller", 0, "(RPG) AI Controller")
 END_VAR_TABLE
 
-void RPG_AiControllerComponent::ServerTick(float deltaTime)
+bool RPG_AiControllerComponent::CanAttack() const
 {
-  VASSERT(GetOwner());
-  if(static_cast<RPG_Character*>(GetOwner())->IsDead())
+  return ((Vision::GetTimer()->GetTime() - m_lastAttackTime) > m_minAttackInterval);
+}
+
+bool RPG_AiControllerComponent::TryMeleeAttack()
+{
+  if(CanAttack())
   {
-    return;
-  }
-
-  SelectState();
-  UpdateState(deltaTime);
-}
-
-RPG_AIState_e RPG_AiControllerComponent::GetState() const
-{
-  return m_aiState;
-}
-
-bool RPG_AiControllerComponent::IsInState(RPG_AIState_e state) const
-{
-  return state == GetState();
-}
-
-bool RPG_AiControllerComponent::SwitchState(RPG_AIState_e newState)
-{
-  if (GetState() != newState && CanEnterState(newState))
-  {
-    m_aiState = newState;
-    m_isFirstStateUpdate = true;
-    m_stateStartTime = Vision::GetTimer()->GetTime();
+    m_lastAttackTime = Vision::GetTimer()->GetTime();
+    SetState(RPG_ControllerStateId::kMeleeAttacking);
     return true;
   }
+
   return false;
 }
 
-void RPG_AiControllerComponent::UpdateState(float const deltaTime)
+bool RPG_AiControllerComponent::TryRangedAttack()
 {
-  if (m_characterOwner->ShouldDisplayDebugStateInformation())
+  if(CanAttack())
   {
-    DebugDisplayStateInformation();
+    m_lastAttackTime = Vision::GetTimer()->GetTime();
+    SetState(RPG_ControllerStateId::kRangedAttacking);
+    return true;
   }
 
-  RPG_AIState_e const state = GetState();
-  switch(state)
+  return false;
+}
+
+bool RPG_AiControllerComponent::TryAoeAttack()
+{
+  if(CanAttack())
   {
-  case ST_Spawning:
-    UpdateSpawning(deltaTime);
-    break;
-  case ST_Wandering:
-    UpdateWandering(deltaTime);
-    break;
-  case ST_Challenging:
-    UpdateChallenging(deltaTime);
-    break;
-  case ST_MovingToPosition:
-    UpdateMovingToPosition(deltaTime);
-    break;
-  case ST_MeleeAttacking:
-    UpdateMeleeAttacking(deltaTime);
-    break;
-  case ST_RangedAttacking:
-    UpdateRangedAttacking(deltaTime);
-    break;
-  case ST_AoeAttacking:
-    UpdateAoeAttacking(deltaTime);
-    break;
-  case ST_Fleeing:
-    UpdateFleeing(deltaTime);
-    break;
-  case ST_Healing:
-    UpdateHealing(deltaTime);
-    break;
-  default:
-    VASSERT_MSG(false, "RPG_Ai Controller Component tried to update an unhandled state.");
-    break;
+    m_lastAttackTime = Vision::GetTimer()->GetTime();
+    return RPG_ControllerComponent::TryAoeAttack();
   }
-  m_isFirstStateUpdate = false;
+
+  return false;
 }
 
 /// Finds and sets a target within range to interact with (usually to attack).
@@ -159,7 +119,7 @@ bool RPG_AiControllerComponent::AcquireTarget()
 {
   VArray<RPG_Character*> const& characters = RPG_GameManager::s_instance.GetCharacters();
 
-  hkvVec3 const& currentPosition = m_characterOwner->GetPosition();
+  hkvVec3 const& currentPosition = GetCharacter()->GetPosition();
 
   bool returnVal = false;
   for(int index = 0; index < characters.GetSize(); ++index)
@@ -167,7 +127,7 @@ bool RPG_AiControllerComponent::AcquireTarget()
     RPG_Character* character = characters.GetAt(index);
 
     // can't target yourself
-    if(character == m_characterOwner)
+    if(character == GetCharacter())
     {
       continue;
     }
@@ -180,7 +140,7 @@ bool RPG_AiControllerComponent::AcquireTarget()
       continue;
     }
 
-    float const aggroRadius = m_characterOwner->GetAggroRadius();
+    float const aggroRadius = GetCharacter()->GetAggroRadius();
     hkvVec3 const& targetPosition = character->GetPosition();
 
     float const currentRangeSquared = (currentPosition - targetPosition).getLengthSquared();
@@ -188,48 +148,42 @@ bool RPG_AiControllerComponent::AcquireTarget()
     // check if they are within range
     if(currentRangeSquared <= aggroRadius * aggroRadius)
     {
-      m_target = character;
+      SetTarget(character);
       returnVal = true;
     }
   }
   return returnVal;
 }
 
-void RPG_AiControllerComponent::SetTarget(RPG_DamageableEntity* target)
-{
-  m_target = target;
-}
-
-/// Returns the current target.
-RPG_DamageableEntity* RPG_AiControllerComponent::GetTarget()
-{
-  return m_target;
-}
-
-void RPG_AiControllerComponent::ClearTarget()
-{
-  m_target = NULL;
-}
-
-bool RPG_AiControllerComponent::HasTarget() const
-{
-  return m_target != NULL;
-}
-
 bool RPG_AiControllerComponent::HasValidTarget() const
 {
-  if (HasTarget())
+  if (m_target)
   {
     VArray<RPG_DamageableEntity*> const& attackableEntities = RPG_GameManager::s_instance.GetAttackableEntities();
-    if(attackableEntities.Find(m_target) < 0)
+    if(attackableEntities.Find(GetTarget()) < 0)
     {
       return false;
     }
 
     if(m_target->IsFrom(RPG_Character))
     {
-      RPG_Character* targetCharacter = static_cast<RPG_Character*>(m_target);
-      return !targetCharacter->IsDead() && !targetCharacter->IsFeigningDeath();
+      float const aggroRadius = GetCharacter()->GetAggroRadius();
+      hkvVec3 const& currentPosition = GetCharacter()->GetPosition();
+
+      RPG_Character* targetCharacter = static_cast<RPG_Character*>(GetTarget());
+      hkvVec3 const& targetPosition = targetCharacter->GetPosition();
+
+      float const currentRangeSquared = (currentPosition - targetPosition).getLengthSquared();
+
+      // check if target is still within range
+      if(currentRangeSquared > aggroRadius * aggroRadius)
+      {
+        return false;
+      }
+      else
+      {
+        return !targetCharacter->IsDead() && !targetCharacter->IsFeigningDeath();
+      }
     }
     else
     {
@@ -247,16 +201,16 @@ bool RPG_AiControllerComponent::HasLineOfSightToTarget() const
 
 bool RPG_AiControllerComponent::HasLineOfSightToTarget(bool& left, bool& center, bool& right) const
 {
-  VASSERT(m_characterOwner);
+  VASSERT(GetCharacter());
   VASSERT(m_target);
 
-  RPG_ClosestRaycastResultIgnoreSourceTarget raycastResult(m_characterOwner, m_target);
+  RPG_ClosestRaycastResultIgnoreSourceTarget raycastResult(GetCharacter(), m_target);
 
   hkvVec3 rayStart;
-  m_characterOwner->CalcPositionForTargeting(rayStart);
+  GetCharacter()->CalcPositionForTargeting(rayStart);
 
   hkvVec3 rayEnd;
-  m_target->CalcPositionForTargeting(rayEnd);
+  GetTarget()->CalcPositionForTargeting(rayEnd);
 
   hkvVec3 directionToTarget = rayEnd - rayStart;
   directionToTarget.normalizeIfNotZero();
@@ -267,7 +221,7 @@ bool RPG_AiControllerComponent::HasLineOfSightToTarget(bool& left, bool& center,
   raycastResult.vRayStart = rayStart;
   raycastResult.vRayEnd = rayEnd;
   Vision::GetApplication()->GetPhysicsModule()->PerformRaycast(&raycastResult);
-  if (m_characterOwner->ShouldDisplayDebugStateInformation())
+  if (GetCharacter()->ShouldDisplayDebugStateInformation())
   {
     if(raycastResult.bHit)
     {
@@ -286,10 +240,10 @@ bool RPG_AiControllerComponent::HasLineOfSightToTarget(bool& left, bool& center,
   // check from the left side
   left = true;
   raycastResult.Reset();
-  raycastResult.vRayStart = rayStart + hkvVec3(-directionToTarget.y, directionToTarget.x, 0.0f) * m_characterOwner->GetCollisionRadius();
-  raycastResult.vRayEnd = rayEnd + hkvVec3(-directionToTarget.y, directionToTarget.x, 0.0f) * m_characterOwner->GetCollisionRadius();
+  raycastResult.vRayStart = rayStart + hkvVec3(-directionToTarget.y, directionToTarget.x, 0.0f) * GetCharacter()->GetCollisionRadius();
+  raycastResult.vRayEnd = rayEnd + hkvVec3(-directionToTarget.y, directionToTarget.x, 0.0f) * GetCharacter()->GetCollisionRadius();
   Vision::GetApplication()->GetPhysicsModule()->PerformRaycast(&raycastResult);
-  if (m_characterOwner->ShouldDisplayDebugStateInformation())
+  if (GetCharacter()->ShouldDisplayDebugStateInformation())
   {
     if(raycastResult.bHit)
     {
@@ -308,10 +262,10 @@ bool RPG_AiControllerComponent::HasLineOfSightToTarget(bool& left, bool& center,
   // check from the right side
   right = true;
   raycastResult.Reset();
-  raycastResult.vRayStart = rayStart + hkvVec3(directionToTarget.y, -directionToTarget.x, 0.0f) * m_characterOwner->GetCollisionRadius();
-  raycastResult.vRayEnd = rayEnd + hkvVec3(directionToTarget.y, -directionToTarget.x, 0.0f) * m_characterOwner->GetCollisionRadius();
+  raycastResult.vRayStart = rayStart + hkvVec3(directionToTarget.y, -directionToTarget.x, 0.0f) * GetCharacter()->GetCollisionRadius();
+  raycastResult.vRayEnd = rayEnd + hkvVec3(directionToTarget.y, -directionToTarget.x, 0.0f) * GetCharacter()->GetCollisionRadius();
   Vision::GetApplication()->GetPhysicsModule()->PerformRaycast(&raycastResult);
-  if (m_characterOwner->ShouldDisplayDebugStateInformation())
+  if (GetCharacter()->ShouldDisplayDebugStateInformation())
   {
     if(raycastResult.bHit)
     {
@@ -330,136 +284,175 @@ bool RPG_AiControllerComponent::HasLineOfSightToTarget(bool& left, bool& center,
   return left && center && right;
 }
 
-bool RPG_AiControllerComponent::IsValidTargetInAggroRange() const
+// RPG_AiControllerState::MeleeAttacking
+void RPG_AiControllerState::MeleeAttacking::OnEnterState(RPG_ControllerComponent *const controller)
 {
-  VASSERT(m_characterOwner);
-  return m_target && m_characterOwner->IsTargetWithinRange(m_target, m_characterOwner->GetAggroRadius());
+  RPG_ControllerStateBase::OnEnterState(controller);
+
+  RPG_Character *const character = controller->GetCharacter();
+
+  character->CreateCharacterEffect(FX_MeleeBasicAttackSwing);
+
+  character->RaiseAnimationEvent(RPG_CharacterAnimationEvent::kMeleeAttack);
 }
 
-bool RPG_AiControllerComponent::FleeFromPosition(hkvVec3 const& targetPosition, float const fleeDistance /*= 300.f*/)
+void RPG_AiControllerState::MeleeAttacking::OnProcessAnimationEvent(RPG_ControllerComponent *const controller, hkbEvent const& animationEvent)
 {
-  VASSERT(m_characterOwner);
-  hkvVec3 const& currentPosition = m_characterOwner->GetPosition();
+  RPG_ControllerStateBase::OnProcessAnimationEvent(controller, animationEvent);
 
-  // find a position away from the target
-  hkvVec3 const& fleeDirection = (currentPosition - targetPosition).getNormalized(); //direction from target to me
-  hkvVec3 const& fleePosition = currentPosition + fleeDirection * fleeDistance;
+  RPG_Character *const character = controller->GetCharacter();
 
-  // if fleePosition is valid, just use it
-  if (RPG_ControllerUtil::IsPointOnNavmesh(fleePosition))
+  if(character->GetIdForAnimationEvent(RPG_CharacterAnimationEvent::kMeleeAttackEnd) == animationEvent.getId())
   {
-    m_characterOwner->GetActionHandler().PerformAction(AT_Move, false, NULL, fleePosition);
-    if (m_characterOwner->ShouldDisplayDebugStateInformation())
-    {
-      Vision::Game.DrawSingleLine(currentPosition, fleePosition, VColorRef(24, 208, 208), 3.0f);
-    }
-    return true;
+    controller->SetState(RPG_ControllerStateId::kIdling);
   }
-  else
+  else if(character->GetIdForAnimationEvent(RPG_CharacterAnimationEvent::kMeleeAttackFire) == animationEvent.getId())
   {
-    hkvVec3 nearestFleePosition;
-    if (RPG_ControllerUtil::GetClosestPointOnNavMesh(fleePosition, 5.0f, nearestFleePosition))
-    {
-      m_characterOwner->GetActionHandler().PerformAction(AT_Move, false, NULL, nearestFleePosition);
-      if (m_characterOwner->ShouldDisplayDebugStateInformation())
-      {
-        Vision::Game.DrawSingleLine(currentPosition, nearestFleePosition, VColorRef(24, 208, 208), 3.0f);
-      }
-      return true;
-    }
-  }
-  return false;
-}
-
-void RPG_AiControllerComponent::UpdateSpawning(float const deltaTime)
-{
-  // if we entered this state and weren't already performing its associated action, start it up.
-  if (m_isFirstStateUpdate && !m_characterOwner->GetActionHandler().IsPerformingAction(AT_Spawn))
-  {
-    m_characterOwner->GetActionHandler().PerformAction(AT_Spawn, true, m_target);
-  }
-  else
-  {
-    // when the action is no longer being performed, exit the state.
-    if(!m_characterOwner->GetActionHandler().IsPerformingAction(AT_Spawn))
-    {
-      SwitchState(ST_None);
-    }
+    // Do attack
+    character->DoMeleeAttack(controller->GetTarget());
   }
 }
 
-void RPG_AiControllerComponent::UpdateChallenging(float const deltaTime)
+void RPG_AiControllerState::MeleeAttacking::OnTick(RPG_ControllerComponent *const controller, float const deltaTime)
 {
-  if (m_isFirstStateUpdate)
+  RPG_ControllerStateBase::OnTick(controller, deltaTime);
+
+  RPG_DamageableEntity const *const targetEntity = controller->GetTarget();
+
+  if(targetEntity)
   {
-    // target is newly acquired. Begin the challenge.
-    m_characterOwner->GetActionHandler().PerformAction(AT_Challenge, true, m_target);
-  }
-  else
-  {
-    if(!m_characterOwner->GetActionHandler().IsPerformingAction(AT_Challenge))
-    {
-      // challenge SA has completed.
-      SwitchState(ST_None);
-    }
+    RPG_ControllerUtil::FaceTowards(controller, targetEntity->GetPosition(), 0.25f);
   }
 }
 
-void RPG_AiControllerComponent::DebugDisplayStateInformation() const
+// RPG_AiControllerState::RangedAttacking
+void RPG_AiControllerState::RangedAttacking::OnEnterState(RPG_ControllerComponent *const controller)
 {
-  const float vOffset = 0.f;
-  VString msg, tempLine, stateName;
+  RPG_ControllerStateBase::OnEnterState(controller);
 
-  RPG_AIState_e const state = GetState();
-  switch(state)
+  RPG_Character *const character = controller->GetCharacter();
+
+  character->CreateCharacterEffect(FX_RangedAttackChargeLoop);
+
+  character->RaiseAnimationEvent(RPG_CharacterAnimationEvent::kRangedAttack);
+}
+
+void RPG_AiControllerState::RangedAttacking::OnExitState(RPG_ControllerComponent *const controller)
+{
+  RPG_ControllerStateBase::OnExitState(controller);
+
+  controller->GetCharacter()->PauseCharacterEffect(FX_RangedAttackChargeLoop);
+}
+
+void RPG_AiControllerState::RangedAttacking::OnProcessAnimationEvent(RPG_ControllerComponent *const controller, hkbEvent const& animationEvent)
+{
+  RPG_ControllerStateBase::OnProcessAnimationEvent(controller, animationEvent);
+
+  RPG_Character *const character = controller->GetCharacter();
+
+  if(character->GetIdForAnimationEvent(RPG_CharacterAnimationEvent::kRangedAttackEnd) == animationEvent.getId())
   {
-  case ST_None:
-    stateName = "None";
-  case ST_Spawning:
-    stateName = "Spawning";
-    break;
-  case ST_Wandering:
-    stateName = "Wandering";
-    break;
-  case ST_Challenging:
-    stateName = "Challenging";
-    break;
-  case ST_MovingToPosition:
-    stateName = "Moving to Position";
-    break;
-  case ST_MeleeAttacking:
-    stateName = "Melee Attacking";
-    break;
-  case ST_RangedAttacking:
-    stateName = "Ranged Attacking";
-    break;
-  case ST_AoeAttacking:
-    stateName = "AoE Attacking";
-    break;
-  case ST_Fleeing:
-    stateName = "Fleeing";
-    break;
-  case ST_Healing:
-    stateName = "Healing";
-    break;
-  default:
-    VASSERT_MSG(false, "Hey developer! Update your DebugDisplayStateInformation() to accommodate any newly-defined states.");
-    break;
+    controller->SetState(RPG_ControllerStateId::kIdling);
   }
+  else if(character->GetIdForAnimationEvent(RPG_CharacterAnimationEvent::kRangedAttackFire) == animationEvent.getId())
+  {
+    character->PauseCharacterEffect(FX_RangedAttackChargeLoop);
+    character->CreateCharacterEffect(FX_RangedAttackFire);
 
-  tempLine.Format("State: %s\n", stateName.AsChar());
-  msg += tempLine;
+    character->DoRangedAttack(controller->GetTargetPoint());
+  }
+}
 
-  VASSERT(m_characterOwner);
-  const hkvVec3 vPos = m_characterOwner->GetPosition() + hkvVec3(0.0f, 0.0f, vOffset);
+void RPG_AiControllerState::RangedAttacking::OnTick(RPG_ControllerComponent *const controller, float const deltaTime)
+{
+  RPG_ControllerStateBase::OnTick(controller, deltaTime);
 
-  Vision::Message.SetTextColor(VColorRef(208,127,127,255));
-  Vision::Message.DrawMessage3D(msg, vPos);
-  Vision::Message.SetTextColor(); // restore default white
+  RPG_DamageableEntity const *const targetEntity = controller->GetTarget();
+
+  if(targetEntity)
+  {
+    controller->SetTargetPoint(targetEntity->GetPosition());
+
+    RPG_ControllerUtil::FaceTowards(controller, targetEntity->GetPosition(), 0.25f);
+  }
+}
+
+// RPG_AiControllerState::AoeAttacking
+void RPG_AiControllerState::AoeAttacking::OnEnterState(RPG_ControllerComponent *const controller)
+{
+  RPG_ControllerStateBase::OnEnterState(controller);
+
+  RPG_Character *const character = controller->GetCharacter();
+
+  character->CreateCharacterEffect(FX_AoeAttackBegin);
+  character->CreateCharacterEffect(FX_AoeAttackChargeLoop);
+
+  character->RaiseAnimationEvent(RPG_CharacterAnimationEvent::kAoeAttack);
+}
+
+void RPG_AiControllerState::AoeAttacking::OnExitState(RPG_ControllerComponent *const controller)
+{
+  RPG_ControllerStateBase::OnExitState(controller);
+
+  controller->GetCharacter()->PauseCharacterEffect(FX_AoeAttackChargeLoop);
+}
+
+void RPG_AiControllerState::AoeAttacking::OnProcessAnimationEvent(RPG_ControllerComponent *const controller, hkbEvent const& animationEvent)
+{
+  RPG_ControllerStateBase::OnProcessAnimationEvent(controller, animationEvent);
+
+  RPG_Character *const character = controller->GetCharacter();
+
+  if(character->GetIdForAnimationEvent(RPG_CharacterAnimationEvent::kAoeAttackEnd) == animationEvent.getId())
+  {
+    controller->SetState(RPG_ControllerStateId::kIdling);
+  }
+  else if(character->GetIdForAnimationEvent(RPG_CharacterAnimationEvent::kAoeAttackFire) == animationEvent.getId())
+  {
+    // Do attack
+    character->PauseCharacterEffect(FX_AoeAttackChargeLoop);
+    character->CreateCharacterEffect(FX_AoeAttackFire);
+
+    character->DoAoeAttack();
+  }
+}
+
+// RPG_AiControllerState::Challenging
+void RPG_AiControllerState::Challenging::OnEnterState(RPG_ControllerComponent *const controller)
+{
+  RPG_ControllerStateBase::OnEnterState(controller);
+
+  RPG_Character *const character = controller->GetCharacter();
+
+  character->CreateCharacterEffect(FX_Challenge);
+
+  character->RaiseAnimationEvent(RPG_CharacterAnimationEvent::kChallenge);
+}
+
+void RPG_AiControllerState::Challenging::OnProcessAnimationEvent(RPG_ControllerComponent *const controller, hkbEvent const& animationEvent)
+{
+  RPG_ControllerStateBase::OnProcessAnimationEvent(controller, animationEvent);
+
+  if(controller->GetCharacter()->GetIdForAnimationEvent(RPG_CharacterAnimationEvent::kChallengeEnd) == animationEvent.getId())
+  {
+    controller->SetState(RPG_ControllerStateId::kIdling);
+  }
+}
+
+void RPG_AiControllerState::Challenging::OnTick(RPG_ControllerComponent *const controller, float const deltaTime)
+{
+  RPG_ControllerStateBase::OnTick(controller, deltaTime);
+
+  RPG_DamageableEntity const *const targetEntity = controller->GetTarget();
+
+  if(targetEntity)
+  {
+    RPG_ControllerUtil::FaceTowards(controller, targetEntity->GetPosition(), 0.25f);
+  }
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

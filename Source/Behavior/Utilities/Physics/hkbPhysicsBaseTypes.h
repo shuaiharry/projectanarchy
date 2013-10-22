@@ -124,7 +124,6 @@ struct hkbRagdollControllerInstanceSetup
 	HK_DECLARE_POD_TYPE();
 
 		/// Context in which the controller is being created.
-		/// Note: this may be null in some circumstances, it is provided only as extra information when available.
 	const hkbContext* m_context;
 
 		/// Ragdoll instance to drive
@@ -256,7 +255,6 @@ struct hkbCharacterControllerInstanceSetup
 	HK_DECLARE_POD_TYPE();
 
 		/// Context in which the controller is being created.
-		/// Note: this may be null in some circumstances, it is provided only as extra information when available.
 	const hkbContext* m_context;
 
 		/// Initial transform for the controller.
@@ -271,7 +269,7 @@ struct hkbCharacterControllerInstanceSetup
 #endif // hkbPhysicsBaseTypes_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

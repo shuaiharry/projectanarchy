@@ -79,8 +79,8 @@ class BitmapWriteIterator
 // Finds the span (i.e. min, max) of a channel and quantizes values
 class Range
 {
-	// This class performs quantisation with a tolerance, which is somewhat subtle.
-	// The quantisation bins are chosen so that:
+	// This class performs quantization with a tolerance, which is somewhat subtle.
+	// The quantization bins are chosen so that:
 	//   1. there are an equal number of bins to the left and right of the center-point
 	//   2. there is one bin covering both center+epsilon and center-epsilon
 	//   3. each value is quantized to the *nearest* bin, not quantized via truncation
@@ -103,72 +103,76 @@ class Range
 	public:
 		enum { MIN_QVAL = -(1<<13) + 1, MAX_QVAL = (1<<13) - 1};
 
-
-
+		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_ANIM_COMPRESSED,hkaPredictiveCompressedAnimationUtil::Range);
+		
 		Range()
 			// setting min to a large number and max to a small one means that the first sample
 			// will change both min and max.
-			: m_min(HK_REAL_MAX), m_max(-HK_REAL_MAX)
 		{
+			m_min = hkSimdReal_Max;
+			m_max = hkSimdReal_MinusMax;
+			m_tolerance.setZero();
 		}
-		inline void calcParams(float& scale, float& offset) const
+		inline void calcParams(hkSimdReal& scale, hkSimdReal& offset) const
 		{
 			HK_ASSERT(0xabd3ba32, m_max >= m_min);
-			HK_ASSERT(0xabd3ba32, hkMath::isFinite(m_max));
-			HK_ASSERT(0xabd3ba32, hkMath::isFinite(m_min));
+			HK_ASSERT(0xabd3ba32, hkMath::isFinite(m_max.getReal()));
+			HK_ASSERT(0xabd3ba32, hkMath::isFinite(m_min.getReal()));
 			// Ranges are stored as (scale, offset)
 			// such that for a quantized value q, the dequantized value will be q * scale + offset
 			// and the abs. difference between the quantized and dequantized values will be less
 			// than or equal to m_tolerance.
-			scale = 2.0f * m_tolerance;
-			offset = 0.5f * (m_max + m_min);
+			scale.setAdd(m_tolerance, m_tolerance);
+			offset.setAdd(m_max, m_min);
+			offset.mul(hkSimdReal_Half);
 		}
 
-		inline hkInt16 quantize(float x) const
+		inline hkInt16 quantize(hkSimdRealParameter x) const
 		{
 			HK_ASSERT(0xabd3ba32, m_max >= m_min);
-			HK_ASSERT(0xabd3ba32, hkMath::isFinite(m_max));
-			HK_ASSERT(0xabd3ba32, hkMath::isFinite(m_min));
+			HK_ASSERT(0xabd3ba32, hkMath::isFinite(m_max.getReal()));
+			HK_ASSERT(0xabd3ba32, hkMath::isFinite(m_min.getReal()));
 
-			float scale, offset;
+			hkSimdReal scale, offset;
 			calcParams(scale, offset);
 			
-			float q = (x - offset) / scale;
+			hkSimdReal q; 
+			q.setReciprocal<HK_ACC_FULL,HK_DIV_SET_HIGH>(scale); 
+			q.mul(x - offset);
 
 
 			// We need round-to-nearest, not truncating conversion
 			// This gives us a full extra bit of precision
-			int i = (int)(q >= 0 ? q + 0.5f : q - 0.5f);
+			hkSimdReal qRounded;
+			qRounded.setFlipSign(hkSimdReal_Half, q.lessZero());
+			qRounded.add(q);
+			int i; qRounded.storeSaturateInt32(&i);
 			
-
 			// these out-of-bounds cases shouldn't really happen, but may crop up due to rounding error
 			i = hkMath::clamp(i, (int)MIN_QVAL, (int)MAX_QVAL);
 			return (hkInt16)i;
 		}
 
-		inline void addToRange(float x)
+		inline void addToRange(hkSimdRealParameter x)
 		{
-			if (x > m_max)
-			{
-				m_max = x;
-			}
-			if (x < m_min)
-			{
-				m_min = x;
-			}
+			m_max.setMax(x, m_max);
+			m_min.setMin(x, m_min);
 		}
 
-		inline void setTolerance(hkReal tolerance)
+		inline void setTolerance(hkSimdRealParameter tolerance)
 		{
-			hkReal minPossibleTolerance = 0.5f * (m_max - m_min) / (MAX_QVAL - MIN_QVAL);
-			m_tolerance = hkMath::max2(tolerance, minPossibleTolerance);
+			hkSimdReal minPossibleTolerance = hkSimdReal_Half * (m_max - m_min) * hkSimdReal::fromFloat(hkReal(1) / hkReal(MAX_QVAL - MIN_QVAL));
+			m_tolerance.setMax(tolerance, minPossibleTolerance);
 		}
 
-		inline PCA::StorageClass getStorageClass(float refValue)
+		inline PCA::StorageClass getStorageClass(hkSimdRealParameter refValue)
 		{
-			if ((m_max - m_min) < 2.0f * m_tolerance)
+			if ((m_max - m_min) < (m_tolerance + m_tolerance))
 			{
-				if (hkMath::max2(hkMath::fabs(m_max-refValue), hkMath::fabs(m_min-refValue)) < m_tolerance)
+				hkSimdReal absMax; absMax.setAbs(m_max-refValue);
+				hkSimdReal absMin; absMin.setAbs(m_min-refValue);
+				hkSimdReal both; both.setMax(absMax,absMin);
+				if (both.isLess(m_tolerance))
 				{
 					return PCA::STORAGE_REFERENCE;
 				}
@@ -183,91 +187,76 @@ class Range
 			}
 		}
 
-		inline float center()
+		inline hkSimdReal center()
 		{
-			return (m_max + m_min) / 2;
+			return (m_max + m_min) * hkSimdReal_Half;
 		}
 	public:
 		// smallest value seen in the channel
-		float m_min;
+		hkSimdReal m_min;
 		// largest value seen in the channel
-		float m_max;
+		hkSimdReal m_max;
 		// maximum acceptable error
 		// average error for uniform data is m_tolerance/2
 		// due to floating-point inaccuracies, it is sometimes possible for the error to exceed tolerance by
 		// about 1 ulp (i.e. a factor of 1 + HK_REAL_EPSILON).
-		float m_tolerance;
+		hkSimdReal m_tolerance;
 };
 
 
-
-
-HK_FORCE_INLINE void quaternionDropW(hkVector4& v)
-{
-	if (v(3) < 0)
-	{
-		v.setNeg4(v);
-	}
-#ifdef HK_PREDICTIVE_QUATERNION_MANHATTAN
-	hkVector4 abs; abs.setAbs4(v);
-	hkVector4 manhattanNorm; manhattanNorm.setAll(abs(0) + abs(1) + abs(2) + abs(3));
-	v.setDiv4(v, manhattanNorm);
-#endif
-}
-
 HK_FORCE_INLINE void quaternionRecoverW(hkVector4& v)
 {
-	#if defined(HK_PREDICTIVE_QUATERNION_MANHATTAN)
-		hkVector4 abs;
-		abs.setAbs4(v);
-		#if HK_CONFIG_SIMD == HK_CONFIG_SIMD_ENABLED
-			hkSimdReal w = hkSimdReal::getConstant<HK_QUADREAL_1>() - abs.horizontalAdd3();
-			w.setMax( hkSimdReal::getConstant<HK_QUADREAL_0>(), w );
-			w.setMin( hkSimdReal::getConstant<HK_QUADREAL_1>(), w );
-			v.setXYZW( v, w );
-		#else
-			v(3) = hkMath::clamp(1.0f - (abs(0) + abs(1) + abs(2)), 0.f, 1.f);
-		#endif
-	#else
-		#if HK_CONFIG_SIMD == HK_CONFIG_SIMD_ENABLED
-			hkSimdReal w = hkSimdReal::getConstant<HK_QUADREAL_1>() - v.lengthSquared3();
-			w.setMax( hkSimdReal::getConstant<HK_QUADREAL_0>(), w );
-			w.setMin( hkSimdReal::getConstant<HK_QUADREAL_1>(), w );
-			// shucks, back to the FPU
-			v(3) = hkMath::sqrt( w );
-		#else
-		    v(3) = hkMath::sqrt(hkMath::clamp(1 - (v(0)*v(0) + v(1)*v(1) + v(2)*v(2)), 0.f, 1.f));
-		#endif
-	#endif
+#if defined(HK_PREDICTIVE_QUATERNION_MANHATTAN)
+	hkVector4 abs;
+	abs.setAbs(v);
+	hkSimdReal w; w.setClampedZeroOne(hkSimdReal_1 - abs.horizontalAdd<3>());
+	v.setW( w );
+#else
+	hkSimdReal w; w.setClampedZeroOne(hkSimdReal_1 - v.lengthSquared<3>());
+	v.setW(w.sqrt<HK_ACC_FULL,HK_SQRT_SET_ZERO>());
+#endif
 }
 
 HK_FORCE_INLINE void quaternionRecoverW4(hkVector4& a, hkVector4& b, hkVector4& c, hkVector4& d)
 {
-#if defined(HK_PREDICTIVE_QUATERNION_MANHATTAN) || (HK_CONFIG_SIMD == HK_CONFIG_SIMD_DISABLED)
+#if (HK_CONFIG_SIMD == HK_CONFIG_SIMD_DISABLED)
 	quaternionRecoverW(a);
 	quaternionRecoverW(b);
 	quaternionRecoverW(c);
 	quaternionRecoverW(d);
 #else
-	hkVector4 dots;
-	hkVector4Util::dot3_4vs4(a,a,b,b,c,c,d,d,dots);
-	hkVector4 zero = hkVector4::getConstant<HK_QUADREAL_0>();
+
+	hkVector4 zero; zero.setZero();
 	hkVector4 one = hkVector4::getConstant<HK_QUADREAL_1>();
-	dots.setSub4( one, dots );
-	// clamp
-	dots.setMax4( zero, dots );
-	dots.setMin4( one, dots );
-	a(3) = hkMath::sqrt(dots(0));
-	b(3) = hkMath::sqrt(dots(1));
-	c(3) = hkMath::sqrt(dots(2));
-	d(3) = hkMath::sqrt(dots(3));
+
+	hkVector4Util::transpose(a,b,c,d);
+
+#if defined(HK_PREDICTIVE_QUATERNION_MANHATTAN)
+	hkVector4 manhattanNorm, tmp;
+	manhattanNorm.setAbs(a);
+	tmp.setAbs(b); manhattanNorm.add(tmp);
+	tmp.setAbs(c); manhattanNorm.add(tmp);
+	d.setSub(one, manhattanNorm);
+	d.setClamped(d, zero, one);
+#else
+	hkVector4 tmp;
+	tmp.setMul(a,a);
+	tmp.addMul(b,b);
+	tmp.addMul(c,c);
+	tmp.setSub( one, tmp );
+	tmp.setClamped(tmp, zero, one);
+	d.setSqrt<HK_ACC_FULL,HK_SQRT_SET_ZERO>(tmp);
+#endif
+
+	hkVector4Util::transpose(a,b,c,d);
+
 #endif
 }
 
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

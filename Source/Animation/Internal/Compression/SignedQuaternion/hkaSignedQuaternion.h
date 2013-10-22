@@ -19,7 +19,7 @@ public:
 	static void HK_CALL unpackSignedQuaternion16( const hkUint8* in, hkQuaternion* out );
 	static void HK_CALL unpackSignedQuaternion24( const hkUint8* in, hkQuaternion* out );
 	static void HK_CALL unpackSignedQuaternion32( const hkUint8* in8, hkQuaternion* out );
-	static void HK_CALL unpackSignedQuaternion40( const hkUint8* in, hkQuaternion* out );
+	static void HK_CALL unpackSignedQuaternion40( const hkUint8* HK_RESTRICT in, hkQuaternion* HK_RESTRICT out );
 	static void HK_CALL unpackSignedQuaternion48( const hkUint8* in8, hkQuaternion* out );
 	static void HK_CALL unpackSignedQuaternion128( const hkUint8* in8, hkQuaternion* out );
 	static void HK_CALL handleEndianSignedQuaternion24( hkUint8* dataInOut );
@@ -37,7 +37,7 @@ public:
 };
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

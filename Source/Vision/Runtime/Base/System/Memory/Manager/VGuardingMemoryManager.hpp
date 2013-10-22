@@ -28,7 +28,7 @@
 ///
 /// Using this manager has an extremely high memory and CPU overhead.
 ///
-#if !defined(WIN32) && !defined(_VISION_DOC)
+#if !( defined(WIN32) && !defined( _VISION_WINRT ) ) && !defined(_VISION_DOC)
 
 typedef VMemoryManager_CRT VGuardingMemoryManager;
 
@@ -67,7 +67,7 @@ private:
 #endif // VGuardingMemoryManager_h__
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

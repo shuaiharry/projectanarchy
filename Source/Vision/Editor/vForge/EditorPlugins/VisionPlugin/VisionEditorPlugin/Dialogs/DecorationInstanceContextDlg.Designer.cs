@@ -232,6 +232,7 @@ namespace VisionEditorPlugin.Dialogs
       this.MaximumSize = new System.Drawing.Size(380, 154);
       this.MinimizeBox = false;
       this.MinimumSize = new System.Drawing.Size(380, 75);
+      this.ShowInTaskbar = false;
       this.Name = "DecorationInstanceContextDlg";
       this.Text = "Decoration Group";
       this.toolStrip1.ResumeLayout(false);

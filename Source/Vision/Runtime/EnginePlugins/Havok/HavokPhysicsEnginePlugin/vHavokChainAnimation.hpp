@@ -13,7 +13,6 @@
 
 class vHavokConstraintChain;
 
-
 /// \brief
 ///   Component for animating the bones of an entity according to the
 ///   links of a Havok constraint chain.
@@ -21,10 +20,12 @@ class vHavokChainAnimation
   : public IVObjectComponent
   , public IVisCallbackHandler_cl
 {
-
-  /// @name Constructor / Destructor
-  //@{
 public:
+  ///
+  /// @name Constructor / Destructor
+  /// @{
+  ///
+
   /// \brief
   ///   Constructor for this chain animation component.
   /// \param iComponentFlags
@@ -37,11 +38,17 @@ public:
   /// \brief
   ///   Destructor.
   VHAVOK_IMPEXP virtual ~vHavokChainAnimation();
-  //@}
 
-  /// @name Initialization / Deinitialization
-  //@{
+  ///
+  /// @}
+  ///
+
 protected:
+  ///
+  /// @name Initialization / Deinitialization
+  /// @{
+  ///
+
   /// \brief
   ///   Initializes this component after it has been added to an owner.
   void CommonInit();
@@ -49,74 +56,114 @@ protected:
   /// \brief
   ///   Deinitialization that is used both on DisposeObject and on destruction.
   void CommonDeinit();  
-  //@}
 
+  ///
+  /// @}
+  ///
+
+public:
+  ///
   /// @name Base Class Overrides
-  //@{
-public:
-  VHAVOK_IMPEXP VOVERRIDE BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut);
-  VHAVOK_IMPEXP VOVERRIDE void DisposeObject();
-  VHAVOK_IMPEXP VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData);
-  VHAVOK_IMPEXP VOVERRIDE void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
-  VHAVOK_IMPEXP VOVERRIDE void SetOwner(VisTypedEngineObject_cl *pOwner);
-  //@}
+  /// @{
+  ///
 
+  VHAVOK_IMPEXP virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void DisposeObject() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void SetOwner(VisTypedEngineObject_cl *pOwner) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
+
+public:
+  ///
   /// @name Serialization
-  //@{
-public:
-  V_DECLARE_SERIAL_DLLEXP( vHavokChainAnimation, VHAVOK_IMPEXP)
-  V_DECLARE_VARTABLE(vHavokChainAnimation, VHAVOK_IMPEXP)
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
-  VHAVOK_IMPEXP VOVERRIDE void OnDeserializationCallback(const VSerializationContext &context);
-  VOVERRIDE VBool WantsDeserializationCallback(const VSerializationContext &context) { return context.m_eType != VSerializationContext::VSERIALIZATION_EDITOR; }
-  //@}
+  /// @{
+  ///
 
-  /// @name Helpers
-  //@{
+  V_DECLARE_SERIAL_DLLEXP(vHavokChainAnimation, VHAVOK_IMPEXP)
+  V_DECLARE_VARTABLE(vHavokChainAnimation, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void OnDeserializationCallback(const VSerializationContext &context) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual VBool WantsDeserializationCallback(const VSerializationContext &context) HKV_OVERRIDE
+  { 
+    return context.m_eType != VSerializationContext::VSERIALIZATION_EDITOR; 
+  }
+
+  ///
+  /// @}
+  ///
+
 protected:
+  ///
+  /// @name Helpers
+  /// @{
+  ///
+
   /// \brief
   ///   Retrieves the constraint chain instance matching the \c ConstraintChainKey
   /// \return
-  ///   A pointer to a constraint chain; or \c null, if the key is empty or if no 
+  ///   A pointer to a constraint chain; or \c NULL, if the key is empty or if no 
   ///   constraint chain with that key exists.
   vHavokConstraintChain *GetConstraintChain();
 
   /// \brief
-  ///   Updates the bones of the owner entity with the data of the constraint chain
-  ///   this component refers to. Does nothing if no constraint chain is specified
+  ///   Updates the bones of the owner entity with the data of this component's 
+  ///   constraint chain. Does nothing if no constraint chain is specified
   ///   or if the specified constraint chain does not exist.
   void UpdateBones();
-  //@}
 
-  /// @name Public Attributes
-  //@{
+  ///
+  ///@}
+  ///
+
 public:
+  ///
+  /// @name Public Attributes
+  /// @{
+  ///
+
   VString ConstraintChainKey; ///< The key of the constraint chain used to animate the entity
   float BoneRoll; ///< The roll to apply to each bone in addition to the link transformation
   BOOL ReverseBoneOrder; ///< Whether to reverse the bone order before applying the transformations
-  //@}
 
-  /// @name Internal Attributes
-  //@{
+  ///
+  /// @}
+  ///
+
 protected:
+  ///
+  /// @name Internal Attributes
+  /// @{
+
   unsigned int m_iConstraintChainIndex; ///< The last known index of the constraint chain this component refers to
   VisBaseEntity_cl *m_pOwnerEntity; ///< The owner of this component as a VisBaseEntity_cl
 
 private:
   static const unsigned int s_iSerialVersion; ///< The current serialization version for objects of this class.
-  //@}
 
-  /// @name Constants
-  //@{
+  ///
+  /// @}
+  ///
+
 protected:
+  ///
+  /// @name Constants
+  /// @{
+
   static const unsigned int InvalidIndex; ///< The invalid constraint chain index
-  //@}
+
+  ///
+  /// @}
+  ///
 };
 
 #endif //V_HAVOK_CHAIN_ANIMATION_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

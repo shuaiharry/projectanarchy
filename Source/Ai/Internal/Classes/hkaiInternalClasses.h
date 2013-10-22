@@ -17,8 +17,8 @@
 HK_CLASS(hkaiEdgeGeometry)
 HK_STRUCT(hkaiEdgeGeometryEdge)
 HK_STRUCT(hkaiEdgeGeometryFace)
+HK_STRUCT(hkaiNavMeshEdgeMatchingParameters)
 HK_STRUCT(hkaiNavMeshGenerationSettings)
-HK_STRUCT(hkaiNavMeshGenerationSettingsEdgeMatchingParameters)
 HK_STRUCT(hkaiNavMeshGenerationSettingsMaterialConstructionPair)
 HK_STRUCT(hkaiNavMeshGenerationSettingsOverrideSettings)
 HK_STRUCT(hkaiNavMeshGenerationSettingsRegionPruningSettings)
@@ -31,7 +31,7 @@ HK_STRUCT(hkaiNavVolumeGenerationSettingsMaterialConstructionInfo)
 HK_STRUCT(hkaiNavVolumeGenerationSettingsMergingSettings)
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

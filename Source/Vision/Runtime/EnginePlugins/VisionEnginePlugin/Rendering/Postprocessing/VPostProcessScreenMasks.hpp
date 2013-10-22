@@ -41,15 +41,15 @@ public:
 
   /// \brief
   ///   Returns whether 2d geometry is rendered by the postprocessor
-  inline bool GetRender2dElements(bool bStatus) const { return m_bRender2D; };
+  inline bool GetRender2dElements() const { return m_bRender2D; };
 
   /// \brief
-  ///   Specifies whether 2d geometry should be rendered by the postprocessor
+  ///   Specifies whether 3d geometry should be rendered by the postprocessor
   inline void SetRender3dElements(bool bStatus) { m_bRender3D = bStatus; };
 
   /// \brief
-  ///   Returns whether 2d geometry is rendered by the postprocessor
-  inline bool GetRender3dElements(bool bStatus) const { return m_bRender3D; };
+  ///   Returns whether 3d geometry is rendered by the postprocessor
+  inline bool GetRender3dElements() const { return m_bRender3D; };
 
 #ifndef _VISION_DOC
   V_DECLARE_SERIAL_DLLEXP( VPostProcessScreenMasks,  EFFECTS_IMPEXP );
@@ -69,7 +69,7 @@ protected:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

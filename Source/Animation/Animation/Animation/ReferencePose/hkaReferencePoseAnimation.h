@@ -48,6 +48,9 @@ class hkaReferencePoseAnimation : public hkaAnimation
 		virtual int getNumOriginalFrames() const HK_OVERRIDE;
 
 			// hkaAnimation interface implementation
+		virtual int getSizeInBytes() const HK_OVERRIDE;
+
+			// hkaAnimation interface implementation
 		virtual bool requiresSkeleton() const HK_OVERRIDE;
 
 			// hkaAnimation interface implementation
@@ -92,7 +95,7 @@ class hkaReferencePoseAnimation : public hkaAnimation
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -80,7 +80,8 @@ void TransitionBarbarian_cl::InitFunction()
 	// Setup the state machine component and pass the filename of the transition file
   // in which the transitions between the various animation states are defined.
 	m_pStateMachine = new VTransitionStateMachine();
-  m_pStateMachine->Init(this, pTable);
+  m_pStateMachine->SetTransitionTable(pTable);
+
 	AddComponent(m_pStateMachine);
 
 	// Set initial state
@@ -179,7 +180,7 @@ V_IMPLEMENT_SERIAL( TransitionBarbarian_cl, VisBaseEntity_cl, 0, Vision::GetEngi
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

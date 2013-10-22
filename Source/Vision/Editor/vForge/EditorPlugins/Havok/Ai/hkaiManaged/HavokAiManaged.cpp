@@ -45,9 +45,9 @@ namespace HavokAiManaged
       GetEnginePlugin_vHavokAi()->DeInitEnginePlugin();
     }
 
-	static void SetConnectToPhysicsWorld(bool connect)	
+	static void SetConnectToPhysicsWorld(bool connect, bool stepSilhouettesAfterDisconnecting)
 	{ 
-		vHavokAiModule::GetInstance()->SetConnectToPhysicsWorld(connect); 
+		vHavokAiModule::GetInstance()->SetConnectToPhysicsWorld(connect, stepSilhouettesAfterDisconnecting);
 	}
 
 	static bool ComputeAndDrawPath(VisionViewBase ^view, Vector3F startPoint, Vector3F endPoint, float radius, float height, float displayOffset, UINT color)
@@ -66,7 +66,7 @@ namespace HavokAiManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -33,8 +33,22 @@ inline hkaiAstarCostModifier::NavVolumeGetModifiedCostCallbackContext::NavVolume
 
 }
 
+
+inline hkaiAstarCostModifier::DirectedGraphGetModifiedCostCallbackContext::DirectedGraphGetModifiedCostCallbackContext( 
+	const hkaiStreamingCollection::InstanceInfo* streamingInfo, const hkaiAgentTraversalInfo& agentInfo, 
+	const hkaiDirectedGraphNodePairInfo& nodeEdgeInfo, hkSimdRealParameter searchPathCost, 
+	hkSimdRealParameter edgeCost )
+	: m_streamingInfo(streamingInfo),
+	m_agentInfo(agentInfo),
+	m_nodeEdgeInfo(nodeEdgeInfo),
+	m_searchPathCost(searchPathCost),
+	m_edgeCost(edgeCost)
+{
+
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

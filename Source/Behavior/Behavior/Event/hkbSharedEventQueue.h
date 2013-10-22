@@ -29,6 +29,9 @@ class hkbSharedEventQueue
 			/// Transfers the events from this queue to per-character queues.
 		void transferEvents( const hkPointerMap<const hkbCharacter*, hkbEventQueue*>& characterToEventQueue );
 
+			/// Sort the shared event queue deterministically
+		void sortDeterministically( const hkPointerMap<const hkbCharacter*, hkInt32>& characterToId );
+
 			/// Returns the number of events currently in the queue.
 		int getSize() const;
 
@@ -41,7 +44,11 @@ class hkbSharedEventQueue
 
 			hkbEvent m_event;
 			hkbCharacter* m_character;
+			hkInt32 m_characterId;
 		};
+
+			// function to compare the above queue entries
+		static hkBool compareQueueEntries( const QueueEntry& entryA, const QueueEntry& entryB );
 
 			// the queue itself
 		hkArray<QueueEntry> m_queue;
@@ -55,7 +62,7 @@ class hkbSharedEventQueue
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

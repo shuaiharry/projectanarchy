@@ -198,6 +198,8 @@ void CubeMapHandle_cl::DisableRendering()
 
   m_bRenderingEnabled = false;
 
+  m_iCurrentFaceMask = 0;
+
 #endif // SUPPORTS_RENDERABLE_CUBEMAPS
 }
 
@@ -364,12 +366,12 @@ void CubeMapHandle_cl::SetCubemapKey(const char *szKey, int iEdgeSize)
 
   int iOldSize = m_iSize;
   VisRenderableCubeMap_cl *pOldCubemap = m_spCubemap;
-  VisRenderableTexture_cl *pOldDepthTarget = m_spDepthTarget;
 
   if (m_spCubemap)
   {
     m_spCubemap->EnableUnloading();
     m_spCubemap->EnsureUnloaded();
+    m_spCubemap->Init(NULL);
     m_spCubemap = NULL;
   }
   if (m_spDepthTarget)
@@ -425,9 +427,9 @@ void CubeMapHandle_cl::SetCubemapKey(const char *szKey, int iEdgeSize)
   {
     if(m_bActive)
     {
-    CreateBlurTarget();
-    Invalidate();
-  }
+      CreateBlurTarget();
+      Invalidate();
+    }
   }
 #endif
 }
@@ -474,17 +476,18 @@ void CubeMapHandle_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
         m_spRendererNode->SetFinalTargetContext(m_spRenderContext[i]);
         m_spRendererNode->InitializeRenderer();
 
+        // Find an unused renderer node index, or insert at the end if none was found
         int iNodeIdx;
-        for(iNodeIdx = 0; iNodeIdx < V_MAX_RENDERER_NODES; iNodeIdx++)
+        int iRendererNodeCount = Vision::Renderer.GetRendererNodeCount();
+        for(iNodeIdx = 0; iNodeIdx < iRendererNodeCount; iNodeIdx++)
         {
           if(Vision::Renderer.GetRendererNode(iNodeIdx) == NULL)
           {
-            Vision::Renderer.SetRendererNode(iNodeIdx, m_spRendererNode);
             break;
           }
         }
 
-        VASSERT_MSG(iNodeIdx != V_MAX_RENDERER_NODES, "No renderer node index available for cubemap rendering!");
+		Vision::Renderer.SetRendererNode(iNodeIdx, m_spRendererNode);
 
         m_spRendererNode->Execute();
 
@@ -522,7 +525,7 @@ void CubeMapHandle_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
   }
   else if (pData->m_pSender == &Vision::Callbacks.OnRenderHook && m_spRendererNode == NULL)
   {
-    VASSERT(m_bRenderingEnabled);
+    VASSERT(m_bRenderingEnabled && m_spCubemap);
     if(static_cast<VisRenderHookDataObject_cl *>(pData)->m_iEntryConst == VRH_PRE_SCREENMASKS)
     {
       for (int i=0; i<6; i++)
@@ -995,7 +998,7 @@ DEFINE_VAR_BOOL(CubeMapHandle_cl, m_bGenMipMaps, "generate mip maps after render
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

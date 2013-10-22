@@ -129,7 +129,6 @@
 
 // Destruction fracture runtime algorithms
 //#define HK_EXCLUDE_FEATURE_hkdCutoutFracture_runtimeFracture
-//#define HK_EXCLUDE_FEATURE_hkdDebrisFracture_runtimeFracture
 //#define HK_EXCLUDE_FEATURE_hkdDecomposeFracture_runtimeFracture
 //#define HK_EXCLUDE_FEATURE_hkdPieFracture_runtimeFracture
 //#define HK_EXCLUDE_FEATURE_hkdRandomSplitFracture_runtimeFracture
@@ -149,7 +148,7 @@
 //#define HK_EXCLUDE_FEATURE_hkdFractureUtilRetriangulateRecursively
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

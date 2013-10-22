@@ -38,10 +38,12 @@ class hkbAttachmentManager
 			/// Release an attachment.
 			/// 
 			/// You should pass in an hkbAttachmentInstance that was returned by attach().
-		void detach( hkbAttachmentInstance* attachment, bool deleteAttachment=true );
+			/// Returns if a detach actually occurred.
+		hkBool32 detach( hkbAttachmentInstance* attachment, bool deleteAttachment=true );
 
 			/// Detach all attachments involving the given character.
 		void detachCharacter( hkbCharacter* character );
+
 			/// Update all attachments. If the attachments are being updated for doing fixup
 			/// after the physics update then true should be passed for the fixup parameter.
 		void update( hkReal timestep, hkbSceneCharacters& sceneCharacters, bool fixup = false );
@@ -88,7 +90,7 @@ class hkbAttachmentManager
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

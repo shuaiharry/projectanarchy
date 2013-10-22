@@ -9,7 +9,7 @@
 #include <Vision/Runtime/Base/BasePCH.h>
 #include <Vision/Runtime/Base/IPC/VMessage.hpp>
 #include <Vision/Runtime/Base/IPC/VChannelQueue.hpp>
-#include <Vision/Runtime/Base/System/Memory/VMemDbg.hpp>
+
 
 ChannelQueue::ChannelQueue(UINT id, Mode mode, IChannelListener* listener,
   HANDLE serverMessagesEvent, HANDLE clientMessagesEvent)
@@ -93,12 +93,11 @@ bool ChannelQueue::TryDequeue(Message& msg)
   VPListT<Message>* queue = m_mode == MODE_SERVER ? 
     m_client2ServerQueue : m_server2ClientQueue;
   VMutex* mutex = m_mode == MODE_SERVER ? m_c2sMutex : m_s2cMutex;
-  bool res;
+  VMutexLocker lock(mutex);
 
-  mutex->Lock();
   if (queue->IsEmpty())
   {
-    res = false;
+    return false;
   }
   else
   {
@@ -106,22 +105,19 @@ bool ChannelQueue::TryDequeue(Message& msg)
     queue->RemoveAt(0);
     msg = *tmp;
     delete tmp;
-    res = true;
+    return true;
   }
-  mutex->Unlock();
-
-  return res;
 }
 
 void ChannelQueue::ProcessMessages()
 {
+  ResetPendingEvent();
+
   Message msg;
   while (TryDequeue(msg))
   {
     m_listener->OnMessageReceived(msg);
-  }  
-
-  ResetPendingEvent();
+  }
 }
 
 bool ChannelQueue::IsValid()
@@ -130,7 +126,7 @@ bool ChannelQueue::IsValid()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

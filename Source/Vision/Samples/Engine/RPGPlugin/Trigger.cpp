@@ -112,6 +112,11 @@ void RPG_Trigger::OnOverlappingCollidableRemoved(hkpCollidable *handle)
   }
 }
 
+void RPG_Trigger::Initialize()
+{
+  Vision::Callbacks.OnFrameUpdatePreRender += this;
+}
+
 // Deliberate use of InitFunction: I want to add these components in vForge/CreateEntity; otherwise serialization will create them
 void RPG_Trigger::InitFunction()
 {
@@ -141,29 +146,34 @@ void RPG_Trigger::DisposeObject()
     m_aabbPhantom = NULL;
   }
 
+  Vision::Callbacks.OnFrameUpdatePreRender -= this;
+
   m_insideEntities.RemoveAll();
 
   RPG_BaseEntity::DisposeObject();
 }
 
-/// Used for Editor drawing
-void RPG_Trigger::EditorThinkFunction()
+void RPG_Trigger::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 {
-  if(!Vision::Editor.IsPlayingTheGame() || m_displayDebug)
+  if (pData->m_pSender == &Vision::Callbacks.OnFrameUpdatePreRender)
   {
-    // draw the bounding box if we're in the editor and not playing the game, or in the editor and m_displayDebug is TRUE
-    // DrawBoundingBox(TRUE, m_boundsDisplayColor, m_boundsDisplayLineWidth);
+    // draw the bounding box if we're in the editor and not playing the game, and outside the editor if m_displayDebug is TRUE
+    if(m_displayDebug || (Vision::Editor.IsInEditor() && !Vision::Editor.IsPlayingTheGame()))
+    {
+      hkvAlignedBBox aabb;
+      aabb.setCenterAndSize(this->GetPosition(), this->GetScaling() / 2.f);
+      if (m_aabb.isValid())
+      {
+        VSimpleRenderState_t state;
+        state.SetTransparency(VIS_TRANSP_ALPHA);
+        Vision::Game.GetDebugRenderInterface()->RenderAABox(aabb, VColorRef(150, 150, 255, 50), state);
+      }
+    }
   }
 }
 
 void RPG_Trigger::ThinkFunction()
 {
-  if(!Vision::Editor.IsInEditor() && m_displayDebug)
-  {
-    // draw the bounding box if we aren't in the editor but want to draw debug info.
-    DrawBoundingBox(TRUE, m_boundsDisplayColor, m_boundsDisplayLineWidth);
-  }
-
   const float deltaTime = Vision::GetTimer()->GetTimeDifference();
 
   // TODO - implement both server and client tick
@@ -358,7 +368,7 @@ bool RPG_Trigger::IsValidEntity(VisBaseEntity_cl* entity) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

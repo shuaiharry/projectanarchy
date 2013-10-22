@@ -8,7 +8,8 @@
 
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/HavokPhysicsEnginePluginPCH.h>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokCachedShape.hpp>
-#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokFileStreamAccess.hpp>
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokFileStreamAccess.hpp>     
+#include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConversionUtils.hpp>
 
 #include <Common/Base/Config/hkConfigVersion.h>
 #include <Common/Base/System/Io/Writer/Buffered/hkBufferedStreamWriter.h>
@@ -202,11 +203,15 @@ hkpShape* vHavokCachedShape::LoadTerrainSectorShape(const VTerrainSector *pSecto
 
 void vHavokCachedShape::GetConvexShapePath(VStaticString<FS_MAX_PATH>& szInOut, const hkvVec3& vScale, bool bShrinkToFit)
 {
+  // Use Havok instead of Vision scale to account for global HavokToVision scale.
+  const hkvVec3 vHavokScale = vScale * vHavokConversionUtils::GetVision2HavokScale();
+
+  // The max. filename length on Xbox360 is 40 chars. The worst case should be here 37 chars.
   char tempString[64];
   if (bShrinkToFit)
-    sprintf(tempString, "Cvx_%.2f_%.2f_%.2f_t", vScale.x, vScale.y, vScale.z);
+    sprintf(tempString, "C_%.3g_%.3g_%.3g_t", vHavokScale.x, vHavokScale.y, vHavokScale.z);
   else
-    sprintf(tempString, "Cvx_%.2f_%.2f_%.2f", vScale.x, vScale.y, vScale.z);
+    sprintf(tempString, "C_%.3g_%.3g_%.3g", vHavokScale.x, vHavokScale.y, vHavokScale.z);
 
   szInOut += "_data";
   szInOut += VFILE_STR_SEPARATOR;
@@ -217,8 +222,13 @@ void vHavokCachedShape::GetConvexShapePath(VStaticString<FS_MAX_PATH>& szInOut, 
 void vHavokCachedShape::GetMeshShapePath(VStaticString<FS_MAX_PATH>& szInOut, const hkvVec3& vScale, VisStaticMeshInstance_cl::VisCollisionBehavior_e eCollisionBehavior, 
                                          VisWeldingType_e eWeldingType)
 {
+  // Use Havok instead of Vision scale to account for global HavokToVision scale.
+  const hkvVec3 vHavokScale = vScale * vHavokConversionUtils::GetVision2HavokScale();
+
+  // The max. filename length on Xbox360 is 40 chars. The worst case should be here 39 chars.
   char tempString[64];
-  sprintf(tempString, "Msh_%.2f_%.2f_%.2f_%i_%i", vScale.x, vScale.y, vScale.z, (int)eCollisionBehavior, (int)eWeldingType);
+  sprintf(tempString, "M_%.3g_%.3g_%.3g_%i_%i", vHavokScale.x, vHavokScale.y, vHavokScale.z, (int)eCollisionBehavior, (int)eWeldingType);
+
   szInOut += "_data";
   szInOut += VFILE_STR_SEPARATOR;
   szInOut += tempString;
@@ -331,7 +341,7 @@ bool vHavokCachedShape::IsHktUpToDate(VBaseMesh *pMesh, hkpShape *pShape, const 
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

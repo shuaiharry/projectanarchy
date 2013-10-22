@@ -76,7 +76,7 @@ vHavokVisualDebuggerCallbackData_cl::vHavokVisualDebuggerCallbackData_cl(VisCall
 // HAVOK VISUAL DEBUGGER
 // --------------------------------------------------------------------------
 
-vHavokVisualDebugger::vHavokVisualDebugger(hkpWorld* pPhysicsWorld)
+vHavokVisualDebugger::vHavokVisualDebugger(hkpWorld* pPhysicsWorld, int iPort)
 {
   hkArray<hkProcessContext*> contexts;
   hkProcessRegisterUtil::registerAllCommonProcesses();
@@ -100,7 +100,7 @@ vHavokVisualDebugger::vHavokVisualDebugger(hkpWorld* pPhysicsWorld)
   vHavokVisualDebuggerCallbackData_cl vdbAddDefaultViewerCallbackData(&vHavokVisualDebugger::OnAddingDefaultViewers, m_pVisualDebugger, &contexts);
   vHavokVisualDebugger::OnAddingDefaultViewers.TriggerCallbacks(&vdbAddDefaultViewerCallbackData);
 
-  m_pVisualDebugger->serve();
+  m_pVisualDebugger->serve(iPort);
 
   // Allocate memory for internal profiling information
   // You can discard this if you do not want Havok profiling information
@@ -170,8 +170,15 @@ void vHavokVisualDebugger::Step()
   hkMonitorStream::getInstance().reset();
 }
 
+void vHavokVisualDebugger::SetPort(int iPort)
+{
+  // Shutdown and restart the server
+  m_pVisualDebugger->shutdown();
+  m_pVisualDebugger->serve(iPort);
+}
+
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

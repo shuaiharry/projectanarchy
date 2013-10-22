@@ -11,7 +11,7 @@
 #include <Vision/Runtime/Engine/Renderer/VisApiSimpleRendererNode.hpp>
 #include <Vision/Runtime/Engine/Renderer/Shader/VisionMobileShaderProvider.hpp>
 #include <Vision/Runtime/Engine/Physics/IVisApiPhysicsModule.hpp>
-#include <Vision/Runtime/Base/System/Memory/VMemDbg.hpp>
+
 
 // *******************************************************************************
 // *  This file is Vision's default Application Class implementation and is
@@ -21,106 +21,7 @@
 // *  #includes in order to get this code to compile.
 // *******************************************************************************
 
-const char* s_pszAuthKey = NULL;
-
-
-IVisApp_cl::IVisApp_cl(const char *pszAuthKey)
-{
-  m_bQuit = false;
-  s_pszAuthKey = pszAuthKey;
-  m_iUpdateSceneTickCount = 1;
-}
-
-IVisApp_cl::~IVisApp_cl()
-{
-  SetPhysicsModule(NULL);
-}
-
-//Call this to make the next call to Run to return false
-//so the application will quit 
-void IVisApp_cl::Quit()
-{
-  m_bQuit = true;
-}
-
-//Returns whether the application wants to terminate
-bool IVisApp_cl::WantsToQuit()
-{
-#if defined(WIN32) && !defined(_VISION_WINRT)
-  //VGLWantClose will be true if the user pressed Alt-F4 or the Window close button (X)
-  return (m_bQuit || VGLWantClose());
-#elif defined(_VISION_WIIU)
-  // On the WiiU we have to check for the process switching information,
-  // once this returns true the application should quit (User select "Exit Game" in the HBM)
-  return m_bQuit || VWiiUCheckProcUI();
-#else
-  return m_bQuit;
-#endif
-}
-
-
-
-void IVisApp_cl::TriggerLoadSceneStatus(int iStatus, float fPercentage, const char* pszStatus)
-{
-  OnLoadSceneStatus(iStatus, fPercentage, pszStatus);
-  VisProgressDataObject_cl data(&Vision::Callbacks.OnProgress,iStatus,GetLoadingProgress());
-  Vision::Callbacks.OnProgress.TriggerCallbacks(&data);
-}
-
-
-bool IVisApp_cl::SetPhysicsModule(IVisPhysicsModule_cl *pPhysicsModule)
-{
-  //Deinitialize current physics module
-  if (m_spPhysicsModule)
-  {
-    m_spPhysicsModule->OnDeInitPhysics();
-    m_spPhysicsModule = NULL;
-  }
-
-  bool bRes = true;
-
-  //Initialize new physics module
-  if (pPhysicsModule)
-    bRes = (pPhysicsModule->OnInitPhysics()!=0);
-
-  if (bRes)
-    m_spPhysicsModule = pPhysicsModule;
-
-  return bRes;    
-}
-
-void IVisApp_cl::SetShaderProvider(IVisShaderProvider_cl* pProvider)
-{
-  m_spShaderProvider = pProvider;
-}
-
-IVisShaderProvider_cl* IVisApp_cl::GetShaderProvider() const
-{
-  return m_spShaderProvider;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// class IVisUpdateSceneController_cl
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-IVisUpdateSceneController_cl::IVisUpdateSceneController_cl(bool bDeleteObjectUponUnref)
-{
-  m_bDeleteObjectUponUnref = bDeleteObjectUponUnref;
-}
-
-IVisUpdateSceneController_cl::~IVisUpdateSceneController_cl()
-{
-}
-
-
-
-void IVisUpdateSceneController_cl::DeleteThis()
-{
-  if (m_bDeleteObjectUponUnref)
-    VRefCounter::DeleteThis();
-}
-
+extern const char* s_pszAuthKey;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // class VFixStepSceneUpdateController
@@ -129,19 +30,17 @@ void IVisUpdateSceneController_cl::DeleteThis()
 
 VFixStepSceneUpdateController::VFixStepSceneUpdateController(int iTicksPerSec, int iMaxTickCount, bool bDeleteObjectUponUnref)
   : IVisUpdateSceneController_cl(bDeleteObjectUponUnref)
+  , m_iLastUpdateTickCount(0)
+  , m_iTicksPerSecond(iTicksPerSec)
+  , m_iMaxTickCount(iMaxTickCount)
 {
-  m_iLastUpdateTickCount = 0;
-  m_iTicksPerSecond = iTicksPerSec;
-  m_iMaxTickCount = iMaxTickCount;
 }
-
 
 void VFixStepSceneUpdateController::SetSteps(int iTicksPerSec, int iMaxTickCount)
 {
   m_iTicksPerSecond = iTicksPerSec;
   m_iMaxTickCount = iMaxTickCount;
 }
-
 
 VFixStepSceneUpdateController::~VFixStepSceneUpdateController()
 {
@@ -166,6 +65,37 @@ int VFixStepSceneUpdateController::GetUpdateTickCount()
   if (m_iMaxTickCount>0 && iCount>m_iMaxTickCount)
     return m_iMaxTickCount;
   return iCount;
+}
+
+V_IMPLEMENT_SERIAL(VFixStepSceneUpdateController, IVisUpdateSceneController_cl, 0, &g_engineModule)
+
+#define VFIXSTEPSCENEUPDATECONTROLLER_VERSION_0         0
+#define VFIXSTEPSCENEUPDATECONTROLLER_VERSION_CURRENT   VFIXSTEPSCENEUPDATECONTROLLER_VERSION_0
+
+void VFixStepSceneUpdateController::Serialize(VArchive &ar)
+{
+  IVisUpdateSceneController_cl::Serialize(ar);
+
+  if (ar.IsLoading())
+  {
+    int iVersion;
+    ar >> iVersion;
+    VASSERT_MSG(iVersion >= VFIXSTEPSCENEUPDATECONTROLLER_VERSION_0 &&
+      iVersion <= VFIXSTEPSCENEUPDATECONTROLLER_VERSION_CURRENT, "VFixStepSceneUpdateController version is invalid.");
+
+    m_iLastUpdateTickCount = 0;
+
+    ar >> m_iMaxTickCount;
+    ar >> m_iTicksPerSecond;
+  }
+  else
+  {
+    const int iVersion = VFIXSTEPSCENEUPDATECONTROLLER_VERSION_CURRENT;
+    ar << iVersion;
+
+    ar << m_iMaxTickCount;
+    ar << m_iTicksPerSecond;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +131,7 @@ void VAppProgressStatus::OnStart()
   m_iStartCtr++;
 #ifdef HK_DEBUG_SLOW
   m_fOldPercentage = 0.f;
-  //  g_iStartTime = GetTickCount(); // time debugging
+//  g_iStartTime = GetTickCount(); // time debugging
 #endif
 }
 
@@ -219,11 +149,11 @@ void VAppProgressStatus::OnProgressChanged()
   VProgressStatus::OnProgressChanged();
 
   float fProgress = GetCurrentProgress();
-#pragma warning(suppress:6239)
+  #pragma warning(suppress:6239)
   if (bShowProgress && m_iStartCtr>0) // only inside a scene loading block
     m_pApp->TriggerLoadSceneStatus(VIS_API_LOADSCENESTATUS_PROGRESS,fProgress,GetProgressStatusString());
 
-  /* For debugging purposes
+/* For debugging purposes
   int iDepth = GetStackPos();
   char indent[128];
   for (int i=0;i<iDepth;i++) indent[i] = '_';
@@ -232,7 +162,7 @@ void VAppProgressStatus::OnProgressChanged()
   float fSpeed = 0.f;
   if (fTimeDiff>0.f) fSpeed = fProgress/fTimeDiff;
   Vision::Error.SystemMessage("%sLoadingProgress : %.2f at %.2fs; Speed:%.3f (%s)",indent,fProgress,fTimeDiff,fSpeed,GetProgressStatusString());
-  */
+*/
 
 #ifdef HK_DEBUG_SLOW
   if (m_iStartCtr>0)
@@ -250,6 +180,17 @@ void VAppProgressStatus::OnStatusStringChanged()
   m_pApp->TriggerLoadSceneStatus(VIS_API_LOADMODELSTATUS_PROGRESS,GetCurrentProgress(),GetProgressStatusString());
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// struct VLoadSceneRequest
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void VLoadSceneRequest::Clear()
+{
+  sSceneFileName = "";
+  iAdditionalLoadingFlags = 0;
+  bAllowProfileFallback = false;
+  bPending = false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // class VisionApp_cl
@@ -262,9 +203,12 @@ VisCallback_cl VisionApp_cl::OnUpdatePhysicsFinished(VIS_PROFILE_CALLBACKS_UPDAT
 VisionApp_cl::VisionApp_cl(const char *pszAuthKey) : IVisApp_cl(pszAuthKey)
 {
   m_bUpdateScreen = true;
+  m_bInsideRun = false;
   m_LoadingProgress.m_pApp = this;
   m_bInputInitialized = false;
   m_iInitializeCount = 0;
+
+  m_loadSceneRequest.Clear();
 
   Vision::Game.ResetUpdatedEntitiesList();
 }
@@ -289,11 +233,9 @@ void VisionApp_cl::UpdateTimer()
 //Update, render and display the scene
 bool VisionApp_cl::Run()
 {
-  static bool bInsideGameLoop = false;
-
   // Make sure the game loop isn't executed recursively. In Windows builds, this could for example happen if a shown message box triggers
   // a repaint message. This case needs to be handled by the code calling the game loop.
-  if(bInsideGameLoop)
+  if(m_bInsideRun)
   {
     // We can't report this error in a form that could trigger a message box, so reporting a warning and breaking the debugger is the best we can do.
     Vision::Error.Warning("VisionApp_cl::Run called recursively! This is usually caused by triggering a repaint from inside the game loop.");
@@ -307,7 +249,7 @@ bool VisionApp_cl::Run()
     return true;
   }
 
-  bInsideGameLoop = true;
+  m_bInsideRun = true;
 
   //Update the scene
   m_iUpdateSceneTickCount = 1; // by default one simulation tick per loop
@@ -333,27 +275,28 @@ bool VisionApp_cl::Run()
 
   // If in debug build, perform a sanity check - no context registered with the main context should also be registered
   // with a renderer node!
-#ifdef HK_DEBUG_SLOW
-  static bool bContextErrorShown = false;
-  if (!bContextErrorShown)
-  {
-    int iContextCount = Vision::Contexts.GetContextCount();
-    for (int iContext = 0; iContext < iContextCount; iContext++)
+  #ifdef HK_DEBUG_SLOW
+    static bool bContextErrorShown = false;
+    if (!bContextErrorShown)
     {
-      for (int iRendererNode=0; iRendererNode<V_MAX_RENDERER_NODES; iRendererNode++)
+      int iContextCount = Vision::Contexts.GetContextCount();
+      for (int iContext = 0; iContext < iContextCount; iContext++)
       {
-        IVRendererNode *pNode = Vision::Renderer.GetRendererNode(iRendererNode);
-        VisRenderContext_cl* pContext = Vision::Contexts.GetContext(iContext);
-        if (pNode != NULL && pNode->IsContextRegistered(Vision::Contexts.GetContext(iContext)))
+        int iRendererNodeCount = Vision::Renderer.GetRendererNodeCount();
+        for (int iRendererNode=0; iRendererNode<iRendererNodeCount; iRendererNode++)
         {
-          Vision::Error.Warning("Context %s (%p) is registered globally AND in renderer node %s (%p). This may be intended, but it is most likely a porting issue introduced by porting from a pre-8.0 version of the Vision Engine.",
-            pContext->GetName(), pContext, pNode->GetTypeId()->m_lpszClassName, pNode);
-          bContextErrorShown = true;
+          IVRendererNode *pNode = Vision::Renderer.GetRendererNode(iRendererNode);
+          VisRenderContext_cl* pContext = Vision::Contexts.GetContext(iContext);
+          if (pNode != NULL && pNode->IsContextRegistered(Vision::Contexts.GetContext(iContext)))
+          {
+            Vision::Error.Warning("Context %s (%p) is registered globally AND in renderer node %s (%p). This may be intended, but it is most likely a porting issue introduced by porting from a pre-8.0 version of the Vision Engine.",
+              pContext->GetName(), pContext, pNode->GetTypeId()->m_lpszClassName, pNode);
+            bContextErrorShown = true;
+          }
         }
       }
     }
-  }
-#endif
+  #endif
 
   {
     INSERT_PERF_MARKER_SCOPE("BeginRendering");
@@ -363,7 +306,7 @@ bool VisionApp_cl::Run()
     Vision::Callbacks.BeginRendering.TriggerCallbacks();
   }
 
-
+  
   Vision::Renderer.SetCurrentRendererNode(NULL);
   VisRendererNodeDataObject_cl data(&Vision::Callbacks.OnRendererNodeSwitching, NULL);
   Vision::Callbacks.OnRendererNodeSwitching.TriggerCallbacks(&data);
@@ -376,12 +319,14 @@ bool VisionApp_cl::Run()
   }
 
   {
-    for (int iRendererNode=0; iRendererNode<V_MAX_RENDERER_NODES; iRendererNode++)
-    {
-      IVRendererNode *pNode = Vision::Renderer.GetRendererNode(iRendererNode);
 
-      if (pNode != NULL && pNode->GetRenderingEnabled())
-      {
+  int iRendererNodeCount = Vision::Renderer.GetRendererNodeCount();  
+  for (int iRendererNode=0; iRendererNode<iRendererNodeCount; iRendererNode++)
+  {
+    IVRendererNode *pNode = Vision::Renderer.GetRendererNode(iRendererNode);
+
+    if (pNode != NULL && pNode->GetRenderingEnabled())
+    {
         char buffer[192];
         sprintf(buffer, "RendererNode %d (%s)", iRendererNode, pNode->GetTypeId()->m_lpszClassName);
         INSERT_PERF_MARKER_SCOPE(buffer);
@@ -394,7 +339,7 @@ bool VisionApp_cl::Run()
 
   {
     INSERT_PERF_MARKER_SCOPE("PostRendererNodeContexts");
-    Vision::Renderer.SetCurrentRendererNode(NULL);
+  Vision::Renderer.SetCurrentRendererNode(NULL);
     Vision::Contexts.RenderContexts(VIS_RENDERCONTEXTPRIORITY_SCENE, FLT_MAX);
   }
 
@@ -409,7 +354,7 @@ bool VisionApp_cl::Run()
   //Finish the scene - the last tick is performed here
   if (m_iUpdateSceneTickCount>0)
     OnFinishScene();
-
+  
   // update everything that has to be done once per loop rather than per simulation steps
   OnFrameUpdatePostRender();
 
@@ -418,12 +363,12 @@ bool VisionApp_cl::Run()
 #ifdef WIN32
   if (m_bUpdateScreen) // only supported on win32
 #endif
-    Vision::Video.UpdateScreen();
+  Vision::Video.UpdateScreen();
 
   if (m_iUpdateSceneTickCount>0) // same as for OnFinishScene
     UpdateTimer();
 
-  bInsideGameLoop = false;
+  m_bInsideRun = false;
 
   return !WantsToQuit();
 }
@@ -446,7 +391,7 @@ bool VisionApp_cl::InitEngine(VisAppConfig_cl *pConfig)
   // Use default application configuration if none is provided
   if (pConfig != NULL)
     m_appConfig = *pConfig;
-
+    
   VASSERT(m_iInitializeCount==0);
   if (m_iInitializeCount==0)
   {
@@ -497,10 +442,11 @@ bool VisionApp_cl::InitEngine(VisAppConfig_cl *pConfig)
 
     if ((m_appConfig.m_iInitFlags & VAPP_DEFER_IM_SHADER_CREATION) == 0)
     {
+      InitShaderPatcher();
       // Create fixed-function shaders for immediate mode
       CreateIMShaders();
     }
-
+    
     m_iInitFlags = m_appConfig.m_iInitFlags;
 
 #ifdef WIN32
@@ -518,7 +464,7 @@ bool VisionApp_cl::InitEngine(VisAppConfig_cl *pConfig)
     ////////////////////////////////////////////////
     Vision::Contexts.GetMainRenderContext()->SetPriority(VIS_RENDERCONTEXTPRIORITY_DISPLAY);
     Vision::Contexts.GetMainRenderContext()->SetRenderLoop(new VisionRenderLoop_cl());
-
+	  
     VSimpleRendererNode* pRenderer = new VSimpleRendererNode(Vision::Contexts.GetMainRenderContext());
     pRenderer->InitializeRenderer();
 
@@ -531,7 +477,7 @@ bool VisionApp_cl::InitEngine(VisAppConfig_cl *pConfig)
   m_iInitializeCount++;
   return true;
 }
-
+  
 
 
 void VisionApp_cl::DeInitEngine()
@@ -559,13 +505,14 @@ void VisionApp_cl::DeInitEngine()
         DeInitInput();
 
       DeleteIMShaders();
+      DeInitShaderPatcher();
 
       //DeInit engine
       Vision::DeInit();
-
+      
       //DeInit video
       Vision::Video.DeInit();  
-
+      
       SetShaderProvider(NULL);
     } // now this app object can be destroyed
 
@@ -590,8 +537,8 @@ bool VisionApp_cl::InitInput()
     eInputModeMouse = VGL_WINDOWSINPUT;
 
   VInputManagerPC::Init(eInputModeKeyboard, eInputModeMouse, (m_iInitFlags&VAPP_MOUSE_HIDECURSOR)!=0, 
-    (m_iInitFlags&VAPP_MOUSE_NONEXCLUSIVE)==0,
-    (m_iInitFlags&VAPP_KEYBOARD_NONEXCLUSIVE)==0);
+                                          (m_iInitFlags&VAPP_MOUSE_NONEXCLUSIVE)==0,
+                                          (m_iInitFlags&VAPP_KEYBOARD_NONEXCLUSIVE)==0);
 #else
   VInputManager::Init();
 #endif
@@ -603,7 +550,7 @@ bool VisionApp_cl::InitInput()
 bool VisionApp_cl::DeInitInput()
 {
   VVERIFY_OR_RET_VAL(m_bInputInitialized,false);
-
+  
   VULPSTATUSMESSAGE_0("Deinitializing input");
 
   VInputManager::DeInit();
@@ -664,6 +611,31 @@ VProgressStatus& VisionApp_cl::GetLoadingProgress()
   return m_LoadingProgress;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+// Load scene request handling
+////////////////////////////////////////////////////////////////////////////////////////
+bool VisionApp_cl::RequestLoadScene(const char* pszSceneName, int iAdditionalLoadingFlags, bool bAllowProfileFallback)
+{
+  if ( m_loadSceneRequest.bPending )
+    return false;
+
+  m_loadSceneRequest.sSceneFileName = pszSceneName;
+  m_loadSceneRequest.iAdditionalLoadingFlags = iAdditionalLoadingFlags;
+  m_loadSceneRequest.bAllowProfileFallback = bAllowProfileFallback;
+  m_loadSceneRequest.bPending = true;
+
+  return true;
+}
+
+const VLoadSceneRequest& VisionApp_cl::GetPendingLoadSceneRequest() const
+{
+  return m_loadSceneRequest;
+}
+
+void VisionApp_cl::ClearLoadSceneRequest()
+{
+  m_loadSceneRequest.Clear();
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Engine init/deinit callbacks
@@ -692,14 +664,14 @@ void VisionApp_cl::OnDeInitEngine()
 
 BOOL VisionApp_cl::WantsToLeaveEditorPlayMode() const
 {
-#if defined(WIN32) && !defined(_VISION_WINRT)
-  // default behaviour: the <ESC> key cancels the play-the-game mode
+  #if defined(WIN32) && !defined(_VISION_WINRT)
+    // default behaviour: the <ESC> key cancels the play-the-game mode
   //no input map used, because there is only one key in use (ESC)
 
   BOOL bStatus = VInputManagerPC::GetKeyboard().GetControlValue(CT_KB_ESC,0.f)>0.f;
   return bStatus;
 
-#endif
+  #endif
 
   return FALSE;
 }
@@ -790,7 +762,7 @@ void VisionApp_cl::OnUpdateScene()
 
   //Timer is not longer updated here, because it needs to be updated right after the frame flip
   float fElapsedTime = Vision::GetTimer()->GetTimeDifference();
-
+  
   // Advance the scene update counter
   Vision::Game.SetUpdateSceneCount( Vision::Game.GetUpdateSceneCount() + 1 );
 
@@ -805,14 +777,14 @@ void VisionApp_cl::OnUpdateScene()
     VISION_PROFILE_FUNCTION( VIS_PROFILE_GAMELOOP_UPDATELOOP );
     Vision::Game.FreeRemovedEntities();
   }
-
+  
   // Run the pre-physics loop: statistics, prethink, events & animations
   if ( Vision::Editor.IsPlaying() )
     RunPreThink(fElapsedTime);
 
   //Process animation messages after processing animations
   Vision::Game.ProcessMessageQueue();
-
+  
   // Run the physics simulation (if physics simulation is set to synchronous)
   if ( Vision::Editor.IsPlaying() && !bAsyncPhysics)
   {
@@ -844,15 +816,6 @@ void VisionApp_cl::OnUpdateScene()
   RunUpdateLoop();
   Vision::Game.ResetUpdatedEntitiesList();
 
-  // Kick off asynchronous physics simulation
-  if ( Vision::Editor.IsPlaying() && bAsyncPhysics )
-  {
-    RunPhysics(fElapsedTime);
-  }
-
-  // Handle portal/visibility zone transitions
-  VisObject3DVisData_cl::HandleAllNodeTransitions();
-
   //Handle render contexts
   VisRenderContext_cl::HandleAllRenderContexts(fElapsedTime);
 
@@ -865,9 +828,15 @@ void VisionApp_cl::OnUpdateScene()
     pSky->Tick(fElapsedTime);
 
   Vision::Callbacks.OnUpdateSceneFinished.TriggerCallbacks();
+
+  // Kick off asynchronous physics simulation.
+  // This is done only after the OnUpdateSceneFinished callback since components (e.g. VFollowPathComponent)
+  // may still modify entity transformations when it is triggered.
+  if ( Vision::Editor.IsPlaying() && bAsyncPhysics )
+  {
+    RunPhysics(fElapsedTime);
+  }
 }
-
-
 
 void VisionApp_cl::OnFrameUpdatePreRender()
 {
@@ -895,6 +864,9 @@ void VisionApp_cl::OnFrameUpdatePreRender()
 
   // trigger callback
   Vision::Callbacks.OnFrameUpdatePreRender.TriggerCallbacks(NULL);
+
+  // Handle portal/visibility zone transitions - do this after all other updates to handle transitions for objects which moved in the OnFrameUpdatePreRender callback
+  VisObject3DVisData_cl::HandleAllNodeTransitions();
 }
 
 
@@ -1042,7 +1014,7 @@ void VisionApp_cl::RunThink(float fElapsedTime)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

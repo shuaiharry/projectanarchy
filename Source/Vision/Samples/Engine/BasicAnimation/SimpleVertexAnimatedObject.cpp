@@ -9,7 +9,6 @@
 #include <Vision/Samples/Engine/BasicAnimation/BasicAnimationPCH.h>
 #include <Vision/Samples/Engine/BasicAnimation/SimpleVertexAnimatedObject.h>
 
-
 SimpleVertexAnimatedObject_cl::SimpleVertexAnimatedObject_cl(void)
 {
 }
@@ -19,8 +18,6 @@ void SimpleVertexAnimatedObject_cl::InitFunction()
   SetCastShadows(TRUE);
   SetSingleAnimationMode();
 }
-
-
 
 //
 //                              *** MODE: START SINGLE ANIMATION ***
@@ -32,19 +29,18 @@ void SimpleVertexAnimatedObject_cl::SetSingleAnimationMode()
   m_spAnimControl = VisAnimConfig_cl::StartVertexAnimation(this, "Noname", VSKELANIMCTRL_DEFAULTS);
 }
 
-
 bool SimpleVertexAnimatedObject_cl::IsAnimationRunning() const
 {
   return true;
 }
 
+V_IMPLEMENT_SERIAL(SimpleVertexAnimatedObject_cl, VisBaseEntity_cl, 0, Vision::GetEngineModule());
 
-V_IMPLEMENT_SERIAL( SimpleVertexAnimatedObject_cl, VisBaseEntity_cl, 0, Vision::GetEngineModule() );
 START_VAR_TABLE(SimpleVertexAnimatedObject_cl, VisBaseEntity_cl, "SimpleVertexAnimatedObject_cl", 0, "Models\\ripple.model")
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

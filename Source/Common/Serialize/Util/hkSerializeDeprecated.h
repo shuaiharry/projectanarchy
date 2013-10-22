@@ -15,15 +15,30 @@ class hkSerializeDeprecated : public hkReferencedObject, public hkSingleton<hkSe
 {
 	public:
 
+		struct XmlPackfileHeader
+		{
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(XmlPackfileHeader, HK_MEMORY_CLASS_BASE);
+
+			int m_classVersion;
+			hkStringPtr m_contentsVersion;
+			hkStringPtr m_topLevelObject;
+		};
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		hkSerializeDeprecated() {}
 
 		static void HK_CALL initDeprecated();
+
+			/// Whether or not deprecated serialization has been enabled.
+		virtual bool isEnabled() const;
 		
 		virtual hkResult saveXmlPackfile( const void* object, const hkClass& klass, hkStreamWriter* writer, const hkPackfileWriter::Options& options, hkPackfileWriter::AddObjectListener* userListener, hkSerializeUtil::ErrorDetails* errorOut );
 		virtual hkBool32 isLoadable(const hkSerializeUtil::FormatDetails& details);
 		virtual hkResource* loadOldPackfile(hkStreamReader& sr, const hkSerializeUtil::FormatDetails& details, hkSerializeUtil::ErrorDetails* errorOut);
 		virtual hkObjectResource* loadOldPackfileOnHeap(hkStreamReader& sr, const hkSerializeUtil::FormatDetails& details, hkSerializeUtil::ErrorDetails* errorOut);
+
+			/// Reads an XML packfile header from buffer.
+		virtual hkResult readXmlPackfileHeader(hkStreamReader* stream, XmlPackfileHeader& out, hkSerializeUtil::ErrorDetails* errorOut);
 };
 
 #if defined(HK_COMPILER_ARMCC) || defined(HK_COMPILER_GHS) // have to specialize before use so that generalized one not auto gen-d<<<<
@@ -33,7 +48,7 @@ HK_SINGLETON_SPECIALIZATION_DECL(hkSerializeDeprecated);
 #endif // HK_COMPAT_SERIALIZE_DEPRECATED_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

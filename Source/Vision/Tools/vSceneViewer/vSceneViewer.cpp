@@ -18,16 +18,17 @@
 #include <Vision/Runtime/EnginePlugins/EnginePluginsImport.hpp>
 #include <Vision/Runtime/Engine/Renderer/VisApiSimpleRendererNode.hpp>
 
-#if !defined (WIN32) || defined(_VISION_WINRT)
+#if defined(EMULATE_DEVICE) || !defined (WIN32) || defined(_VISION_WINRT)
 #include <Vision/Tools/vSceneViewer/GUI/GUISystem.hpp>
 #endif
 
-#ifdef _VISION_MOBILE
+#if defined(EMULATE_DEVICE) || defined( _VISION_MOBILE ) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )    // TODO: Have Apollo defined _VISION_MOBILE.
 #include <Vision/Runtime/Common/VSampleTouchMenu.hpp>
 #endif
 
 #if defined( USE_FILESERVE )
   #include <Vision/Runtime/Base/System/IO/Stream/VFileServeStreamManager.hpp> 
+  #include <Vision/Tools/vSceneViewer/VFileServeDaemon.hpp>
 #endif
 
 #define ENABLE_VISUAL_DEBUGGER
@@ -38,11 +39,11 @@
 // Include key-codes last so they are not disabled by some other product includes
 #include <Common/Base/KeyCode.h>
 
-hkvResult LoadSceneConfig (VTargetDevice_e CurPlatform, const char* szSceneConfigFile, VListControl* pList);
+hkvResult LoadSceneConfig (VTargetDevice_e CurPlatform, const char* szExportedScenesConfig, const char* szSceneConfigFile, VListControl* pList);
 
 VisBaseEntity_cl *g_pCamera = NULL;
 
-#if !defined(WIN32) || defined(_VISION_MOBILE)
+#if defined(EMULATE_DEVICE) || !defined(WIN32) || defined( _VISION_WINRT )
 
   SceneViewerMainMenuPtr g_spMainDlg;
   VGUIMainContextPtr g_spGUIContext;
@@ -77,19 +78,19 @@ public:
     return &m_sceneLoader;
   }
 
-#if defined(_VISION_MOBILE)
+#if defined(EMULATE_DEVICE) || defined(_VISION_MOBILE) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )   // TODO: Have Apollo define _VISION_MOBILE.
   void SetGUIContext(VGUIMainContext* pGUIContext)
   {
-    VASSERT(m_spGUIContext == NULL);
+    VASSERT_MSG(m_spGUIContext == NULL, "m_spGUIContext = %d", m_spGUIContext.GetPtr());
     m_spGUIContext = pGUIContext;
   }
 #endif
 
 protected:
 
-#if defined(_VISION_ANDROID)
+#if defined(_VISION_ANDROID) || defined( _VISION_TIZEN )
   // override back button behavior -> show scene list.
-  virtual bool OnAndroidBackButtonPressed() HKV_OVERRIDE
+  virtual bool OnMobileBackButtonPressed() HKV_OVERRIDE
   {
     // Go back to menu if currently viewing a scene.
     if (g_pCamera != NULL && !g_spMainDlg->IsVisible())
@@ -106,6 +107,10 @@ protected:
 };
 
 VSmartPtr<VSceneViewerApp> g_spApp;
+
+#if defined( USE_FILESERVE )
+  VFileServeDaemon* g_pFileServeDaemon = NULL;
+#endif
 
 //-----------------------------------------------------------------------------------
 
@@ -294,12 +299,15 @@ struct SceneViewConfig_t
   }
 
   inline bool HasSceneName() const {return !sSceneName.IsEmpty();}
-  inline int GetSampleFlags() const
+  inline uint64 GetSampleFlags() const
   {
-    int iSampleFlags = 0;
-    if (bFullScreen) iSampleFlags|=VSAMPLE_FORCEFULLSCREEN;
-    if (bAskFullScreen) iSampleFlags|=VSAMPLE_ASKFULLSCREEN;
-    if (bWaitForVSync) iSampleFlags|=VSAMPLE_WAITRETRACE;
+    uint64 iSampleFlags = 0;
+    iSampleFlags |= VSampleFlags::VSAMPLE_ENABLE_DEBUG_SHADING;
+    
+    if (bFullScreen) iSampleFlags |= VSampleFlags::VSAMPLE_FORCEFULLSCREEN;
+    if (bAskFullScreen) iSampleFlags |= VSampleFlags::VSAMPLE_ASKFULLSCREEN;
+    if (bWaitForVSync) iSampleFlags |= VSampleFlags::VSAMPLE_WAITRETRACE;
+
     return iSampleFlags;
   }
 
@@ -447,7 +455,7 @@ public:
 
   VOVERRIDE const char* GetName() {return m_spManager->GetName();}
 
-  VOVERRIDE IVFileInStream* InternalOpen(const char* pszFileName, int iFlags)
+  VOVERRIDE IVFileInStream* InternalOpen(const char* pszFileName, int iFlags, const InternalOpenContext& ioc)
   {
     if (!m_pBatchFile)
     {
@@ -459,7 +467,7 @@ public:
       m_pBatchFile = m_spManager->Create(szBatchName);
     }
 
-    IVFileInStream* pIn = CallInternalOpen(*m_spManager, pszFileName, iFlags);
+    IVFileInStream* pIn = CallInternalOpen(*m_spManager, pszFileName, iFlags, ioc);
     if (!pIn) return NULL;
     const char *szSrcFile = pIn->GetFileName();
 
@@ -529,7 +537,7 @@ char g_projectPath[FS_MAX_PATH];
 
 // vSceneViewer Data Path
 #if defined(WIN32) && !defined(_VISION_WINRT)
-  #define VSCENEVIEWER_DATA_PATH "Data\\Vision\\Tools\\vSceneViewer"
+  #define VSCENEVIEWER_DATA_PATH VISION_ROOT_DATA"Data\\Vision\\Tools\\vSceneViewer"
 #elif defined (_VISION_XENON)
   #define VSCENEVIEWER_DATA_PATH  "D:\\Data\\Vision\\Tools\\vSceneViewer"
 #elif defined (_VISION_PS3)
@@ -552,8 +560,29 @@ char g_projectPath[FS_MAX_PATH];
     return g_szSceneViewerDataDir;
   }
   #define VSCENEVIEWER_DATA_PATH  GetSceneViewerDataDir()
+#elif defined (_VISION_TIZEN)
+  using namespace Tizen::App;
+  using namespace Tizen::Base;
+  using namespace Tizen::System;
+
+  static char g_szSceneViewerDataDir[FS_MAX_PATH];
+
+  inline const char *GetSceneViewerDataDir()
+  {
+    String resPath = App::GetInstance()->GetAppResourcePath().GetPointer();
+    memset(g_szSceneViewerDataDir, 0, wcslen(resPath.GetPointer()) + 1);
+    wcstombs( g_szSceneViewerDataDir, resPath.GetPointer(), wcslen(resPath.GetPointer()) );
+    strcat(g_szSceneViewerDataDir,  "Data/Vision/Tools/vSceneViewer/");
+    
+    return g_szSceneViewerDataDir;
+  }
+
+  #define VSCENEVIEWER_DATA_PATH  GetSceneViewerDataDir()
+
 #elif defined (_VISION_WIIU)
   #define VSCENEVIEWER_DATA_PATH  "/vol/content/VisionRoot/Data/Vision/Tools/vSceneViewer"
+#elif defined( _VISION_WINRT )
+	#define VSCENEVIEWER_DATA_PATH "Data\\vSceneViewer" 
 #else
   #error "Undefined platform!"
 #endif
@@ -562,74 +591,6 @@ hkvVec3 g_vDefaultCamPos;
 hkvMat3 g_mDefaultCamRot;
 
 bool g_bRenderCollisionMesh = false;
-
-#if defined (WIN32) || defined (_VISION_XENON) || defined (_VISION_PS3) || defined(_VISION_PSP2) || defined(_VISION_WIIU) && !defined(_VISION_WINRT)
-
-  // shading mode related:
-  // backup renderer node and prepare shading modes:
-  IVRendererNodePtr g_spRendererNode;
-  VRefCountedCollection<VCompiledEffect> g_shadingEffects;
-  int g_iCurrentShadingMode = -1;
-  VSmartPtr<VForgeDebugRenderLoop> g_spShadingModeRenderLoop;
-  VSmartPtr<VShaderEffectLib> g_spShadingShaderLib;
-
-  void EnumShadingModes(VRefCountedCollection<VCompiledEffect> &effects)
-  {
-    // add the vForge data directory because it contains the shader lib with shading modes
-    char szForgePath[FS_MAX_PATH];
-    char szExeDir[FS_MAX_PATH];
-    if (!VBaseAppHelpers::GetApplicationDir(szExeDir))
-      return;
-#if defined(WIN32)
-    VFileHelper::CombineDirAndFile(szForgePath, szExeDir, "..\\..\\..\\..\\Data\\Vision\\Editor\\vForge");
-#elif defined(_VISION_XENON)
-    VFileHelper::CombineDirAndFile(szForgePath, szExeDir, "Data\\Vision\\Editor\\vForge");
-#else
-    VFileHelper::CombineDirAndFile(szForgePath, szExeDir, "Data\\Vision\\Editor\\vForge");
-#endif
-    if (!Vision::File.AddDataDirectory(szForgePath))
-      return;
-
-    VisShaderFXLibManager_cl &manager(Vision::Shaders.GetShaderFXLibManager());
-
-#if defined(WIN32)
-    // we have to load this way to be able to load the non-binary version (as we need the effect description)
-    g_spShadingShaderLib = new VShaderEffectLib(&manager,"Shaders\\vForgeShadingEffects.ShaderLib");
-    g_spShadingShaderLib->m_iLoadingFlags |= VSF_LOAD_IGNOREPLATFORMBINARIES;
-    g_spShadingShaderLib->EnsureLoaded();
-    if (!g_spShadingShaderLib->IsLoaded())
-      return;
-#else
-    g_spShadingShaderLib = Vision::Shaders.LoadShaderLibrary("Shaders\\vForgeShadingEffects.ShaderLib");
-    if ((g_spShadingShaderLib == NULL) || (g_spShadingShaderLib && !g_spShadingShaderLib->IsLoaded()))
-      return;
-#endif
-
-    for (int i=0;i<g_spShadingShaderLib->m_Effects.Count();i++)
-    {
-      VShaderEffectResource *pFXRes = g_spShadingShaderLib->m_Effects.GetAt(i);
-
-#if defined(WIN32)
-      if (pFXRes->m_sDescription.IsEmpty() || pFXRes->m_sDescription=="<internal>")
-        continue;
-
-      VCompiledEffect *pFX = pFXRes->CompileEffect(NULL,manager.m_ShaderInstances);
-      if (pFX==NULL)
-        continue;
-      pFX->SetUserData((void *)pFXRes->m_sDescription.AsChar());
-#else
-      // we do not have the description on consoles, thus we use the source effect's name
-      VCompiledEffect *pFX = pFXRes->CompileEffect(NULL,manager.m_ShaderInstances);
-      // we also do not want to expose the vForge_NotAvailable shader as a option
-      if ((pFX==NULL) || (pFX && VStringHelper::SafeCompare(pFX->GetSourceEffect()->GetName(), "vForge_NotAvailable") == 0))
-        continue;
-      pFX->SetUserData((void *)pFX->GetSourceEffect()->GetName());
-#endif
-      effects.Add(pFX);
-    }
-  }
-
-#endif
 
 static unsigned int g_uiUsedDirectories = 0;
 static void RecordDataDirectoryConfiguration()
@@ -678,16 +639,24 @@ static void SetVariantKeys(const VString& sVarKeys)
 
 VISION_INIT
 {
-
   VISION_SET_DIRECTORIES(false);
 
-#ifdef USE_FILESERVE
-  VisSampleApp::SetupFileServeClient(true);
-#endif
+  #if defined( USE_FILESERVE )
+    g_pFileServeDaemon = new VFileServeDaemon();
+  #endif
+  
+  return true;
+}
 
+
+// Since the FileServe setup can't be performed in a single frame,
+// VISION_INIT is empty, and the actual initialization is performed in this
+// function.
+bool SceneViewerInit()
+{
   g_bIsFirstLoad = true; // Re-init global variable for Android
 
-#if defined(WIN32) && !defined(_VISION_WINRT)
+#if !defined(EMULATE_DEVICE) && defined(WIN32) && !defined(_VISION_WINRT)
   char oldPath[FS_MAX_PATH];
   g_Config.ParseParams();
   if (g_Config.bShowHelp) // output help
@@ -726,17 +695,21 @@ VISION_INIT
 
   strcpy(g_sceneName, "dummy.vscene");
    
+  #if !defined(WIN32) || defined(_VISION_WINRT) 
   if (VisSampleApp::IsFileServerInstalled())
   {
     strcpy(g_scenePath, "~/Data/Vision/Tools/vSceneViewer");
   }
   else
   {
+  #endif
     strcpy(g_scenePath, VSCENEVIEWER_DATA_PATH);
+  #if !defined(WIN32) || defined(_VISION_WINRT) 
   }
+  #endif
 
 
-#if defined(WIN32) && !defined(_VISION_WINRT)
+#if !defined(EMULATE_DEVICE) && defined(WIN32) && !defined(_VISION_WINRT)
 
   if (g_Config.HasSceneName())
   {
@@ -785,7 +758,7 @@ VISION_INIT
   SetVariantKeys(g_Config.sVariantKeys);
 #endif
 
-#if defined(_DLL) && !defined(VBASE_LIB)
+#if !defined(EMULATE_DEVICE) && defined(_DLL) && !defined(VBASE_LIB)
   //Load plugins if we're loading a scene file and not just a mesh
   if (g_Config.bIsVScene || g_Config.bIsVZone || g_Config.bIsVPrefab)
   {
@@ -814,7 +787,7 @@ VISION_INIT
   #endif
 
   // Plugins currently not available on Vision Mobile
-  #if !defined(_VISION_MOBILE)
+  #if !defined(_VISION_MOBILE) && !defined( _VISION_APOLLO )    // TODO: Have Apollo define _VISION_MOBILE.
     VISION_PLUGIN_ENSURE_LOADED(SampleGamePlugin); 
     #pragma message ( "If you do not have any samples installed, please remove the following library dependencies (and this line): SampleGamePlugin*.lib" )
   #endif
@@ -845,7 +818,7 @@ VISION_INIT
     #pragma message ( "No Havok Cloth Keycode found. If you do not have a license for Havok Cloth, please remove the following library dependencies (and this line): vHavokCloth*.lib, hclCloth.lib, hclInternal.lib, hclSetup.lib, hclAnimationBridge.lib, hclPhysics2012Bridge.lib, as well as any platform-specific hcl* libraries.")
   #endif
    
-  #if defined(WIN32)
+  #if defined(WIN32) && !defined( _VISION_WINRT )
     #if defined ( HAVOK_SIMULATION_KEYCODE )
       VISION_PLUGIN_ENSURE_LOADED(vHavokVehicle);
       VISION_PLUGIN_ENSURE_LOADED(vHavokCharacter);
@@ -858,7 +831,15 @@ VISION_INIT
   #if !defined(_VISION_MOBILE) && !defined(_VISION_WINRT) && !defined(_VISION_PSP2)
     VISION_PLUGIN_ENSURE_LOADED(Speedtree5EnginePlugin);
     #pragma message ( "If you do not have a license for SpeedTree, please remove the following library dependencies (and this line): Speedtree5EnginePlugin*.lib" )
-  #endif   
+  #endif
+
+#else
+
+  // Always link scaleform in anarchy builds
+  #if !defined(_VISION_TIZEN)
+    VISION_PLUGIN_ENSURE_LOADED(vScaleformPlugin);
+  #endif
+    
 #endif // !defined( HK_ANARCHY )
     
 #endif // _DLL
@@ -866,7 +847,10 @@ VISION_INIT
 #if defined(WIN32) && !defined(_VISION_WINRT)
   char szTitle[FS_MAX_PATH];
 
-#ifdef _VR_DX9
+
+#if defined(EMULATE_DEVICE)
+  sprintf(szTitle,"Scene Viewer (%s) [%s]", V_STRINGIZE(EMULATE_DEVICE), g_Config.sSceneName.AsChar());
+#elif defined(_VR_DX9)
   sprintf(szTitle,"Scene Viewer (DX9) [%s]",g_Config.sSceneName.AsChar());
 #elif defined(_VR_DX11)
   sprintf(szTitle,"Scene Viewer (DX11) [%s]",g_Config.sSceneName.AsChar());
@@ -877,11 +861,11 @@ VISION_INIT
   g_spApp->m_appConfig.m_videoConfig.m_iAdapter = g_Config.iAdapter;
 
   // Force to single threaded for testing here by setting 0 to 1
-  if (!g_spApp->InitSample("Scene Viewer", NULL, g_Config.GetSampleFlags() | VSAMPLE_NO_FALLBACK_ASSETPROFILE, g_Config.iResX,g_Config.iResY, VAPP_INIT_DEFAULTS, 0))
+  if (!g_spApp->InitSample("Scene Viewer", NULL, g_Config.GetSampleFlags() | VSampleFlags::VSAMPLE_NO_FALLBACK_ASSETPROFILE, g_Config.iResX,g_Config.iResY, VAPP_INIT_DEFAULTS, 0))
 #elif defined(_VISION_PSP2)
-  if (!g_spApp->InitSample(NULL, NULL, VSAMPLE_INIT_DEFAULTS | VSAMPLE_WAITRETRACE | VSAMPLE_NO_FALLBACK_ASSETPROFILE))
-#elif defined(_VISION_MOBILE)
-  if (!g_spApp->InitSample(NULL, NULL, VSAMPLE_INIT_DEFAULTS | VSAMPLE_NO_FALLBACK_ASSETPROFILE))
+  if (!g_spApp->InitSample(NULL, NULL, VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_WAITRETRACE | VSampleFlags::VSAMPLE_NO_FALLBACK_ASSETPROFILE))
+#elif defined(_VISION_MOBILE) || defined( _VISION_APOLLO )    // TODO: Have Apollo define _VISION_MOBILE.
+  if (!g_spApp->InitSample(NULL, NULL, VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_NO_FALLBACK_ASSETPROFILE))
 #else
   if(!g_spApp->InitSample())
 #endif
@@ -905,22 +889,17 @@ VISION_INIT
   {
     char szCommonDir[FS_MAX_PATH];
     Vision::File.GetAbsoluteDirectory(szCommonDir, VISION_COMMON_DATA);
-    Vision::File.RemoveDataDirectory( szCommonDir );
+    Vision::File.RemoveDataDirectory(szCommonDir);
   }
 
   // Data dir is reset by engine init. Lets add it again
-  Vision::File.AddDataDirectory( g_projectPath );
-
-#if defined(WIN32) && !defined(_VISION_WINRT) || defined (_VISION_XENON) || defined (_VISION_PS3) || defined(_VISION_PSP2) || defined(_VISION_WIIU)
-  // shading mode related - prepare shading modes:
-  EnumShadingModes(g_shadingEffects);
-#endif
+  Vision::File.AddDataDirectory(g_projectPath);
 
   // Record the base data directory configuration in order to restore it before loading a new scene.
   RecordDataDirectoryConfiguration();
 
 
-#if defined(WIN32) && !defined(_VISION_WINRT)
+#if !defined(EMULATE_DEVICE) && defined(WIN32) && !defined(_VISION_WINRT)
   if(g_Config.bIsVMesh )
   {
     // load vmesh
@@ -1030,7 +1009,7 @@ VISION_INIT
       return false;
     }
 
-#if defined(WIN32) && !defined(_VISION_WINRT)
+#if !defined(EMULATE_DEVICE) && defined(WIN32) && !defined(_VISION_WINRT)
   }
   else
   {
@@ -1048,16 +1027,19 @@ VISION_INIT
 #endif
 
 #if defined(WIN32) && !defined(_VISION_WINRT)
-
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_RETURN_TO_ORIGIN, VInputManagerPC::GetKeyboard(), CT_KB_HOME, VInputOptions::Once(ONCE_ON_PRESS, 0));
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_TOGGLE_MOUSE_CAPTURE, VInputManagerPC::GetKeyboard(), CT_KB_M, VInputOptions::Once(ONCE_ON_PRESS, 0));
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_TOGGLE_RENDERCOLLISIONMESH, VInputManagerPC::GetKeyboard(), CT_KB_C, VInputOptions::Once(ONCE_ON_PRESS, 0));
-  VisSampleApp::GetInputMap()->MapTrigger(SCENE_NEXT_SHADINGMODE, VInputManagerPC::GetKeyboard(), CT_KB_V, VInputOptions::Once(ONCE_ON_PRESS, 0));
+  #ifdef EMULATE_DEVICE
+  VisSampleApp::GetInputMap()->MapTrigger(SCENE_TOGGLE_MENU, VInputManagerPC::GetKeyboard(), CT_KB_BACKSP, VInputOptions::Once(ONCE_ON_PRESS, 0));
+  #endif
 
   g_spApp->AddHelpText("HOME - Return to scene origin.");
   g_spApp->AddHelpText("M - Release mouse.");
   g_spApp->AddHelpText("C - Render collision mesh");
-  g_spApp->AddHelpText("V - Toggle through vForge debug shading modes");
+  #ifdef EMULATE_DEVICE
+  g_spApp->AddHelpText("Backspace - Go back to the menu");
+  #endif
 
   g_spApp->AddHelpText("");
 
@@ -1084,10 +1066,8 @@ VISION_INIT
   
 
 #elif defined(_VISION_XENON)
-
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_TOGGLE_MENU,    VInputManagerXenon::GetPad(0), CT_PAD_Y, VInputOptions::Once());
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_LOAD_NEW_SCENE, VInputManagerXenon::GetPad(0), CT_PAD_RIGHT_SHOULDER, VInputOptions::Once());
-  VisSampleApp::GetInputMap()->MapTrigger(SCENE_NEXT_SHADINGMODE, VInputManagerXenon::GetPad(0), CT_PAD_LEFT_TRIGGER, VInputOptions::Once());
 
   // define help text
   g_spApp->AddHelpText("");
@@ -1097,15 +1077,10 @@ VISION_INIT
   g_spApp->AddHelpText("PAD 1 - B : Select next scene");
   g_spApp->AddHelpText("PAD 1 - X : Select previous scene");
   g_spApp->AddHelpText("PAD 1 - RIGHT SHOULDER : View selected scene");
-  g_spApp->AddHelpText("");
-  g_spApp->AddHelpText("PAD 1 - LEFT TRIGGER : Next shading mode");
-
 
 #elif defined(_VISION_PS3)
-
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_TOGGLE_MENU,  VInputManagerPS3::GetPad(0), CT_PAD_TRIANGLE, VInputOptions::Once());
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_LOAD_NEW_SCENE, VInputManagerPS3::GetPad(0), CT_PAD_RIGHT_SHOULDER, VInputOptions::Once());
-  VisSampleApp::GetInputMap()->MapTrigger(SCENE_NEXT_SHADINGMODE, VInputManagerPS3::GetPad(0), CT_PAD_LEFT_TRIGGER, VInputOptions::Once());
 
   // define help text
   g_spApp->AddHelpText("");
@@ -1115,16 +1090,10 @@ VISION_INIT
   g_spApp->AddHelpText("PAD 1 - CIRCLE : Select next scene");
   g_spApp->AddHelpText("PAD 1 - SQUARE : Select previous scene");
   g_spApp->AddHelpText("PAD 1 - RIGHT SHOULDER : View selected scene");
-  g_spApp->AddHelpText("");
-  g_spApp->AddHelpText("PAD 1 - LEFT TRIGGER : Next shading mode");
-
 
 #elif defined(_VISION_PSP2)
-
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_TOGGLE_MENU,  VInputManagerPSP2::GetPad(0), CT_PAD_TRIANGLE, VInputOptions::Once());
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_LOAD_NEW_SCENE, VInputManagerPSP2::GetPad(0), CT_PAD_RIGHT_SHOULDER, VInputOptions::Once());
-  // Enable this line to allow switching rendering modes on Vita (disabled since some functions like the character controller etc. use the same buttons)
-  // VisSampleApp::GetInputMap()->MapTrigger(SCENE_NEXT_SHADINGMODE, VInputManagerPSP2::GetPad(0),   CT_PAD_LEFT_SHOULDER, VInputOptions::Once());
 
   // define help text
   g_spApp->AddHelpText("");
@@ -1134,15 +1103,10 @@ VISION_INIT
   g_spApp->AddHelpText("PAD 1 - CIRCLE : Select next scene");
   g_spApp->AddHelpText("PAD 1 - SQUARE : Select previous scene");
   g_spApp->AddHelpText("PAD 1 - RIGHT SHOULDER : View selected scene");
-  g_spApp->AddHelpText("");
-  g_spApp->AddHelpText("PAD 1 - LEFT SHOULDER : Next shading mode");
-
-
+  
 #elif defined(_VISION_WIIU)
-
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_TOGGLE_MENU,  VInputManager::GetDRC(V_DRC_FIRST), CT_PAD_X, VInputOptions::Once());
   VisSampleApp::GetInputMap()->MapTrigger(SCENE_LOAD_NEW_SCENE, VInputManager::GetDRC(V_DRC_FIRST), CT_PAD_RIGHT_SHOULDER, VInputOptions::Once());
-  VisSampleApp::GetInputMap()->MapTrigger(SCENE_NEXT_SHADINGMODE, VInputManager::GetDRC(V_DRC_FIRST), CT_PAD_LEFT_TRIGGER, VInputOptions::Once());
 
   // define help text
   g_spApp->AddHelpText("");
@@ -1152,17 +1116,48 @@ VISION_INIT
   g_spApp->AddHelpText("DRC - A : Select next scene");
   g_spApp->AddHelpText("DRC - Y : Select previous scene");
   g_spApp->AddHelpText("DRC - RIGHT SHOULDER : View selected scene");
-  g_spApp->AddHelpText("");
-  g_spApp->AddHelpText("DRC - LEFT TRIGGER : Next shading mode");
-
-
-#elif defined(_VISION_MOBILE)
-
-  // TODO: help text
 
 #endif
   return true;
 }
+
+void LoadSceneConfig(bool bSelectFirstElement)
+{
+  #if !defined(WIN32) || defined(_VISION_WINRT) || defined(EMULATE_DEVICE)
+
+  const char* sceneList = "Dialogs/SceneConfig.lua";
+  const char* exportedScenes = "Dialogs/ExportedScenes.lua";
+
+  VListControl *pListCtrl = (VListControl*) g_spMainDlg->Items ().FindItem (g_spMainDlg->GetMenuManager ()->GetID("SCENE_LIST"));
+
+  #if defined(_VISION_XENON) 
+    LoadSceneConfig (TARGETDEVICE_XBOX360, NULL, "D:\\Data\\Vision\\Tools\\vSceneViewer\\Dialogs\\SceneConfig.lua", pListCtrl);
+  #elif defined(_VISION_PS3)
+    LoadSceneConfig (TARGETDEVICE_PS3, NULL, "/app_home/Data/Vision/Tools/vSceneViewer/Dialogs/SceneConfig.lua", pListCtrl);
+  #elif defined(_VISION_PSP2)
+    LoadSceneConfig (TARGETDEVICE_PSP2, NULL, "app0:Data/Vision/Tools/vSceneViewer/Dialogs/SceneConfig.lua", pListCtrl);
+  #elif defined(_VISION_IOS)
+    LoadSceneConfig (TARGETDEVICE_IOS, exportedScenes, sceneList, pListCtrl);
+  #elif defined(_VISION_ANDROID)
+    LoadSceneConfig (TARGETDEVICE_ANDROID, exportedScenes, sceneList, pListCtrl);
+  #elif defined (_VISION_WINRT) // Apollo, Metro
+    LoadSceneConfig (TARGETDEVICE_DX11, exportedScenes, sceneList, pListCtrl); 
+  #elif defined(_VISION_TIZEN)
+    LoadSceneConfig (TARGETDEVICE_TIZEN, exportedScenes, sceneList, pListCtrl);
+  #elif defined(EMULATE_DEVICE)
+    LoadSceneConfig(EMULATE_DEVICE, exportedScenes, sceneList, pListCtrl);
+  #elif defined(_VISION_WIIU)
+    LoadSceneConfig (TARGETDEVICE_WIIU, NULL, "/vol/content/VisionRoot/Data/Vision/Tools/vSceneViewer/Dialogs/SceneConfig.lua", pListCtrl);
+  #else
+    #error "Undefined platform!"
+  #endif
+
+  if(bSelectFirstElement)
+    pListCtrl->SetSelectionIndex(0);
+
+  #endif
+}
+
 
 VISION_SAMPLEAPP_AFTER_LOADING
 {
@@ -1219,9 +1214,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
 #endif
     VASSERT(g_spMainDlg);
 
-    VListControl *pListCtrl = (VListControl*) g_spMainDlg->Items ().FindItem (g_spMainDlg->GetMenuManager ()->GetID("SCENE_LIST"));
-    LoadSceneConfig (TARGETDEVICE_XBOX360, "D:\\Data\\Vision\\Tools\\vSceneViewer\\Dialogs\\SceneConfig.lua", pListCtrl);
-    pListCtrl->SetSelectionIndex(0);
+    LoadSceneConfig(true);
 
 #elif defined(_VISION_PS3)
 
@@ -1234,9 +1227,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
     g_spMainDlg = (SceneViewerMainMenu *)g_spGUIContext->ShowDialog("/app_home/Data/Vision/Tools/vSceneViewer/Dialogs/MainMenuPS3.xml");
     VASSERT(g_spMainDlg);
 
-    VListControl *pListCtrl = (VListControl*) g_spMainDlg->Items ().FindItem (g_spMainDlg->GetMenuManager ()->GetID("SCENE_LIST"));
-    LoadSceneConfig (TARGETDEVICE_PS3, "/app_home/Data/Vision/Tools/vSceneViewer/Dialogs/SceneConfig.lua", pListCtrl);
-    pListCtrl->SetSelectionIndex(0);
+    LoadSceneConfig(true);
 
 #elif defined(_VISION_PSP2)
 
@@ -1249,14 +1240,17 @@ VISION_SAMPLEAPP_AFTER_LOADING
     g_spMainDlg = (SceneViewerMainMenu *)g_spGUIContext->ShowDialog("app0:Data/Vision/Tools/vSceneViewer/Dialogs/MainMenuPSVita.xml");
     VASSERT(g_spMainDlg);
 
-    VListControl *pListCtrl = (VListControl*) g_spMainDlg->Items ().FindItem (g_spMainDlg->GetMenuManager ()->GetID("SCENE_LIST"));
-    LoadSceneConfig (TARGETDEVICE_PSP2, "app0:Data/Vision/Tools/vSceneViewer/Dialogs/SceneConfig.lua", pListCtrl);
-    pListCtrl->SetSelectionIndex(0);
+    LoadSceneConfig(true);
+#endif
+#if defined(EMULATE_DEVICE) || defined(_VISION_MOBILE) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )   // TODO: Have Apollo define _VISION_MOBILE.
 
-#elif defined(_VISION_MOBILE)
-
+    #ifdef EMULATE_DEVICE
+    const int width = Vision::Video.GetXRes();
+    const int height = Vision::Video.GetYRes();
+    #else
     const int width = VVideo::GetVideoConfig()->ViewWidth;
     const int height = VVideo::GetVideoConfig()->ViewHeight;
+    #endif
 
     // load some GUI resources
     VGUIManager::GlobalManager().LoadResourceFile("Dialogs/MenuSystem.xml");
@@ -1265,7 +1259,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
     g_spGUIContext->SetActivate(true);  
 
     // start the main menu
-#if defined (_VISION_WINRT) 
+#if defined (_VISION_WINRT) && !defined( _VISION_APOLLO )
     const char* dlgPath = "Data/vSceneViewer/Dialogs/MainMenuMobile.xml";
 #else
     const char* dlgPath = "Dialogs/MainMenuMobile.xml";
@@ -1274,16 +1268,8 @@ VISION_SAMPLEAPP_AFTER_LOADING
     VASSERT(g_spMainDlg);
 
     VListControl *pListCtrl = (VListControl*) g_spMainDlg->Items ().FindItem (g_spMainDlg->GetMenuManager ()->GetID("SCENE_LIST"));
-
-    const char* sceneList = "Dialogs/SceneConfig.lua";
-
-#if defined(_VISION_IOS)
-    LoadSceneConfig (TARGETDEVICE_IOS, sceneList, pListCtrl);
-#elif defined(_VISION_ANDROID)
-    LoadSceneConfig (TARGETDEVICE_ANDROID, sceneList, pListCtrl);
-#elif defined (_VISION_WINRT) // Apollo, Metro
-	  LoadSceneConfig (TARGETDEVICE_DX11, sceneList, pListCtrl); 
-#endif
+  
+    LoadSceneConfig(false);
 
     // Pull up the list control to full size
     g_spMainDlg->m_pSceneList->SetSize(width - 74, height - 128);
@@ -1322,9 +1308,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
     g_spMainDlg = (SceneViewerMainMenu *)g_spGUIContext->ShowDialog("/vol/content/VisionRoot/Data/Vision/Tools/vSceneViewer/Dialogs/MainMenuWiiU.xml");
     VASSERT(g_spMainDlg);
 
-    VListControl *pListCtrl = (VListControl*) g_spMainDlg->Items ().FindItem (g_spMainDlg->GetMenuManager ()->GetID("SCENE_LIST"));
-    LoadSceneConfig (TARGETDEVICE_WIIU, "/vol/content/VisionRoot/Data/Vision/Tools/vSceneViewer/Dialogs/SceneConfig.lua", pListCtrl);
-    pListCtrl->SetSelectionIndex(0);
+    LoadSceneConfig(true);
 
 #endif
 
@@ -1344,61 +1328,49 @@ VISION_SAMPLEAPP_AFTER_LOADING
       g_pCamera->SetRotationMatrix(g_spApp->GetSceneLoader()->m_DefaultCamRot);
     }
 
-#if !defined(WIN32) || defined(_VISION_WINRT)
+#if defined(EMULATE_DEVICE) || !defined(WIN32) || defined(_VISION_WINRT)
     g_spMainDlg->ToggleView(g_pCamera);
 #endif
   }
-
-#if defined(WIN32) && !defined(_VISION_WINRT) || defined (_VISION_XENON) || defined (_VISION_PS3) || defined(_VISION_PSP2) || defined(_VISION_WIIU)
-  // shading mode related - backup renderer node:
-  g_spRendererNode = Vision::Renderer.GetRendererNode(0);
-#endif
 }
 
-VISION_SAMPLEAPP_RUN
+VISION_RUN
 {
+  #if defined( USE_FILESERVE )
+    if(!g_pFileServeDaemon->SetupIsFinished())
+    {
+      return g_pFileServeDaemon->RunSetup();
+    }
+  #endif
+
+  static bool bInitRun = false;
+
+  if(!bInitRun)
+  {
+    bInitRun = true;
+    return SceneViewerInit();
+  }
+
+  //check if the scene loading is finished
+  VisSampleApp::ApplicationState appState = static_cast<VisSampleApp*>(Vision::GetApplication())->GetApplicationState();
+  if (appState == VisSampleApp::AS_LOADING)
+  {
+    return true;
+  }
+  else if (appState == VisSampleApp::AS_LOADING_ERROR)
+  {
+    return false;
+  }
+  else if (appState == VisSampleApp::AS_AFTER_LOADING)
+  {
+    VisionSampleAppAfterLoadingFunction();
+  }  
+
   if(!g_spApp->Run ())
     return false;
 
   if (g_bRenderCollisionMesh)
     Vision::Physics.RenderAllCollisionMeshes();
-
-#if defined(WIN32) && defined(SUPPORTS_KEYBOARD) && !defined(_VISION_WINRT) || defined (_VISION_XENON) || defined (_VISION_PS3) || defined(_VISION_PSP2) || defined(_VISION_WIIU)
-
-  if (
-    VisSampleApp::GetInputMap()->GetTrigger(SCENE_NEXT_SHADINGMODE)
-    #if !defined(WIN32)
-    && !g_spMainDlg->IsVisible()
-    #endif
-    )
-  {
-    g_iCurrentShadingMode++;
-    if (g_iCurrentShadingMode>=g_shadingEffects.Count())
-    {
-      // reset to original rendering
-      g_iCurrentShadingMode = -1;
-      Vision::RenderLoopHelper.SetReplacementRenderLoop(NULL);
-      Vision::Renderer.SetRendererNode(0,g_spRendererNode);
-      Vision::Message.Add("Switched back to standard scene rendering");
-    } 
-    else
-    {
-      if (g_spShadingModeRenderLoop==NULL)
-        g_spShadingModeRenderLoop = new VForgeDebugRenderLoop();
-      g_spShadingModeRenderLoop->SetEffect(g_shadingEffects.GetAt(g_iCurrentShadingMode));
-      VSimpleRendererNode* pSimpleRendererNode = new VSimpleRendererNode(Vision::Contexts.GetMainRenderContext());
-      pSimpleRendererNode->InitializeRenderer();
-      Vision::Renderer.SetRendererNode(0, pSimpleRendererNode);
-      Vision::RenderLoopHelper.SetReplacementRenderLoop(g_spShadingModeRenderLoop);
-    }
-  }
-  if (g_iCurrentShadingMode>=0)
-  {
-    const char *szNiceName = (const char *)g_shadingEffects.GetAt(g_iCurrentShadingMode)->GetUserData();
-    VASSERT(szNiceName);
-    Vision::Message.Print(1,10,Vision::Video.GetYRes()-20,"Scene shading mode: %s",szNiceName);
-  }
-#endif
 
 #if defined(WIN32) && defined(SUPPORTS_KEYBOARD) && !defined(_VISION_WINRT) 
   if (VisSampleApp::GetInputMap()->GetTrigger(SCENE_TOGGLE_RENDERCOLLISIONMESH))
@@ -1426,7 +1398,7 @@ VISION_SAMPLEAPP_RUN
   }
 #endif
 
-#if !defined(WIN32)
+#if defined(EMULATE_DEVICE) || !defined(WIN32) || defined( _VISION_WINRT )
   // Toggling is handled here instead of the tick function of the
   // dialog system since we have to pass the correct camera.
   if (VisSampleApp::GetInputMap()->GetTrigger(SCENE_TOGGLE_MENU))
@@ -1453,6 +1425,26 @@ VISION_SAMPLEAPP_RUN
   }
 #endif
 
+  if( g_spMainDlg->IsRefreshSceneListSet() )
+  {
+    #ifdef USE_FILESERVE
+    // Resend all data directories because the server might disappeared
+    for(int i=0; i < Vision::File.GetMaxDataDirectoryCount(); i++)
+    {
+      const char* pszDataDir = Vision::File.GetDataDirectory(i);
+      if(pszDataDir != NULL)
+      {
+        // Make a copy because the string might go out of scope when reassigning to the same index
+        VStaticString<FS_MAX_PATH> szDataDir;
+        szDataDir = pszDataDir;
+        Vision::File.SetDataDirectory(i, szDataDir);
+      }
+    }
+    #endif
+    LoadSceneConfig(false);
+    g_spMainDlg->ResetRefreshSceneList();
+  }
+
   if ( g_spMainDlg->IsLoadNewScene() && g_spMainDlg->GetScenePath() != NULL )
   {
     // Once a scene has been loaded, the continue button should be visible in the menu
@@ -1460,15 +1452,6 @@ VISION_SAMPLEAPP_RUN
     {
       g_spMainDlg->m_pContinueButton->SetVisible(true);
     }
-
-#if defined( USE_FILESERVE )
-    if (VisSampleApp::IsFileServerInstalled())
-    {
-      VFileServeStreamManager* pFileServe = (VFileServeStreamManager*) Vision::File.GetManager ();
-      pFileServe->SetSceneName(VPathHelper::GetFilename(g_spMainDlg->GetScenePath()));
-      pFileServe->SendSceneChangedEvent();
-    }
-#endif
 
 #ifdef _VISION_IOS
     // Remove touch menu when loading
@@ -1478,9 +1461,6 @@ VISION_SAMPLEAPP_RUN
     g_spApp->ClearScene();        // cleanup everything, wait for pending zones
 
     Vision::Renderer.SetRendererNode(0, NULL);
-#if defined (WIN32) || defined (_VISION_XENON) || defined (_VISION_PS3) || defined(_VISION_PSP2) || defined(_VISION_WIIU)
-    g_spRendererNode = NULL;
-#endif
 
     hkvVec3 dummy;
     VisRenderContext_cl::GetMainRenderContext()->GetCamera()->AttachToEntity(NULL, dummy);
@@ -1497,7 +1477,7 @@ VISION_SAMPLEAPP_RUN
 #endif
 
     // get the new scene path
-    strcpy(g_scenePath,g_spMainDlg->GetScenePath());
+    strcpy(g_scenePath, g_spMainDlg->GetScenePath());
 
     char path[256];
     char* pCurrentPosition = g_scenePath;
@@ -1512,18 +1492,11 @@ VISION_SAMPLEAPP_RUN
       pNextPosition = strchr( pCurrentPosition, ';' );
     }
 
-    VFileHelper::GetFileDirEx(pCurrentPosition,path);
-    Vision::File.AddDataDirectory( path );
-
-    // Note: also add parent directory, in case if scenes are in sub-folder with respect to .project file
-    strcat(path, VFILE_STR_SEPARATOR);
-    VFileHelper::GetParentDir(path);
-    Vision::File.AddDataDirectory( path );
-
     // load the scene file
-    strcpy(g_sceneName,VFileHelper::GetFilename(pCurrentPosition));
+    strcpy(g_sceneName, pCurrentPosition);
 
-
+    // Always reset the asset profile to the current platform
+    Vision::File.SetAssetProfile(VTargetDeviceName[TARGETDEVICE_THIS]);
 
     if (!g_spApp->LoadScene(g_sceneName))
     {
@@ -1533,7 +1506,7 @@ VISION_SAMPLEAPP_RUN
     VListControl *pListCtrl = (VListControl*) g_spMainDlg->Items().FindItem (g_spMainDlg->GetMenuManager ()->GetID("SCENE_LIST"));
 
     // On mobile we reset the selection so the items don't appear highlighted
-    #ifdef _VISION_MOBILE
+    #if defined ( _VISION_MOBILE ) || defined( _VISION_APOLLO )    // TODO: Have Apollo defined _VISION_MOBILE.
     if ( pListCtrl )
     {
       pListCtrl->SetSelectionIndex(-1);
@@ -1547,6 +1520,8 @@ VISION_SAMPLEAPP_RUN
       // This only becomes important if the app is suspended and resumed as it will then try to reload
       // the mouse cursor and the sample icons.
       Vision::File.AddDataDirectory( "~/Data/Vision/Tools/vSceneViewer" );
+
+      Vision::File.AddDataDirectory( "~/Data/Vision/Editor/vForge" );
     }
 #endif
 
@@ -1558,7 +1533,6 @@ VISION_SAMPLEAPP_RUN
 
 VISION_DEINIT
 {
-
 #ifdef USE_FILESERVE
   if (VisSampleApp::IsFileServerInstalled())
   {
@@ -1567,33 +1541,35 @@ VISION_DEINIT
   }
 #endif
 
-#if defined(WIN32) && !defined(_VISION_WINRT) || defined (_VISION_XENON) || defined (_VISION_PS3) || defined(_VISION_PSP2) || defined(_VISION_WIIU)
-  // deinit shading modes related settings
-  Vision::RenderLoopHelper.SetReplacementRenderLoop(NULL);
-  g_spShadingModeRenderLoop = NULL;
-  g_spRendererNode = NULL;
-  g_shadingEffects.Clear();
-  g_spShadingShaderLib = NULL;
-#endif
-
 #ifdef _VISION_IOS
   g_spTouchMenu = NULL;
 #endif
 
-#if !defined(WIN32)
+#if defined(EMULATE_DEVICE) || !defined(WIN32) || defined( _VISION_WINRT )
   // Deinit GUI
   g_spMainDlg = NULL;
-  g_spGUIContext->SetActivate(false);
-  g_spGUIContext = NULL;
+
+  if(g_spGUIContext)
+  {
+    g_spGUIContext->SetActivate(false);
+    g_spGUIContext = NULL;
+  }
 #endif
 
   g_pCamera = NULL;
 
   VGUIManager::GlobalManager().CleanupResources();
 
-  g_spApp->UnloadScene();
-  g_spApp->DeInitSample();
-  g_spApp = NULL;
+  if(g_spApp)
+  {
+    g_spApp->UnloadScene();
+    g_spApp->DeInitSample();
+    g_spApp = NULL;
+  }
+
+  #if defined( USE_FILESERVE )
+    V_SAFE_DELETE(g_pFileServeDaemon);
+  #endif
 
   return true;
 }
@@ -1601,7 +1577,7 @@ VISION_DEINIT
 VISION_MAIN_DEFAULT
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

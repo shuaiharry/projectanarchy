@@ -21,7 +21,7 @@
 #include <Vision/Samples/Engine/GUI/MonitorContext.hpp>
 #include <Vision/Runtime/Common/VisSampleApp.hpp>
 
-#if defined(_VISION_ANDROID)
+#if defined(_VISION_ANDROID) || defined(_VISION_TIZEN)
 #include <Vision/Runtime/Common/VisMobileExitDialog.hpp> 
 #endif
 
@@ -66,7 +66,7 @@ public:
   {
     if ((g_spGUIContext != NULL) && g_spGUIContext->IsActive())
     {
-#if defined(_VISION_ANDROID)
+#if defined(_VISION_ANDROID) || defined(_VISION_TIZEN)
       if (m_spGUIContext != NULL && m_spGUIContext->IsActive() && m_spExitDlg != NULL && static_cast<VisMobileExitDialog*>(m_spExitDlg.GetPtr())->IsExitTriggered())
       {
         return false;
@@ -81,8 +81,8 @@ public:
     }
   }
 
-#if defined(_VISION_ANDROID)
-  virtual bool OnAndroidBackButtonPressed() HKV_OVERRIDE
+#if defined(_VISION_ANDROID) || defined(_VISION_TIZEN)
+  virtual bool OnMobileBackButtonPressed() HKV_OVERRIDE
   {
     // Disable back button default behaviour
     return true;
@@ -93,8 +93,8 @@ public:
 VSmartPtr<GUISampleApp> spApp = NULL;
 
 // Sample flags, and filename configurations
-#if defined(_VISION_MOBILE) || defined(HK_ANARCHY)
-  int iSampleFlags = VSAMPLE_INIT_DEFAULTS | VSAMPLE_FORCEMOBILEMODE;
+#if defined(_VISION_MOBILE) || defined(HK_ANARCHY) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )   // TODO: Define _VISION_MOBILE on Apollo.
+  uint64 iSampleFlags = VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_FORCEMOBILEMODE;
   int iVideoWidth = VVIDEO_DEFAULTWIDTH;
   int iVideoHeight = VVIDEO_DEFAULTHEIGHT;
 
@@ -107,7 +107,7 @@ VSmartPtr<GUISampleApp> spApp = NULL;
   VisScreenMaskPtr g_spExit;
 
 #elif defined(_VISION_PSP2)
-  int iSampleFlags = VSAMPLE_INIT_DEFAULTS | VSAMPLE_WAITRETRACE;
+  uint64 iSampleFlags = VSampleFlags::VSAMPLE_INIT_DEFAULTS | VSampleFlags::VSAMPLE_WAITRETRACE;
   int iVideoWidth = 960;
   int iVideoHeight = 544;
 
@@ -118,7 +118,7 @@ VSmartPtr<GUISampleApp> spApp = NULL;
   #define MESH_NAME "Crossing.vmesh"
 
 #else
-  int iSampleFlags = VSAMPLE_INIT_DEFAULTS;
+  uint64 iSampleFlags = VSampleFlags::VSAMPLE_INIT_DEFAULTS;
   int iVideoWidth = VVIDEO_DEFAULTWIDTH;
   int iVideoHeight = VVIDEO_DEFAULTHEIGHT;
 
@@ -164,12 +164,12 @@ VISION_INIT
 #endif
 
 #if defined(_VISION_WIIU)
-  iSampleFlags &= ~VSAMPLE_WIIU_DRCDEMO;
+  iSampleFlags &= ~VSampleFlags::VSAMPLE_WIIU_DRCDEMO;
 #endif
 
   // Create and init an application
   spApp = new GUISampleApp();
-  if (!spApp->InitSample(MAP_DATA_DIR /*DataDir*/, NULL,  iSampleFlags&~VSAMPLE_SPLASHSCREEN&~VSAMPLE_HAVOKLOGO, iVideoWidth, iVideoHeight ))
+  if (!spApp->InitSample(MAP_DATA_DIR /*DataDir*/, NULL,  iSampleFlags & ~VSampleFlags::VSAMPLE_SPLASHSCREEN & ~VSampleFlags::VSAMPLE_HAVOKLOGO, iVideoWidth, iVideoHeight ))
     return false;
 
   g_state = GS_INIT;
@@ -240,7 +240,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
     spApp->AddHelpText("PAD1 - B : Click with cursor");
     spApp->AddHelpText("PAD1 - X : Go to main menu");
 
-#elif defined(_VISION_MOBILE)
+#elif defined(_VISION_MOBILE) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )    // TODO: Define _VISION_MOBILE on Apollo.
     int iResX = Vision::Video.GetXRes();
     int iResY = Vision::Video.GetYRes();
     int iWidth, iHeight;
@@ -278,7 +278,7 @@ VISION_SAMPLEAPP_AFTER_LOADING
 
     // Prepare the world in order to have skinning shaders for the render to texture menu
     Vision::InitWorld();
-
+    spApp->SelectAssetProfile(SCENE_NAME, true);
     // Start in main menu after initialization
     g_state = GS_MAIN_MENU;
   }
@@ -315,7 +315,7 @@ VISION_SAMPLEAPP_RUN
         {
           if (iDlgResult == VGUIManager::GetID("CANCEL"))
           {
-#if defined(_VISION_ANDROID)
+#if defined(_VISION_ANDROID) || defined(_VISION_TIZEN)
             g_pMainMenuDialog->SetDialogResult(0);
 
             // On android use the build-in exit dialog
@@ -342,7 +342,7 @@ VISION_SAMPLEAPP_RUN
           }
         }
 
-#if defined(_VISION_ANDROID)
+#if defined(_VISION_ANDROID) || defined(_VISION_TIZEN)
         if (spApp->GetInputMap()->GetTrigger(EXIT)) 
         {
           // Show exit dialog when back button is pressed in main menu
@@ -386,6 +386,7 @@ VISION_SAMPLEAPP_RUN
               g_spMonitor = NULL;
 
               Vision::InitWorld();
+              spApp->SelectAssetProfile(SCENE_NAME, true);
               g_state = GS_MAIN_MENU;
 
               g_spGUIContext->SetActivate(true);
@@ -421,7 +422,7 @@ VISION_DEINIT
   g_pMainMenuDialog = NULL;
   g_pMessageBoxInGame = NULL;
 
-#if defined(_VISION_MOBILE)
+#if defined(_VISION_MOBILE) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )    // TODO: Define _VISION_MOBILE on Apollo.
   g_spExit = NULL;
 #endif
 
@@ -438,7 +439,7 @@ VISION_MAIN_DEFAULT
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

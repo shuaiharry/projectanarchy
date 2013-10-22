@@ -93,10 +93,12 @@ hkvPlatformToTextureDataFormatMapping::hkvPlatformToTextureDataFormatMapping()
   addMappings(HKV_TARGET_PLATFORM_PSVITA, rawFormats);
   addMappings(HKV_TARGET_PLATFORM_IOS, rawFormats);
   addMappings(HKV_TARGET_PLATFORM_ANDROID, rawFormats);
+  addMappings(HKV_TARGET_PLATFORM_TIZEN, rawFormats);
   addMappings(HKV_TARGET_PLATFORM_WIIU, rawFormats);
 
   addMapping(HKV_TARGET_PLATFORM_ANDROID, HKV_TEXTURE_DATA_FORMAT_R4G4B4A4_GL);
   addMapping(HKV_TARGET_PLATFORM_IOS, HKV_TEXTURE_DATA_FORMAT_R4G4B4A4_GL);
+  addMapping(HKV_TARGET_PLATFORM_TIZEN, HKV_TEXTURE_DATA_FORMAT_R4G4B4A4_GL);
 
   hkvTextureDataFormat bcFormats[] = {
     HKV_TEXTURE_DATA_FORMAT_DXT1,
@@ -116,11 +118,13 @@ hkvPlatformToTextureDataFormatMapping::hkvPlatformToTextureDataFormatMapping()
   };
   addMappings(HKV_TARGET_PLATFORM_IOS, pvrFormats);
   addMappings(HKV_TARGET_PLATFORM_ANDROID, pvrFormats);
+  addMappings(HKV_TARGET_PLATFORM_TIZEN, pvrFormats);
 
   hkvTextureDataFormat etcFormats[] = {
     HKV_TEXTURE_DATA_FORMAT_ETC1,
   };
   addMappings(HKV_TARGET_PLATFORM_ANDROID, etcFormats);
+  addMappings(HKV_TARGET_PLATFORM_TIZEN, etcFormats);
 }
 
 
@@ -136,17 +140,21 @@ hkvPlatformToTextureFileFormatMapping::hkvPlatformToTextureFileFormatMapping()
   addMapping(HKV_TARGET_PLATFORM_PSVITA, HKV_TEXTURE_FILE_FORMAT_DDS);
   addMapping(HKV_TARGET_PLATFORM_ANDROID, HKV_TEXTURE_FILE_FORMAT_DDS);
   addMapping(HKV_TARGET_PLATFORM_IOS, HKV_TEXTURE_FILE_FORMAT_DDS);
+  addMapping(HKV_TARGET_PLATFORM_TIZEN, HKV_TEXTURE_FILE_FORMAT_DDS);
 
   //RGBA
   addMapping(HKV_TARGET_PLATFORM_ANDROID, HKV_TEXTURE_FILE_FORMAT_RGBA);
   addMapping(HKV_TARGET_PLATFORM_IOS, HKV_TEXTURE_FILE_FORMAT_RGBA);
+  addMapping(HKV_TARGET_PLATFORM_TIZEN, HKV_TEXTURE_FILE_FORMAT_RGBA);
 
   //PVR
   addMapping(HKV_TARGET_PLATFORM_IOS, HKV_TEXTURE_FILE_FORMAT_PVR);
   addMapping(HKV_TARGET_PLATFORM_ANDROID, HKV_TEXTURE_FILE_FORMAT_PVR);
+  addMapping(HKV_TARGET_PLATFORM_TIZEN, HKV_TEXTURE_FILE_FORMAT_PVR);
 
   //ETC
   addMapping(HKV_TARGET_PLATFORM_ANDROID, HKV_TEXTURE_FILE_FORMAT_ETC);
+  addMapping(HKV_TARGET_PLATFORM_TIZEN, HKV_TEXTURE_FILE_FORMAT_ETC);
 
   //GTX
   addMapping(HKV_TARGET_PLATFORM_WIIU, HKV_TEXTURE_FILE_FORMAT_GTX);
@@ -192,7 +200,7 @@ hkvTextureFileToDataFormatMapping::hkvTextureFileToDataFormatMapping()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

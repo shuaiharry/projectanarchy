@@ -6,7 +6,6 @@
  *
  */
 
-
 // Gcc 4.5.1 can mis-optimise _mm_move_sd
 #if defined(HK_COMPILER_GCC) && (HK_COMPILER_GCC_VERSION <= 40501)
 #define MOVE_SD(a, b) _mm_shuffle_pd(b, a, _MM_SHUFFLE2(1, 0))
@@ -159,10 +158,22 @@ HK_FORCE_INLINE void hkVector4d::setAdd(hkVector4dParameter v0, hkVector4dParame
 	m_quad.zw = _mm_add_pd(v0.m_quad.zw, v1.m_quad.zw);
 }
 
+HK_FORCE_INLINE void hkVector4d::setAdd(hkVector4dParameter v0, hkSimdDouble64Parameter v1)
+{
+	m_quad.xy = _mm_add_pd(v0.m_quad.xy, v1.m_real);
+	m_quad.zw = _mm_add_pd(v0.m_quad.zw, v1.m_real);
+}
+
 HK_FORCE_INLINE void hkVector4d::setSub(hkVector4dParameter v0, hkVector4dParameter v1)
 {
 	m_quad.xy = _mm_sub_pd(v0.m_quad.xy, v1.m_quad.xy);
 	m_quad.zw = _mm_sub_pd(v0.m_quad.zw, v1.m_quad.zw);
+}
+
+HK_FORCE_INLINE void hkVector4d::setSub(hkVector4dParameter v0, hkSimdDouble64Parameter v1)
+{
+	m_quad.xy = _mm_sub_pd(v0.m_quad.xy, v1.m_real);
+	m_quad.zw = _mm_sub_pd(v0.m_quad.zw, v1.m_real);
 }
 
 HK_FORCE_INLINE void hkVector4d::setMul(hkVector4dParameter v0, hkVector4dParameter v1)
@@ -2846,7 +2857,7 @@ HK_FORCE_INLINE void hkVector4d::store(hkFloat16* p) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

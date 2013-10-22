@@ -250,7 +250,7 @@ VSWIG_CREATE_TOSTRING(VStringInputMap, "%s: [%d triggers %d alternatives]", self
 
 /// \brief VStringInputMap is a named input map, additionally support strings to identify your triggers.
 /// 			 VStringInputMap additionally comes with with an element manager so you can use
-/// 			 VStringInputMap::FindByKey to find your named input map.
+/// 			 Input:GetMap("MyMap") to find your named input map.
 /// 			 
 /// \note If you are also using integer based trigger indices, please setup their mapping BEFORE string based
 /// 			triggers, otherwise the named trigger will accidentally use another ones integer based index.
@@ -259,6 +259,233 @@ VSWIG_CREATE_TOSTRING(VStringInputMap, "%s: [%d triggers %d alternatives]", self
 /// 			performance in C++ and will be still able to access all triggers without additional code in your
 /// 			scripts as well.
 ///
+///       VStringInputMap uses strings in Lua to identify the controls.
+///       Here is a list of the most common control names (from the enum VInputControl):
+///       <TABLE>
+///        <TR>
+///         <TH colspan="4">Gamepad : Digital Buttons</TH>
+///        </TR>
+///        <TR>
+///         <TD>CT_PAD_UP</TD>
+///         <TD>CT_PAD_DOWN</TD>
+///         <TD>CT_PAD_LEFT</TD>
+///         <TD>CT_PAD_RIGHT</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_PAD_SQUARE = CT_PAD_X = CT_PAD_PC_1</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_PAD_CROSS = CT_PAD_A = CT_PAD_PC_2</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_PAD_CIRCLE = CT_PAD_B = CT_PAD_PC_3</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_PAD_TRIANGLE = CT_PAD_Y = CT_PAD_PC_4</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_PAD_START</TD>
+///         <TD>CT_PAD_BACK = CT_PAD_SELECT</TD>
+///         <TD>CT_PAD_LEFT_THUMB</TD>
+///         <TD>CT_PAD_RIGHT_THUMB</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_PAD_LEFT_TRIGGER</TD>
+///         <TD>CT_PAD_LEFT_SHOULDER</TD>
+///         <TD>CT_PAD_RIGHT_TRIGGER</TD>
+///         <TD>CT_PAD_RIGHT_SHOULDER</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_PAD_LEFT_THUMB_STICK_CHANGED</TD>
+///         <TD colspan="2">CT_PAD_RIGHT_THUMB_STICK_CHANGED</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_PAD_ANY_KEY</TD>
+///         <TD colspan = 3>CT_PAD_PC_5 - CT_PAD_PC_24</TD>
+///        </TR>
+///        <TR>
+///         <TH colspan="4">Gamepad : Analogue Buttons</TH>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_PAD_LEFT_THUMB_STICK_UP</TD>
+///         <TD colspan="2">CT_PAD_LEFT_THUMB_STICK_DOWN</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_PAD_LEFT_THUMB_STICK_LEFT</TD>
+///         <TD colspan="2">CT_PAD_LEFT_THUMB_STICK_RIGHT</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_PAD_RIGHT_THUMB_STICK_UP</TD>
+///         <TD colspan="2">CT_PAD_RIGHT_THUMB_STICK_DOWN</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_PAD_RIGHT_THUMB_STICK_LEFT</TD>
+///         <TD colspan="2">CT_PAD_RIGHT_THUMB_STICK_RIGHT</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_PAD_PC_SLIDER1_NEG</TD>
+///         <TD colspan="2">CT_PAD_PC_SLIDER1_POS</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_PAD_PC_SLIDER2_NEG</TD>
+///         <TD colspan="2">CT_PAD_PC_SLIDER2_POS</TD>
+///        </TR>
+///        <TR>
+///         <TH colspan="4">TouchScreen</TH>
+///        </TR>
+///        <TR>
+///         <TD>CT_TOUCH_POINT_0_X</TD>
+///         <TD>CT_TOUCH_POINT_0_Y</TD>
+///         <TD colspan="2">CT_TOUCH_POINT_0_FORCE</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">until</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_TOUCH_POINT_9_X</TD>
+///         <TD>CT_TOUCH_POINT_9_Y</TD>
+///         <TD colspan="2">CT_TOUCH_POINT_9_FORCE</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_TOUCH_ANY</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_TOUCH_ABS_X</TD>
+///         <TD>CT_TOUCH_ABS_Y</TD>
+///         <TD>CT_TOUCH_NORM_X</TD>
+///         <TD>CT_TOUCH_NORM_Y</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_TOUCH_ABS_DELTA_X</TD>
+///         <TD>CT_TOUCH_ABS_DELTA_Y</TD>
+///         <TD>CT_TOUCH_NORM_DELTA_X</TD>
+///         <TD>CT_TOUCH_NORM_DELTA_Y</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_TOUCH_DOUBLE_TAP</TD>
+///         <TD>CT_TOUCH_TRIPLE_TAP</TD>
+///         <TD>CT_TOUCH_TAP_X</TD>
+///         <TD>CT_TOUCH_TAP_Y</TD>
+///        </TR>
+///        <TR>
+///         <TH colspan="4">MotionSensor</TH>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_MOTION_ACCELERATION_X / Y / Z</TD>
+///        </TR>
+///        <TR>
+///         <TH colspan="4">Mouse</TH>
+///        </TR>
+///        <TR>
+///         <TD>CT_MOUSE_LEFT_BUTTON</TD>
+///         <TD>CT_MOUSE_MIDDLE_BUTTON</TD>
+///         <TD>CT_MOUSE_RIGHT_BUTTON</TD>
+///         <TD>CT_MOUSE_DATA_CHANGED</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_MOUSE_WHEEL</TD>
+///         <TD>CT_MOUSE_WHEEL_UP</TD>
+///         <TD>CT_MOUSE_WHEEL_DOWN</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_MOUSE_ABS_X</TD>
+///         <TD>CT_MOUSE_ABS_Y</TD>
+///         <TD>CT_MOUSE_NORM_X</TD>
+///         <TD>CT_MOUSE_NORM_Y</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_MOUSE_ABS_DELTA_X</TD>
+///         <TD>CT_MOUSE_ABS_DELTA_Y</TD>
+///         <TD>CT_MOUSE_NORM_DELTA_X</TD>
+///         <TD>CT_MOUSE_NORM_DELTA_Y</TD>
+///        </TR>
+///        <TR>
+///         <TH colspan="4">Keyboard</TH>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_ESC</TD>
+///         <TD>CT_KB_SPACE</TD>
+///         <TD>CT_KB_ENTER</TD>
+///         <TD>CT_KB_ANYKEY</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_LSHIFT</TD>
+///         <TD>CT_KB_RSHIFT</TD>
+///         <TD>CT_KB_LCTRL</TD>
+///         <TD>CT_KB_RCTRL</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_APPS</TD>
+///         <TD>CT_KB_BACKSP</TD>
+///         <TD>CT_KB_TAB</TD>
+///         <TD>CT_KB_PGUP / PGDN</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_LWIN</TD>
+///         <TD>CT_KB_RWIN</TD>
+///         <TD>CT_KB_LALT</TD>
+///         <TD>CT_KB_RALT</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_INS</TD>
+///         <TD>CT_KB_DEL</TD>
+///         <TD>CT_KB_HOME</TD>
+///         <TD>CT_KB_END</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_UP</TD>
+///         <TD>CT_KB_DOWN</TD>
+///         <TD>CT_KB_LEFT</TD>
+///         <TD>CT_KB_RIGHT</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_COMMA</TD>
+///         <TD>CT_KB_PERIOD</TD>
+///         <TD>CT_KB_MINUS</TD>
+///         <TD>CT_KB_GRAVE</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_KB_A - CT_KB_Z</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_KB_0 - CT_KB_9</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_KB_F1 - CT_KB_F12 </TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="4">CT_KB_KP_0 - CT_KB_KP_9</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_KP_SLASH</TD>
+///         <TD>CT_KB_KP_MUL</TD>
+///         <TD>CT_KB_KP_MINUS</TD>
+///         <TD>CT_KB_KP_PLUS</TD>
+///        </TR>
+///        <TR>
+///         <TD colspan="2">CT_KB_KP_DEL</TD>
+///         <TD colspan="2">CT_KB_KP_ENTER</TD>
+///        <TR>
+///         <TD>CT_KB_CAPS</TD>
+///         <TD>CT_KB_SCROLL</TD>
+///         <TD>CT_KB_NUM</TD>
+///         <TD>CT_KB_PRSCR</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_PAUSE</TD>
+///         <TD>CT_KB_EQUAL</TD>
+///         <TD>CT_KB_EQUAL_LSQBRK</TD>
+///         <TD>CT_KB_EQUAL_RSQBRK</TD>
+///        </TR>
+///        <TR>
+///         <TD>CT_KB_EQUAL_SEMICL</TD>
+///         <TD>CT_KB_EQUAL_APOSTR</TD>
+///         <TD>CT_KB_EQUAL_BACKSL</TD>
+///         <TD>CT_KB_EQUAL_SLASH</TD>
+///        </TR>
+///       </TABLE>
+///
+/// \see VInputControl
 /// \see VInputMap
 /// \see VisObjectKey_cl
 /// \see VEnginePluginElementManager<class VStringInputMap*>

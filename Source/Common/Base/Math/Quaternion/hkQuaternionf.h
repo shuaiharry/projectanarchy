@@ -151,8 +151,7 @@ class hkQuaternionf
 			/// Calculates the spherical linear interpolation between q0 and q1
 			/// parameterized by t. If t is 0 then the result will be q0.
 		void setSlerp(hkQuaternionfParameter q0, hkQuaternionfParameter q1, hkSimdFloat32Parameter t);
-		HK_FORCE_INLINE void _setSlerp(hkQuaternionfParameter q0, hkQuaternionfParameter q1, hkSimdFloat32Parameter t);
-		
+				
 			/// Calculates the barycentric interpolation between qVerts = { q0, q1, q2 }. The barycentric coordinates are vLambda = [l0, l1, l2].
 		void setBarycentric(const hkQuaternionf* HK_RESTRICT qVerts, hkVector4fParameter vLambda);
 		
@@ -248,7 +247,7 @@ class hkQuaternionf
 #endif //HK_MATH_QUATERNIONf_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

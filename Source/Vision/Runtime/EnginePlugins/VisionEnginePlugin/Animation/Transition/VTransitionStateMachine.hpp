@@ -148,6 +148,11 @@ public:
   /// @{
   ///
 
+  ///
+  /// \brief
+  ///   Default initialization of  the transition state machine.
+  ///
+  ANIMATION_IMPEXP void Init();
 
   ///
   /// \brief
@@ -159,9 +164,6 @@ public:
   /// will automatically be loaded by the component. A dedicated initialization of the component is
   /// thus not necessary in that case.
   /// 
-  /// \param pEntity
-  ///   Future owner of the component. Has to be the same one as later passed to AddComponent
-  /// 
   /// \param pTable
   ///   Transition table to be used by this state machine
   /// 
@@ -171,8 +173,7 @@ public:
   ///   to manually hook the animation (accessible via GetTransitionMixer) into your entity's
   ///   animation graph.
   ///
-  ANIMATION_IMPEXP void Init(VisBaseEntity_cl *pEntity, VTransitionTable *pTable, bool bCreateAnimConfig = true);
-
+  ANIMATION_IMPEXP void Init(VTransitionTable *pTable, bool bCreateAnimConfig);
 
   ///
   /// \brief
@@ -189,10 +190,10 @@ public:
   ///
   ANIMATION_IMPEXP bool IsInitialized() const;
 
-
 #ifdef SUPPORTS_SNAPSHOT_CREATION
-  ANIMATION_IMPEXP virtual void GetDependencies(VResourceSnapshot &snapshot);
+  ANIMATION_IMPEXP virtual void GetDependencies(VResourceSnapshot &snapshot) HKV_OVERRIDE;
 #endif
+
   ///
   /// @}
   ///
@@ -205,7 +206,7 @@ public:
 
   /// \brief
   ///   Sets the enabled state of the transition machine.
-  ANIMATION_IMPEXP void SetEnabled(BOOL bEnabled);
+  ANIMATION_IMPEXP void SetEnabled(bool bEnabled);
 
   /// \brief
   ///   Returns the enabled state of the transition machine.
@@ -335,13 +336,17 @@ public:
   /// @{
   ///
 
+  ///
+  /// \brief
+  ///   Sets the transition table.
+  ///
+  ANIMATION_IMPEXP void SetTransitionTable(VTransitionTable* pTable);
 
   ///
   /// \brief
   ///   Gets the transition table used by this state machine
   ///
   ANIMATION_IMPEXP VTransitionTable *GetTransitionTable() const;
-
 
   ///
   /// \brief
@@ -557,7 +562,10 @@ public:
   /// \brief
   ///   Override this function to make sure that we get a serialization callback
   ///
-  virtual VBool WantsDeserializationCallback(const VSerializationContext &context) { return context.m_eType!=VSerializationContext::VSERIALIZATION_EDITOR; }
+  virtual VBool WantsDeserializationCallback(const VSerializationContext &context) 
+  { 
+    return (context.m_eType != VSerializationContext::VSERIALIZATION_EDITOR); 
+  }
 
 
   ///
@@ -575,8 +583,6 @@ public:
   ///
   /// @}
   ///
-  
-
 
   ///
   /// \brief
@@ -587,8 +593,10 @@ public:
   ///
   /// The animation sequence is first searched for in the transition table, and then in the list of
   /// animation sequences defined by the model.
-  ANIMATION_IMPEXP void SetInitialAnimation(const char* szAnimationName) { InitialAnimation = szAnimationName; }
-
+  ANIMATION_IMPEXP void SetInitialAnimation(const char* szAnimationName) 
+  { 
+    InitialAnimation = szAnimationName; 
+  }
 
   ///
   /// \brief
@@ -597,7 +605,10 @@ public:
   /// \return
   ///   string with the name of the initial animation that should be set
   ///
-  ANIMATION_IMPEXP const VString& GetInitialAnimation() const { return InitialAnimation; }
+  ANIMATION_IMPEXP const VString& GetInitialAnimation() const 
+  { 
+    return InitialAnimation; 
+  }
 
   ///
   /// @name Network related
@@ -621,13 +632,19 @@ protected:
   /// \brief
   ///   Returns true if the state of the TSM changed (will be cleared as soon as the state is synced via the network)
   ///
-  inline bool HasStateChanged() { return m_bStateChanged; }
+  inline bool HasStateChanged() 
+  { 
+    return m_bStateChanged; 
+  }
 
   ///
   /// \brief
   ///   Clear the state changed flag of the TSM
   ///
-  inline void ClearStateChange() { m_bStateChanged = false; }
+  inline void ClearStateChange() 
+  { 
+    m_bStateChanged = false; 
+  }
 
   ///
   /// @}
@@ -635,13 +652,11 @@ protected:
 
   ANIMATION_IMPEXP virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
 
-
   ///
   /// \brief
   ///   Event handling for fading in/out events
   ///
   ANIMATION_IMPEXP void OnEvent(INT_PTR iEvent);
-
 
   ///
   /// \brief
@@ -649,13 +664,11 @@ protected:
   ///
   ANIMATION_IMPEXP void ProcessOffsetDelta();
 
-
   ///
   /// \brief
   ///   Trigger fading in/out events
   ///
   ANIMATION_IMPEXP void TriggerEvent(INT_PTR iEvent);
-
 
   ///
   /// \brief
@@ -672,13 +685,11 @@ protected:
   ///
   ANIMATION_IMPEXP void SendToAllListeners(int iID, INT_PTR iParamA, INT_PTR iParamB) const;
 
-
   ///
   /// \brief
   ///   Event listener to sequence events
   ///
   ANIMATION_IMPEXP virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB);
-
 
   /// 
   /// \brief
@@ -689,13 +700,11 @@ protected:
   /// 
   void ReloadTable(const char *szFilename);
 
-
   /// 
   /// \brief
   ///   Creates a default transition table with a single default transition
   /// 
   void ReloadDefaultTable();
-
 
   /// 
   /// \brief
@@ -741,17 +750,21 @@ protected:
   ///
   void GetAndDisableAllSkeletalAnimControlEventListeners( DynArray_cl<TDynArrEngObj*> &aEventListeners );
 
-
+  ///
+  /// \brief
+  ///   Returns a pointer to the owner entity.
+  ////
+  inline VisBaseEntity_cl* GetOwnerEntity()
+  {
+    return vstatic_cast<VisBaseEntity_cl*>(GetOwner());
+  }
 
 private:
-
   // Exposed to vForge:
-
   VString TransitionTableFile;        ///< parameter
   VString InitialAnimation;           ///< parameter
 
   // Not exposed to vForge: 
-
   VSmartPtr<VisAnimNormalizeMixerNode_cl> m_spNormalizeMixer;           ///< Animation normalize mixer responsible for handling the transitions
   DynArray_cl<VisTypedEngineObject_cl*> m_pEventListener;               ///< Collection of listeners which get notified about transition events
   int m_iEventListenerCount;                                            ///< Number of event listeners
@@ -761,10 +774,6 @@ private:
   VRefCountedCollection<StateAnimControl_cl> m_SkeletalAnimControlList; ///< Skeletal animation control list  
   StateAnimControlPtr m_spPrimaryStateAnimControl;                      ///< Primary Animation control (Currently active animation sequence)
   StateAnimControlPtr m_spSecondaryStateAnimControl;                    ///< Secondary Animation control (Last active animation sequence)
-
-  VisBaseEntity_cl *m_pEntity;                                          ///< Owner entity
-  VDynamicMesh *m_pMesh;                                                ///< Model of entity
-  VSmartPtr<VisAnimConfig_cl> m_spAnimConfig;                           ///< Hold a reference to the anim config
 
   VTransitionTablePtr m_spTransTable;                                   ///< Transition Table of this Transition State Machine
   VTransitionDef* m_pTransition;                                        ///< Active blending transition
@@ -815,7 +824,7 @@ public:
 #endif // VTRANSITIONSTATEMACHINE_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

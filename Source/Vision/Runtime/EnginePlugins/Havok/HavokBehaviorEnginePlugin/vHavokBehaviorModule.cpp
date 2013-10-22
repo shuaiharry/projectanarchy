@@ -167,6 +167,9 @@ void vHavokBehaviorModule::OneTimeDeInit()
 void vHavokBehaviorModule::InitWorld( vHavokPhysicsModule* physicsModule )
 {
 	hkbWorldCinfo cinfo;
+	// world's up-vector is the Z axis
+	cinfo.m_up = hkVector4::getConstant< HK_QUADREAL_0010 >();
+
 	m_behaviorWorld = new hkbWorld( cinfo );
 
 	if(m_behaviorContext)
@@ -190,8 +193,8 @@ void vHavokBehaviorModule::InitWorld( vHavokPhysicsModule* physicsModule )
 
 	// setup behavior world properties
 	{
-		m_behaviorWorld->setPhysicsWorld( physicsWorld );
 		m_behaviorWorld->setPhysicsInterface( m_physicsStepper );
+		m_projectAssetManager->setPhysicsInterface( m_physicsStepper );
 		physicsModule->SetSteppedExternally( true );
 		physicsModule->SetVdbSteppedExternally(true);
 		physicsModule->SetUseAsynchronousPhysics( false );
@@ -233,15 +236,16 @@ void vHavokBehaviorModule::DeInitWorld()
 
 	if( m_projectAssetManager != HK_NULL )
 	{
+		m_projectAssetManager->setPhysicsInterface( HK_NULL );
 		m_projectAssetManager->removeReference();
 		m_projectAssetManager = HK_NULL;
 	}
 
-    if(m_scriptAssetLoader != HK_NULL)
-    {
-      m_scriptAssetLoader->removeReference();
-      m_scriptAssetLoader = HK_NULL;
-    }
+	if(m_scriptAssetLoader != HK_NULL)
+	{
+		m_scriptAssetLoader->removeReference();
+		m_scriptAssetLoader = HK_NULL;
+	}
 
 	if( m_assetLoader != HK_NULL )
 	{
@@ -462,6 +466,9 @@ void vHavokBehaviorModule::stepModule()
 			{
 				float timestep = Vision::GetTimer()->GetTimeDifference();
 
+				// notify that a frame has started
+				OnFrameStart();
+
 				// Step Behavior
 				vHavokPhysicsModule* physicsModule = vHavokPhysicsModule::GetInstance();
 				if( physicsModule != HK_NULL )
@@ -491,6 +498,18 @@ void vHavokBehaviorModule::stepModule()
 		for( int i = 0; i < m_visionCharacters.getSize(); i++ )
 		{
 			m_visionCharacters[i]->UpdateHavokTransformFromVision();
+		}
+	}
+}
+
+void vHavokBehaviorModule::OnFrameStart()
+{
+	if( Vision::Editor.IsAnimatingOrPlaying() )
+	{
+		// Update the Vision properties after every step
+		for( int i = 0; i < m_visionCharacters.getSize(); i++ )
+		{
+			m_visionCharacters[i]->OnFrameStart();
 		}
 	}
 }
@@ -636,7 +655,7 @@ hkbProjectAssetManager* vHavokBehaviorModule::GetProjectAssetManager() const
 // ----------------------------------------------------------------------------
 
 vHavokPhysicsStepper::vHavokPhysicsStepper( hkpWorld* world, hkJobQueue* jobQueue, hkJobThreadPool* jobThreadPool ) 
-	: hkbpPhysicsInterface( world, jobQueue, jobThreadPool )
+	:hkbpPhysicsInterface( world, jobQueue, jobThreadPool )
 {
 }
 
@@ -675,7 +694,7 @@ void EnsureHavokBehaviorScriptRegistration()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

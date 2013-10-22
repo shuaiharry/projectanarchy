@@ -87,11 +87,11 @@ class hkaTwoJointsIkSolver : public hkReferencedObject
 				m_firstJointTwistIdx(-1),
 				m_secondJointTwistIdx(-1),
 				m_hingeAxisLS(hkVector4::getZero()),
-				m_cosineMaxHingeAngle (-1.0f),
-				m_cosineMinHingeAngle(1.0f),
-				m_firstJointIkGain(1.0f),
-				m_secondJointIkGain(1.0f),
-				m_endJointIkGain(1.0f),
+				m_cosineMaxHingeAngle (-1),
+				m_cosineMinHingeAngle(1),
+				m_firstJointIkGain(1),
+				m_secondJointIkGain(1),
+				m_endJointIkGain(1),
 				m_endTargetMS(hkVector4::getZero()),
 				m_endTargetRotationMS(hkQuaternion::getIdentity()),
 				m_endBoneOffsetLS(hkVector4::getZero()),
@@ -112,7 +112,7 @@ class hkaTwoJointsIkSolver : public hkReferencedObject
 #endif // INC_HKA_TWO_JOINTS_IK_SOLVER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

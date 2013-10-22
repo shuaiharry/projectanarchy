@@ -15,13 +15,38 @@ inline int hkxVertexBuffer::getNumVertices() const
 	return m_data.m_numVerts; 
 }
 
+inline int hkxVertexBuffer::getVectorStride() const
+{
+	return m_data.m_vectorStride;
+}
+
+inline int hkxVertexBuffer::getFloatStride() const
+{
+	return m_data.m_floatStride;
+}
+
+inline int hkxVertexBuffer::getUint32Stride() const
+{
+	return m_data.m_uint32Stride;
+}
+
+inline int hkxVertexBuffer::getUint16Stride() const
+{
+	return m_data.m_uint16Stride;
+}
+
+inline int hkxVertexBuffer::getUint8Stride() const
+{
+	return m_data.m_uint8Stride;
+}
+
 inline const hkxVertexDescription& hkxVertexBuffer::getVertexDesc() const 
 { 
 	return m_desc;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

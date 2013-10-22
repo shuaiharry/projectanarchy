@@ -12,6 +12,7 @@
 #define HKV_ASSET_MANAGER_HPP_INCLUDED
 
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/hkvAssetLibrary.hpp>
+#include <Vision/Editor/vForge/AssetManagement/AssetFramework/hkvAssetPluginManager.hpp>
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/hkvBackgroundAssetHandling.hpp>
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/Base/hkvBackgroundProcessor.hpp>
 #include <Vision/Editor/vForge/AssetManagement/AssetFramework/Base/hkvCriticalSectionLock.hpp>
@@ -124,39 +125,42 @@ public:
 
 
 /// \brief
-///   Data object for the OnQueryEditorStatus callback in the hkvAssetManager
-class hkvQueryEditorStatusData : public hkvCallbackData
-{
-public:
-  ASSETFRAMEWORK_IMPEXP hkvQueryEditorStatusData(const hkvCallback* sender)
-  : hkvCallbackData(sender), m_valid(false), m_isDevelopmentMachine(false)
-  {
-  }
-
-  bool m_valid;
-  bool m_isDevelopmentMachine;
-};
-
-
-/// \brief
 ///   Status of the automatic asset transformation pipeline.
 struct hkvTransformStatus
 {
   ASSETFRAMEWORK_IMPEXP hkvTransformStatus()
-    : m_automaticTransform(true), m_totalAssets(0), m_totalAssetsNeedingUpdate(0), m_totalAssetsNeedingTransform(0) {}
-  ASSETFRAMEWORK_IMPEXP hkvTransformStatus(bool automaticTransform, hkUint32 totalAssets, hkUint32 totalAssetsNeedingUpdate, hkUint32 totalAssetsNeedingTransform)
-    : m_automaticTransform(automaticTransform), m_totalAssets(totalAssets), m_totalAssetsNeedingUpdate(totalAssetsNeedingUpdate), m_totalAssetsNeedingTransform(totalAssetsNeedingTransform) {}
+  : m_automaticTransform(true), m_totalAssets(0), 
+    m_updatesPending(0), m_updateErrors(0), m_upToDate(0), m_transformsPending(0), m_transformErrors(0), m_transformed(0)
+  {}
+
+  ASSETFRAMEWORK_IMPEXP hkvTransformStatus(bool automaticTransform, hkUint32 totalAssets, 
+    hkUint32 updatesPending, hkUint32 updateErrors, hkUint32 upToDate,
+    hkUint32 transformsPending, hkUint32 transformErrors, hkUint32 transformed)
+  : m_automaticTransform(automaticTransform), m_totalAssets(totalAssets), 
+    m_updatesPending(updatesPending), m_updateErrors(updateErrors), m_upToDate(upToDate),
+    m_transformsPending(transformsPending), m_transformErrors(transformErrors), m_transformed(transformed)
+  {}
 
   ASSETFRAMEWORK_IMPEXP bool operator==(const hkvTransformStatus& rhs) const
   {
-    return m_automaticTransform == rhs.m_automaticTransform && m_totalAssets == rhs.m_totalAssets &&
-      m_totalAssetsNeedingUpdate == rhs.m_totalAssetsNeedingUpdate && m_totalAssetsNeedingTransform == rhs.m_totalAssetsNeedingTransform;
+    return m_automaticTransform == rhs.m_automaticTransform 
+      && m_totalAssets == rhs.m_totalAssets 
+      && m_updatesPending == rhs.m_updatesPending
+      && m_updateErrors == rhs.m_updateErrors
+      && m_upToDate == rhs.m_upToDate
+      && m_transformsPending == rhs.m_transformsPending
+      && m_transformErrors == rhs.m_transformErrors
+      && m_transformed == rhs.m_transformed;
   }
 
   bool m_automaticTransform;
   hkUint32 m_totalAssets;
-  hkUint32 m_totalAssetsNeedingUpdate;
-  hkUint32 m_totalAssetsNeedingTransform;
+  hkUint32 m_updatesPending;
+  hkUint32 m_updateErrors;
+  hkUint32 m_upToDate;
+  hkUint32 m_transformsPending;
+  hkUint32 m_transformErrors;
+  hkUint32 m_transformed;
 };
 
 
@@ -201,6 +205,8 @@ public:
   ASSETFRAMEWORK_IMPEXP ~hkvAssetManager();
 
   ASSETFRAMEWORK_IMPEXP hkvCallbackHandler& getProfileManagerEventHandler();
+  ASSETFRAMEWORK_IMPEXP hkvAssetPluginManager& getPluginManager();
+  ASSETFRAMEWORK_IMPEXP hkvAssetTypeManager& getTypeManager();
 
   ASSETFRAMEWORK_IMPEXP hkvCriticalSectionLock acquireLock();
 
@@ -223,6 +229,7 @@ public:
   ASSETFRAMEWORK_IMPEXP hkvAssetLibrary::RefPtr getProjectRootLibrary() const;
   ASSETFRAMEWORK_IMPEXP void refreshAssetLibrary(const char* libraryName, const char* relativePath = NULL);
   ASSETFRAMEWORK_IMPEXP void query(hkvAssetQuery& query) const;
+  ASSETFRAMEWORK_IMPEXP void deferOnQueryInvalidated();
   ASSETFRAMEWORK_IMPEXP void callOnQueryInvalidated();
   ASSETFRAMEWORK_IMPEXP bool saveLibraries();
   ASSETFRAMEWORK_IMPEXP bool writeLookupTables(hkvProfile::RefCPtr profile, bool forEditor, bool assetPreviewMode, std::vector<hkStringPtr>* out_failedFiles = NULL) const;
@@ -239,6 +246,9 @@ public:
   ASSETFRAMEWORK_IMPEXP bool isBackgroundProcessingEnabled() const;
   ASSETFRAMEWORK_IMPEXP void setBackgroundProcessingEnabled(bool enabled);
 
+  ASSETFRAMEWORK_IMPEXP void setAddTransformedToRCS(bool addTransformed);
+  ASSETFRAMEWORK_IMPEXP void setAddThumbnailsToRCS(bool addThumbnails);
+
   ASSETFRAMEWORK_IMPEXP void initBackgroundProcessing();
   ASSETFRAMEWORK_IMPEXP void deinitBackgroundProcessing();
 
@@ -247,15 +257,11 @@ public:
   ASSETFRAMEWORK_IMPEXP hkvBackgroundAssetHandling* getBackgroundAssetHandling() const;
   ASSETFRAMEWORK_IMPEXP void setBackgroundAssetHandling(hkvBackgroundAssetHandling* newHandling);
 
-  ASSETFRAMEWORK_IMPEXP void queueAssetForUpdate(hkvAsset& asset);
-  ASSETFRAMEWORK_IMPEXP void queueAssetForTransformation(hkvAsset& asset);
   ASSETFRAMEWORK_IMPEXP void queueAllAssetsForTransformation();
 
   ASSETFRAMEWORK_IMPEXP void fetchBackgroundTransformationResults();
   ASSETFRAMEWORK_IMPEXP void evaluateBackgroundTransformationResults();
   ASSETFRAMEWORK_IMPEXP bool performMainThreadWork();
-  ASSETFRAMEWORK_IMPEXP void gatherBackgroundUpdateStatistics(hkUint32& out_count, hkUint32& out_remaining) const;
-  ASSETFRAMEWORK_IMPEXP void gatherBackgroundTransformStatistics(hkUint32& out_count, hkUint32& out_remaining) const;
 
   ASSETFRAMEWORK_IMPEXP void postEngineMessage(hkvMessageSeverity severity, const char* message);
 
@@ -273,12 +279,10 @@ public: // data
   hkvCallback OnAssetChanged;
   hkvCallback OnReloadResources;
   hkvCallback OnEngineMessage;
-  hkvCallback OnQueryEditorStatus;
   hkvCallback OnTransformStatusChanged;
 
 private: // functions
   void UpdateLibraryIndices();
-  void finalizeDependencies();
 
   // Callback handling
   void handleActiveProfileChanged(hkvActiveProfileChangedData& data);
@@ -286,8 +290,14 @@ private: // functions
 private: //data
   mutable hkCriticalSection m_protect;
   LibraryList m_assetLibraries;
+  hkvAssetPluginManager* m_pluginManager;
+  hkvAssetTypeManager* m_typeManager;
 
   bool m_editorProjectLoaded;
+  bool m_invalidateQueryInMainThread;
+
+  bool m_addTransformedToRCS;
+  bool m_addThumbnailsToRCS;
 
   bool m_backgroundProcessingEnabled;
   hkRefPtr<hkvBackgroundAssetHandling> m_backgroundAssetHandling;
@@ -303,7 +313,7 @@ private: // static data
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

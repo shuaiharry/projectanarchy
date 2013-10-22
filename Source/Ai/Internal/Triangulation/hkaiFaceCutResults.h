@@ -43,6 +43,7 @@ HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiFaceCutResults);
 		VERTEX_IS_NEW = 4,
 	};
 
+		/// Magic connectivity numbers
 	enum ConnectivitySpecialValues
 	{
 			/// Corresponds to hkaiFaceCutResults::SILHOUETTE.
@@ -52,6 +53,7 @@ HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiFaceCutResults);
 		CONNECTIVITY_UNCONSTRAINED = 0xFFFFFFFE,
 	};
 
+		/// Special return value if no cuts were performed.
 	enum ResultsBits
 	{
 			/// No cutting was performed (i.e. no overlapping silhouettes)
@@ -142,7 +144,7 @@ protected:
 #endif // HK_FACE_CUT_RESULTS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

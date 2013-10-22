@@ -176,6 +176,23 @@ inline T hkSet<T,Allocator,OPS>::getElement(Iterator it) const
 }
 
 template <typename T, typename Allocator, typename OPS >
+inline void hkSet<T,Allocator,OPS>::updateElement(Iterator it, const T& elem)
+{
+	int i = HK_MAP_ITERATOR_TO_INDEX(it);
+	HK_ASSERT(0x7f305156, i>=0 && i<=getHashMod());
+	
+	// Make sure the hashes agree.
+#ifdef HK_DEBUG
+	const int hashMod = getHashMod();
+	unsigned oldHash = OPS::hash(m_elem[i], hashMod);
+	unsigned newHash = OPS::hash(elem, hashMod);
+	HK_ASSERT(0x377bea16, oldHash == newHash);
+#endif
+	
+	m_elem[i] = elem;
+}
+
+template <typename T, typename Allocator, typename OPS >
 hkResult hkSet<T,Allocator,OPS>::resizeTable(int newcap)
 {
 	int hashMod = getHashMod();
@@ -222,9 +239,9 @@ hkResult hkSet<T,Allocator,OPS>::resizeTable(int newcap)
 }
 
 template <typename T, typename Allocator, typename OPS >
-hkBool32 hkSet<T,Allocator,OPS>::insert( T key )
+hkBool32 hkSet<T,Allocator,OPS>::insert( T elem )
 {
-	HK_ASSERT2(0x19291575, OPS::isValid(key), "pointer map keys must not be the empty value");
+	HK_ASSERT2(0x19291575, OPS::isValid(elem), "pointer map keys must not be the empty value");
 	{
 		if( shouldResize() )
 		{
@@ -237,12 +254,12 @@ hkBool32 hkSet<T,Allocator,OPS>::insert( T key )
 
 	unsigned i;
 	hkBool32 isNewKey = true;
-	for( i = OPS::hash(key, hashMod);
+	for( i = OPS::hash(elem, hashMod);
 		OPS::isValid(m_elem[i]);
 		i = (i+1) & hashMod )
 	{
 		// find free slot
-		if( OPS::equal( m_elem[i], key ) )
+		if( OPS::equal( m_elem[i], elem ) )
 		{
 			isNewKey = false;
 			break;
@@ -252,8 +269,8 @@ hkBool32 hkSet<T,Allocator,OPS>::insert( T key )
 	// dont increment m_numElems if overwriting.
 	m_numElems += isNewKey;
 
-	// insert key,value
-	m_elem[i] = key;
+	// insert elem,value
+	m_elem[i] = elem;
 	return isNewKey;
 }
 
@@ -354,7 +371,7 @@ bool hkSet<T,Allocator,OPS>::shouldResize( ) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -16,13 +16,8 @@
 #define TO_PROPERTY     "to"
 #define ACTION_PROPERTY "action"
 
-//#include <Effects/EffectsModule.hpp>
-
-
 #define SHARED_IMPEXP VHAVOK_IMPEXP
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokCharacterController.hpp>
-class vHavokCharacterController;
-
 
 ///
 /// \brief
@@ -35,10 +30,8 @@ class vHavokCharacterController;
 class VLineFollowerComponent : public IVObjectComponent, public IVisCallbackHandler_cl
 {
 public:
-
-
   ///
-  /// @name Constructor / Destructor
+  /// @name Constructor / Initialization / Destructor
   /// @{
   ///
 
@@ -51,7 +44,7 @@ public:
 
   /// \brief
   ///   Destructor
-  SHARED_IMPEXP ~VLineFollowerComponent();
+  SHARED_IMPEXP virtual ~VLineFollowerComponent();
 
   /// \brief
   ///   Init Function
@@ -65,7 +58,6 @@ public:
   /// @}
   ///
 
-
   ///
   /// @name IVObjectComponent Overrides
   /// @{
@@ -73,24 +65,23 @@ public:
 
   /// \brief
   ///   Overridden function to respond to owner changes
-  SHARED_IMPEXP VOVERRIDE void SetOwner(VisTypedEngineObject_cl *pOwner);
+  SHARED_IMPEXP virtual void SetOwner(VisTypedEngineObject_cl *pOwner) HKV_OVERRIDE;
 
   /// \brief
   ///   Overridden function. Blob shadows can be attached to VisObject3D_cl instances
-  SHARED_IMPEXP VOVERRIDE BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut);
+  SHARED_IMPEXP virtual BOOL CanAttachToObject(VisTypedEngineObject_cl *pObject, VString &sErrorMsgOut) HKV_OVERRIDE;
 
   /// \brief
   ///   Overridden function to respond to variable changes
-  SHARED_IMPEXP VOVERRIDE void OnVariableValueChanged(VisVariable_cl *pVar, const char * value);
+  SHARED_IMPEXP virtual void OnVariableValueChanged(VisVariable_cl *pVar, const char * value) HKV_OVERRIDE;
 
   /// \brief
   ///   Overridden function to process incoming messages, such as collision events and property changes
-  SHARED_IMPEXP VOVERRIDE void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB);
+  SHARED_IMPEXP virtual void MessageFunction(int iID, INT_PTR iParamA, INT_PTR iParamB) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name VTypedObject Overrides
@@ -100,17 +91,19 @@ public:
   /// \brief
   ///   Virtual overridable that indicates whether OnDeserializationCallback 
   ///   should be called for this object
-  VOVERRIDE VBool WantsDeserializationCallback(const VSerializationContext &context) {return context.m_eType!=VSerializationContext::VSERIALIZATION_EDITOR;}
+  SHARED_IMPEXP virtual VBool WantsDeserializationCallback(const VSerializationContext &context) HKV_OVERRIDE
+  {
+    return (context.m_eType != VSerializationContext::VSERIALIZATION_EDITOR);
+  }
 
   /// \brief
   ///   Virtual overridable that gets called when a loading archive closes
   /// 
-  VOVERRIDE void OnDeserializationCallback(const VSerializationContext &context);
+  SHARED_IMPEXP virtual void OnDeserializationCallback(const VSerializationContext &context) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Serialization
@@ -130,12 +123,12 @@ public:
   ///
   /// \param ar
   ///   binary archive
-  SHARED_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  ///
+  SHARED_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name IVisCallbackHandler_cl Overrides
@@ -144,20 +137,13 @@ public:
 
   /// 
   /// \brief
-  ///   Overridden function that gets called by all callbacks that this handler is registered to
-  /// 
-  /// \param pData
-  ///   See IVisCallbackHandler_cl
+  ///   Callback handler implementation.
   ///
-  /// \see
-  ///   IVisCallbackHandler_cl
-  /// 
-  VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData);
+  SHARED_IMPEXP virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Update Method
@@ -166,14 +152,7 @@ public:
 
   ///
   /// \brief
-  ///   Updates the the state machine for the current frame.
-  /// 
-  /// The PerFrameUpdate() function takes care of processing the input map (keyboard events)
-  /// and updating the gravity gun component functionality.
-  ///
-  /// \note
-  ///   You do not have to call this function manually, since the VGravityGunComponentManager
-  ///   class will take care of this
+  ///   Updates the the component for the current frame.
   ///
   void PerFrameUpdate();
 
@@ -181,9 +160,8 @@ public:
   /// @}
   ///
 
-
   ///
-  /// @name Helper
+  /// @name Helpers
   /// @{
   ///
 
@@ -196,7 +174,7 @@ public:
 
   vHavokCharacterController *m_pPhys;
 
-  // entity parameter
+  // entity parameters
   char Model_AnimationName[128];
   char Path_Key[128];
   float Path_NumberSteps;
@@ -219,7 +197,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

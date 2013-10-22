@@ -10,6 +10,8 @@
 #define HKBP_CHARACTER_CONTROLLER_H
 
 #include <Behavior/Utilities/Physics/Interface/hkbCharacterController.h>
+#include <Physics2012/Utilities/CharacterControl/hkpCharacterControl.h>
+#include <Behavior/Utilities/Physics/hkbPhysicsConfig.h>
 
 class hkpCollidable;
 
@@ -20,14 +22,32 @@ class hkbpCharacterController : public hkbCharacterController
 
 		HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BEHAVIOR );
 
+			// Ctor.
+		hkbpCharacterController();
+
+			// hkbCharacterController interface
+		virtual void applyVelocityModifiers(
+			const hkbContext& context,
+			const hkbGeneratorOutput& currentOutput,
+			hkVector4Parameter desiredVelocity,
+			hkBinaryReal gravityBlendFactor,
+			hkReal timestep,
+			hkVector4& newVelocityOut ) HK_OVERRIDE;
+
 			/// Get the hkpCollidable used by this character controller.
 		virtual const hkpCollidable* getCollidable() const = 0;
+
+	protected:
+
+			/// Cached ground info from supported call
+		hkpSurfaceInfo m_groundInfo;
+
 };
 
 #endif // HKBP_CHARACTER_CONTROLLER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

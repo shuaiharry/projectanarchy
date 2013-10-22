@@ -68,8 +68,8 @@ class hkaSkeletonMapperUtils
 				m_mode( HK_USE_BOUNDING_BOX_DIAGONAL ),
 				m_extractedMotionBoneA( 0 ),
 				m_extractedMotionBoneB( 0 ),
-				m_extractedMotionFactorA( 1.0f ),
-				m_extractedMotionFactorB( 1.0f )
+				m_extractedMotionFactorA( 1 ),
+				m_extractedMotionFactorB( 1 )
 			{
 			}
 
@@ -179,8 +179,8 @@ class hkaSkeletonMapperUtils
 				m_skeletonA(HK_NULL),
 				m_skeletonB(HK_NULL),
 				m_compareNames(HK_NULL), 
-				m_positionMatchTolerance(0.0f),
-				m_rotationMatchTolerance( 30.0f * HK_REAL_DEG_TO_RAD ),
+				m_positionMatchTolerance(0),
+				m_rotationMatchTolerance( hkReal(30) * HK_REAL_DEG_TO_RAD ),
 				m_autodetectPartitionMap(true),
 				m_autodetectSimple(true),
 				m_autodetectChains(true),
@@ -243,7 +243,7 @@ class hkaSkeletonMapperUtils
 #endif // HK_SKELETON_MAPPER_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -9,13 +9,26 @@
 #ifndef HKB_CHARACTER_CONTROLLER_H
 #define HKB_CHARACTER_CONTROLLER_H
 
+class hkbContext;
+class hkbGeneratorOutput;
+
 	/// Interface between Behavior and Physics to control a character (used by hkbCharacterControllerDriver).
 class hkbCharacterController : public hkReferencedObject
 {
 public:
 
 	HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BEHAVIOR );
-	
+
+		/// Optionally modify the velocity before it is applied.
+		/// The default implementation applies gravity only.
+	virtual void applyVelocityModifiers(
+		const hkbContext& context,
+		const hkbGeneratorOutput& currentOutput,
+		hkVector4Parameter desiredVelocity,
+		hkBinaryReal gravityBlendFactor,
+		hkReal timestep,
+		hkVector4& newVelocityOut );
+		
 		/// The character driver will call this function to integrate the character controller.
 		/// The character controller need not update it's position immediately if isIntegratedWithPhysics() == true.
 		/// But the position should be updated after hkbPhysicsInterface::step is called.
@@ -42,7 +55,7 @@ public:
 #endif // HKB_CHARACTER_CONTROLLER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

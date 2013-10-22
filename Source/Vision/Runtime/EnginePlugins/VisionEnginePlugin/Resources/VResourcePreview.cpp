@@ -531,15 +531,11 @@ void VResourcePreview::LookAtBBox(hkvMat4 &transform, float fYaw, const hkvAlign
   rotation.setRotationalPart(rot);
 
   // position in front of the camera
+  const hkvVec3& pos = pContext->GetCamera()->GetPosition();
+  const hkvVec3& dir = pContext->GetCamera()->GetDirection();
+
   hkvMat4 position;
-  //////////////////////////////////////////////////////////////////////////
-  // TODO: correct this when hkvVec3 is replaced by hkvVec3 inside VisContextCamera_cl
-  hkvVec3 pos(pContext->GetCamera()->GetPosition());
-  // const hkvVec3& pos = pContext->GetCamera()->GetPosition();
-  hkvVec3 dir(pContext->GetCamera()->GetDirection());
-  // const hkvVec3& dir = pContext->GetCamera()->GetDirection();
   position.setTranslation(pos + dir * m_fDistance + offset);
-  //////////////////////////////////////////////////////////////////////////
 
   // apply
   transform.setIdentity();
@@ -584,20 +580,6 @@ bool VResourcePreview::SaveRenderTarget(VisRenderableTexture_cl *pTex, const cha
   static VMemoryTempBuffer<512*512*3> buffer(sx*sy*3);
   UBYTE *pDest = (UBYTE *)buffer.GetBuffer();
   Vision::Game.WriteScreenToBuffer(0,0,sx,sy,pDest,pTex);
-  UBYTE szLine[4];
-  // flip vertically:
-  int iStride = sx*3;
-  for (int y=0;y<sy/2;y++)
-  {
-    UBYTE *l1 = &pDest[y*iStride];
-    UBYTE *l2 = &pDest[(sy-1-y)*iStride];
-    for (int x=0;x<sx;x++,l1+=3,l2+=3)
-    {
-      szLine[0] = l1[0]; szLine[1] = l1[1]; szLine[2] = l1[2]; 
-      l1[0] = l2[2]; l1[1] = l2[1]; l1[2] = l2[0]; // flip components
-      l2[0] = szLine[2]; l2[1] = szLine[1]; l2[2] = szLine[0]; // flip components        
-    }
-  }
   image.AddColorMap(sx,sy,COLORDEPTH_24BPP,pDest);
 
   int iSavingResult = -1;
@@ -814,11 +796,7 @@ void VBaseMeshResourcePreview::OnRender(int iFlags)
 
   hkvVec3 modelOffset = hkvVec3::ZeroVector ();
 
-  //////////////////////////////////////////////////////////////////////////
-  // TODO: correct this when hkvAlignedBBox is replaced by hkvAlignedBBox inside VBaseMesh
-  hkvAlignedBBox bbox(pMesh->GetBoundingBox().m_vMin, pMesh->GetBoundingBox().m_vMax);
-  // const hkvAlignedBBox &bbox = pMesh->GetBoundingBox();
-  //////////////////////////////////////////////////////////////////////////
+  const hkvAlignedBBox &bbox = pMesh->GetBoundingBox();
 
   // overwrite rotation (must be done before Helper_CreateTransformation)
   if (bThumbnail && GetOverwriteSceneCamera())
@@ -933,6 +911,10 @@ void VBaseMeshResourcePreview::RenderMesh(VBaseMesh *pMesh, hkvVec3 light0, hkvV
   for (int i=0;i<pMesh->GetSubmeshCount();i++)
   {
     VBaseSubmesh *pSubmesh = pMesh->GetBaseSubmesh(i);
+
+    // if LOD is defined, make sure we only render highest LOD. This condition covers ==0 and ==-1, which is intended
+    if (pSubmesh->GetGeometryInfo().m_iLODIndex>0)
+      continue;
 
     VisSurface_cl *pSurface = pSubmesh->GetSurface();
     if (pSurface==NULL)
@@ -1491,7 +1473,7 @@ void VTextureCubemapResourcePreview::OnRender(int iFlags)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

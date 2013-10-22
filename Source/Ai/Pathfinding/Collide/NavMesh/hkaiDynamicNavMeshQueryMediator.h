@@ -33,6 +33,7 @@ class hkaiDynamicNavMeshQueryMediator : public hkaiNavMeshQueryMediator
 		~hkaiDynamicNavMeshQueryMediator();
 
 		virtual hkaiPackedKey getClosestPoint( const GetClosestPointInput& input, hkVector4& closestPointOut ) const HK_OVERRIDE;
+		virtual hkaiPackedKey getClosestBoundaryEdge( const GetClosestBoundaryEdgeInput& input, hkVector4& closestPointOut ) const HK_OVERRIDE;
 		virtual bool castRay( const RaycastInput& input, HitDetails& hitOut ) const HK_OVERRIDE;
 		virtual void queryAabb( const AabbQueryInput& input, hkArray<hkaiPackedKey>::Temp& hits ) const HK_OVERRIDE;
 
@@ -51,7 +52,7 @@ class hkaiDynamicNavMeshQueryMediator : public hkaiNavMeshQueryMediator
 #endif // HK_CUT_NAV_MESH_MEDIATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

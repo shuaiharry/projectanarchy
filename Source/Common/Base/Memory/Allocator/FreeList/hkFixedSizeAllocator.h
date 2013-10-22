@@ -17,15 +17,15 @@ class hkFixedSizeAllocator: public hkMemoryAllocator
 	public:
 		HK_DECLARE_PLACEMENT_ALLOCATOR();
 
-		virtual void* blockAlloc( int numBytes );
-		virtual void blockFree( void* p, int numBytes );
-		virtual void* bufAlloc( int& reqNumBytesInOut );
-		virtual void bufFree( void* p, int numBytes );
-		virtual void* bufRealloc( void* pold, int oldNumBytes, int& reqNumBytesInOut );
-		virtual void blockAllocBatch(void** ptrsOut, int numPtrs, int blockSize);
-		virtual void blockFreeBatch(void** ptrsIn, int numPtrs, int blockSize);
-		virtual void getMemoryStatistics( MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
+		virtual void* bufAlloc( int& reqNumBytesInOut ) HK_OVERRIDE;
+		virtual void bufFree( void* p, int numBytes ) HK_OVERRIDE;
+		virtual void* bufRealloc( void* pold, int oldNumBytes, int& reqNumBytesInOut ) HK_OVERRIDE;
+		virtual void blockAllocBatch(void** ptrsOut, int numPtrs, int blockSize) HK_OVERRIDE;
+		virtual void blockFreeBatch(void** ptrsIn, int numPtrs, int blockSize) HK_OVERRIDE;
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
 			/// Ctor.
 		void init(hk_size_t blockSize, hk_size_t align, hk_size_t allocatorBlockSize, hkMemoryAllocator* allocator);
@@ -37,7 +37,7 @@ class hkFixedSizeAllocator: public hkMemoryAllocator
 #endif // HK_FIXED_SIZE_ALLOCATOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

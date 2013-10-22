@@ -36,24 +36,26 @@ HK_FORCE_INLINE void hkaQuantizedAnimation::getFrameAndDelta( const hkUint8* dat
 	
 	const hkUint32 maxFrameIndex = header->m_numFrames - 1;
 	
-	const hkReal frameFloat = ( time / header->m_duration ) * maxFrameIndex;
-	hkUint32 frame = static_cast<hkUint32>( frameFloat );
+	const hkSimdReal t = hkSimdReal::fromFloat(time);
+	hkSimdReal frameFloat; frameFloat.setReciprocal(hkSimdReal::fromFloat(header->m_duration)); frameFloat.mul(t * hkSimdReal::fromInt32(maxFrameIndex));
+	hkUint32 frame; frameFloat.storeSaturateInt32((hkInt32*)&frame);
 
 	// Ensure frame < maxFrameIndex - 1.  Otherwise delta = 1.0f
 	bool lastFrame = frame > maxFrameIndex - 1;
 
 	if( lastFrame )
 	{
-		deltaOut = 1.f;
+		deltaOut = hkReal(1);
 		frameOut = maxFrameIndex - 1;
 	}
 	else
 	{
 		frameOut = frame;
-		const hkReal frameDelta = frameFloat - frame;
+		const hkSimdReal frameDelta = frameFloat - hkSimdReal::fromInt32(frame);
 
-		// Clamp deltaOut to frameOut[0,1].  Cant use hkMath::clamp due to SNC bug.
-		deltaOut = frameDelta < 0 ? 0.f : (frameDelta > 1.f ? 1.f : frameDelta);
+		// Clamp deltaOut to frameOut[0,1].
+		hkSimdReal clampedDelta; clampedDelta.setClampedZeroOne(frameDelta);
+		deltaOut = clampedDelta.getReal();
 	}
 }
 
@@ -80,7 +82,7 @@ HK_FORCE_INLINE hkUint32 hkaQuantizedAnimation::getNumFloats( const hkUint8* dat
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -10,6 +10,7 @@
 
 #include <Ai/Pathfinding/hkaiBaseTypes.h>
 #include <Ai/Pathfinding/Dynamic/Silhouette/hkaiCompoundSilhouette.h>
+class hkBitField;
 
 	/// Callback from hkaiNavMeshCutter::cutSilhouettesIncremental to query which original faces need to be cut and by what shapes.
 class hkaiNavMeshSilhouetteSelector
@@ -20,7 +21,7 @@ public:
 
 	/// Return a list of face keys which must be cut this frame, and a list of face keys which were cut before but aren't now.
 	/// If the bitfield is non-null, it specifies which sections will be updated.
-	virtual void getUpdatedFaces( const class hkaiNavMeshCutter* cutter, hkArray<hkaiPackedKey>::Temp& cutFaceKeysOut, hkArray<hkaiPackedKey>::Temp& uncutFaceKeysOut, const class hkBitField* sectionsToUpdate ) = 0;
+	virtual void getUpdatedFaces( const class hkaiNavMeshCutter* cutter, hkArray<hkaiPackedKey>::Temp& cutFaceKeysOut, hkArray<hkaiPackedKey>::Temp& uncutFaceKeysOut, const hkBitField* sectionsToUpdate ) = 0;
 
 	/// For a given face, return a list of silhouettes which are relevant to this face.
 	virtual void gatherSilhouettesForFace( hkaiPackedKey faceKey, const struct hkaiSilhouetteGenerationParameters& genParams, hkArray< hkaiCompoundSilhouette >::Temp& silsOut, hkArray< int >::Temp& silMaterialIds ) = 0;
@@ -35,7 +36,7 @@ public:
 #endif // HK_NAVMESH_SILHOUETTE_SELECTOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

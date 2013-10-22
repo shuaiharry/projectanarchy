@@ -13,24 +13,24 @@
 
 #ifdef HAVOK_NEED_SYNC_MACROS
 
-void vHavokPhysicsModuleGetSyncInfo(HavokSyncInfo& s)
+void vHavokPhysicsModuleGetSyncInfo(hkMemoryInitUtil::SyncInfo& s)
 {
-	s.baseSystemInfo.m_memoryRouter = hkMemoryRouter::getInstancePtr();
-	s.baseSystemInfo.m_singletonList = hkSingletonInitList;
-	s.baseSystemInfo.m_memorySystem = hkMemorySystem::getInstancePtr();
-	s.monitors = hkMonitorStream::getInstancePtr();
-	s.mtCheckSection = hkMultiThreadCheck::m_criticalSection;
+	s.m_memoryRouter = hkMemoryRouter::getInstancePtr();
+	s.m_singletonList = hkSingletonInitList;
+	s.m_memorySystem = hkMemorySystem::getInstancePtr();
+	s.m_monitors = hkMonitorStream::getInstancePtr();
+	s.m_mtCheckSection = hkMultiThreadCheck::m_criticalSection;
 #if (HAVOK_SDK_VERSION_MAJOR >= 2010)
-	s.mtCheckStackTracer = hkMultiThreadCheck::s_stackTracer;
-	s.mtCheckStackTree = hkMultiThreadCheck::s_stackTree;
-	s.mtRefLockedAllPtr = hkMemoryRouter::getInstance().getRefObjectLocalStore();
+	s.m_stackTracerImpl = hkStackTracer::getImplementation();
+	s.m_mtCheckStackTree = hkMultiThreadCheck::s_stackTree;
+	s.m_mtRefLockedAllPtr = hkMemoryRouter::getInstance().getRefObjectLocalStore();
 #endif
 }
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

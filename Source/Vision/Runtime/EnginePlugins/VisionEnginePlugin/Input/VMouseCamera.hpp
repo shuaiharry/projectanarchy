@@ -73,7 +73,11 @@ public:
   EFFECTS_IMPEXP virtual void InitFunction() HKV_OVERRIDE;
   
   // Will be called by the engine once per tick/frame
-  EFFECTS_IMPEXP virtual void ThinkFunction() HKV_OVERRIDE;
+  EFFECTS_IMPEXP virtual void ThinkFunction() HKV_OVERRIDE
+  {
+    // Keep this function in order to have the ThinkFunctionStatus set to true.
+    // (See base implementation)
+  }
   
   // serialize this entitiy
   EFFECTS_IMPEXP virtual void Serialize(VArchive& ar) HKV_OVERRIDE;
@@ -83,12 +87,6 @@ public:
   // 
   EFFECTS_IMPEXP void SetWalkMode( VisMouseCamWalkMode_e mode );
   EFFECTS_IMPEXP void SetWalkMode( BOOL walk );
-
-  EFFECTS_IMPEXP void SetSimulationIndependentMovement(bool bStatus);
-  inline bool GetSimulationIndependentMovement() const 
-  {
-    return m_bSimulationIndependent;
-  }
 
   //
   inline VisMouseCamWalkMode_e GetWalkMode() const 
@@ -125,8 +123,6 @@ protected:
 
   VInputMap* m_pInputMap;
 
-  bool m_bSimulationIndependent;
-
 private:
 #if defined(SUPPORTS_MULTITOUCH)
   VVirtualThumbStick* m_pVirtualThumbStick;
@@ -136,7 +132,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

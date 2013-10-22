@@ -29,6 +29,7 @@
   #include <libkern/OSAtomic.h>
 #elif defined(_VISION_ANDROID)
   #include <sys/atomics.h>
+#elif defined(_VISION_TIZEN)
 #else
   #warning "Missing header for atomic operations!"
 #endif
@@ -67,7 +68,17 @@ inline struct tm* _gmtime64(const __time64_t* t)
   return gmtime(&t_);//@@@L check if this works
 }
 
-#define _time64(t) (_gmtime64(t))
+inline __time64_t _time64(__time64_t* t)
+{
+  time_t t_;
+  time( &t_ );
+  __time64_t t64 = t_;
+  if ( t != NULL )
+  {
+    *t = t_;
+  }
+  return t64;
+}
 
 #define __cdecl
 
@@ -139,7 +150,9 @@ const int FS_MAX_DRIVE = 16;  // Didn't find equivalent - stay modest
 #define _strnicmp   strncasecmp
 #define vsnwprintf  vswprintf
 
+#ifndef _VISION_TIZEN
 char* strlwr(char *string);
+#endif
 int wcsicmp(const wchar_t *s1, const wchar_t *s2);
 wchar_t *wcstok(wchar_t *s1, const wchar_t *s2);
 
@@ -171,11 +184,13 @@ typedef struct _D3DMATRIX { // TODO: USE OWN MATRIX CLASS ?
 
 
 // glibc only defines int abs(int)
+#ifndef _VISION_TIZEN
 template <typename T>
 T abs(T x) 
 {
   return (x >= 0) ? x : -x;
 }
+#endif
 
 #define DECLSPEC_DLLEXPORT 
 
@@ -194,6 +209,7 @@ T abs(T x)
   
   extern android_app *AndroidApplication;
   extern void AndroidHandleCmd(struct android_app* app, int32_t cmd);
+  extern int PollAndroidOnce();
   extern bool PollAndroidNativeEnvironment();
   extern void InitAndroidNativeEnvironment(char* szAPKDirectory, char* szSDCardDirectory, char* szCacheDirectory, int Size = FS_MAX_PATH);
   extern void DeinitAndroidNativeEnvironment();
@@ -203,12 +219,26 @@ T abs(T x)
   extern void AndroidShowAlert(const char* pTitle, const char* pMessage);
 #endif
 
+#if defined(_VISION_TIZEN)
+
+	#include <osp/egl.h>
+	#include <osp/eglext.h>
+	#include <osp/gl2.h>
+	#include <osp/gl2ext.h>
+
+  #define printf(...) AppLogTag("Vision", __VA_ARGS__)
+
+#endif
+
+#if defined(_VISION_IOS)
+  extern "C" char g_szDeviceName[256];
+#endif
 
 
-#endif //VPLATFORM_LINUX_INCLUDED
+#endif //VPLATFORM_POSIX_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

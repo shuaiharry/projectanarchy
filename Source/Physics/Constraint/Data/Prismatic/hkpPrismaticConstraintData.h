@@ -20,10 +20,10 @@ class hkpPrismaticConstraintData : public hkpConstraintData
 {
 	public:
 
-		enum 
+		enum
 		{
 			SOLVER_RESULT_MOTOR				= 0,	// the motor
-			SOLVER_RESULT_MOTOR_INTERNAL	= 1, 
+			SOLVER_RESULT_MOTOR_INTERNAL	= 1,
 			SOLVER_RESULT_FRICTION			= 2,	// the friction
 			SOLVER_RESULT_FRICTION_INTERNAL	= 3,
 
@@ -41,7 +41,7 @@ class hkpPrismaticConstraintData : public hkpConstraintData
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_DYNAMICS, hkpPrismaticConstraintData::Runtime );
 
-			hkpSolverResults m_solverResults[SOLVER_RESULT_MAX];		
+			hkpSolverResults m_solverResults[SOLVER_RESULT_MAX];
 			hkUint8 m_initialized;				///< Whether the previous position has been initialized.
 			hkReal m_previousTargetPosition;	///< The previous target position
 		};
@@ -77,15 +77,19 @@ class hkpPrismaticConstraintData : public hkpConstraintData
 		};
 
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
 		/// Constructor.
 		hkpPrismaticConstraintData();
 
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		hkpPrismaticConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
+
+#endif
 
 		/// Destructor.
 		~hkpPrismaticConstraintData();
@@ -122,8 +126,8 @@ class hkpPrismaticConstraintData : public hkpConstraintData
 		inline void setMinLinearLimit(hkReal mmin);
 
 		/// Set the friction value.
-		inline void setMaxFrictionForce(hkReal mag);	
-		
+		inline void setMaxFrictionForce(hkReal mag);
+
 		/// Get the maximum limit for the attached body's movement along the axis.
 		inline hkReal getMaxLinearLimit() const;
 
@@ -169,7 +173,7 @@ class hkpPrismaticConstraintData : public hkpConstraintData
 		virtual void getConstraintInfo( ConstraintInfo& infoOut ) const ;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
+
 	public:
 
 		HK_ALIGN_REAL( Atoms m_atoms );
@@ -181,7 +185,7 @@ class hkpPrismaticConstraintData : public hkpConstraintData
 #endif // HKP_PRISMATIC_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

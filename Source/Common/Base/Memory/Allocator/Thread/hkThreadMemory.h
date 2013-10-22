@@ -61,13 +61,13 @@ class hkThreadMemory : public hkMemoryAllocator
 			int m_numElem;
 		};
 
-		virtual void* blockAlloc( int numBytes );
-		virtual void blockFree( void* p, int numBytes );
-		virtual void* bufAlloc( int& reqNumInOut );
-		virtual void bufFree( void* p, int numElem );
-		virtual void* bufRealloc( void* p, int oldNum, int& reqNumInOut  );
-		virtual void blockAllocBatch(void** ptrsOut, int numPtrs, int blockSize);
-		virtual void blockFreeBatch(void** ptrsIn, int numPtrs, int blockSize);
+		virtual void* blockAlloc( int numBytes ) HK_OVERRIDE;
+		virtual void blockFree( void* p, int numBytes ) HK_OVERRIDE;
+		virtual void* bufAlloc( int& reqNumInOut ) HK_OVERRIDE;
+		virtual void bufFree( void* p, int numElem ) HK_OVERRIDE;
+		virtual void* bufRealloc( void* p, int oldNum, int& reqNumInOut  ) HK_OVERRIDE;
+		virtual void blockAllocBatch(void** ptrsOut, int numPtrs, int blockSize) HK_OVERRIDE;
+		virtual void blockFreeBatch(void** ptrsIn, int numPtrs, int blockSize) HK_OVERRIDE;
 
 		hkThreadMemory();
 			/// Creates a new instance of a thread memory.
@@ -85,8 +85,8 @@ class hkThreadMemory : public hkMemoryAllocator
 			/// Get a simply memory statistics of cached blocks
 		hk_size_t getCachedSizeUnchecked();
 
-		virtual void getMemoryStatistics( MemoryStatistics& u );
-		virtual int getAllocatedSize(const void* obj, int nbytes);
+		virtual void getMemoryStatistics( MemoryStatistics& u ) const HK_OVERRIDE;
+		virtual int getAllocatedSize(const void* obj, int nbytes) const HK_OVERRIDE;
 
 	public:
 
@@ -199,7 +199,7 @@ class hkThreadMemory : public hkMemoryAllocator
 #endif // HKBASE_hkThreadMemory_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

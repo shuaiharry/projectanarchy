@@ -119,8 +119,8 @@ namespace FmodManaged
     VString sFilename;
     ConversionUtils::StringToVString(filename, sFilename);
 
-    // create a new sound instance
-    DisposeNativeInstance();
+    VFmodSoundObject* pOldInstance = m_pSound;
+    m_pSound = NULL;
 
     int iInstanceFlags = (int)flags & (int)VFMOD_FLAG_BITMASK;
     int iResourceUsageFlags = (int)flags & (int)VFMOD_RESOURCEFLAG_BITMASK;
@@ -128,22 +128,44 @@ namespace FmodManaged
     if (!sFilename.IsEmpty())
       m_pSound = VFmodManager::GlobalManager().CreateSoundInstance(sFilename, iResourceUsageFlags, iInstanceFlags, iPrior);
 
+    bool bAddTriggerComponents = true;
+
+    if (pOldInstance)
+    {
+      if(m_pSound)
+      {
+        bAddTriggerComponents = false;
+
+        // Move components to new instance
+        while(pOldInstance->Components().Count() > 0)
+        {
+          VSmartPtr<IVObjectComponent> spComponent = pOldInstance->Components().GetAt(pOldInstance->Components().Count() - 1);
+          pOldInstance->RemoveComponent(spComponent);
+          m_pSound->AddComponent(spComponent);
+        }
+      }
+
+      pOldInstance->DisposeObject();
+      pOldInstance->Release();
+      pOldInstance = NULL;
+    }
+
     if (m_pSound == NULL)
       return;
 
     m_pSound->AddRef();
     m_pSound->SetMuted(!m_bIsVisible);
 
-    // add trigger target components - only inside vForge. They are only serialized when used.
-    VisTriggerTargetComponent_cl *pComp;
+    if(bAddTriggerComponents)
+    {
+      // add trigger target components - only inside vForge. They are only serialized when used.
 
-    // pause target
-    pComp = new VisTriggerTargetComponent_cl(VFMOD_TRIGGER_PAUSE, VIS_OBJECTCOMPONENTFLAG_SERIALIZEWHENRELEVANT);
-    m_pSound->AddComponent(pComp);
+      // pause target
+      m_pSound->AddComponent(new VisTriggerTargetComponent_cl(VFMOD_TRIGGER_PAUSE, VIS_OBJECTCOMPONENTFLAG_SERIALIZEWHENRELEVANT));
 
-    // unpause target
-    pComp = new VisTriggerTargetComponent_cl(VFMOD_TRIGGER_RESUME, VIS_OBJECTCOMPONENTFLAG_SERIALIZEWHENRELEVANT);
-    m_pSound->AddComponent(pComp);
+      // unpause target
+      m_pSound->AddComponent(new VisTriggerTargetComponent_cl(VFMOD_TRIGGER_RESUME, VIS_OBJECTCOMPONENTFLAG_SERIALIZEWHENRELEVANT));
+    }
   }
 
   void EngineInstanceFmodSound::SetVolume(float fVol) 
@@ -233,7 +255,7 @@ namespace FmodManaged
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

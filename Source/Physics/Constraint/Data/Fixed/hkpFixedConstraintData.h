@@ -17,10 +17,10 @@ class hkpFixedConstraintData : public hkpConstraintData
 {
 	public:
 
-		enum 
+		enum
 		{
 			SOLVER_RESULT_LIN_0	= 0,	// linear constraint 0
-			SOLVER_RESULT_LIN_1	= 1,	// linear constraint 1 
+			SOLVER_RESULT_LIN_1	= 1,	// linear constraint 1
 			SOLVER_RESULT_LIN_2	= 2,	// linear constraint 2
 			SOLVER_RESULT_ANG_0	= 3,	// angular constraint 0
 			SOLVER_RESULT_ANG_1	= 4,	// angular constraint 1
@@ -56,18 +56,22 @@ class hkpFixedConstraintData : public hkpConstraintData
 		};
 
 	public:
-		
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
 		/// Constructor
 		hkpFixedConstraintData();
 
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor
 		hkpFixedConstraintData(hkFinishLoadedObjectFlag f)
 			:	hkpConstraintData(f)
 			,	m_atoms(f)
 		{}
+
+#endif
 
 		/// Sets the construction information with body space information.
 		/// \param pivotA The constraint pivot, specified in bodyA's space.
@@ -80,7 +84,7 @@ class hkpFixedConstraintData : public hkpConstraintData
 		/// \param bodyB The second rigid body transform
 		/// \param pivot The constraint pivot, specified in world space.
 		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, const hkTransform& pivot);
-		
+
 		static inline Runtime* HK_CALL getRuntime( hkpConstraintRuntime* runtime ) { return reinterpret_cast<Runtime*>(runtime); }
 
 		//
@@ -135,7 +139,7 @@ class hkpFixedConstraintData : public hkpConstraintData
 #endif	// HKP_FIXED_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -14,11 +14,12 @@ public:
 	HK_DECLARE_PLACEMENT_ALLOCATOR();
 	HK_DECLARE_REFLECTION();
 
-	hkRelArray<int> m_array;
+	hkRelArray<int> m_array1;
+	hkRelArray<char> m_array2;
 };
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

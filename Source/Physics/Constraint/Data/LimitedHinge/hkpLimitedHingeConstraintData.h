@@ -16,25 +16,25 @@ extern const hkClass hkpLimitedHingeConstraintDataClass;
 
 
 /// Full hinge constraint with limits and motor.
-/// 
+///
 /// By default the motor is disabled. When the motor is enabled friction is automatically disabled.
 class hkpLimitedHingeConstraintData : public hkpConstraintData
 {
 	public:
 
-		enum 
+		enum
 		{
 			SOLVER_RESULT_MOTOR				= 0,	// the motor
-			SOLVER_RESULT_MOTOR_INTERNAL	= 1,		
-			SOLVER_RESULT_FRICTION			= 2,	// or friction 
+			SOLVER_RESULT_MOTOR_INTERNAL	= 1,
+			SOLVER_RESULT_FRICTION			= 2,	// or friction
 			SOLVER_RESULT_FRICTION_INTERNAL	= 3,
-			SOLVER_RESULT_LIMIT				= 4,	// limits defined around m_freeAxisA 
+			SOLVER_RESULT_LIMIT				= 4,	// limits defined around m_freeAxisA
 			SOLVER_RESULT_ANG_0				= 5,	// angular constraint 0
 			SOLVER_RESULT_ANG_1				= 6,	// angular constraint 1
 
-			SOLVER_RESULT_LIN_0				= 7,	// linear constraint 
-			SOLVER_RESULT_LIN_1				= 8,	// linear constraint 
-			SOLVER_RESULT_LIN_2				= 9,	// linear constraint 
+			SOLVER_RESULT_LIN_0				= 7,	// linear constraint
+			SOLVER_RESULT_LIN_1				= 8,	// linear constraint
+			SOLVER_RESULT_LIN_2				= 9,	// linear constraint
 			SOLVER_RESULT_MAX				= 10
 		};
 
@@ -77,11 +77,11 @@ class hkpLimitedHingeConstraintData : public hkpConstraintData
 			hkpSetupStabilizationAtom			m_setupStabilization;
 			hkpAngMotorConstraintAtom           m_angMotor;
 			hkpAngFrictionConstraintAtom        m_angFriction;
-			hkpAngLimitConstraintAtom           m_angLimit; 
+			hkpAngLimitConstraintAtom           m_angLimit;
 			hkp2dAngConstraintAtom			  	m_2dAng;
 			hkpBallSocketConstraintAtom			m_ballSocket;
 		};
-		
+
 	public:
 
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
@@ -90,8 +90,12 @@ class hkpLimitedHingeConstraintData : public hkpConstraintData
 		/// Constructor.
 		hkpLimitedHingeConstraintData();
 
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		hkpLimitedHingeConstraintData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
+
+#endif
 
 		/// Destructor.
 		~hkpLimitedHingeConstraintData();
@@ -103,8 +107,8 @@ class hkpLimitedHingeConstraintData : public hkpConstraintData
 		/// \param axisB The hinge axis, specified in bodyB space.
 		/// \param axisAPerp Axis perpendicular to the hinge axis, specified in bodyA space.
 		/// \param axisBPerp Axis perpendicular to the hinge axis, specified in bodyB space.
-		void setInBodySpace(const hkVector4& pivotA, const hkVector4& pivotB, 
-							const hkVector4& axisA, const hkVector4& axisB, 
+		void setInBodySpace(const hkVector4& pivotA, const hkVector4& pivotB,
+							const hkVector4& axisA, const hkVector4& axisB,
 							const hkVector4& axisAPerp, const hkVector4& axisBPerp);
 
 		/// Set the data for a Limited Hinge constraint with information given in world space.
@@ -112,9 +116,9 @@ class hkpLimitedHingeConstraintData : public hkpConstraintData
 		/// \param bodyB The second rigid body transform.
 		/// \param pivot The pivot point, specified in world space.
 		/// \param axis	The hinge axis, specified in world space.
-		void setInWorldSpace(	const hkTransform& bodyATransform, const hkTransform& bodyBTransform, 
+		void setInWorldSpace(	const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
 								const hkVector4& pivot, const hkVector4& axis);
-		
+
 		static inline Runtime* HK_CALL getRuntime( hkpConstraintRuntime* runtime ) { return reinterpret_cast<Runtime*>(runtime); }
 
 		//
@@ -205,7 +209,7 @@ class hkpLimitedHingeConstraintData : public hkpConstraintData
 
 		/// Returns the index of the body that is notified when the constraint's maximum impulse limit is breached.
 		virtual hkUint8 getNotifiedBodyIndex() const;
-	
+
 		/// Set the solving method for this constraint. Use one of the hkpConstraintAtom::SolvingMethod as a value for method.
 		virtual void setSolvingMethod(hkpConstraintAtom::SolvingMethod method);
 
@@ -216,9 +220,9 @@ class hkpLimitedHingeConstraintData : public hkpConstraintData
 		virtual hkResult setInertiaStabilizationFactor(const hkReal inertiaStabilizationFactorIn);
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
+
 	public:
-		
+
 		HK_ALIGN_REAL( Atoms m_atoms );
 };
 
@@ -228,7 +232,7 @@ class hkpLimitedHingeConstraintData : public hkpConstraintData
 #endif // HKP_LIMITED_HINGE_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

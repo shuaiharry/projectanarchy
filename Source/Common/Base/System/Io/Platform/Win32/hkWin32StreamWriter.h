@@ -36,12 +36,10 @@ class hkWin32StreamWriter : public hkStreamWriter
 		HANDLE m_handle;
 };
 
-typedef hkWin32StreamWriter DefaultFileWriter;
-
 #endif //HK_BASE_WIN32STREAMWRITER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

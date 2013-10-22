@@ -180,9 +180,8 @@ namespace FmodEditorPlugin
     /// </summary>
     [PrefabResolveFilename]
     [SortedCategory(CAT_COLLMESH, CATORDER_COLLMESH),
-    PropertyOrder(1),
-    EditorAttribute(typeof(FilenameEditor), typeof(UITypeEditor)), 
-    FileDialogFilter(new string[] {".model", ".vmesh"})]
+    PropertyOrder(1)]
+    [EditorAttribute(typeof(AssetEditor), typeof(UITypeEditor)), AssetDialogFilter(new string[] { "StaticMesh", "Model" })]
     [ThumbnailFormat(new string[] { @"{0}_data\Thumbnail.bmp", @"{0}_data\Thumbnail.jpg" })]
     [Description("The model/ static mesh that defines the Fmod collision mesh")]
     public string MeshFilename
@@ -391,7 +390,7 @@ namespace FmodEditorPlugin
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

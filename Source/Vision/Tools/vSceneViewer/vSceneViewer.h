@@ -10,13 +10,12 @@ enum SCENE_VIEWER_CONTROL {
   SCENE_RETURN_TO_ORIGIN = VISION_INPUT_CONTROL_LAST_ELEMENT+1,
   SCENE_TOGGLE_MOUSE_CAPTURE,
   SCENE_TOGGLE_RENDERCOLLISIONMESH,
-  SCENE_NEXT_SHADINGMODE,
   SCENE_TOGGLE_MENU,
   SCENE_LOAD_NEW_SCENE
 };
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -33,7 +33,7 @@ enum CAMERA_DEMO_CONTROL {
 #define CAMERA_DEMO_CONTROL_ALTERNATIVES 12
 #define CAMERA_DEMO_CONTROL_USER_SPACE 8
 
-class VisDemoCamera_cl : public VisBaseEntity_cl
+class VisDemoCamera_cl : public VisBaseEntity_cl, public IVisCallbackHandler_cl
 {
 public:
   VisDemoCamera_cl(float fModelHeight = 120.f, float fMinDistance = 50.f, float fMaxDistance = 1000.f, float fSpeed = 1.0f);
@@ -51,8 +51,10 @@ public:
   void SetMaxDistance(float fDistance);
   float GetMaxDistance() const;
 
-  VISION_APIFUNC virtual void InitFunction();
-  VISION_APIFUNC virtual void ThinkFunction();
+  VISION_APIFUNC virtual void InitFunction() HKV_OVERRIDE;
+  VISION_APIFUNC virtual void DeInitFunction() HKV_OVERRIDE;
+
+  virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE;
 
 private:
   void HandleInput();
@@ -81,7 +83,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

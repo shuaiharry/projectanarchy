@@ -12,93 +12,106 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConstraint.hpp>
 
 /// \brief
-///   Descriptor for vHavok Ragdoll constraint.
+///   Descriptor for vHavokPhysics Ragdoll constraint.
 class vHavokRagdollConstraintDesc : public vHavokConstraintDesc
 {
 public:
   VHAVOK_IMPEXP vHavokRagdollConstraintDesc();
 
-  VHAVOK_IMPEXP virtual void Reset();
+  VHAVOK_IMPEXP virtual void Reset() HKV_OVERRIDE;
 
-  V_DECLARE_SERIAL_DLLEXP( vHavokRagdollConstraintDesc, VHAVOK_IMPEXP )
-    VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokRagdollConstraintDesc, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 public:
-  hkvVec3 m_vPivot; ///< The constraint's pivot point in world space
-  hkvVec3 m_vTwistAxis; ///< The constraint's twist axis (see Havok documentation)
-  hkvVec3 m_vPlaneAxis; ///< The constraint's plane axis (see Havok documentation)
+  hkvVec3 m_vPivot;                 ///< The constraint's pivot point in world space
+  hkvVec3 m_vTwistAxis;             ///< The constraint's twist axis (see Havok documentation)
+  hkvVec3 m_vPlaneAxis;             ///< The constraint's plane axis (see Havok documentation)
 
-  float m_fConeAngle; ///< The opening half-angle (in radians) of the cone around the twist axis
-  float m_fPlaneConeMinAngle; ///< The opening half-angle (in radians) of the plane min cone (negative plane axis)
-  float m_fPlaneConeMaxAngle; ///< The opening half-angle (in radians) of the plane max cone (positive plane axis)
-  float m_fTwistMinAngle; ///< The minimum twist angle (in radians)
-  float m_fTwistMaxAngle; ///< The maximum twist angle (in radians)
+  float m_fConeAngle;               ///< The opening half-angle (in radians) of the cone around the twist axis
+  float m_fPlaneConeMinAngle;       ///< The opening half-angle (in radians) of the plane min cone (negative plane axis)
+  float m_fPlaneConeMaxAngle;       ///< The opening half-angle (in radians) of the plane max cone (positive plane axis)
+  float m_fTwistMinAngle;           ///< The minimum twist angle (in radians)
+  float m_fTwistMaxAngle;           ///< The maximum twist angle (in radians)
 
-  bool m_bConeLimitStabilization; ///< Whether cone limit stabilization is enabled
-  float m_fMaxFrictionTorque; ///< The maximum friction value for the constraint
-  float m_fAngularLimitsTauFactor; ///< The tau factor for the angular limits [0..1]
+  bool m_bConeLimitStabilization;   ///< Whether cone limit stabilization is enabled
+  float m_fMaxFrictionTorque;       ///< The maximum friction value for the constraint
+  float m_fAngularLimitsTauFactor;  ///< The tau factor for the angular limits [0..1]
 
 private:
   static const unsigned int s_iSerialVersion;
 };
 
-// ----------------------------------------------------------------------------
-// vHavokRagdollConstraint
-// ----------------------------------------------------------------------------
-
 /// \brief
-///   Implementation of the vHavok Ragdoll constraint.
+///   Implementation of the vHavokPhysics Ragdoll constraint.
 class vHavokRagdollConstraint : public vHavokConstraint
 {
 public:
   // serialization and type management
-  V_DECLARE_SERIAL_DLLEXP( vHavokRagdollConstraint, VHAVOK_IMPEXP )
-    VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokRagdollConstraint, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
-  ///@name Base Class Overrides
-  //@{
+  ///
+  /// @name Base Class Overrides
+  /// @{
+  ///
+
 protected:
-  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData();
-  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc();
-  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, vHavokConstraintDesc const& desc);
-public:
-  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc);
-  //@}
+  VHAVOK_IMPEXP virtual hkpConstraintData* CreateConstraintData() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual vHavokConstraintDesc *CreateConstraintDesc() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void InitConstraintDataFromDesc(hkpConstraintData& data, 
+    vHavokConstraintDesc const& desc) HKV_OVERRIDE;
 
-  ///@name Motors
-  //@{
 public:
+  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintDesc& desc) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
+
+  ///
+  /// @name Motors
+  /// @{
+  ///
+
   /// \brief
   ///   Enables a position-based motor for the three degrees of freedom of this constraint.
+  ///
   /// \param fTau
-  ///   the tau value to use in solving
+  ///   The tau value used when in solving.
   /// \param fDamping
-  ///   the damping to use in solving
+  ///   The damping value used when solving.
   /// \param fProportionalVelocity
-  ///   the proportional component of the velocity with which position errors are corrected
+  ///   The proportional component of the velocity with which position errors are corrected.
   /// \param fConstantVelocity
-  ///   the constant component of the velocity with which position errors are corrected
+  ///   The constant component of the velocity with which position errors are corrected.
+  ///
   VHAVOK_IMPEXP void EnablePositionMotor(float fTau, float fDamping, float fProportionalVelocity, float fConstantVelocity);
   
   /// \brief
   ///   Enables a spring-damper-based motor for the three degrees of freedom of this constraint.
+  ///
   /// \param fSpringConstant
-  ///   the spring constant of the spring to be used
+  ///   The spring constant of the spring to be used.
   /// \param fSpringDamping
-  ///   the damping of the spring to be used
+  ///   The damping of the spring to be used.
+  ///
   VHAVOK_IMPEXP void EnableSpringDamperMotor(float fSpringConstant, float fSpringDamping);
 
   /// \brief
-  ///   Disables any motor that has been set before. Has no effect if the constraint
+  ///   Disables any motor that has been configured before. Has no effect if the constraint
   ///   currently has no motor.
+  ///
   VHAVOK_IMPEXP void DisableMotor();
 
   /// \brief
   ///   Sets the min and max limits of the force the constraint motor may use.
+  ///
   /// \param fMin
-  ///   the lower limit of the force
+  ///   The lower limit of the force.
   /// \param fMax
-  ///   the upper limit of the force
+  ///   The upper limit of the force.
+  ///
   VHAVOK_IMPEXP void SetMotorForces(float fMin, float fMax);
 
   /// \brief
@@ -109,26 +122,30 @@ public:
   /// points straight along the twist axis.
   ///
   /// \param fYaw
-  ///   the yaw component of the target orientation
+  ///   The yaw component of the target orientation.
   /// \param fPitch
-  ///   the pitch component of the target orientation
+  ///   The pitch component of the target orientation.
   /// \param fRoll
-  ///   the roll component of the target orientation
+  ///   The roll component of the target orientation.
+  ///
   VHAVOK_IMPEXP void SetTargetOrientation(float fYaw, float fPitch, float fRoll);
-  //@}
+
+  ///
+  /// @}
+  ///
 
 private:
   static const unsigned int s_iSerialVersion;
 
-  hkvVec3 m_vSavedPivot; ///< Saved constraint pivot point (world space)
-  hkvVec3 m_vSavedTwistAxis; ///< Saved constraint twist axis (world space)
-  hkvVec3 m_vSavedPlaneAxis; ///< Saved constraint plane axis (world space)
+  hkvVec3 m_vSavedPivot;      ///< Saved constraint pivot point (world space).
+  hkvVec3 m_vSavedTwistAxis;  ///< Saved constraint twist axis (world space).
+  hkvVec3 m_vSavedPlaneAxis;  ///< Saved constraint plane axis (world space).
 };
 
-#endif //V_HAVOK_RAGDOLL_CONSTRAINT_HPP_INCLUDED
+#endif // V_HAVOK_RAGDOLL_CONSTRAINT_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

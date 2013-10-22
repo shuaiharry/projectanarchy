@@ -80,6 +80,8 @@ public:
 
 	virtual bool hasPath() const;
 
+	virtual void getGoalPoints( hkArray<hkVector4>::Temp& goalsOut ) const HK_OVERRIDE;
+
 		/// Get the character radius multiplier.
 	inline hkReal getCharacterRadiusMultiplier() const;
 
@@ -144,6 +146,7 @@ private:
 
 	hkaiCharacter::State m_savedCharacterState;
 
+		/// Extra info used to initialize corner prediction.
 	struct CornerPredictorInitInfo
 	{
 		hkVector4 m_positionLocal;
@@ -155,7 +158,6 @@ private:
 		hkBool m_hasInfo;
 	};
 
-	/// Extra info used to init corner predictors
 	CornerPredictorInitInfo m_cornerPredictorInitInfo;
 };
 
@@ -164,7 +166,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

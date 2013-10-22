@@ -11,8 +11,6 @@
 #ifndef _VISAPIVISIBILITYOBJECT_HPP_INCLUDED_
 #define _VISAPIVISIBILITYOBJECT_HPP_INCLUDED_
 
-//#include "VisApiElementVisData.hpp"
-
 #include <Vision/Runtime/Engine/SceneElements/VisApiSortedRenderCollection.hpp>
 #include <Vision/Runtime/Engine/Renderer/OcclusionQuery/VisApiOcclusionQueryObject.hpp>
 #include <Vision/Runtime/Engine/Visibility/VisApiVisibilityData.hpp>
@@ -459,7 +457,7 @@ VISION_ELEMENTMANAGER_TEMPLATE_DECL(VisVisibilityObject_cl)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

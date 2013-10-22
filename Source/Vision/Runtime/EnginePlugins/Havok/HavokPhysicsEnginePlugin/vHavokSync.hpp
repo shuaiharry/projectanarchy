@@ -8,10 +8,6 @@
 
 /// \file vHavokStaticMesh.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKSYNC_HPP_INCLUDED
 #define VHAVOKSYNC_HPP_INCLUDED
 
@@ -30,9 +26,6 @@
 #include <Common/Base/Reflection/Registry/hkVtableClassRegistry.h>
 
 #include <Common/Base/Config/hkConfigVersion.h>
-#if (HAVOK_SDK_VERSION_MAJOR >= 2010)
-	#include <Common/Base/System/StackTracer/hkStackTracer.h>
-#endif
 
 #ifndef _VISION_DOC
 
@@ -41,25 +34,9 @@
 #define HAVOK_NEED_SYNC_MACROS
 #endif
 
-
 #ifdef HAVOK_NEED_SYNC_MACROS
 
-/// \brief
-///   Helper structure for synchronization in multi-threaded environments.
-///   Internal use only!
-struct HavokSyncInfo
-{
-	hkMemoryInitUtil::SyncInfo baseSystemInfo; // mem, singletons etc
-	hkCriticalSection* mtCheckSection; // the multithreading debug check 
-	hkMonitorStream* monitors; // montor ptrs as monitors not a normal singleton
-#if (HAVOK_SDK_VERSION_MAJOR >= 2010)
-	hkStackTracer* mtCheckStackTracer; // the multithreading debug check 
-	hkStackTracer::CallTree* mtCheckStackTree; // the multithreading debug check 
-	hkUint32* mtRefLockedAllPtr;
-#endif
-};
-
-void VHAVOK_IMPEXP vHavokPhysicsModuleGetSyncInfo(HavokSyncInfo& s);
+void VHAVOK_IMPEXP vHavokPhysicsModuleGetSyncInfo(hkMemoryInitUtil::SyncInfo& s);
 
 #ifndef __vHavokPhysicsModuleIncludes
 
@@ -69,16 +46,16 @@ void VHAVOK_IMPEXP vHavokPhysicsModuleGetSyncInfo(HavokSyncInfo& s);
 		do { \
 		extern hkBool hkBaseSystemIsInitialized; \
 		extern HK_THREAD_LOCAL( hkMonitorStream* ) hkMonitorStream__m_instance; \
-		if (!hkBaseSystemIsInitialized && s.baseSystemInfo.m_memoryRouter) \
+		if (!hkBaseSystemIsInitialized && s.m_memoryRouter) \
 		{   \
-			hkMemoryRouter::replaceInstance(s.baseSystemInfo.m_memoryRouter);\
-			hkMemorySystem::replaceInstance(s.baseSystemInfo.m_memorySystem);\
-			if (s.baseSystemInfo.m_singletonList) { hkSingletonInitNode::populate( hkSingletonInitList, s.baseSystemInfo.m_singletonList ); }  \
-	   	hkBaseSystem::initSingletons();\
-			HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, s.monitors);\
-			HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection =  s.mtCheckSection; ) \
-			HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTracer =  s.mtCheckStackTracer; ) \
-			HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTree =  s.mtCheckStackTree; ) \
+			hkStackTracer::replaceImplementation(s.m_stackTracerImpl);\
+			hkMemoryRouter::replaceInstance(s.m_memoryRouter);\
+			hkMemorySystem::replaceInstance(s.m_memorySystem);\
+			if (s.m_singletonList) { hkSingletonInitNode::populate( hkSingletonInitList, s.m_singletonList ); }  \
+			hkBaseSystem::initSingletons();\
+			HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, s.m_monitors);\
+			HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection =  s.m_mtCheckSection; ) \
+			HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTree =  s.m_mtCheckStackTree; ) \
 			hkBaseSystemIsInitialized = true; \
 		} } while(false) 
 
@@ -93,7 +70,7 @@ void VHAVOK_IMPEXP vHavokPhysicsModuleGetSyncInfo(HavokSyncInfo& s);
 				hkMemoryRouter::replaceInstance(s.baseSystemInfo.m_memoryRouter);\
 				hkMemorySystem::replaceInstance(s.baseSystemInfo.m_memorySystem);\
 				if (s.baseSystemInfo.m_singletonList) { hkSingletonInitNode::populate( hkSingletonInitList, s.baseSystemInfo.m_singletonList ); }  \
-	   		hkBaseSystem::initSingletons();\
+				hkBaseSystem::initSingletons();\
 				HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, s.monitors);\
 				HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection =  s.mtCheckSection; ) \
 				hkBaseSystemIsInitialized = true; \
@@ -103,7 +80,7 @@ void VHAVOK_IMPEXP vHavokPhysicsModuleGetSyncInfo(HavokSyncInfo& s);
 
 #define VISION_HAVOK_SYNC_STATICS() \
 	do { \
-		HavokSyncInfo s; \
+		hkMemoryInitUtil::SyncInfo s; \
 		vHavokPhysicsModuleGetSyncInfo(s); \
 		VISION_HAVOK_SYNC_STATICS_IMPL(s); \
 	} while(false)
@@ -113,45 +90,45 @@ void VHAVOK_IMPEXP vHavokPhysicsModuleGetSyncInfo(HavokSyncInfo& s);
 
 #define VISION_HAVOK_UNSYNC_STATICS_IMPL( s ) \
   do { \
-    extern hkBool hkBaseSystemIsInitialized; \
-    extern HK_THREAD_LOCAL( hkMonitorStream* ) hkMonitorStream__m_instance; \
-    if (hkBaseSystemIsInitialized) \
-    {   \
-      hkBaseSystemIsInitialized = false; \
-      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTree =  HK_NULL; ) \
-      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTracer =  HK_NULL; ) \
-      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection =  HK_NULL; ) \
-      HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, HK_NULL);\
-      hkBaseSystem::quitSingletons();\
-      if (s.baseSystemInfo.m_singletonList) { hkSingletonInitNode::depopulate( hkSingletonInitList, s.baseSystemInfo.m_singletonList ); }  \
-      hkMemorySystem::replaceInstance(HK_NULL);\
-      hkMemoryRouter::replaceInstance(HK_NULL);\
-    } \
+	extern hkBool hkBaseSystemIsInitialized; \
+	extern HK_THREAD_LOCAL( hkMonitorStream* ) hkMonitorStream__m_instance; \
+	if (hkBaseSystemIsInitialized) \
+	{   \
+	  hkBaseSystemIsInitialized = false; \
+	  HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::s_stackTree =  HK_NULL; ) \
+	  HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection =  HK_NULL; ) \
+	  HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, HK_NULL);\
+	  hkBaseSystem::quitSingletons();\
+	  if (s.m_singletonList) { hkSingletonInitNode::depopulate( hkSingletonInitList, s.m_singletonList ); }  \
+	  hkMemorySystem::replaceInstance(HK_NULL);\
+	  hkMemoryRouter::replaceInstance(HK_NULL);\
+	  hkStackTracer::replaceImplementation(HK_NULL);\
+	} \
   } while(false) 
 
 #else // 7.1
 
 #define VISION_HAVOK_UNSYNC_STATICS_IMPL( s ) \
   do { \
-    extern hkBool hkBaseSystemIsInitialized; \
-    extern HK_THREAD_LOCAL( hkMonitorStream* ) hkMonitorStream__m_instance; \
-    if (hkBaseSystemIsInitialized) \
-    { \
-      hkBaseSystemIsInitialized = false; \
-      HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection =  HK_NULL; ) \
-      HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, HK_NULL);\
-      hkBaseSystem::quitSingletons();\
-      if (s.baseSystemInfo.m_singletonList) { hkSingletonInitNode::depopulate( hkSingletonInitList, s.baseSystemInfo.m_singletonList ); }  \
-      hkMemorySystem::replaceInstance(HK_NULL);\
-      hkMemoryRouter::replaceInstance(HK_NULL);\
-    } \
+	extern hkBool hkBaseSystemIsInitialized; \
+	extern HK_THREAD_LOCAL( hkMonitorStream* ) hkMonitorStream__m_instance; \
+	if (hkBaseSystemIsInitialized) \
+	{ \
+	  hkBaseSystemIsInitialized = false; \
+	  HK_ON_DEBUG_MULTI_THREADING( hkMultiThreadCheck::m_criticalSection =  HK_NULL; ) \
+	  HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, HK_NULL);\
+	  hkBaseSystem::quitSingletons();\
+	  if (s.baseSystemInfo.m_singletonList) { hkSingletonInitNode::depopulate( hkSingletonInitList, s.baseSystemInfo.m_singletonList ); }  \
+	  hkMemorySystem::replaceInstance(HK_NULL);\
+	  hkMemoryRouter::replaceInstance(HK_NULL);\
+	} \
   } while(false) 
 
 #endif
 
 #define VISION_HAVOK_UNSYNC_STATICS() \
   do { \
-  HavokSyncInfo s; \
+  hkMemoryInitUtil::SyncInfo s; \
   vHavokPhysicsModuleGetSyncInfo(s); \
   VISION_HAVOK_UNSYNC_STATICS_IMPL(s); \
   } while(false)
@@ -160,16 +137,16 @@ void VHAVOK_IMPEXP vHavokPhysicsModuleGetSyncInfo(HavokSyncInfo& s);
 #define VISION_HAVOK_SYNC_THREAD_STATICS_IMPL( s ) \
 	do { \
 		extern HK_THREAD_LOCAL( hkMonitorStream* ) hkMonitorStream__m_instance; \
-		if (s.baseSystemInfo.m_memoryRouter) \
+		if (s.m_memoryRouter) \
 		{   \
-			hkMemoryRouter::replaceInstance(s.baseSystemInfo.m_memoryRouter); \
-			HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, s.monitors); \
+			hkMemoryRouter::replaceInstance(s.m_memoryRouter); \
+			HK_THREAD_LOCAL_SET(hkMonitorStream__m_instance, s.m_monitors); \
 		} } while(false) 
 
 //New macro (VISION_HAVOK_SYNC_PER_THREAD_STATICS) to allow callbacks sync the thread specific stuff (noticeably the per thread stack ptr in the mem router)
 #define VISION_HAVOK_SYNC_THREAD_STATICS() \
 	do { \
-		HavokSyncInfo s; \
+		hkMemoryInitUtil::SyncInfo s; \
 		vHavokPhysicsModuleGetSyncInfo(s); \
 		VISION_HAVOK_SYNC_THREAD_STATICS_IMPL(s); \
 	} while(false)
@@ -188,7 +165,7 @@ class HavokModulThreadCreateCallbackListener_cl : public IVisCallbackHandler_cl
 {
 public: 
 	HavokModulThreadCreateCallbackListener_cl () {} 
-	VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData) 
+	virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE
 	{ 
 		VISION_HAVOK_SYNC_THREAD_STATICS(); 
 	} 
@@ -203,7 +180,7 @@ class HavokModulThreadFinishCallbackListener_cl : public IVisCallbackHandler_cl 
 {
 public: 
 	HavokModulThreadFinishCallbackListener_cl () { }\
-	VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData) \
+	virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE\
 	{
 		VISION_HAVOK_ZERO_THREAD_STATICS();
 	}
@@ -226,7 +203,7 @@ public:
 
 	vHavokModuleCallbackHandler_cl() {}
 
-	VOVERRIDE void OnHandleCallback(IVisCallbackDataObject_cl *pData)
+	virtual void OnHandleCallback(IVisCallbackDataObject_cl *pData) HKV_OVERRIDE
 	{
 		if ( pData->m_pSender == &vHavokPhysicsModule::OnBeforeInitializePhysics )
 		{
@@ -264,7 +241,6 @@ static vHavokModuleCallbackHandler_cl g_HavokModuleCallbackHandler;
 	vHavokPhysicsModule::OnBeforeInitializePhysics -= &g_HavokModuleCallbackHandler;\
 	vHavokPhysicsModule::OnAfterDeInitializePhysics -= &g_HavokModuleCallbackHandler;
 
-
 #endif
 
 #else // None needed
@@ -285,7 +261,7 @@ static vHavokModuleCallbackHandler_cl g_HavokModuleCallbackHandler;
 #endif //VHAVOKSYNC_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

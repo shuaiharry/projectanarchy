@@ -112,6 +112,9 @@ class hkbGeneratorSyncInfo
 		/// be called until after the active interval has been computed for a given frame
 		hkReal computeLocalTimeFromActiveInterval() const;
 
+		/// Set the local time of the sync info.
+		void setLocalTime( hkReal newLocalTime ) { m_localTime = newLocalTime; m_activeInterval.reset(); }
+
 	protected:
 		/// Computes the active interval from the sync info's own sync points
 		hkReal computeActiveIntervalFraction(hkReal localTime, hkReal endTime, hkReal startTime) const;
@@ -180,7 +183,7 @@ class hkbReferencedGeneratorSyncInfo : public hkReferencedObject
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -61,6 +61,7 @@ namespace Editor.Dialogs
     private ListView listView_Layers;
     private ColumnHeader nameHeader;
     private ColumnHeader descriptionHeader;
+    private TableLayoutPanel checkBoxTableLayout;
 
 		/// <summary>
 		/// Required designer variable.
@@ -96,6 +97,11 @@ namespace Editor.Dialogs
       comboBox_Profile_SelectionChangeCommitted(null, null);
     }
 
+    void ExportDialog_ResizeEnd(object sender, EventArgs e)
+    {
+      dropDown_AssetProfiles.Refresh();
+    }
+
     protected override void Dispose(bool disposing)
 		{
 			if(disposing)
@@ -118,14 +124,14 @@ namespace Editor.Dialogs
 		private void InitializeComponent()
 		{
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExportDialog));
-      System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Layers to export", System.Windows.Forms.HorizontalAlignment.Left);
-      System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("Zones to export", System.Windows.Forms.HorizontalAlignment.Left);
-      System.Windows.Forms.ListViewGroup listViewGroup3 = new System.Windows.Forms.ListViewGroup("Scene Components to export", System.Windows.Forms.HorizontalAlignment.Left);
-      System.Windows.Forms.ListViewGroup listViewGroup4 = new System.Windows.Forms.ListViewGroup("Optional Plugins to embed", System.Windows.Forms.HorizontalAlignment.Left);
-      System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("xxx");
-      System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem("yyy");
-      System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem("zzz");
-      System.Windows.Forms.ListViewItem listViewItem4 = new System.Windows.Forms.ListViewItem("www");
+      System.Windows.Forms.ListViewGroup listViewGroup5 = new System.Windows.Forms.ListViewGroup("Layers to export", System.Windows.Forms.HorizontalAlignment.Left);
+      System.Windows.Forms.ListViewGroup listViewGroup6 = new System.Windows.Forms.ListViewGroup("Zones to export", System.Windows.Forms.HorizontalAlignment.Left);
+      System.Windows.Forms.ListViewGroup listViewGroup7 = new System.Windows.Forms.ListViewGroup("Scene Components to export", System.Windows.Forms.HorizontalAlignment.Left);
+      System.Windows.Forms.ListViewGroup listViewGroup8 = new System.Windows.Forms.ListViewGroup("Optional Plugins to embed", System.Windows.Forms.HorizontalAlignment.Left);
+      System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem("xxx");
+      System.Windows.Forms.ListViewItem listViewItem6 = new System.Windows.Forms.ListViewItem("yyy");
+      System.Windows.Forms.ListViewItem listViewItem7 = new System.Windows.Forms.ListViewItem("zzz");
+      System.Windows.Forms.ListViewItem listViewItem8 = new System.Windows.Forms.ListViewItem("www");
       this.button_ExportActiveProfile = new System.Windows.Forms.Button();
       this.button_CANCEL = new System.Windows.Forms.Button();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -136,10 +142,11 @@ namespace Editor.Dialogs
       this.button_Browse = new System.Windows.Forms.Button();
       this.text_Pathname = new System.Windows.Forms.TextBox();
       this.settingsBox = new System.Windows.Forms.GroupBox();
-      this.checkBox_updateAssetTransformations = new System.Windows.Forms.CheckBox();
-      this.checkBox_InvisibleLayersExportInvisibleObjects = new System.Windows.Forms.CheckBox();
+      this.checkBoxTableLayout = new System.Windows.Forms.TableLayoutPanel();
       this.checkBox_IncludeVisibilityInfo = new System.Windows.Forms.CheckBox();
       this.checkBox_RunAfterExport = new System.Windows.Forms.CheckBox();
+      this.checkBox_InvisibleLayersExportInvisibleObjects = new System.Windows.Forms.CheckBox();
+      this.checkBox_updateAssetTransformations = new System.Windows.Forms.CheckBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.button_ShowAssets = new System.Windows.Forms.Button();
@@ -159,6 +166,7 @@ namespace Editor.Dialogs
       this.captionBar = new CSharpFramework.Controls.DialogCaptionBar();
       this.groupBox1.SuspendLayout();
       this.settingsBox.SuspendLayout();
+      this.checkBoxTableLayout.SuspendLayout();
       this.groupBox2.SuspendLayout();
       this.tableLayoutPanel1.SuspendLayout();
       this.groupBox3.SuspendLayout();
@@ -169,9 +177,9 @@ namespace Editor.Dialogs
       this.button_ExportActiveProfile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.button_ExportActiveProfile.Image = ((System.Drawing.Image)(resources.GetObject("button_ExportActiveProfile.Image")));
       this.button_ExportActiveProfile.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-      this.button_ExportActiveProfile.Location = new System.Drawing.Point(310, 695);
+      this.button_ExportActiveProfile.Location = new System.Drawing.Point(304, 666);
       this.button_ExportActiveProfile.Name = "button_ExportActiveProfile";
-      this.button_ExportActiveProfile.Size = new System.Drawing.Size(154, 28);
+      this.button_ExportActiveProfile.Size = new System.Drawing.Size(135, 28);
       this.button_ExportActiveProfile.TabIndex = 6;
       this.button_ExportActiveProfile.Text = "Export Active Profile";
       this.button_ExportActiveProfile.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
@@ -181,7 +189,7 @@ namespace Editor.Dialogs
       // 
       this.button_CANCEL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.button_CANCEL.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.button_CANCEL.Location = new System.Drawing.Point(470, 695);
+      this.button_CANCEL.Location = new System.Drawing.Point(444, 666);
       this.button_CANCEL.Name = "button_CANCEL";
       this.button_CANCEL.Size = new System.Drawing.Size(97, 28);
       this.button_CANCEL.TabIndex = 7;
@@ -197,21 +205,23 @@ namespace Editor.Dialogs
       this.groupBox1.Controls.Add(this.label1);
       this.groupBox1.Controls.Add(this.button_Browse);
       this.groupBox1.Controls.Add(this.text_Pathname);
-      this.groupBox1.Location = new System.Drawing.Point(12, 165);
+      this.groupBox1.Location = new System.Drawing.Point(12, 138);
       this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(555, 80);
+      this.groupBox1.Size = new System.Drawing.Size(529, 68);
       this.groupBox1.TabIndex = 2;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Target";
       // 
       // dropDown_AssetProfiles
       // 
-      this.dropDown_AssetProfiles.AnchorSize = new System.Drawing.Size(290, 21);
+      this.dropDown_AssetProfiles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.dropDown_AssetProfiles.AnchorSize = new System.Drawing.Size(417, 20);
       this.dropDown_AssetProfiles.BackColor = System.Drawing.Color.White;
       this.dropDown_AssetProfiles.DockSide = CSharpFramework.Controls.DropDownControl.eDockSide.Left;
-      this.dropDown_AssetProfiles.Location = new System.Drawing.Point(104, 49);
+      this.dropDown_AssetProfiles.Location = new System.Drawing.Point(104, 42);
       this.dropDown_AssetProfiles.Name = "dropDown_AssetProfiles";
-      this.dropDown_AssetProfiles.Size = new System.Drawing.Size(290, 21);
+      this.dropDown_AssetProfiles.Size = new System.Drawing.Size(417, 20);
       this.dropDown_AssetProfiles.TabIndex = 5;
       this.dropDown_AssetProfiles.ProfileSelectionChanged += new System.EventHandler(this.ProfileControlChanged);
       // 
@@ -219,9 +229,9 @@ namespace Editor.Dialogs
       // 
       this.label_PathExtension.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.label_PathExtension.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-      this.label_PathExtension.Location = new System.Drawing.Point(400, 22);
+      this.label_PathExtension.Location = new System.Drawing.Point(374, 15);
       this.label_PathExtension.Name = "label_PathExtension";
-      this.label_PathExtension.Size = new System.Drawing.Size(119, 20);
+      this.label_PathExtension.Size = new System.Drawing.Size(120, 19);
       this.label_PathExtension.TabIndex = 3;
       this.label_PathExtension.Text = ".[profile].vscene";
       this.label_PathExtension.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -229,7 +239,7 @@ namespace Editor.Dialogs
       // label3
       // 
       this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(13, 52);
+      this.label3.Location = new System.Drawing.Point(13, 45);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(73, 13);
       this.label3.TabIndex = 4;
@@ -238,7 +248,7 @@ namespace Editor.Dialogs
       // label1
       // 
       this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(13, 26);
+      this.label1.Location = new System.Drawing.Point(13, 19);
       this.label1.Name = "label1";
       this.label1.Size = new System.Drawing.Size(57, 13);
       this.label1.TabIndex = 0;
@@ -246,9 +256,10 @@ namespace Editor.Dialogs
       // 
       // button_Browse
       // 
-      this.button_Browse.Location = new System.Drawing.Point(525, 20);
+      this.button_Browse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.button_Browse.Location = new System.Drawing.Point(497, 13);
       this.button_Browse.Name = "button_Browse";
-      this.button_Browse.Size = new System.Drawing.Size(24, 24);
+      this.button_Browse.Size = new System.Drawing.Size(24, 23);
       this.button_Browse.TabIndex = 2;
       this.button_Browse.Text = "...";
       this.button_Browse.Click += new System.EventHandler(this.button_Browse_Click);
@@ -257,56 +268,50 @@ namespace Editor.Dialogs
       // 
       this.text_Pathname.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.text_Pathname.Location = new System.Drawing.Point(104, 23);
+      this.text_Pathname.Location = new System.Drawing.Point(104, 16);
       this.text_Pathname.Name = "text_Pathname";
-      this.text_Pathname.Size = new System.Drawing.Size(290, 20);
+      this.text_Pathname.Size = new System.Drawing.Size(265, 20);
       this.text_Pathname.TabIndex = 1;
       this.text_Pathname.Text = "textBox1";
       this.text_Pathname.TextChanged += new System.EventHandler(this.ProfileControlChanged);
       // 
       // settingsBox
       // 
-      this.settingsBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.settingsBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.settingsBox.Controls.Add(this.checkBox_updateAssetTransformations);
-      this.settingsBox.Controls.Add(this.checkBox_InvisibleLayersExportInvisibleObjects);
-      this.settingsBox.Controls.Add(this.checkBox_IncludeVisibilityInfo);
-      this.settingsBox.Controls.Add(this.checkBox_RunAfterExport);
-      this.settingsBox.Location = new System.Drawing.Point(12, 610);
+      this.settingsBox.Controls.Add(this.checkBoxTableLayout);
+      this.settingsBox.Location = new System.Drawing.Point(12, 589);
       this.settingsBox.Name = "settingsBox";
-      this.settingsBox.Size = new System.Drawing.Size(555, 75);
+      this.settingsBox.Size = new System.Drawing.Size(529, 69);
       this.settingsBox.TabIndex = 4;
       this.settingsBox.TabStop = false;
       this.settingsBox.Text = "Options";
       // 
-      // checkBox_updateAssetTransformations
+      // checkBoxTableLayout
       // 
-      this.checkBox_updateAssetTransformations.AutoSize = true;
-      this.checkBox_updateAssetTransformations.Checked = true;
-      this.checkBox_updateAssetTransformations.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.checkBox_updateAssetTransformations.Location = new System.Drawing.Point(247, 24);
-      this.checkBox_updateAssetTransformations.Name = "checkBox_updateAssetTransformations";
-      this.checkBox_updateAssetTransformations.Size = new System.Drawing.Size(207, 17);
-      this.checkBox_updateAssetTransformations.TabIndex = 7;
-      this.checkBox_updateAssetTransformations.Text = "Execute Asset Transformation Pipeline";
-      this.checkBox_updateAssetTransformations.CheckedChanged += new System.EventHandler(this.ProfileControlChanged);
-      // 
-      // checkBox_InvisibleLayersExportInvisibleObjects
-      // 
-      this.checkBox_InvisibleLayersExportInvisibleObjects.AutoSize = true;
-      this.checkBox_InvisibleLayersExportInvisibleObjects.Location = new System.Drawing.Point(16, 47);
-      this.checkBox_InvisibleLayersExportInvisibleObjects.Name = "checkBox_InvisibleLayersExportInvisibleObjects";
-      this.checkBox_InvisibleLayersExportInvisibleObjects.Size = new System.Drawing.Size(209, 17);
-      this.checkBox_InvisibleLayersExportInvisibleObjects.TabIndex = 2;
-      this.checkBox_InvisibleLayersExportInvisibleObjects.Text = "Invisible Layers export invisible Objects";
-      this.checkBox_InvisibleLayersExportInvisibleObjects.CheckedChanged += new System.EventHandler(this.ProfileControlChanged);
+      this.checkBoxTableLayout.ColumnCount = 2;
+      this.checkBoxTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.checkBoxTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.checkBoxTableLayout.Controls.Add(this.checkBox_IncludeVisibilityInfo, 0, 0);
+      this.checkBoxTableLayout.Controls.Add(this.checkBox_RunAfterExport, 1, 1);
+      this.checkBoxTableLayout.Controls.Add(this.checkBox_InvisibleLayersExportInvisibleObjects, 0, 1);
+      this.checkBoxTableLayout.Controls.Add(this.checkBox_updateAssetTransformations, 1, 0);
+      this.checkBoxTableLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.checkBoxTableLayout.Location = new System.Drawing.Point(3, 16);
+      this.checkBoxTableLayout.Name = "checkBoxTableLayout";
+      this.checkBoxTableLayout.RowCount = 2;
+      this.checkBoxTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.checkBoxTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.checkBoxTableLayout.Size = new System.Drawing.Size(523, 50);
+      this.checkBoxTableLayout.TabIndex = 8;
       // 
       // checkBox_IncludeVisibilityInfo
       // 
       this.checkBox_IncludeVisibilityInfo.AutoSize = true;
-      this.checkBox_IncludeVisibilityInfo.Location = new System.Drawing.Point(16, 24);
+      this.checkBox_IncludeVisibilityInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.checkBox_IncludeVisibilityInfo.Location = new System.Drawing.Point(3, 3);
       this.checkBox_IncludeVisibilityInfo.Name = "checkBox_IncludeVisibilityInfo";
-      this.checkBox_IncludeVisibilityInfo.Size = new System.Drawing.Size(167, 17);
+      this.checkBox_IncludeVisibilityInfo.Size = new System.Drawing.Size(255, 19);
       this.checkBox_IncludeVisibilityInfo.TabIndex = 0;
       this.checkBox_IncludeVisibilityInfo.Text = "Build and include Visibility Info";
       this.checkBox_IncludeVisibilityInfo.CheckedChanged += new System.EventHandler(this.ProfileControlChanged);
@@ -314,21 +319,47 @@ namespace Editor.Dialogs
       // checkBox_RunAfterExport
       // 
       this.checkBox_RunAfterExport.AutoSize = true;
-      this.checkBox_RunAfterExport.Location = new System.Drawing.Point(247, 47);
+      this.checkBox_RunAfterExport.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.checkBox_RunAfterExport.Location = new System.Drawing.Point(264, 28);
       this.checkBox_RunAfterExport.Name = "checkBox_RunAfterExport";
-      this.checkBox_RunAfterExport.Size = new System.Drawing.Size(103, 17);
+      this.checkBox_RunAfterExport.Size = new System.Drawing.Size(256, 19);
       this.checkBox_RunAfterExport.TabIndex = 1;
       this.checkBox_RunAfterExport.Text = "Run after Export";
       this.checkBox_RunAfterExport.CheckedChanged += new System.EventHandler(this.ProfileControlChanged);
       // 
+      // checkBox_InvisibleLayersExportInvisibleObjects
+      // 
+      this.checkBox_InvisibleLayersExportInvisibleObjects.AutoSize = true;
+      this.checkBox_InvisibleLayersExportInvisibleObjects.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.checkBox_InvisibleLayersExportInvisibleObjects.Location = new System.Drawing.Point(3, 28);
+      this.checkBox_InvisibleLayersExportInvisibleObjects.Name = "checkBox_InvisibleLayersExportInvisibleObjects";
+      this.checkBox_InvisibleLayersExportInvisibleObjects.Size = new System.Drawing.Size(255, 19);
+      this.checkBox_InvisibleLayersExportInvisibleObjects.TabIndex = 2;
+      this.checkBox_InvisibleLayersExportInvisibleObjects.Text = "Invisible Layers export invisible Objects";
+      this.checkBox_InvisibleLayersExportInvisibleObjects.CheckedChanged += new System.EventHandler(this.ProfileControlChanged);
+      // 
+      // checkBox_updateAssetTransformations
+      // 
+      this.checkBox_updateAssetTransformations.AutoSize = true;
+      this.checkBox_updateAssetTransformations.Checked = true;
+      this.checkBox_updateAssetTransformations.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.checkBox_updateAssetTransformations.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.checkBox_updateAssetTransformations.Location = new System.Drawing.Point(264, 3);
+      this.checkBox_updateAssetTransformations.Name = "checkBox_updateAssetTransformations";
+      this.checkBox_updateAssetTransformations.Size = new System.Drawing.Size(256, 19);
+      this.checkBox_updateAssetTransformations.TabIndex = 7;
+      this.checkBox_updateAssetTransformations.Text = "Execute Asset Transformation Pipeline";
+      this.checkBox_updateAssetTransformations.CheckedChanged += new System.EventHandler(this.ProfileControlChanged);
+      // 
       // groupBox2
       // 
-      this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.groupBox2.Controls.Add(this.tableLayoutPanel1);
-      this.groupBox2.Location = new System.Drawing.Point(12, 251);
+      this.groupBox2.Location = new System.Drawing.Point(12, 212);
       this.groupBox2.Name = "groupBox2";
-      this.groupBox2.Size = new System.Drawing.Size(555, 353);
+      this.groupBox2.Size = new System.Drawing.Size(529, 372);
       this.groupBox2.TabIndex = 3;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Layers and Zones to export";
@@ -351,32 +382,36 @@ namespace Editor.Dialogs
       this.tableLayoutPanel1.RowCount = 2;
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(549, 334);
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 19F));
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(523, 353);
       this.tableLayoutPanel1.TabIndex = 5;
       // 
       // button_ShowAssets
       // 
-      this.button_ShowAssets.Location = new System.Drawing.Point(456, 308);
+      this.button_ShowAssets.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.button_ShowAssets.Location = new System.Drawing.Point(430, 324);
       this.button_ShowAssets.Name = "button_ShowAssets";
-      this.button_ShowAssets.Size = new System.Drawing.Size(90, 23);
+      this.button_ShowAssets.Size = new System.Drawing.Size(90, 26);
       this.button_ShowAssets.TabIndex = 7;
       this.button_ShowAssets.Text = "Show Assets";
       this.button_ShowAssets.Click += new System.EventHandler(this.button_ShowAssets_Click);
       // 
       // button_AllLayers
       // 
-      this.button_AllLayers.Location = new System.Drawing.Point(264, 308);
+      this.button_AllLayers.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.button_AllLayers.Location = new System.Drawing.Point(238, 324);
       this.button_AllLayers.Name = "button_AllLayers";
-      this.button_AllLayers.Size = new System.Drawing.Size(90, 23);
+      this.button_AllLayers.Size = new System.Drawing.Size(90, 26);
       this.button_AllLayers.TabIndex = 6;
       this.button_AllLayers.Text = "Select All";
       this.button_AllLayers.Click += new System.EventHandler(this.button_AllLayers_Click);
       // 
       // button_InvertLayers
       // 
-      this.button_InvertLayers.Location = new System.Drawing.Point(360, 308);
+      this.button_InvertLayers.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.button_InvertLayers.Location = new System.Drawing.Point(334, 324);
       this.button_InvertLayers.Name = "button_InvertLayers";
-      this.button_InvertLayers.Size = new System.Drawing.Size(90, 23);
+      this.button_InvertLayers.Size = new System.Drawing.Size(90, 26);
       this.button_InvertLayers.TabIndex = 5;
       this.button_InvertLayers.Text = "Invert Selection";
       this.button_InvertLayers.Click += new System.EventHandler(this.button_InvertLayers_Click);
@@ -385,55 +420,58 @@ namespace Editor.Dialogs
       // 
       this.checkBox_LoadedZonesOnly.AutoSize = true;
       this.checkBox_LoadedZonesOnly.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.checkBox_LoadedZonesOnly.Location = new System.Drawing.Point(3, 308);
+      this.checkBox_LoadedZonesOnly.Location = new System.Drawing.Point(3, 329);
+      this.checkBox_LoadedZonesOnly.Margin = new System.Windows.Forms.Padding(3, 8, 3, 7);
       this.checkBox_LoadedZonesOnly.Name = "checkBox_LoadedZonesOnly";
-      this.checkBox_LoadedZonesOnly.Size = new System.Drawing.Size(255, 23);
+      this.checkBox_LoadedZonesOnly.Size = new System.Drawing.Size(229, 17);
       this.checkBox_LoadedZonesOnly.TabIndex = 2;
       this.checkBox_LoadedZonesOnly.Text = "Export loaded Zones only";
       this.checkBox_LoadedZonesOnly.CheckedChanged += new System.EventHandler(this.ProfileControlChanged);
       // 
       // listView_Layers
       // 
+      this.listView_Layers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.listView_Layers.AutoArrange = false;
       this.listView_Layers.CheckBoxes = true;
       this.listView_Layers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.nameHeader,
             this.descriptionHeader});
       this.tableLayoutPanel1.SetColumnSpan(this.listView_Layers, 4);
-      this.listView_Layers.Dock = System.Windows.Forms.DockStyle.Fill;
       this.listView_Layers.FullRowSelect = true;
       this.listView_Layers.GridLines = true;
-      listViewGroup1.Header = "Layers to export";
-      listViewGroup1.Name = "Layers";
-      listViewGroup2.Header = "Zones to export";
-      listViewGroup2.Name = "Zones";
-      listViewGroup3.Header = "Scene Components to export";
-      listViewGroup3.Name = "SceneComponents";
-      listViewGroup4.Header = "Optional Plugins to embed";
-      listViewGroup4.Name = "Plugins";
+      listViewGroup5.Header = "Layers to export";
+      listViewGroup5.Name = "Layers";
+      listViewGroup6.Header = "Zones to export";
+      listViewGroup6.Name = "Zones";
+      listViewGroup7.Header = "Scene Components to export";
+      listViewGroup7.Name = "SceneComponents";
+      listViewGroup8.Header = "Optional Plugins to embed";
+      listViewGroup8.Name = "Plugins";
       this.listView_Layers.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
-            listViewGroup1,
-            listViewGroup2,
-            listViewGroup3,
-            listViewGroup4});
-      listViewItem1.Group = listViewGroup1;
-      listViewItem1.StateImageIndex = 0;
-      listViewItem2.Group = listViewGroup2;
-      listViewItem2.StateImageIndex = 0;
-      listViewItem3.Group = listViewGroup3;
-      listViewItem3.StateImageIndex = 0;
-      listViewItem4.Group = listViewGroup4;
-      listViewItem4.StateImageIndex = 0;
+            listViewGroup5,
+            listViewGroup6,
+            listViewGroup7,
+            listViewGroup8});
+      listViewItem5.Group = listViewGroup5;
+      listViewItem5.StateImageIndex = 0;
+      listViewItem6.Group = listViewGroup6;
+      listViewItem6.StateImageIndex = 0;
+      listViewItem7.Group = listViewGroup7;
+      listViewItem7.StateImageIndex = 0;
+      listViewItem8.Group = listViewGroup8;
+      listViewItem8.StateImageIndex = 0;
       this.listView_Layers.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem1,
-            listViewItem2,
-            listViewItem3,
-            listViewItem4});
+            listViewItem5,
+            listViewItem6,
+            listViewItem7,
+            listViewItem8});
       this.listView_Layers.Location = new System.Drawing.Point(3, 3);
       this.listView_Layers.MultiSelect = false;
       this.listView_Layers.Name = "listView_Layers";
       this.listView_Layers.ShowItemToolTips = true;
-      this.listView_Layers.Size = new System.Drawing.Size(543, 299);
+      this.listView_Layers.Size = new System.Drawing.Size(517, 315);
       this.listView_Layers.TabIndex = 1;
       this.listView_Layers.UseCompatibleStateImageBehavior = false;
       this.listView_Layers.View = System.Windows.Forms.View.Details;
@@ -442,12 +480,12 @@ namespace Editor.Dialogs
       // nameHeader
       // 
       this.nameHeader.Text = "Name";
-      this.nameHeader.Width = 217;
+      this.nameHeader.Width = 200;
       // 
       // descriptionHeader
       // 
       this.descriptionHeader.Text = "Description";
-      this.descriptionHeader.Width = 357;
+      this.descriptionHeader.Width = 250;
       // 
       // groupBox3
       // 
@@ -458,9 +496,9 @@ namespace Editor.Dialogs
       this.groupBox3.Controls.Add(this.button_SaveProfile);
       this.groupBox3.Controls.Add(this.button_CreateProfile);
       this.groupBox3.Controls.Add(this.comboBox_Profile);
-      this.groupBox3.Location = new System.Drawing.Point(12, 76);
+      this.groupBox3.Location = new System.Drawing.Point(12, 59);
       this.groupBox3.Name = "groupBox3";
-      this.groupBox3.Size = new System.Drawing.Size(555, 83);
+      this.groupBox3.Size = new System.Drawing.Size(529, 74);
       this.groupBox3.TabIndex = 1;
       this.groupBox3.TabStop = false;
       this.groupBox3.Text = "Export Presets";
@@ -468,7 +506,7 @@ namespace Editor.Dialogs
       // checkBox_SaveProfileOnExport
       // 
       this.checkBox_SaveProfileOnExport.AutoSize = true;
-      this.checkBox_SaveProfileOnExport.Location = new System.Drawing.Point(400, 53);
+      this.checkBox_SaveProfileOnExport.Location = new System.Drawing.Point(15, 48);
       this.checkBox_SaveProfileOnExport.Name = "checkBox_SaveProfileOnExport";
       this.checkBox_SaveProfileOnExport.Size = new System.Drawing.Size(132, 17);
       this.checkBox_SaveProfileOnExport.TabIndex = 4;
@@ -486,11 +524,12 @@ namespace Editor.Dialogs
       // 
       // button_SaveProfile
       // 
+      this.button_SaveProfile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.button_SaveProfile.Image = ((System.Drawing.Image)(resources.GetObject("button_SaveProfile.Image")));
       this.button_SaveProfile.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-      this.button_SaveProfile.Location = new System.Drawing.Point(252, 46);
+      this.button_SaveProfile.Location = new System.Drawing.Point(404, 43);
       this.button_SaveProfile.Name = "button_SaveProfile";
-      this.button_SaveProfile.Size = new System.Drawing.Size(142, 28);
+      this.button_SaveProfile.Size = new System.Drawing.Size(117, 24);
       this.button_SaveProfile.TabIndex = 2;
       this.button_SaveProfile.Text = "Save Preset";
       this.button_SaveProfile.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
@@ -499,11 +538,12 @@ namespace Editor.Dialogs
       // 
       // button_CreateProfile
       // 
+      this.button_CreateProfile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.button_CreateProfile.Image = ((System.Drawing.Image)(resources.GetObject("button_CreateProfile.Image")));
       this.button_CreateProfile.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-      this.button_CreateProfile.Location = new System.Drawing.Point(104, 46);
+      this.button_CreateProfile.Location = new System.Drawing.Point(281, 43);
       this.button_CreateProfile.Name = "button_CreateProfile";
-      this.button_CreateProfile.Size = new System.Drawing.Size(142, 28);
+      this.button_CreateProfile.Size = new System.Drawing.Size(117, 24);
       this.button_CreateProfile.TabIndex = 3;
       this.button_CreateProfile.Text = "Create Preset";
       this.button_CreateProfile.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
@@ -512,22 +552,25 @@ namespace Editor.Dialogs
       // 
       // comboBox_Profile
       // 
+      this.comboBox_Profile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.comboBox_Profile.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.comboBox_Profile.FormattingEnabled = true;
       this.comboBox_Profile.Location = new System.Drawing.Point(104, 19);
       this.comboBox_Profile.Name = "comboBox_Profile";
-      this.comboBox_Profile.Size = new System.Drawing.Size(290, 21);
+      this.comboBox_Profile.Size = new System.Drawing.Size(417, 21);
       this.comboBox_Profile.TabIndex = 1;
       this.comboBox_Profile.SelectionChangeCommitted += new System.EventHandler(this.comboBox_Profile_SelectionChangeCommitted);
       // 
       // button_ExportSelectedProfiles
       // 
-      this.button_ExportSelectedProfiles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+      this.button_ExportSelectedProfiles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.button_ExportSelectedProfiles.Image = ((System.Drawing.Image)(resources.GetObject("button_ExportSelectedProfiles.Image")));
       this.button_ExportSelectedProfiles.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-      this.button_ExportSelectedProfiles.Location = new System.Drawing.Point(135, 695);
+      this.button_ExportSelectedProfiles.Location = new System.Drawing.Point(12, 666);
       this.button_ExportSelectedProfiles.Name = "button_ExportSelectedProfiles";
-      this.button_ExportSelectedProfiles.Size = new System.Drawing.Size(169, 28);
+      this.button_ExportSelectedProfiles.Size = new System.Drawing.Size(285, 28);
       this.button_ExportSelectedProfiles.TabIndex = 6;
       this.button_ExportSelectedProfiles.Text = "Export Selected Profiles";
       this.button_ExportSelectedProfiles.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
@@ -538,7 +581,9 @@ namespace Editor.Dialogs
       this.captionBar.BackColor = System.Drawing.SystemColors.Window;
       this.captionBar.Caption = "Exporting the Scene";
       this.captionBar.CompactView = false;
-      this.captionBar.Description = resources.GetString("captionBar.Description");
+      this.captionBar.Description = "All settings in this dialog can be saved in export presets for later reuse. You c" +
+    "an export the scene either for the active Asset Profile, or for a selection of m" +
+    "ultiple Asset Profiles.";
       this.captionBar.Dock = System.Windows.Forms.DockStyle.Top;
       this.captionBar.Image = ((System.Drawing.Image)(resources.GetObject("captionBar.Image")));
       this.captionBar.Location = new System.Drawing.Point(0, 0);
@@ -548,14 +593,15 @@ namespace Editor.Dialogs
       this.captionBar.ShowBottomLine = true;
       this.captionBar.ShowCaptionText = true;
       this.captionBar.ShowImage = true;
-      this.captionBar.Size = new System.Drawing.Size(579, 69);
+      this.captionBar.Size = new System.Drawing.Size(554, 52);
       this.captionBar.TabIndex = 0;
       // 
       // ExportDialog
       // 
+      this.AcceptButton = this.button_ExportSelectedProfiles;
       this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
       this.CancelButton = this.button_CANCEL;
-      this.ClientSize = new System.Drawing.Size(579, 735);
+      this.ClientSize = new System.Drawing.Size(554, 705);
       this.Controls.Add(this.groupBox3);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.settingsBox);
@@ -564,19 +610,21 @@ namespace Editor.Dialogs
       this.Controls.Add(this.button_CANCEL);
       this.Controls.Add(this.button_ExportSelectedProfiles);
       this.Controls.Add(this.button_ExportActiveProfile);
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.MinimumSize = new System.Drawing.Size(450, 520);
       this.Name = "ExportDialog";
       this.ShowInTaskbar = false;
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Export Scene";
       this.Load += new System.EventHandler(this.ExportDialog_Load);
+      this.ResizeEnd += new System.EventHandler(this.ExportDialog_ResizeEnd);
       this.groupBox1.ResumeLayout(false);
       this.groupBox1.PerformLayout();
       this.settingsBox.ResumeLayout(false);
-      this.settingsBox.PerformLayout();
+      this.checkBoxTableLayout.ResumeLayout(false);
+      this.checkBoxTableLayout.PerformLayout();
       this.groupBox2.ResumeLayout(false);
       this.tableLayoutPanel1.ResumeLayout(false);
       this.tableLayoutPanel1.PerformLayout();
@@ -643,8 +691,6 @@ namespace Editor.Dialogs
       }
     }
 
-    uint _exportFlags = 0xffffffff;
-
     SceneExportFlags_e UIExportFlags
     {
       get
@@ -663,7 +709,6 @@ namespace Editor.Dialogs
       }
       set
       {
-        _exportFlags = (uint)value;
         foreach (ListViewItem item in listView_Layers.Items)
         {
           if (!(item.Tag is SceneExportFlags_e))
@@ -802,7 +847,7 @@ namespace Editor.Dialogs
 
       foreach (IProfileManager.Profile profile in EditorManager.ProfileManager.GetProfiles())
       {
-        string profileExtension = "." + profile._name;
+        string profileExtension = "." + profile.ToString();
         if (pathOut.EndsWith(profileExtension, StringComparison.InvariantCultureIgnoreCase))
         {
           pathOut = pathOut.Remove(pathOut.Length - profileExtension.Length);
@@ -851,6 +896,7 @@ namespace Editor.Dialogs
     {
       if (bListBuildInProgress)
         return;
+
       this.OnCheckProfileModified();
     }
 
@@ -922,7 +968,7 @@ namespace Editor.Dialogs
           item.ToolTipText = descAttr[0].Description;
           //item.SubItems.Add(descAttr[0].Description);
       }
-      UIExportFlags = (SceneExportFlags_e)_exportFlags;
+      UIExportFlags = (SceneExportFlags_e)_settings.ExportFlags;
 
       // custom plugins state
       Dictionary<string, bool> relevantPlugins = new Dictionary<string, bool>();
@@ -1171,12 +1217,12 @@ namespace Editor.Dialogs
     void OnCheckProfileModified()
     {
       button_SaveProfile.Enabled = this.CurrentSettingModified;
-      UpdateListBox();
     }
 
     private void ProfileControlChanged(object sender, EventArgs e)
     {
       this.OnCheckProfileModified();
+      UpdateListBox();
     }
 
     #endregion
@@ -1184,7 +1230,7 @@ namespace Editor.Dialogs
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

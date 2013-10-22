@@ -7,13 +7,16 @@
  */
 
 #include <Vision/Tools/vSceneViewer/vSceneViewerPCH.h>
+
+#if defined(EMULATE_DEVICE) || !defined(WIN32) || defined(_VISION_WINRT)
 #include <Vision/Tools/vSceneViewer/GUI/GUISystem.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scene/VSceneLoader.hpp>
 
 VModule &GUIModule = VGUIManager::GUIModule();
 V_IMPLEMENT_SERIAL( SceneViewerMainMenu, VDialog, 0, &GUIModule );
 
-SceneViewerMainMenu::SceneViewerMainMenu()
+SceneViewerMainMenu::SceneViewerMainMenu() :
+  m_bRefreshSceneList(false)
 {
   m_pCamera = 0;
 }
@@ -36,12 +39,16 @@ void SceneViewerMainMenu::OnItemClicked(VMenuEventDataObject* pEvent)
   {
     ToggleView(m_pCamera);
   }
+  else if(pEvent->m_pItem == m_pRefreshButton)
+  {
+    m_bRefreshSceneList = true;
+  }
 }
 
 void SceneViewerMainMenu::OnValueChanged(VItemValueChangedEvent *pEvent)
 {
   // On mobile we select to load (thus a value change happens)
-  #ifdef _VISION_MOBILE
+  #if defined(EMULATE_DEVICE) || defined( _VISION_MOBILE ) || defined( _VISION_APOLLO )    // TODO: Have Apollo define _VISION_MOBILE.
   if(pEvent->m_pItem == m_pSceneList)
   {
     m_bLoadNewScene = true;
@@ -75,16 +82,18 @@ void SceneViewerMainMenu::OnInitDialog()
 {
   SetVisible(true);
   m_bLoadNewScene = false;
+  m_bRefreshSceneList = false;
 
   m_pSceneList = (VListControl *)Items().FindItem(VGUIManager::GetID("SCENE_LIST"));
   VASSERT(m_pSceneList);
 
   m_pLoadButton = static_cast<VPushButton*>(Items().FindItem(VGUIManager::GetID("LOAD_SCENE_BUTTON")));
   m_pContinueButton = static_cast<VPushButton*>(Items().FindItem(VGUIManager::GetID("CONTINUE_BUTTON")));
+  m_pRefreshButton = static_cast<VPushButton*>(Items().FindItem(VGUIManager::GetID("REFRESH_BUTTON")));
   // Don't assert if buttons not available - not needed on all platforms
 
   // On mobile we select to load -> thus no preselection should happen
-#ifdef _VISION_MOBILE
+#if defined( _VISION_MOBILE ) || defined( _VISION_APOLLO )    // TODO: Have Apollo define _VISION_MOBILE.
   bool autoSelect = m_pSceneList->Items().Count() == 1; // if only one choice, just take it
 #else
   bool autoSelect = true;
@@ -100,7 +109,7 @@ void SceneViewerMainMenu::OnTick(float dtime)
   if(VisSampleApp::GetInputMap()->GetTrigger(SCENE_LOAD_NEW_SCENE) || (m_pSceneList->Items().Count() == 1) )
   {
     m_bLoadNewScene = true;
-#ifdef _VISION_MOBILE
+#if defined( _VISION_MOBILE ) || defined( _VISION_APOLLO )      // TODO: Have Apollo define _VISION_MOBILE.
     if (m_pSceneList->Items().Count() == 1)
         m_pSceneList->SetSelectionIndex(0);
 #endif
@@ -120,7 +129,7 @@ void SceneViewerMainMenu::OnTick(float dtime)
 #elif defined(_VISION_WIIU)
   if (VInputManagerWiiU::GetDRC(V_DRC_FIRST).GetRawControlValue(CT_PAD_DOWN))
   
-#elif defined(_VISION_MOBILE)
+#elif defined(_VISION_MOBILE) || defined( _VISION_APOLLO )    // TODO: Have Apollo define _VISION_MOBILE.
   if(false)
 #endif
   {
@@ -158,7 +167,7 @@ void SceneViewerMainMenu::OnTick(float dtime)
 #elif defined(_VISION_WIIU)
   if (VInputManagerWiiU::GetDRC(V_DRC_FIRST).GetRawControlValue(CT_PAD_UP))
 
-#elif defined(_VISION_MOBILE)
+#elif defined(_VISION_MOBILE) || defined( _VISION_APOLLO )    // TODO: Have Apollo define _VISION_MOBILE.
   if(false)
 #endif
   {
@@ -174,7 +183,7 @@ void SceneViewerMainMenu::OnTick(float dtime)
       m_pSceneList->EnsureVisible(m_pSceneList->GetSelectedItem());
     }
   }
-#if !defined(WIN32) || (defined(_VISION_WINRT) && !defined(_VISION_METRO) && !defined(_VISION_APOLLO))
+#if !defined(WIN32) || (defined(_VISION_WINRT) && !defined(_VISION_METRO))
   else
   {
     m_bButtonXHit = false;
@@ -196,8 +205,10 @@ void SceneViewerMainMenu::OnTick(float dtime)
 
 }
 
+#endif
+
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

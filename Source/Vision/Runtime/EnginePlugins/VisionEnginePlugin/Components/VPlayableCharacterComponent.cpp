@@ -82,7 +82,7 @@ VPlayableCharacterComponent::VPlayableCharacterComponent()
 #elif defined(_VISION_PSP2)
   m_pInputMap->MapTrigger(INPUTMAP_CHARACTER_WALK_FORWARD,  V_PSP2_PAD(0), CT_PAD_LEFT_THUMB_STICK_UP,   VInputOptions::DeadZone(0.4f));
   m_pInputMap->MapTrigger(INPUTMAP_CHARACTER_WALK_BACKWARD, V_PSP2_PAD(0), CT_PAD_LEFT_THUMB_STICK_DOWN, VInputOptions::DeadZone(0.4f));
-  m_pInputMap->MapTrigger(INPUTMAP_CHARACTER_WALK_RUN,      V_PSP2_PAD(0), CT_PAD_LEFT_TRIGGER);
+  m_pInputMap->MapTrigger(INPUTMAP_CHARACTER_WALK_RUN,      V_PSP2_PAD(0), CT_PAD_SQUARE);
   m_pInputMap->MapTrigger(INPUTMAP_CHARACTER_ROTATE_LEFT,   V_PSP2_PAD(0), CT_PAD_LEFT_THUMB_STICK_LEFT, VInputOptions::DeadZone(0.6f));
   m_pInputMap->MapTrigger(INPUTMAP_CHARACTER_ROTATE_RIGHT,  V_PSP2_PAD(0), CT_PAD_LEFT_THUMB_STICK_RIGHT,VInputOptions::DeadZone(0.6f));
 
@@ -319,7 +319,7 @@ START_VAR_TABLE(VPlayableCharacterComponent,IVObjectComponent,"Playable characte
 END_VAR_TABLE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

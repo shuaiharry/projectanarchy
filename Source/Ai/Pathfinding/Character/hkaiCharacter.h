@@ -37,6 +37,8 @@ class hkaiCharacter : public hkReferencedObject
 		{
 			public:
 				HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiCharacter::BehaviorListener);
+
+					/// Possible causes of search failure, used for pathFailed callbacks.
 				enum FailureCause
 				{
 						/// The start point of the path is invalid
@@ -167,7 +169,9 @@ class hkaiCharacter : public hkReferencedObject
 				/// Initial position for the character
 			hkVector4 m_initialPosition;
 
-				/// Initial forward direction for the character
+				/// Initial forward direction, for characters with linear and 
+				/// angular kinematic constraints. Characters with only linear
+				/// constraints, or no constraints, should not set this value.
 			hkVector4 m_initialForward;
 
 				/// Initial up direction for the character
@@ -185,7 +189,8 @@ class hkaiCharacter : public hkReferencedObject
 			hkUlong m_userData;
 		};
 
-		enum State 
+			/// Character state values.
+		enum State
 		{
 			STATE_NEEDS_NEW_PATH,
 			STATE_FOLLOWING_PATH,
@@ -258,32 +263,29 @@ class hkaiCharacter : public hkReferencedObject
 			/// Set the position of the character.
 		void setPosition( hkVector4Parameter position );
 
+		/// Get the current linear velocity.
+		inline const hkVector4& getVelocity() const;
+
+		/// Set the current linear velocity.
+		inline void setVelocity( hkVector4Parameter velocity );
+
 		/// Get the current up direction.
 		inline const hkVector4& getUp() const;
 
 		/// Set the up direction of the character.
 		void setUp( hkVector4Parameter up );
-
-
-			/// Get the characters angular velocity.
-		inline hkReal getAngularVelocity() const { return m_velocity(3); } 
 		
-
-			/// Get the characters velocity. The w component contains the angular velocity.
-		inline const hkVector4& getVelocity() const;
-		
-
-			/// Simultaneously set the linear and angular velocity. The angular velocity is in the .w component.
-		inline void setLinearAndAngularVelocity( hkVector4Parameter velocity );
-
-			/// Set the linear velocity. The angular velocity is unchanged.
-		inline void setLinearVelocity( hkVector4Parameter velocity );
-
-			/// Get the characters facing direction.
+		/// Get the current facing direction. This method is only applicable
+		/// to characters whose kinematic constraint type is 
+		/// CONSTRAINTS_LINEAR_AND_ANGULAR.
 		inline const hkVector4& getForward() const;
 		
-			/// Set the characters facing direction.
+		/// Set the current facing direction. This method is only applicable
+		/// to characters whose kinematic constraint type is 
+		/// CONSTRAINTS_LINEAR_AND_ANGULAR.
 		inline void setForward(hkVector4Parameter forward);
+
+
 
 		
 		/* listener, sensor, filter */
@@ -498,6 +500,15 @@ class hkaiCharacter : public hkReferencedObject
 
 		hkArray<BehaviorListener*> m_behaviorListeners; //+nosave
 		
+	public:
+		/// This method is deprecated.
+		inline void setLinearAndAngularVelocity( hkVector4Parameter velocity );
+
+		/// This method is deprecated. Use setVelocity() instead.
+		inline void setLinearVelocity( hkVector4Parameter velocity );
+
+		/// This method is deprecated. Use getForward() for angular-constrained characters.
+		hkReal getAngularVelocity() const;
 };
 
 #include <Ai/Pathfinding/Character/hkaiCharacter.inl>
@@ -505,7 +516,7 @@ class hkaiCharacter : public hkReferencedObject
 #endif // HK_AI_CHARACTER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

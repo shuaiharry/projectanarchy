@@ -219,6 +219,11 @@ const SLONG VERR_LINUXMAGIC     = -4711;   ///< Magic linux arbitrary error
 
 #elif defined(_VISION_ANDROID)
   #define VDBGBREAK raise(SIGTRAP);
+
+#elif defined(_VISION_TIZEN)
+  #include <signal.h>
+  #define VDBGBREAK raise(SIGTRAP);
+
 #else
   //XBox 360, etc.
   #define VDBGBREAK DebugBreak()
@@ -480,13 +485,14 @@ const SLONG VERR_LINUXMAGIC     = -4711;   ///< Magic linux arbitrary error
 // structure member alignment and NOT 4 bytes anymore.
 ///////////////////////////////////////////////////////////
 
+/*
 #ifndef _VISION_DOC
   // TODO (Platform Team): Fix this
   #if !defined (_VISION_IOS) && !defined(_VISION_ANDROID)
     class Vision_MemAlignTest { int a; double d; };
     V_COMPILE_ASSERT(sizeof(Vision_MemAlignTest) == 16);
   #endif
-#endif
+#endif*/
 
 
 
@@ -497,7 +503,7 @@ const SLONG VERR_LINUXMAGIC     = -4711;   ///< Magic linux arbitrary error
 #endif // #ifndef VULPINE_H_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

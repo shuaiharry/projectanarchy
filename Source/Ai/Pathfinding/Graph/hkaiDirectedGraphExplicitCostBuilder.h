@@ -12,8 +12,9 @@
 #include <Ai/Pathfinding/Graph/hkaiDirectedGraphExplicitCost.h>
 
 /// Interface for constructing graphs.
-struct hkaiGraphBuilder
+class hkaiGraphBuilder
 {
+public:
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_AI, hkaiGraphBuilder);
 	typedef int PositionId;
 	typedef int EdgeKey;
@@ -22,15 +23,29 @@ struct hkaiGraphBuilder
 	virtual EdgeKey addEdge( PositionId a, PositionId b, hkReal w ) = 0;
 	virtual void extraPositionData( PositionId, int tag, void* value ) {}
 	virtual void extraEdgeData( EdgeKey, int tag, void* value ) {}
+
+		// calls addEdge(a,b,w) and addEdge(b,a,w)
+	void addSymmetricEdge( PositionId a, PositionId b, hkReal w );
 };
 
-/// Utility class for constructing graphs
-struct hkaiDirectedGraphExplicitCostBuilder : public hkaiGraphBuilder
+	/// Utility class for constructing graphs
+class hkaiDirectedGraphExplicitCostBuilder : public hkaiGraphBuilder
 {
+public:
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiDirectedGraphExplicitCostBuilder);
 	typedef hkaiDirectedGraphExplicitCost::Node Node;
 	typedef hkaiDirectedGraphExplicitCost::Position Position;
 	typedef hkaiDirectedGraphExplicitCost::Edge Edge;
+
+		/// Graph building options.
+	struct BuildOptions
+	{
+		BuildOptions();
+
+			/// Whether or not to allow duplicated edges.
+			/// If false, duplicates will be ignored, and the lower-cost edge will be kept.
+		hkBool m_allowDuplicateEdges;
+	};
 	
 		/// A potential edge to be constructed in the graph.
 	struct Link
@@ -40,53 +55,37 @@ struct hkaiDirectedGraphExplicitCostBuilder : public hkaiGraphBuilder
 		hkReal w;
 	};
 
-	virtual PositionId addPosition( hkVector4Parameter p )
-	{
-		m_positions.pushBack(p);
-		return m_positions.getSize() - 1;
-	}
-	virtual EdgeKey addEdge( PositionId a, PositionId b, hkReal w )
-	{
-		Link& l = m_links.expandOne();
-		l.a = a; l.b = b; l.w = w;
-		return m_links.getSize() - 1;
-	}
+	virtual PositionId addPosition( hkVector4Parameter p ) HK_OVERRIDE;
+	virtual EdgeKey addEdge( PositionId a, PositionId b, hkReal w ) HK_OVERRIDE;
 
-	hkaiDirectedGraphExplicitCost* build(hkaiDirectedGraphExplicitCost* d)
-	{
-		hkArray<Node> nodes; nodes.setSize(m_positions.getSize());
-		hkArray<Edge> edges;
-
-		for( int ni = 0; ni < nodes.getSize(); ++ni )
-		{
-			Node& n = nodes[ni];
-			n.m_numEdges = 0;
-			n.m_startEdgeIndex = edges.getSize();
-			for( int li = 0; li < m_links.getSize(); ++li )
-			{
-				const Link& l = m_links[li];
-				if( l.a == ni )
-				{
-					n.m_numEdges += 1;
-					Edge e; 
-					e.init(l.b, l.w);
-					edges.pushBack(e);
-				}
-			}
-		}
-		d->m_positions.swap(m_positions);
-		d->m_nodes.swap(nodes);
-		d->m_edges.swap(edges);
-		return d;
-	}
+	hkaiDirectedGraphExplicitCost* build(hkaiDirectedGraphExplicitCost* d);
 	hkArray<Position> m_positions;
 	hkArray<Link> m_links;
+
+	BuildOptions m_options;
+
+protected:
+	int removeDuplicateEdges();
+};
+
+	/// Works the same as hkaiDirectedGraphExplicitCostBuilder, but avoids duplicated positions
+class hkaiHashingDirectedGraphBuilder : public hkaiDirectedGraphExplicitCostBuilder
+{
+public: 
+	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiHashingDirectedGraphBuilder);
+	hkaiHashingDirectedGraphBuilder() {m_collisions = 0;}
+
+	virtual PositionId addPosition( hkVector4Parameter p ) HK_OVERRIDE;
+
+	typedef hkPointerMap<hkUint64, int> KeyToIndexMap;
+	KeyToIndexMap m_keyToIndexMap;
+	int m_collisions;
 };
 
 #endif // HKAI_ASTAR_DIRECTEDGRAPHEXPLICITCOST_BUILDER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

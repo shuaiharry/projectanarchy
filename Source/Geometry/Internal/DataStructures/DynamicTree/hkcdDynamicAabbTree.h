@@ -36,8 +36,14 @@ public:
 		/// Add a leaf with the specified AABB and key. The key will be used during query callbacks
 	TreeHandle insert( const hkAabb& aabb, hkUint32 key );
 
+		/// Add a leaf with the specified point and key. The key will be used during query callbacks
+	TreeHandle insertPoint( hkVector4Parameter point, hkUint32 key );
+
 		/// Add a leaf with the specified AABB and key. The hkResult will be set to HK_SUCCESS if all memory allocations succeed, or to HK_FAILURE otherwise.
 	TreeHandle tryInsert( const hkAabb& aabb, hkUint32 key, hkResult& res );
+
+		/// Add a leaf with the specified point and key. The hkResult will be set to HK_SUCCESS if all memory allocations succeed, or to HK_FAILURE otherwise.
+	TreeHandle tryInsertPoint( hkVector4Parameter point, hkUint32 key, hkResult& res );
 
 		/// Change the AABB of the leaf.
 	void update( TreeHandle handle, const hkAabb& aabb );
@@ -50,6 +56,9 @@ public:
 
 		/// Do a fast, in-place optimization on the tree to improve query performance.
 	void rebuildFast( int numPasses );
+
+		/// Incremental optimization of the tree. This is suitable to be called every frame if objects have moved.
+	void optimizeIncremental(int passes, int lookahead = 2);
 
 		/// Completely clears the tree.
 	void clear();
@@ -69,6 +78,15 @@ public:
 
 		/// Find the closest leaf in the tree. The collector's callback is triggered for each leaf that is closer to the current smallest distance, starting at maxDistance.
 	hkUint32 getClosestPoint( hkVector4Parameter point, hkSimdRealParameter maxDistance, hkcdAabbTreeQueries::ClosestPointCollector* collector, hkVector4& closestPointOut ) const;
+
+		/// Find the closest leaf in the tree. The distance to the leaf will be taken as the distance to the AABB.
+	hkUint32 getClosestPoint( hkVector4Parameter point, hkSimdRealParameter maxDistance, hkVector4& closestPointOut ) const;
+
+		/// Finds all pairs of overlapping leaves in this tree.
+	void getAllPairs( hkcdAabbTreeQueries::AllPairsCollector* collector ) const;
+
+		/// Finds all leaves in this tree that overlap with leaves in the other tree.
+	void getAllPairs( const hkcdDynamicAabbTree* otherTree, hkcdAabbTreeQueries::AllPairsCollector* collector ) const;
 
 		/// Returns the size (in bytes) of the tree.
 	int getMemoryFootPrint() const;
@@ -95,7 +113,7 @@ protected:
 #endif //HK_DYNAMIC_TREE
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

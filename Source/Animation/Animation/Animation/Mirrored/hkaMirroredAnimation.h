@@ -59,8 +59,10 @@ class hkaMirroredAnimation : public hkaAnimation
 			/// Sample individual floating tracks
 		virtual void sampleIndividualFloatTracks( hkReal time, const hkInt16* tracks, hkUint32 numTracks, hkReal* out ) const HK_OVERRIDE;
 
+			/// Return the memory required for this animation
+		virtual int getSizeInBytes() const HK_OVERRIDE;
 
-		/// Returns the number of original samples / frames of animation
+			/// Returns the number of original samples / frames of animation
 		virtual int getNumOriginalFrames() const HK_OVERRIDE;
 
 			/// Return the number of chunks of data required to sample a pose at time t
@@ -155,7 +157,7 @@ class hkaMirroredAnimation : public hkaAnimation
 #endif // HKANIMATION_ANIMATION_HKMIRROREDSKELETALANIMATION_XML_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

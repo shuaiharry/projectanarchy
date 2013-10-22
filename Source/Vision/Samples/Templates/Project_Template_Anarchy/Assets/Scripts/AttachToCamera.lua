@@ -4,21 +4,20 @@
 
 function OnCreate(self)
 	
-	self.heightOffset = 750;
+	self.offset = 150;
 	
 end
 
 function OnThink(self)
 
   -- update Particle Position according to Camera Position
-  local cam = VisionCamera.GetMainCamera()
+  local cam = Game:GetCamera()
   
   local camPos = cam:GetPosition()
   
   -- height offset
-  camPos.z = camPos.z + self.heightOffset;
+  camPos = camPos + cam:GetDirection() * self.offset - Vision.hkvVec3(0, 0, 100)
   
   self:SetPosition(camPos)
     
 end
-

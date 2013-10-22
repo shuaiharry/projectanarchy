@@ -24,6 +24,9 @@ public:
 
   const char* GetRagdollCollisionFile();
   void SetRagdollCollisionFile(const char* val);
+
+  void ApplyCurrentBoneConfiguration();
+
   int GetRigidBodyIndex(const char* val) const;
   void ApplyForceToRigidBody(int boneIndex, hkvVec3& value, float deltaT);
   void ApplyLinearImpulseToRigidBody(int boneIndex, hkvVec3& value);
@@ -75,6 +78,18 @@ public:
   /// \param color
   ///   New Color of the debug rendering representation.
   void SetDebugColor(VColorRef color);
+
+  /// @}
+  /// @name Rigid Body Manipulation
+  /// @{
+
+  /// \brief
+  ///   Copies the current bones' transformation to the rag doll's rigid bodies.
+  ///
+  /// This should usually be called for animated entities when switching over
+  /// to rag doll simulation.
+  ///
+  void ApplyCurrentBoneConfiguration();
 
   /// \brief
   ///   Returns the index of this bone in the ragdoll or returns -1 if not found

@@ -142,7 +142,7 @@ inline void operator delete(void* /*unused*/, hkPlacementNewArg* /*unused*/) { H
 inline void operator delete[](void* /*unused*/, hkPlacementNewArg* /*unused*/) { HK_ASSERT(0x7ca45d11, false); }
 #endif
 
-#include <Common/Base/Types/hkTypeTraits.h>
+#include <Common/Base/Types/hkTrait.h>
 #include <Common/Base/Memory/Util/hkMemUtil.h>
 #include <Common/Base/Container/Array/hkArray.h>
 #include <Common/Base/Container/Array/hkSmallArray.h>
@@ -158,7 +158,7 @@ inline void operator delete[](void* /*unused*/, hkPlacementNewArg* /*unused*/) {
 #endif // HKBASE_HKBASE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

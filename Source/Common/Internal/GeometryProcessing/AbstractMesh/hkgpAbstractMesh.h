@@ -162,7 +162,7 @@ public:
 		Vertex*	m_vertex;			
 	public:
 		HK_FORCE_INLINE VertexIterator&		operator++()							{ if(m_vertex) m_vertex=m_vertex->next(); return(*this); }
-		HK_FORCE_INLINE VertexIterator		operator++(int)							{ VertexIterator i=this;operator++();return(i); }
+		HK_FORCE_INLINE VertexIterator		operator++(int)							{ VertexIterator i = *this; operator++(); return(i); }
 		HK_FORCE_INLINE Vertex*				operator()() const						{ return(m_vertex); }
 											operator const VertexIterator*() const	{ return(m_vertex?this:0); }
 	};
@@ -177,7 +177,7 @@ public:
 		Triangle*	m_triangle;			
 	public:
 		HK_FORCE_INLINE TriangleIterator&	operator++()								{ if(m_triangle) m_triangle=m_triangle->next(); return(*this); }
-		HK_FORCE_INLINE TriangleIterator	operator++(int)								{ TriangleIterator i=this;operator++();return(i); }
+		HK_FORCE_INLINE TriangleIterator	operator++(int)								{ TriangleIterator i = *this; operator++(); return(i); }
 		HK_FORCE_INLINE Triangle*			operator()() const							{ return(m_triangle); }
 		HK_FORCE_INLINE						operator const TriangleIterator*() const	{ return(m_triangle?this:0); }
 	};
@@ -194,7 +194,7 @@ public:
 
 	public:
 		HK_FORCE_INLINE EdgeIterator&		operator++()							{ if(m_edge.isValid()) next(); return(*this); }
-		HK_FORCE_INLINE EdgeIterator		operator++(int)							{ EdgeIterator i=this;next();return(i); }
+		HK_FORCE_INLINE EdgeIterator		operator++(int)							{ EdgeIterator i = *this; next(); return(i); }
 		HK_FORCE_INLINE Edge				operator()() const						{ return(m_edge); }
 		HK_FORCE_INLINE						operator const EdgeIterator*() const	{ return(m_edge.isValid()?this:0); }
 	private:
@@ -212,7 +212,7 @@ public:
 
 	public:
 		HK_FORCE_INLINE AllEdgeIterator&	operator++()							{ next(); return(*this); }
-		HK_FORCE_INLINE AllEdgeIterator		operator++(int)							{ AllEdgeIterator i=this;next();return(i); }
+		HK_FORCE_INLINE AllEdgeIterator		operator++(int)							{ AllEdgeIterator i = *this; next(); return(i); }
 		HK_FORCE_INLINE Edge				operator()() const						{ return(m_edge); }
 		HK_FORCE_INLINE						operator const AllEdgeIterator*() const	{ return(m_edge.isValid()?this:0); }
 	private:
@@ -349,7 +349,7 @@ public:
 #endif // HKGP_ABSTRACT_MESH_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

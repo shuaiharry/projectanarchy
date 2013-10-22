@@ -132,7 +132,7 @@ template <> inline const hkVector4dComparison hkSimdInt<128>::equalZero<hkVector
 #if (HK_SSE_VERSION >= 0x41)
 	const __m128i xy = _mm_cmpeq_epi64(m_quad,_mm_setzero_si128());		// [x, x, y, y]
 	const __m128i yx = _mm_shuffle_epi32(xy, _MM_SHUFFLE(1, 0, 3, 2));	// [y, y, x, x]
-	ret.m_mask.xy = ret.m_mask.zw = _mm_castsi128_ps(_mm_and_si128(xy, yx));
+	ret.m_mask.xy = ret.m_mask.zw = _mm_castsi128_pd(_mm_and_si128(xy, yx));
 #else
 	hkVector4fComparison cmp;
 	cmp.m_mask = _mm_castsi128_ps(_mm_cmpeq_epi32(m_quad, _mm_setzero_si128()));
@@ -323,7 +323,7 @@ inline int hkSimdInt<128>::getWord() const
 
 template <int I> inline hkInt64 hkSimdInt<128>::getDoubleWord() const
 {
-#if HK_SSE_VERSION >= 0x41
+#if (HK_SSE_VERSION >= 0x41)  && defined(HK_PLATFORM_X64)
 	return _mm_extract_epi64(m_quad, I);
 #else
 	return HK_M128(m_quad).m128i_i64[I];
@@ -358,7 +358,7 @@ inline int hkSimdInt<128>::countTrailingZeros() const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

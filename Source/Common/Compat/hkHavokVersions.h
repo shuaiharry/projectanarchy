@@ -63,12 +63,13 @@
 #define HK_HAVOK_VERSION_201220r1	46
 #define HK_HAVOK_VERSION_201221r1	47
 #define HK_HAVOK_VERSION_201310r1	48
-#define HK_HAVOK_VERSION_Current	49
+#define HK_HAVOK_VERSION_201311r1	49
+#define HK_HAVOK_VERSION_Current	50
 
 #endif // HK_HAVOK_VERSIONS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130725)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

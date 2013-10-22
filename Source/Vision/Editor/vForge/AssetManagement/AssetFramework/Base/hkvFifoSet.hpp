@@ -16,6 +16,13 @@ template<class TYPE>
 class hkvFifoSet
 {
 public:
+  struct Entry;
+
+public:
+  typedef typename std::set<Entry> EntrySet;
+  typedef typename EntrySet::iterator EntryIterator;
+
+public:
   hkvFifoSet()
   {
     m_First = m_AllEntries.end();
@@ -56,9 +63,19 @@ public:
     return m_AllEntries.empty();
   }
 
-  unsigned int GetElementCount() const
+  unsigned int GetSize() const
   {
     return (unsigned int) m_AllEntries.size();
+  }
+
+  EntryIterator EntriesBegin() const
+  {
+    return m_AllEntries.begin();
+  }
+
+  EntryIterator EntriesEnd() const
+  {
+    return m_AllEntries.end();
   }
 
   const TYPE& GetFrontElement() const
@@ -85,30 +102,42 @@ public:
   }
 
 private:
-  struct Entry
+  typename EntryIterator m_First;
+  typename EntryIterator m_Last;
+
+  typename EntrySet m_AllEntries;
+};
+
+
+template<class TYPE>
+struct hkvFifoSet<TYPE>::Entry
+{
+  friend class hkvFifoSet;
+
+private:
+  Entry() { }
+  Entry(const TYPE& data) : m_Data(data) { }
+
+public:
+  bool operator< (const Entry& rhs) const
   {
-    Entry() { }
-    Entry(const TYPE& data) : m_Data(data) { }
+    return m_Data < rhs.m_Data;
+  }
 
-    mutable typename std::set<Entry>::iterator m_NextEntry;
-    TYPE m_Data;
+  const TYPE& GetData() const
+  {
+    return m_Data;
+  }
 
-    bool operator< (const Entry& rhs) const
-    {
-      return m_Data < rhs.m_Data;
-    }
-  };
-
-  typename std::set<Entry>::iterator m_First;
-  typename std::set<Entry>::iterator m_Last;
-
-  typename std::set<Entry> m_AllEntries;
+private:
+  mutable typename std::set<Entry>::iterator m_NextEntry;
+  TYPE m_Data;
 };
 
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

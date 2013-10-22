@@ -477,7 +477,7 @@ namespace FmodEditorPlugin
       {
         _item = new ToolStripMenuItem("Launch Fmod Designer");
         _subItem1 = new ToolStripMenuItem("Last event project");
-        _subItem2 = new ToolStripMenuItem("Selected event project");
+        _subItem2 = new ToolStripMenuItem("Select event project...");
         _item.DropDownItems.Add(_subItem1);
         _item.DropDownItems.Add(_subItem2);
       }
@@ -565,7 +565,7 @@ namespace FmodEditorPlugin
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

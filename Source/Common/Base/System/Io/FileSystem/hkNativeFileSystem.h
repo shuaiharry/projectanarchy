@@ -28,7 +28,7 @@
 #elif defined(HK_PLATFORM_ANDROID)
 	#include <Common/Base/System/Io/Platform/Android/hkAndroidAssetManagerFileSystem.h>
 	typedef hkAndroidAssetManagerFileSystem hkNativeFileSystem;
-#elif defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_LINUX) || defined(HK_PLATFORM_IOS)
+#elif defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_LINUX) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_TIZEN)
 	#include <Common/Base/System/Io/Platform/Posix/hkPosixFileSystem.h>
 	typedef hkPosixFileSystem hkNativeFileSystem;
 #elif defined(HK_PLATFORM_WIIU)
@@ -44,7 +44,7 @@
 #endif //HK_hkNativeFileSystem_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

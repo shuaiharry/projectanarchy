@@ -21,7 +21,7 @@ class hkaiNavVolumeChunkDomainOverrideCallback;
 /// This input structure controls all of the major settings for automatic nav volume generation
 struct hkaiNavVolumeGenerationSettings
 {
-	// +version(8)
+	// +version(9)
 	HK_DECLARE_REFLECTION();
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI_NAVMESH, hkaiNavVolumeGenerationSettings);
 
@@ -152,9 +152,6 @@ struct hkaiNavVolumeGenerationSettings
 	hkReal m_maxVerticalRange;		//+default(1000.0f)
 									//+hk.RangeReal(absmin=0)
 
-	/// Checks the input geometry for simple corruption, such as NAN/INF values, or triangles which overlap many other triangles.
-	hkBool m_validateInputGeometry; //+default(false)
-
 	/// The up vector for the world
 	hkVector4 m_up;					//+default( 0 0 1 );
 
@@ -246,7 +243,7 @@ struct hkaiNavVolumeGenerationSettings
 #endif	// HKAI_NAV_VOLUME_GENERATION_SETTINGS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

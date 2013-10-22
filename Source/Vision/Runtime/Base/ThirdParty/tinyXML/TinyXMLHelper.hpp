@@ -88,6 +88,7 @@ public:
   inline static int GetUserFlags(TiXmlElement *pMaterialNode, int iAlternative) {XMLHelper::Exchange_Int(pMaterialNode, "userflags", iAlternative, false); return iAlternative;}
   inline static bool GetDoublesidednessFlag(TiXmlElement *pMaterialNode, bool bAlternative) {XMLHelper::Exchange_Bool(pMaterialNode,"doublesided",bAlternative,false);return bAlternative;}
   inline static bool GetDepthWriteFlag(TiXmlElement *pMaterialNode, bool bAlternative) {XMLHelper::Exchange_Bool(pMaterialNode,"depthwrite",bAlternative,false);return bAlternative;}
+  inline static bool GetSavePathsDataDirectoryRelative(TiXmlElement *pMaterialNode, bool bAlternative) {XMLHelper::Exchange_Bool(pMaterialNode, "datadirectoryrelative", bAlternative ,false); return bAlternative;}
   inline static void GetDepthBiasParams(TiXmlElement *pMaterialNode, float &fBias, float &fBiasClamp, float &fSlopeScale)
   {
     float fValues[3] = {fBias, fBiasClamp, fSlopeScale};
@@ -143,6 +144,8 @@ public:
   inline static void SetUserFlags(TiXmlElement *pMaterialNode, int iFlags) {XMLHelper::Exchange_Int(pMaterialNode, "userflags", iFlags, true);}
   inline static void SetDoublesidednessFlag(TiXmlElement *pMaterialNode, bool bAlternative) {XMLHelper::Exchange_Bool(pMaterialNode,"doublesided",bAlternative,true);}
   inline static void SetDepthWriteFlag(TiXmlElement *pMaterialNode, bool bAlternative) {XMLHelper::Exchange_Bool(pMaterialNode,"depthwrite",bAlternative,true);}
+  inline static void SetSavePathsDataDirectoryRelativeFlag(TiXmlElement *pMaterialNode, bool bAlternative) {XMLHelper::Exchange_Bool(pMaterialNode, "datadirectoryrelative", bAlternative, true);}
+
   inline static void SetDepthBiasParams(TiXmlElement *pMaterialNode, float fBias, float fBiasClamp, float fSlopeScale)
   {
     float fValues[3] = {fBias, fBiasClamp, fSlopeScale};
@@ -206,7 +209,7 @@ private:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

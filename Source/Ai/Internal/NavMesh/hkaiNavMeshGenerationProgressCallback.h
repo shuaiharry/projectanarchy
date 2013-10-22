@@ -11,9 +11,10 @@
 #include <Ai/Internal/NavMesh/hkaiNavMeshGenerationSettings.h>
 #include <Ai/Internal/NavMesh/hkaiNavMeshGenerationTypes.h>
 
-class hkBitField;
 struct hkGeometry;
+class hkBitField;
 
+	/// hkaiNavMeshGenerationProgressCallbackContext used during hkaiNavMeshGenerationProgressCallback.
 struct hkaiNavMeshGenerationProgressCallbackContext
 {
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiNavMeshGenerationProgressCallbackContext);
@@ -48,6 +49,7 @@ class hkaiNavMeshGenerationProgressCallback
 public:
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiNavMeshGenerationProgressCallback);
 
+		/// Steps of nav mesh generation.
 	enum NavMeshGenerationStep
 	{
 		START = 0,
@@ -99,7 +101,7 @@ public:
 #endif // HKAI_NAVIGATION_MESH_GENERATION_CALLBACK_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

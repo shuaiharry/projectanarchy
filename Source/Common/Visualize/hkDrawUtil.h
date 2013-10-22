@@ -86,6 +86,9 @@ class hkDrawUtil: public hkReferencedObject
 				m_showEdges = true;
 				m_showFaces = true;
 
+				m_labelTriangles = false;
+				m_labelVertices = false;
+
 				m_forceColorFacesByMaterial = false;
 				m_lightFaces = false;
 				m_lightDirection.set(0.0f, 0.0f, 1.0f );
@@ -102,6 +105,9 @@ class hkDrawUtil: public hkReferencedObject
 			hkBool m_showVertices;
 			hkBool m_showEdges;
 			hkBool m_showFaces;
+
+			hkBool m_labelTriangles;
+			hkBool m_labelVertices;
 
 			// Ignore m_faceColor and use material index to access hkColor::s_colorTable
 			hkBool m_forceColorFacesByMaterial;
@@ -124,7 +130,7 @@ class hkDrawUtil: public hkReferencedObject
 #endif // HK_VISUALIZE_DRAWUTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

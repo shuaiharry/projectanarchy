@@ -10,7 +10,6 @@
 #include <Vision/Samples/Engine/RPGPlugin/GameManager.h>
 #include <Vision/Samples/Engine/RPGPlugin/MeshTrailEffectComponent.h>
 #include <Vision/Samples/Engine/RPGPlugin/HighlightableComponentManager.h>
-#include <Vision/Samples/Engine/RPGPlugin/VisionTimer.h>
 
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokSync.hpp>
 
@@ -31,26 +30,6 @@ namespace
     // IVisCallbackHandler_cl
     void OnHandleCallback(IVisCallbackDataObject_cl *callback_data) HKV_OVERRIDE;
   } s_PluginInitializer;
-
-  // Plugin_OnEngineInit
-  class Plugin_OnEngineInit : public IVisCallbackHandler_cl
-  {
-    // IVisCallbackHandler_cl
-    void OnHandleCallback(IVisCallbackDataObject_cl *callbackData) HKV_OVERRIDE;
-  }
-  s_Plugin_OnEngineInit;
-
-  // Plugin_OnEngineDeInit
-  class Plugin_OnEngineDeInit : public IVisCallbackHandler_cl
-  {
-    // IVisCallbackHandler_cl
-    void OnHandleCallback(IVisCallbackDataObject_cl *callbackData) HKV_OVERRIDE;
-  }
-  s_Plugin_OnEngineDeInit;
-
-  IVTimerPtr s_Plugin_Timer;
-
-  int const kFPS = 30;
 }
 
 DECLARE_THIS_MODULE(g_RPGPluginModule, MAKE_VERSION(0, 1), "RPGPlugin", "Havok", "Havok RPG Plugin", &s_Plugin);
@@ -66,9 +45,7 @@ VEXPORT IVisPlugin_cl *GetEnginePlugin()
   return GetEnginePlugin_RPGPlugin();
 }
 #endif
-#if (RPG_UI_SCALEFORM)
-extern "C" IVisPlugin_cl* GetEnginePlugin_vScaleformPlugin();
-#endif
+
 void RPG_Plugin::OnInitEnginePlugin()
 {
   // Module
@@ -76,25 +53,12 @@ void RPG_Plugin::OnInitEnginePlugin()
   Vision::RegisterModule(&g_RPGPluginModule);
   RPG_VisionModuleTypes::ForceStaticLink();
 
-  // Timer
-  s_Plugin_Timer = new RPG_VisionTimer;
-
   // Havok AI plugin (chains to Havok plugin)
   VISION_PLUGIN_ENSURE_LOADED(vHavokAi);
   VISION_PLUGIN_ENSURE_LOADED(vHavokBehavior);
 
   // Fmod
   VISION_PLUGIN_ENSURE_LOADED(vFmodEnginePlugin);
-
-  // Scaleform
-#if (RPG_UI_SCALEFORM)
-  GetEnginePlugin_vScaleformPlugin()->InitEnginePlugin();
-  VScaleformManager::GlobalManager().EnableMultithreadedAdvance(false);
-#endif
-
-  // Hook engine init
-  Vision::Callbacks.OnEngineInit += &s_Plugin_OnEngineInit;
-  Vision::Callbacks.OnEngineDeInit += &s_Plugin_OnEngineDeInit;
 
   // Hook physics init
   vHavokPhysicsModule::OnBeforeInitializePhysics += &s_PluginInitializer;
@@ -127,17 +91,6 @@ void RPG_Plugin::OnDeInitEnginePlugin()
   vHavokPhysicsModule::OnBeforeWorldCreated -= &s_PluginInitializer;
   vHavokPhysicsModule::OnBeforeInitializePhysics -= &s_PluginInitializer;
 
-  // Unhook engine init
-  Vision::Callbacks.OnEngineDeInit -= &s_Plugin_OnEngineDeInit;
-  Vision::Callbacks.OnEngineInit -= &s_Plugin_OnEngineInit;
-
-  // Scaleform
-#if (RPG_UI_SCALEFORM)
-  GetEnginePlugin_vScaleformPlugin()->DeInitEnginePlugin();
-#endif
-  // Timer
-  s_Plugin_Timer = NULL;
-
   // Module
   Vision::Error.SystemMessage("RPGPlugin:OnDeInitEnginePlugin()");
   Vision::UnregisterModule(&g_RPGPluginModule);
@@ -168,13 +121,11 @@ void RPG_PluginInitializer::OnHandleCallback(IVisCallbackDataObject_cl *callback
     {
       havok_module->SetUseAsynchronousPhysics(false);
 
-#if defined (_VISION_MOBILE)
-      havok_module->SetPhysicsTickCount(kFPS, 1, true);
-#else
-      havok_module->SetPhysicsTickCount(kFPS);
-#endif
       havok_module->SetEnabledVisualDebugger(TRUE);
     }
+
+    // Disable validation checks (that are also performed in dev build)
+    vHavokAiModule::GetInstance()->GetAiWorld()->getNavMeshCutter()->m_performValidationChecks = false;
   }
   else if(&vHavokPhysicsModule::OnAfterDeInitializePhysics == callback_data->m_pSender)
   {
@@ -186,22 +137,8 @@ void RPG_PluginInitializer::OnHandleCallback(IVisCallbackDataObject_cl *callback
   }
 }
 
-void Plugin_OnEngineInit::OnHandleCallback(IVisCallbackDataObject_cl *callbackData)
-{
-#if defined (_VISION_MOBILE)
-  Vision::GetApplication()->SetSceneUpdateController(new VFixStepSceneUpdateController(kFPS, 1));
-#else
-  Vision::GetApplication()->SetSceneUpdateController(new VFixStepSceneUpdateController(kFPS, 10));
-#endif
-  Vision::SetTimer(new VFixStepTimer(kFPS));
-}
-
-void Plugin_OnEngineDeInit::OnHandleCallback(IVisCallbackDataObject_cl *callbackData)
-{
-}
-
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

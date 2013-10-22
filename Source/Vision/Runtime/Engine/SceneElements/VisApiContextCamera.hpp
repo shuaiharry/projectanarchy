@@ -11,16 +11,14 @@
 #ifndef DEFINE_VISAPICONTEXTCAMERA
 #define DEFINE_VISAPICONTEXTCAMERA
 
-#include <Vision/Runtime/Engine/SceneElements/VisApiBaseEntity.hpp>
-#include <Vision/Runtime/Engine/Visibility/VisApiElementVisData.hpp>
-
-
 // flags for (camera) position update, see VisCamera_cl::IncCameraPosition
 #define INCPOSFLAG_NONE               0
 #define INCPOSFLAG_PORTALCHECK        1
 
+// Forward declarations
 class VisContextCamera_cl;
 class VisVisibilityZone_cl;
+class VisBaseEntity_cl;
 typedef VSmartPtr<VisContextCamera_cl> VisContextCameraPtr;
 
 
@@ -168,7 +166,7 @@ VISION_ELEMENTMANAGER_TEMPLATE_DECL(VisContextCamera_cl)
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -8,10 +8,6 @@
 
 /// \file vHavokTerrain.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKTERRAIN_HPP_INCLUDED
 #define VHAVOKTERRAIN_HPP_INCLUDED
 
@@ -22,112 +18,102 @@
 
 class vHavokPhysicsModule;
 
-
 ///
 /// \brief 
-///   Representation of terrains (heightfields) instances in the Havok binding.
+///   Representation of terrain (height field) instances in the Havok Physics binding.
 ///
 class vHavokTerrain : public VRefCounter
 {
 public:
-  
   ///
   /// @name Construction / Destruction
   /// @{
   ///
 
-
   ///
   /// \brief
-  ///   Constructor. Takes the Havok physics module instance it belongs to as parameter
+  ///   Constructor.
   ///
-  /// The constructor does not add the object to the Havok simulation. Use one of the 
-  /// ::Init functions to put the object into simulation.
+  /// The constructor does not add the object to the Havok Physics simulation. Use one of the 
+  /// Init functions to add the object to the physics world.
   ///
   /// \param module
   ///   Reference of the Havok Physics Module.
   /// 
   VHAVOK_IMPEXP vHavokTerrain(vHavokPhysicsModule &module);
 
-
   ///
   /// \brief
-  ///   Destructor. Deletes the Havok rigid body if still alive.
+  ///   Destructor. Deletes the Havok Physics rigid body if still alive.
   ///
-  VHAVOK_IMPEXP ~vHavokTerrain();
-
+  VHAVOK_IMPEXP virtual ~vHavokTerrain();
 
   ///
   /// \brief
   ///   Removes the static mesh from the simulation without necessarily deleting this instance.
   ///
-  VHAVOK_IMPEXP VOVERRIDE void DisposeObject();
-
+  VHAVOK_IMPEXP virtual void DisposeObject();
 
   ///
   /// \brief
-  ///   Initializes the object with one Vision Terrain sector and adds it to the simulation.
+  ///   Initializes the object with a Vision terrain sector and adds it to the simulation.
   ///
   /// \param sector
   ///   Vision terrain sector that shall be part of the Havok simulation.
-  VHAVOK_IMPEXP VOVERRIDE void Init(const VTerrainSector &sector);
-
+  ///
+  VHAVOK_IMPEXP virtual void Init(const VTerrainSector &sector);
 
   ///
   /// @}
   ///
 
   ///
-  /// @name Access to Havok Internals
+  /// @name Access to Havok Physics Internals
   /// @{
   ///
 
-
   ///
   /// \brief
-  ///   Gets the Havok internal rigid body instance (can be NULL if not yet initialized).
+  ///   Returns the internal Havok Physics rigid body instance ( NULL if not initialized).
   ///
   /// \returns
-  ///   Pointer to the internal Havok Rigid Body (can be NULL).
+  ///   Pointer to the internal Havok Physics Rigid Body (can be NULL).
   /// 
-  inline hkpRigidBody *GetHkRigidBody() { return m_pRigidBody; }
-
+  inline hkpRigidBody *GetHkRigidBody() 
+  { 
+    return m_pRigidBody; 
+  }
 
   ///
   /// \brief
-  ///   Gets the Havok shape that belongs to the rigid body instance (can be NULL if not yet initialized).
+  ///   Returns the Havok Physics shape that belongs to the rigid body instance (NULL if not initialized).
   ///  
   /// \returns
-  ///   Pointer to the internal Havok Rigid Shape (can be NULL).
+  ///   Pointer to the internal Havok Physics collision shape (can be NULL).
   /// 
   VHAVOK_IMPEXP const hkpShape *GetHkShape() const; 
-
 
   ///
   /// @}
   ///
-
 
   ///
   /// @name Access to Vision Internals
   /// @{
   ///
-
   
   ///
   /// \brief
-  ///   Gets the terrain sector of this Havok Terrain instance.
+  ///   Returns the terrain sector of this Havok terrain instance.
   /// 
   /// \returns
   ///   Pointer to the terrain sector.
   ///
   VHAVOK_IMPEXP const VTerrainSector* GetWrappedTerrainSector();
 
-
   ///
   /// @}
   ///
-
 
   ///
   /// @name Helper methods
@@ -136,7 +122,7 @@ public:
 
   ///
   /// \brief
-  ///   Caches the internally used physics shape to a HKT file.
+  ///   Caches the internal collision shape using a HKT file.
   ///
   VHAVOK_IMPEXP void SaveShapeToFile();
 
@@ -145,13 +131,11 @@ public:
   ///
 
 protected:
-
   ///
   /// \brief
-  ///   Creates the Havok shape and rigid body, and adds the object to the simulation.
+  ///   Creates the Havok Physics shape and rigid body, and adds them to the simulation.
   ///
   void CreateHkRigidBody();
-
 
   ///
   /// \brief
@@ -159,42 +143,42 @@ protected:
   ///
   void RemoveHkRigidBody();
 
-
   ///
   /// \brief
-  ///   Common deinitialisation code that is used both on DisposeObject and on destruction
+  ///   Common deinitialisation code that is used both for DisposeObject and on destruction
   ///
   void CommonDeinit();
 
-  bool m_bInitialized;                          ///< Indicates whether object has been initialized with one of the ::Init functions
-  hkpRigidBody *m_pRigidBody;                   ///< Pointer to the Havok internal rigid body instance
+  bool m_bInitialized;                    ///< Indicates whether object has been initialized with one of the Init functions.
+  hkpRigidBody *m_pRigidBody;             ///< Pointer to the internal Havok Physics rigid body instance.
 
-  const VTerrainSector* m_terrainSector;        ///< Terrain sector of this Havok Terrain instance.
-  vHavokPhysicsModule &m_module;                ///< Reference to the physics module this object belongs to
+  const VTerrainSector* m_terrainSector;  ///< Terrain sector of this Havok terrain instance.
+  vHavokPhysicsModule &m_module;          ///< Reference to the physics module this object belongs to.
 };
-
-
 
 ///
 /// \brief 
-///   Representation of a IVisDecorationGroup_cl, created in vHavokPhysicsModule::OnDecorationCreated and attached to the group
+///   Representation of a IVisDecorationGroup_cl, created in 
+///   vHavokPhysicsModule::OnDecorationCreated and attached to the group.
+///
 class VHavokDecorationGroup : public VRefCounter
 {
 public:
   VHavokDecorationGroup(IVisDecorationGroup_cl &group);
   virtual ~VHavokDecorationGroup();
-  VHAVOK_IMPEXP VOVERRIDE void DisposeObject();
+
+  VHAVOK_IMPEXP virtual void DisposeObject();
   void CommonDeinit();
   VHAVOK_IMPEXP hkpRigidBody* GetHkRigidBody();
+
 private:
   hkpEntity *m_pCompoundRigidBody;
 };
 
-
 #endif // VHAVOKTERRAIN_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

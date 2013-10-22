@@ -342,6 +342,14 @@ HK_FORCE_INLINE void hkSimdDouble64::setSelect( hkVector4dComparisonParameter co
 	m_real = comp.m_mask ? a.m_real : b.m_real;
 }
 
+HK_FORCE_INLINE void hkSimdDouble64::setClampedZeroOne( hkSimdDouble64Parameter a )
+{
+	// This ensures that if a is NAN, clamped will be 1 afterwards	
+	const hkVector4dComparison maxValGtA = hkSimdDouble64_1.greater(a);
+	hkSimdDouble64 clamped; clamped.setSelect(maxValGtA, a, hkSimdDouble64_1);
+	setMax(hkSimdDouble64_0, clamped);
+}
+
 HK_FORCE_INLINE void hkSimdDouble64::zeroIfFalse( hkVector4dComparisonParameter comp )
 {
 	HK_MATH_ASSERT(0x125f0f99, comp.allAreSet() || (comp.getMask() == hkVector4ComparisonMask::MASK_NONE), "illegal compare mask");
@@ -995,7 +1003,7 @@ HK_FORCE_INLINE void hkSimdDouble64::store(  hkFloat16 *p ) const
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

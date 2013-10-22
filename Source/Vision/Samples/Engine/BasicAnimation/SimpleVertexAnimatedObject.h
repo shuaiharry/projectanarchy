@@ -24,7 +24,7 @@ public:
   SimpleVertexAnimatedObject_cl(void);
 
   // VisBaseEntity_cl overrides
-  VOVERRIDE void InitFunction();
+  virtual void InitFunction() HKV_OVERRIDE;
 
   // toggle visibility
   void SetActivate(bool bStatus) 
@@ -37,17 +37,22 @@ public:
   void SetSingleAnimationMode();
   bool IsAnimationRunning() const;
 
-  VisVertexAnimControl_cl *GetVertexAnimControl() const {return m_spAnimControl;}
+  inline VisVertexAnimControl_cl *GetVertexAnimControl() const 
+  {
+    return m_spAnimControl;
+  }
+
 public:
-  V_DECLARE_SERIAL( SimpleVertexAnimatedObject_cl, )
+  V_DECLARE_SERIAL(SimpleVertexAnimatedObject_cl, )
   IMPLEMENT_OBJ_CLASS(SimpleVertexAnimatedObject_cl);
+
   VSmartPtr<VisVertexAnimControl_cl> m_spAnimControl;
 };
 
 #endif //__VISION_SAMPLEVERTEXANIMATEDOBJECT_HPP
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

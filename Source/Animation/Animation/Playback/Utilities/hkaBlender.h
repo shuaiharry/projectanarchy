@@ -33,7 +33,7 @@ namespace hkaBlender
 	// dst = ( 1 - alpha ) * srcL + ( alpha ) * srcR.
 	//
 	// Each of these functions requires that all inputs and outputs
-	// be 16 byte aligned, and have an allocation size which is a
+	// be aligned for SIMD, and have an allocation size which is a
 	// multiple of four times the size of the given type.
 	//
 	// All functions below are alias safe for outputPtr == inputPtr, but may
@@ -102,7 +102,7 @@ namespace hkaBlender
 #ifndef HK_USE_BATCH_BLENDER
 
 // (Allow for user override)
-#define HK_USE_BATCH_BLENDER ( HK_CONFIG_SIMD == HK_CONFIG_SIMD_ENABLED )
+#define HK_USE_BATCH_BLENDER (( HK_CONFIG_SIMD == HK_CONFIG_SIMD_ENABLED ) && defined(HK_PLATFORM_SUPPORTS_MANY_SIMD_REGISTERS))
 
 #endif // HK_USE_BATCH_BLENDER
 
@@ -123,7 +123,7 @@ namespace hkaBlender
 #endif // HK_ANIMATION_BLENDER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

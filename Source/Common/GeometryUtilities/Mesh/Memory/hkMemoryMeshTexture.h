@@ -30,6 +30,9 @@ class hkMemoryMeshTexture: public hkMeshTexture
 		virtual void getData(hkUint8*& data, int& size, Format& format);
 			// hkMeshTexture implementation
 		virtual void setData(hkUint8* data, int size, Format format);
+
+			// Gets the raw data format
+		virtual Format getFormat() const HK_OVERRIDE;
 			
 			// hkMeshTexture implementation
 		virtual const char* getFilename() const;
@@ -59,6 +62,15 @@ class hkMemoryMeshTexture: public hkMeshTexture
 			// hkMeshTexture implementation
 		virtual bool isReadOnly() const HK_OVERRIDE { return false; }
 
+			// hkMeshTexture implementation
+		virtual Sampler* createSampler() const HK_OVERRIDE;
+
+		/// Tests whether two textures are equal
+		virtual bool equals(const hkMeshTexture* other) const HK_OVERRIDE;
+
+		/// Returns the class type
+		virtual const hkClass* getClassType() const HK_OVERRIDE;
+
 	protected:
 			/// Filename of the texture
 		hkStringPtr m_filename;
@@ -80,7 +92,7 @@ class hkMemoryMeshTexture: public hkMeshTexture
 #endif	//HK_MEMORY_MESH_TEXTURE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -234,7 +234,6 @@ inline bool ParticleGroupBase_cl::HandleSingleParticle(ParticleExt_t *pParticle,
 
     pParticle->color = m_InstanceColor * pParticle->m_ModColor * 
      m_pColorLookup[(int)(pParticle->m_fLifeTimeCounter*m_fColorBitmapSizeX)];
-//    pParticle->color = m_pColorLookup[(int)(pParticle->m_fLifeTimeCounter*m_fColorBitmapSizeX)];
 
 #ifdef PARTICLE_LIGHTGRID_LIGHTING
     VLightGrid_cl *pGrid = Vision::RenderLoopHelper.GetLightGrid();
@@ -260,8 +259,9 @@ inline bool ParticleGroupBase_cl::HandleSingleParticle(ParticleExt_t *pParticle,
   // particle size : either from size curve of lookup or just grow size
   if (VISION_LIKELY(m_spSizeCurve!=NULL))
   {
-    pParticle->size = m_spSizeCurve->GetValueFast(pParticle->m_fLifeTimeCounter) * pParticle->m_fSizeGrowth;
-  } else
+    pParticle->size = m_spSizeCurve->GetValueFastInterpolated(pParticle->m_fLifeTimeCounter) * pParticle->m_fSizeGrowth;
+  } 
+  else
   {
     pParticle->size += pParticle->m_fSizeGrowth * fDeltaTime;
     if (pParticle->size<=0.f)
@@ -419,13 +419,13 @@ inline unsigned char ParticleGroupBase_cl::GetDistortionType() const
 
 inline void ParticleGroupBase_cl::RenderBoundingBox(VColorRef iColor)
 {
-  const hkvAlignedBBox *pBBox = GetCurrentBoundingBox();
+  const hkvAlignedBBox *pBBox = CalcCurrentBoundingBox();
   if (pBBox)
     Vision::Game.DrawBoundingBox(*pBBox,iColor,1.f);
 }
 
 
-inline const hkvAlignedBBox *ParticleGroupBase_cl::GetCurrentBoundingBox()
+inline const hkvAlignedBBox *ParticleGroupBase_cl::CalcCurrentBoundingBox()
 {
   if (!m_bBBoxValid)
   {
@@ -434,7 +434,7 @@ inline const hkvAlignedBBox *ParticleGroupBase_cl::GetCurrentBoundingBox()
     m_BoundingBox.setInvalid();
     if (m_spDescriptor->m_fDynamicInflateInterval>=0.f) // create bbox from all particles
     {
-      InflateBoundingBox(true);
+      InflateBoundingBox(true); //this always happens in local space
       return &m_BoundingBox;
     }
       
@@ -442,25 +442,32 @@ inline const hkvAlignedBBox *ParticleGroupBase_cl::GetCurrentBoundingBox()
     if (!m_spDescriptor->m_BoundingBox.isValid())
       return NULL;
     if (GetUseLocalSpaceMatrix())
-      m_BoundingBox = m_spDescriptor->m_BoundingBox;
+    {
+      m_BoundingBox = m_spDescriptor->m_BoundingBox; //local bounding box
+      m_BoundingBox.scaleFromCenter( hkvVec3( GetScaling() ) ); //because the particle effects do not use Object3D scaling
+    }
     else
     {
       if(m_spEmitter->GetType()==EMITTER_TYPE_MESH && m_pEmitterMeshEntity!=NULL)
       {
+        //get world space bbox from model
         m_BoundingBox.expandToInclude( m_pEmitterMeshEntity->GetBoundingBox());
-        //add boundary of the initial bounding box
-        hkvVec3 boundary(m_spDescriptor->m_BoundingBox.getSizeX()*0.5f,m_spDescriptor->m_BoundingBox.getSizeY()*0.5f,m_spDescriptor->m_BoundingBox.getSizeZ()*0.5f);
-        m_BoundingBox.addBoundary(boundary);
+
+        //add boundary of the initial (local) bounding box
+        hkvVec3 vBoundary( m_spDescriptor->m_BoundingBox.getSizeX()*0.5f*GetScaling() , m_spDescriptor->m_BoundingBox.getSizeY()*0.5f*GetScaling() , m_spDescriptor->m_BoundingBox.getSizeZ()*0.5f*GetScaling());
+        m_BoundingBox.addBoundary( vBoundary );
       }
       else
       {
-        hkvMat3 rotMat = GetRotationMatrix();
+        hkvMat3 rotMat = (m_pParentEffect!=NULL) ? m_pParentEffect->GetRotationMatrix() : GetRotationMatrix();
         hkvAlignedBBox orientedBBox = m_spDescriptor->m_BoundingBox;
-        hkvMat4 mTransform (rotMat, GetPosition());
-        orientedBBox.transformFromOrigin (mTransform);
+        hkvMat4 transform(rotMat, (m_pParentEffect!=NULL) ? m_pParentEffect->GetPosition() : GetPosition() );
+        transform.setScalingFactors( hkvVec3( GetScaling() ) );
+        orientedBBox.transformFromOrigin( transform );
         m_BoundingBox.expandToInclude (orientedBBox);
       }
     }
+    
   }
   if (VISION_LIKELY(m_BoundingBox.isValid()))
     return &m_BoundingBox;
@@ -468,7 +475,7 @@ inline const hkvAlignedBBox *ParticleGroupBase_cl::GetCurrentBoundingBox()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

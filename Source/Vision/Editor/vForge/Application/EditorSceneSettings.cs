@@ -36,6 +36,7 @@ namespace Editor
     {
       _ownerScene = ownerScene;
       _cameraPosition *= EditorManager.Settings.GlobalUnitScaling;
+      _screenshotSettings = new ScreenshotSettings();
     }
 
     IScene _ownerScene;
@@ -82,6 +83,15 @@ namespace Editor
       if (SerializationHelper.HasElement(info, "_autoSaveExportProfile"))
         _autoSaveExportProfile = info.GetBoolean("_autoSaveExportProfile");
 
+      if (SerializationHelper.HasElement(info, "_screenshotSettings"))
+      {
+        _screenshotSettings = info.GetValue("_screenshotSettings", typeof(ScreenshotSettings)) as ScreenshotSettings;
+      }
+      else
+      {
+        _screenshotSettings = new ScreenshotSettings();
+      }
+
       // the following settings are now in export profiles. Load them here for backwards compatibility
       if (PATCH_PROFILE != null) ///...but only if no dedicated profile name has been loaded 
       {
@@ -127,6 +137,7 @@ namespace Editor
       info.AddValue("_gridSettings", _gridSettings);
       info.AddValue("_exportProfileName", _exportProfileName);
       info.AddValue("_autoSaveExportProfile", _autoSaveExportProfile);
+      info.AddValue("_screenshotSettings", _screenshotSettings);
     }
 
     #endregion
@@ -291,20 +302,6 @@ namespace Editor
       set { CurrentProfile.RunAfterExport = value; }
     }
 
-    /*
-    /// <summary>
-    /// Flag that indicates whether relevant engine plugins should be copied to the export path so the viewer runs properly
-    /// </summary>
-    [Browsable(false)]
-    [SortedCategory("Export", 4), PropertyOrder(3)]
-    [Description("Flag that indicates whether relevant engine plugins should be copied to the export path so the viewer runs properly")]
-    public bool CopyRelevantPlugins
-    {
-      get {return _bCopyRelevantPlugins;}
-      set {_bCopyRelevantPlugins=value;}
-    }
-    */
-
     /// <summary>
     /// Flag that indicates whether relevant engine plugins should be copied to the export path so the viewer runs properly
     /// </summary>
@@ -331,6 +328,28 @@ namespace Editor
       set { CurrentProfile.EmbedCustomLitFile = value; }
     }
 
+    #endregion
+
+    #region Screenshot settings
+
+    private ScreenshotSettings _screenshotSettings;
+
+    /// <summary>
+    /// Settings for creating engine screenshots.
+    /// </summary>
+    [Browsable(false)]
+    public ScreenshotSettings ScreenCaptureSettings
+    {
+      get 
+      {
+        return _screenshotSettings;
+      }
+      set
+      {
+        _screenshotSettings = value;
+      }
+    }
+   
     #endregion
 
     #region Update Static lighting related options
@@ -387,7 +406,6 @@ namespace Editor
       EditorSceneSettings other = obj as EditorSceneSettings;
       if (other == null)
         return false;
-      //if (!string.Equals(_viewerCmdLine, other._viewerCmdLine)) return false;
       if (!_showDescAtStartup.Equals(other._showDescAtStartup)) return false;
       if (!string.Equals(_vLuxSettingsFile,other._vLuxSettingsFile)) return false;
       if (!_bUseDefaultvLuxSettingsFile.Equals(other._bUseDefaultvLuxSettingsFile)) return false;
@@ -395,6 +413,12 @@ namespace Editor
       if (!_cameraPosition.Equals(other._cameraPosition)) return false;
       if (!_cameraAngles.Equals(other._cameraAngles)) return false;
       if (!_gridSettings.Equals(other._gridSettings)) return false;
+
+      if (!_screenshotSettings.Equals(other._screenshotSettings))
+      {
+        return false;
+      }
+
       return true;
     }
 
@@ -406,7 +430,7 @@ namespace Editor
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

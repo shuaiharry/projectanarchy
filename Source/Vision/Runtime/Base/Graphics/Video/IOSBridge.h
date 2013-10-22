@@ -48,7 +48,9 @@ FUNCTION_DEFINITION void IOSTouchRemoveTouch(void* pTouchObject);
 FUNCTION_DEFINITION void IOSTouchUpdateTouch(void* pTouchObject, int iXAbsolute, int iYAbsolute, int iXPrevLocAbsolute, int iYPrevLocAbsolute);
 
 
-FUNCTION_DEFINITION int IOSGetProcessorCount();  
+FUNCTION_DEFINITION int IOSGetProcessorCount();
+
+FUNCTION_DEFINITION void IOSGetAppIdentifier(char buffer[1024]);
 
 
 FUNCTION_DEFINITION void IOSShowVirtualKeyboard();
@@ -82,7 +84,7 @@ void IOSSetAlertDelegate(id<UIAlertViewDelegate> delegate);
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131021)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -21,8 +21,8 @@
 #define HK_CONFIG_SINGLE_THREADED 1
 #define HK_CONFIG_MULTI_THREADED  2
 
-#if !defined(HKBASE_HKBASETYPES_H)
-#	error hkbase/hkBase.h needs to be included before this file
+#if !defined(HKBASE_HKBASEDEFS_H)
+#	error Common/Base/hkBase.h needs to be included before this file
 #endif
 
 #if defined(HK_PLATFORM_WIIU)
@@ -61,6 +61,10 @@
 
 	// Linux
 #	elif defined(HK_PLATFORM_LINUX)
+#		define HK_CONFIG_THREAD HK_CONFIG_MULTI_THREADED
+
+	// Tizen
+#	elif defined(HK_PLATFORM_TIZEN)
 #		define HK_CONFIG_THREAD HK_CONFIG_MULTI_THREADED
 
 	// Mac
@@ -113,7 +117,7 @@
 #endif // HK_BASE_CONFIGTHREAD_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

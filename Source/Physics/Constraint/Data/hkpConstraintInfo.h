@@ -26,18 +26,18 @@ namespace hkpJacobianSchemaInfo
 	struct End
 	{ enum {
 	#if HK_POINTER_SIZE == 4
-		Sizeof = HK_REAL_ALIGNMENT,  
-	#else 
-		Sizeof = 32,  
+		Sizeof = HK_REAL_ALIGNMENT,
+	#else
+		Sizeof = 32,
 	#endif
 	}; };
 
-	struct Header 
+	struct Header
 	{ enum {
 	#if HK_POINTER_SIZE == 4
-		Sizeof = HK_REAL_ALIGNMENT,  
+		Sizeof = HK_REAL_ALIGNMENT,
 	#else
-		Sizeof = 32,  
+		Sizeof = 32,
 	#endif
 	}; };
 
@@ -162,6 +162,13 @@ namespace hkpJacobianSchemaInfo
 	{ enum {
 		Temps = 2,
 		Results = 2,
+		Sizeof = DoubleSize*112,
+	}; };
+
+	struct WheelFriction
+	{ enum {
+		Temps = 2,
+		Results = 0,
 		Sizeof = DoubleSize*112,
 	}; };
 
@@ -413,7 +420,7 @@ inline hkpConstraintInfo& hkpConstraintInfo::operator= (const struct hkpConstrai
 #endif // HKP_CONSTRAINT_INFO_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -82,9 +82,6 @@ class hkaiAvoidanceSolverUtils
 		// This method detects relative position of agent in front of boundary
 		static bool detectFrontArea( hkReal radius, const hkVector4& agentPos, const hkaiAvoidanceSolver::BoundaryObstacle& boundary, const hkVector4& boundaryPlane );
 
-		// This method return true if the obstacle is inside view angle cone of the agent
-		static bool HK_CALL inView(const hkReal cosViewAngle, const hkaiAvoidanceSolver::ObstacleAgent& agent, const hkaiAvoidanceSolver::ObstacleAgent& obstacle);
-
 		// This method calculates the velocity obstacle avoidance gradient
 		static void HK_CALL calcVOGradient(const hkReal agentMinvel, const hkVector4& agentVel, const hkaiDynamicObstacleSolver::VelocityObstacle& velocityObstacle, const hkVector4& preferred, hkVector4& gradient );
 		
@@ -179,7 +176,7 @@ class hkaiAvoidanceSolverDebugDisplayUtils
 #endif // HK_AI_AVOIDANCE_SOLVER_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

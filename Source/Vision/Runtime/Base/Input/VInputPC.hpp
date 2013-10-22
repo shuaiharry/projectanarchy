@@ -626,6 +626,12 @@ private:
   ///   ID of the touchpoint as given by the touch interface
   VBASE_IMPEXP void RemoveTouch(int id);
 
+
+  /// \brief
+  ///   Updates screen size dependent scaling factors (used e.g. for CT_TOUCH_NORM_X)
+  ///
+  VBASE_IMPEXP void UpdateScalingFactors();
+
   /* Wrapper functions for Win API calls related to Multitouch */
 
   // Registers a window as no longer being touch-capable
@@ -900,6 +906,227 @@ private:
   static float s_MaxSlider;
 };
 
+/// \brief
+///   Facade class that is used to handle DirectInput and XInput devices transparently
+class VGamepadAdapter : public IVJoypad
+{
+public:
+			
+    /// \brief Constructor
+	VBASE_IMPEXP VGamepadAdapter( IVJoypad* jpadInt ) 
+		: m_pCurInterface(jpadInt), m_bPortOccupied(false), m_bIsXInput(false)
+	{
+
+	}
+        	
+    /// \brief Destructor
+	VBASE_IMPEXP ~VGamepadAdapter()
+	{
+		V_SAFE_DELETE( m_pCurInterface );
+	}
+
+    /// \brief
+    ///   Remove the current interface
+	VBASE_IMPEXP void DeleteCurrentInterface()
+	{
+		V_SAFE_DELETE(m_pCurInterface);
+	}
+
+    /// \brief
+    ///   Set a new interface (must be either VGamepadXI or VGamepadPC)
+	VBASE_IMPEXP void SetInterface( IVJoypad* jpadInt )
+	{
+		m_pCurInterface = jpadInt;
+	}
+
+    /// \brief
+    ///   Returns the current interface.
+	VBASE_IMPEXP IVJoypad* GetInterface()
+	{
+		return m_pCurInterface;
+	}
+
+    /// \brief
+    ///   Delegate IsActive() to interface
+	VBASE_IMPEXP virtual bool IsActive() HKV_OVERRIDE
+	{ 
+		return m_pCurInterface ? m_pCurInterface->IsActive() : false; 
+	}
+
+    /// \brief
+    ///   Delegate GetControlValue() to interface
+	VBASE_IMPEXP virtual float GetControlValue(unsigned int device, float fDeadZone, bool bTimeScaled = false) HKV_OVERRIDE
+	{
+		return m_pCurInterface ? m_pCurInterface->GetControlValue( device, fDeadZone, bTimeScaled ) : 0.0f;
+	}
+
+    /// \brief
+    ///   Delegate GetRawControlValue() to interface
+	VBASE_IMPEXP virtual int GetRawControlValue(unsigned int control) HKV_OVERRIDE
+	{
+		return m_pCurInterface ? m_pCurInterface->GetRawControlValue( control ) : 0;
+	}
+
+    /// \brief
+    ///   Delegate Update() to interface
+	VBASE_IMPEXP virtual void Update(float timeDiff=0) HKV_OVERRIDE
+	{
+		if ( m_pCurInterface )
+			m_pCurInterface->Update( timeDiff );
+	}
+    
+    /// \brief
+    ///   Delegate Init() to interface
+	VBASE_IMPEXP void Init()
+	{
+		if (!m_pCurInterface)
+			return;
+
+		if(m_bIsXInput)
+		{
+			VGamepadXI* pPad = static_cast<VGamepadXI*>(m_pCurInterface);
+			return pPad->Init();
+		}
+		else
+		{
+			VGamepadPC* pPad = static_cast<VGamepadPC*>(m_pCurInterface);
+			return pPad->Init();
+		}
+	}
+
+    /// \brief
+    ///   Delegate DeInit() to interface
+	VBASE_IMPEXP void DeInit()
+	{
+		if (!m_pCurInterface)
+			return;
+
+		if(m_bIsXInput)
+		{
+			VGamepadXI* pPad = static_cast<VGamepadXI*>(m_pCurInterface);
+			return pPad->DeInit();
+		}
+		else
+		{
+			VGamepadPC* pPad = static_cast<VGamepadPC*>(m_pCurInterface);
+			return pPad->DeInit();
+		}
+	}
+
+    /// \brief
+    ///   Delegate Reset() to interface
+	VBASE_IMPEXP virtual void Reset() HKV_OVERRIDE
+	{
+		if  (m_pCurInterface )
+			m_pCurInterface->Reset();      
+	}
+
+
+    /// \brief
+    ///   Delegate IsInitialized() to interface
+	VBASE_IMPEXP virtual bool IsInitialized() HKV_OVERRIDE
+	{
+		if ( !m_pCurInterface )
+			return false;
+		return m_pCurInterface->IsInitialized();
+	}
+
+    /// \brief
+    ///   Delegate GetControlName() to interface
+	VBASE_IMPEXP virtual const char* GetControlName(unsigned int control) HKV_OVERRIDE
+	{
+		return m_pCurInterface ? m_pCurInterface->GetControlName(control) : "";
+	}
+
+    /// \brief
+    ///   Delegate GetName() to interface
+	VBASE_IMPEXP virtual const char* GetName() HKV_OVERRIDE
+	{
+		return m_pCurInterface ? m_pCurInterface->GetName() : "";
+	}
+
+    /// \brief
+    ///   Delegate GetModel() to interface
+	VBASE_IMPEXP virtual int GetModel() HKV_OVERRIDE
+	{
+		return m_pCurInterface ? m_pCurInterface->GetModel() : INPUT_DEVICE_NONE;
+	}
+
+    /// \brief
+    ///   Delegate Rumble() to interface
+	VBASE_IMPEXP virtual void Rumble(unsigned short speedLeft, unsigned short speedRight) HKV_OVERRIDE
+	{
+		if ( m_pCurInterface )
+			m_pCurInterface->Rumble(speedLeft,speedRight);
+	}
+
+    /// \brief
+    ///   Delegate GetHardwareId() to interface
+	VBASE_IMPEXP virtual const char* GetHardwareId() HKV_OVERRIDE
+	{
+		return m_pCurInterface ? m_pCurInterface->GetHardwareId() : "";
+	}
+
+    /// \brief
+    ///   Delegate GetProductName() to interface
+	VBASE_IMPEXP virtual const char* GetProductName() HKV_OVERRIDE
+	{
+		return m_pCurInterface ? m_pCurInterface->GetProductName() : "";
+	}
+
+    /// \brief	
+    ///   Set if this port counts as occupied
+	VBASE_IMPEXP void SetPortOccupied(bool bIsOccupied)
+	{
+		m_bPortOccupied = bIsOccupied;
+	}
+
+    /// \brief	
+    ///   If this port if occupied by a device
+	VBASE_IMPEXP bool IsPortOccupied() const
+	{
+		return m_bPortOccupied;
+	}
+
+    /// \brief	
+    ///   If this adapter holds an XInput device
+	VBASE_IMPEXP bool IsXInput() const
+	{
+		return m_bIsXInput;
+	}
+
+    /// \brief	
+    ///   Set if this adapter holds an XInput device
+	VBASE_IMPEXP void SetIsXInput(bool bIsXInput)
+	{
+		m_bIsXInput = bIsXInput;
+	}
+
+    /// \brief
+    ///   If the device in this slot is plugged in
+	VBASE_IMPEXP bool IsPlugged() const
+	{
+		if(!m_pCurInterface)
+			return false;
+
+		if(m_bIsXInput)
+		{
+			VGamepadXI* pPad = static_cast<VGamepadXI*>(m_pCurInterface);
+			return pPad->IsPlugged();
+		}
+		else
+		{
+			VGamepadPC* pPad = static_cast<VGamepadPC*>(m_pCurInterface);
+			return pPad->IsPlugged();
+		}
+	}
+
+private:    
+    IVJoypad* m_pCurInterface;  // interface to device, either VGamepadXI or VGamepadPC
+	bool m_bIsXInput; // if the current port is used for an Xinput device (just used for internal casting)
+	bool m_bPortOccupied; // If the port is currently occupied with an active gamepad
+};
+
 #endif
 
 
@@ -1115,7 +1342,7 @@ private:
 #endif //VINPUTPC_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

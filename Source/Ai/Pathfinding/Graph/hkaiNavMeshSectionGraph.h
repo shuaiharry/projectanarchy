@@ -35,6 +35,7 @@ struct hkaiNavMeshSectionGraph
 public:
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE,hkaiNavMeshSectionGraph);
 	
+		/// Internal flags.
 	enum Flags
 	{
 		CHECK_SPHERE_RADIUS = 1,
@@ -53,7 +54,7 @@ public:
 	typedef struct hkaiHierarchicalNavMeshHeuristic Heuristic;
 	friend struct hkaiHierarchicalNavMeshHeuristic;
 
-	typedef hkaiHashSearchState<Heuristic> SearchState;
+	typedef hkaiHashSearchState SearchState;
 
 	HK_FORCE_INLINE hkaiNavMeshSectionGraph();
 
@@ -201,7 +202,7 @@ private:
 #endif // HKAI_NAV_MESH_GRAPH_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

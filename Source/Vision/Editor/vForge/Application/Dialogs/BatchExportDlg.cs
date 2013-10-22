@@ -14,6 +14,7 @@ using System.Windows.Forms;
 using CSharpFramework;
 using CSharpFramework.Scene;
 using CSharpFramework.Dialogs;
+using CSharpFramework.AssetManagement;
 
 namespace Editor.Dialogs
 {
@@ -204,6 +205,31 @@ namespace Editor.Dialogs
             }
           }
 
+          EditorScene scene = EditorManager.Scene as EditorScene;
+
+          if (showExportDialog)
+          {
+            // Open export dialog
+            using (ExportDialog dlg = new ExportDialog())
+            {
+              scene.CurrentExportProfile.ExportedLayersFromScene(); // retrieve current status
+              dlg.Settings = scene.CurrentExportProfile; // clones the settings
+              dlg.AutoSaveExportProfile = scene.Settings.AutoSaveExportProfile;
+
+              // Show dialog
+              if (dlg.ShowDialog() != DialogResult.OK)
+              {
+                continue;
+              }
+
+              // Get back settings
+              scene.CurrentExportProfile = dlg.Settings;
+
+              scene.Settings.ExportProfileName = scene.CurrentExportProfile.ProfileName;
+              scene.Settings.AutoSaveExportProfile = dlg.AutoSaveExportProfile;
+            }
+          }
+
           // Always export all zones
           foreach (Zone zone in EditorManager.Scene.Zones)
           {
@@ -217,9 +243,16 @@ namespace Editor.Dialogs
 
           EditorManager.Progress.Percentage = 0;
 
+          // Export all profiles
+          List<string> assetProfiles = new List<string>();
+          foreach (IProfileManager.Profile profile in EditorManager.ProfileManager.GetProfiles())
+          {
+            assetProfiles.Add(profile.ToString());
+          }
+
           // Export the scene
           EditorManager.GUI.UIUpdateLock++;
-          EditorManager.Scene.ExportScene(null, showExportDialog);
+          EditorManager.Scene.ExportScene(null, assetProfiles);
           EditorManager.GUI.UIUpdateLock--;
 
           if (showExportDialog)
@@ -393,7 +426,7 @@ namespace Editor.Dialogs
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

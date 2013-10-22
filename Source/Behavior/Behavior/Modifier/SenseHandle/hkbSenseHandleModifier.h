@@ -231,11 +231,13 @@ class hkbSenseHandleModifier : public hkbModifier
 		hkInt16 m_sensorRagdollBoneIndex;	//+default(-1)
 											//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL")
 											//+hk.Description("The ragdoll bone to be used for sensing.  You cannot specify both a ragdoll bone and an animation bone.")
+											//+hk.Ui(group="Ragdoll Sensor Bone",label="Sensor Bone Index")
 
 			/// The index of the animation bone whose coordinates will be used to specify the sensor location.
 		hkInt16 m_sensorAnimationBoneIndex;	//+default(-1)
-											//+hkb.RoleAttribute("ROLE_BONE_INDEX")
+											//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NONE")
 											//+hk.Description("The animation bone to be used for sensing.  You cannot specify both a ragdoll bone and an animation bone.")
+											//+hk.Ui(group="Animation Sensor Bone",label="Sensor Bone Index")
 
 			/// Where to look for a handle.
 		hkEnum<SensingMode, hkInt8> m_sensingMode;	//+default(hkbSenseHandleModifier::SENSE_IN_NEARBY_RIGID_BODIES)
@@ -271,7 +273,7 @@ class hkbSenseHandleModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

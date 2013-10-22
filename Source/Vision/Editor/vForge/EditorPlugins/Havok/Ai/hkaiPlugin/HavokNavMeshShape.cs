@@ -220,6 +220,7 @@ namespace HavokAiEditorPlugin.Shapes
 
       // Nav Mesh Edge Matching Settings
       EngineNavMesh.m_edgeConnectionIterations = globalSettings.EdgeConnectionIterations;
+      EngineNavMesh.m_edgeMatchingMetric = (int)globalSettings.EdgeMatchingMetric;
       EngineNavMesh.m_maxStepHeight = globalSettings.MaxStepHeight;
       EngineNavMesh.m_maxSeparation = globalSettings.MaxSeparation;
       EngineNavMesh.m_maxOverhang = globalSettings.MaxOverhang;
@@ -612,6 +613,18 @@ namespace HavokAiEditorPlugin.Shapes
             EngineNavMesh.AddTerrainGeometry(terrain.EngineTerrain.GetNativeObject(), (int)usage, parentZoneBbox);
           }
         }
+#if !HK_ANARCHY
+        else if (shape is DecorationGroupShape)
+        {
+          DecorationGroupShape decorationGroup = shape as DecorationGroupShape;
+
+          // Please note that currently the native HavokAiEnginePlugin only supports decoration capsules as cutters.
+          if (decorationGroup.GetNavMeshLimitedUsage() == DecorationGroupShape.eNavMeshLimitedUsage.CutterOnly)
+          {
+            EngineNavMesh.AddDecorationGroupCapsules(decorationGroup.EngineGroup.GetGroupsObject());
+          }
+        }
+#endif
 #if USE_SPEEDTREE
         else if (shape is SpeedTree5GroupShape)
         {
@@ -842,7 +855,7 @@ namespace HavokAiEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

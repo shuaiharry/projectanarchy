@@ -12,7 +12,7 @@
 #include <Physics/Constraint/Data/hkpConstraintData.h>
 
 
-/// Linear Clearance constraint. 
+/// Linear Clearance constraint.
 class hkpLinearClearanceConstraintData : public hkpConstraintData
 {
 	public:
@@ -24,16 +24,16 @@ class hkpLinearClearanceConstraintData : public hkpConstraintData
 			BALL_SOCKET,
 		};
 
-		enum 
+		enum
 		{
 			SOLVER_RESULT_MOTOR				= 0,	// the motor
-			SOLVER_RESULT_MOTOR_INTERNAL	= 1, 
+			SOLVER_RESULT_MOTOR_INTERNAL	= 1,
 
 			SOLVER_RESULT_FRICTION_0			= 2,	// the friction
 			SOLVER_RESULT_FRICTION_0_INTERNAL	= 3,
-			SOLVER_RESULT_FRICTION_1			= 4,	
+			SOLVER_RESULT_FRICTION_1			= 4,
 			SOLVER_RESULT_FRICTION_1_INTERNAL	= 5,
-			SOLVER_RESULT_FRICTION_2			= 6,	
+			SOLVER_RESULT_FRICTION_2			= 6,
 			SOLVER_RESULT_FRICTION_3_INTERNAL	= 7,
 
 			SOLVER_RESULT_ANG_0				= 8,	// angular constraint 0
@@ -51,7 +51,7 @@ class hkpLinearClearanceConstraintData : public hkpConstraintData
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_DYNAMICS, hkpLinearClearanceConstraintData::Runtime );
 
-			hkpSolverResults m_solverResults[SOLVER_RESULT_MAX];		
+			hkpSolverResults m_solverResults[SOLVER_RESULT_MAX];
 			hkUint8 m_initialized;				///< Whether the previous position has been initialized.
 			hkReal m_previousTargetPosition;	///< The previous target position
 		};
@@ -89,7 +89,7 @@ class hkpLinearClearanceConstraintData : public hkpConstraintData
 		};
 
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
@@ -127,7 +127,7 @@ class hkpLinearClearanceConstraintData : public hkpConstraintData
 		/// This allows you to change this prismatic constraint into a cylindrical constraint, where
 		/// rotation around the shift axis is allowed.
 		inline void allowRotationAroundPrismaticAxis(bool allowRotation);
-		
+
 		//
 		// Methods to set and get limits and friction
 		//
@@ -136,7 +136,7 @@ class hkpLinearClearanceConstraintData : public hkpConstraintData
 		inline void setLimits(hkReal min0, hkReal max0, hkReal min1, hkReal max1, hkReal min2, hkReal max2);
 
 		/// Set the friction value.
-		inline void setMaxFrictionForce(hkReal mag);	
+		inline void setMaxFrictionForce(hkReal mag);
 
 		/// Get the friction value.
 		inline hkReal getMaxFrictionForce() const;
@@ -177,7 +177,7 @@ class hkpLinearClearanceConstraintData : public hkpConstraintData
 		virtual void getConstraintInfo( ConstraintInfo& infoOut ) const ;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
+
 	public:
 
 		HK_ALIGN_REAL( Atoms m_atoms );
@@ -189,7 +189,7 @@ class hkpLinearClearanceConstraintData : public hkpConstraintData
 #endif // HKP_LINEAR_CLEARANCE_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

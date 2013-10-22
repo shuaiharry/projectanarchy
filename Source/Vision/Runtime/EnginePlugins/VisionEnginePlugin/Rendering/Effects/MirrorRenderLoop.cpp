@@ -362,12 +362,6 @@ void MirrorRenderLoop_cl::OnDoRenderLoop(void *pUserData)
   INSERT_PERF_MARKER_SCOPE("MirrorRenderLoop_cl::OnDoRenderLoop");
 
 #if defined (WIN32) || defined (_VISION_XENON) || defined (_VISION_PS3) || defined(_VISION_PSP2) || defined(_VISION_WIIU)
-  if (Vision::RenderLoopHelper.GetReplacementRenderLoop())
-  {
-    // render with this renderloop instead
-    Vision::RenderLoopHelper.GetReplacementRenderLoop()->OnDoRenderLoop(pUserData);
-    return;
-  }
   if (Vision::Editor.GetIgnoreAdvancedEffects())
   {
     // force a black reflection because it won't work with orthographic views
@@ -541,7 +535,7 @@ void MirrorRenderLoop_cl::OnDoRenderLoop(void *pUserData)
   { 
     VisBaseEntity_cl *pEnt = pEntities->GetEntry(i);
 
-    Vision::RenderLoopHelper.TrackLightGridInfo(pEnt);
+//    Vision::RenderLoopHelper.TrackLightGridInfo(pEnt);  // important: need to be done in RenderEntityWithSurfaceShaderList
 
     //if (bUseSimpleShader)
     //{
@@ -619,7 +613,7 @@ void MirrorRenderLoop_cl::OnHandleCallback(IVisCallbackDataObject_cl *pData)
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

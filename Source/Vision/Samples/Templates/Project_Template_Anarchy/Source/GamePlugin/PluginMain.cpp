@@ -14,6 +14,20 @@
 #include "myComponent.h"
 #include "GameManager.h"
 
+#include <Common/Base/KeyCode.h>
+
+// use plugins if supported
+VIMPORT IVisPlugin_cl* GetEnginePlugin_vFmodEnginePlugin();
+#if defined( HAVOK_PHYSICS_2012_KEYCODE )
+VIMPORT IVisPlugin_cl* GetEnginePlugin_vHavok();
+#endif
+#if defined( HAVOK_AI_KEYCODE )
+VIMPORT IVisPlugin_cl* GetEnginePlugin_vHavokAi();
+#endif
+#if defined( HAVOK_BEHAVIOR_KEYCODE )
+VIMPORT IVisPlugin_cl* GetEnginePlugin_vHavokBehavior();
+#endif
+
 //============================================================================================================
 //  Set up the Plugin Class
 //============================================================================================================
@@ -26,7 +40,7 @@ public:
 
   const char *GetPluginName()
   {
-    return "GamePlugin";  //must match DLL name
+    return "GamePlugin";  // must match DLL name
   }
 };
 
@@ -67,13 +81,27 @@ void myPlugin_cl::OnInitEnginePlugin()
   Vision::Error.SystemMessage("MyPlugin:OnInitEnginePlugin()");
   Vision::RegisterModule(&g_myComponentModule);
 
-  //In some cases the compiler optimizes away the full class from the plugin since it seems to be dead code. 
-  //One workaround to prevent this is to add the following helper macro into the plugin initialization code:
+  
+// load plugins if supported
+#if defined( HAVOK_PHYSICS_2012_KEYCODE )
+  VISION_PLUGIN_ENSURE_LOADED(vHavok);
+#endif
+#if defined( HAVOK_AI_KEYCODE )
+  VISION_PLUGIN_ENSURE_LOADED(vHavokAi);
+#endif
+#if defined( HAVOK_BEHAVIOR_KEYCODE )
+  VISION_PLUGIN_ENSURE_LOADED(vHavokBehavior);
+#endif
+  
+  VISION_PLUGIN_ENSURE_LOADED(vFmodEnginePlugin);
+
+  // In some cases the compiler optimizes away the full class from the plugin since it seems to be dead code. 
+  // One workaround to prevent this is to add the following helper macro into the plugin initialization code:
   FORCE_LINKDYNCLASS( MyComponent );
 
   // [...]
 
-  //Start our component managers and game manager here....
+  // Start our component managers and game manager here....
   MyGameManager::GlobalManager().OneTimeInit();
   MyComponent_ComponentManager::GlobalManager().OneTimeInit();
   // [...]
@@ -93,22 +121,26 @@ void myPlugin_cl::OnInitEnginePlugin()
   pManager->Print( "Type in 'myAction' to test this projects demo action" );
 }
 
-//  Called before the plugin is unloaded
+// Called before the plugin is unloaded
 void myPlugin_cl::OnDeInitEnginePlugin()
 {
   Vision::Error.SystemMessage("MyPlugin:OnDeInitEnginePlugin()");
     
-  //  Close our component managers here....
+  // Close our component managers here....
   MyComponent_ComponentManager::GlobalManager().OneTimeDeInit();
   MyGameManager::GlobalManager().OneTimeDeInit();
   //  [...]
+  
+  // de-register component from action manager
+  VActionManager * pManager = Vision::GetActionManager ();
+  pManager->UnregisterModule( &g_myComponentModule );
 
   // de-register our module when the plugin is de-initialized
   Vision::UnregisterModule(&g_myComponentModule);
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

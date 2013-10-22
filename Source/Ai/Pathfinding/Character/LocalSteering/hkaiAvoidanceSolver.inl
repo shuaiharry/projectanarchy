@@ -14,7 +14,6 @@ inline hkaiMovementProperties::hkaiMovementProperties()
 	m_leftTurnRadius(-1.0f),
 	m_rightTurnRadius(-1.0f),
 	m_maxAngularVelocity(1.25f*HK_REAL_PI),
-	m_maxAngularAcceleration(30.0f * m_maxAngularVelocity),
 	m_maxTurnVelocity(0.5f * m_maxVelocity),
 	m_kinematicConstraintType(CONSTRAINTS_LINEAR_ONLY)
 {
@@ -67,24 +66,24 @@ inline hkReal hkaiMovementProperties::getTurnRadiusAtSpeed( hkReal speed ) const
 
 inline void hkaiMovementProperties::setMaxAngularVelocity( hkReal newMaxAngVel )
 {
+	if(m_kinematicConstraintType != CONSTRAINTS_LINEAR_AND_ANGULAR)
+	{
+		HK_WARN_ONCE(0x148de184, 
+			"hkaiMovementProperties::setMaxAngularVelocity is deprecated for "
+			"kinematic constraint types other than CONSTRAINTS_LINEAR_AND_ANGULAR. ");
+	}
 	m_maxAngularVelocity = newMaxAngVel;
 }
 
 inline hkReal hkaiMovementProperties::getMaxAngularVelocity() const
 {
+	if(m_kinematicConstraintType != CONSTRAINTS_LINEAR_AND_ANGULAR)
+	{
+		HK_WARN_ONCE(0x148de185, 
+			"hkaiMovementProperties::getMaxAngularVelocity is deprecated for "
+			"kinematic constraint types other than CONSTRAINTS_LINEAR_AND_ANGULAR. ");
+	}
 	return m_maxAngularVelocity;
-}
-
-inline void hkaiMovementProperties::setMaxAngularAcceleration( hkReal newMaxAngAccel )
-{
-	HK_WARN_ONCE_ON_DEBUG_IF( m_kinematicConstraintType != CONSTRAINTS_LINEAR_AND_ANGULAR, 0x148de184, "Updating m_maxAngularAcceleration, but angular constraints are disabled." );
-	m_maxAngularAcceleration = newMaxAngAccel;
-}
-
-inline hkReal hkaiMovementProperties::getMaxAngularAcceleration() const
-{
-	HK_WARN_ONCE_ON_DEBUG_IF( m_kinematicConstraintType != CONSTRAINTS_LINEAR_AND_ANGULAR, 0x148de184, "m_maxAngularAcceleration requested, but angular constraints are disabled." );
-	return m_maxAngularAcceleration;
 }
 
 inline void hkaiMovementProperties::setReasonableProperties( hkReal maxSpeed, hkReal maxAcceleration, hkReal turnRadiusIn )
@@ -116,12 +115,10 @@ inline void hkaiMovementProperties::setReasonableProperties( hkReal maxSpeed, hk
 	hkReal angularVelocityDuringTurn = turnSpeed / turnRadius;
 
 	m_maxAngularVelocity = angularVelocityDuringTurn;
-
-	m_maxAngularAcceleration = 1000.0f; // effectively unlimited
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -412,7 +412,7 @@ template <> inline const hkSimdInt<128> hkInt64Vector4::dot<3>(hkIntVectorParame
 
 template <> inline hkInt64 hkInt64Vector4::getComponent<0>() const
 {
-#if HK_SSE_VERSION >= 0x41
+#if (HK_SSE_VERSION >= 0x41)  && defined(HK_PLATFORM_X64)
 	return _mm_extract_epi64(m_quad.xy, 0);
 #else
 	return HK_M128(m_quad.xy).m128i_i64[0];
@@ -421,7 +421,7 @@ template <> inline hkInt64 hkInt64Vector4::getComponent<0>() const
 
 template <> inline hkInt64 hkInt64Vector4::getComponent<1>() const
 {
-#if HK_SSE_VERSION >= 0x41
+#if (HK_SSE_VERSION >= 0x41)  && defined(HK_PLATFORM_X64)
 	return _mm_extract_epi64(m_quad.xy, 1);
 #else
 	return HK_M128(m_quad.xy).m128i_i64[1];
@@ -430,7 +430,7 @@ template <> inline hkInt64 hkInt64Vector4::getComponent<1>() const
 
 template <> inline hkInt64 hkInt64Vector4::getComponent<2>() const
 {
-#if HK_SSE_VERSION >= 0x41
+#if (HK_SSE_VERSION >= 0x41)  && defined(HK_PLATFORM_X64)
 	return _mm_extract_epi64(m_quad.zw, 0);
 #else
 	return HK_M128(m_quad.zw).m128i_i64[0];
@@ -439,7 +439,7 @@ template <> inline hkInt64 hkInt64Vector4::getComponent<2>() const
 
 template <> inline hkInt64 hkInt64Vector4::getComponent<3>() const
 {
-#if HK_SSE_VERSION >= 0x41
+#if (HK_SSE_VERSION >= 0x41)  && defined(HK_PLATFORM_X64)
 	return _mm_extract_epi64(m_quad.zw, 1);
 #else
 	return HK_M128(m_quad.zw).m128i_i64[1];
@@ -689,7 +689,7 @@ inline hkInt64 hkInt64Vector4::horizontalMax<3>() const
 	zz	= _mm_castpd_si128(_mm_shuffle_pd(zw, zw, _MM_SHUFFLE2(0, 1)));			// [max(x, z), max(y, z)]
 	zz	= hkInt64Vector4Impl::vec2x64_max(xy, zz);								// max(x, y, z)
 
-#if HK_SSE_VERSION >= 0x41
+#if (HK_SSE_VERSION >= 0x41)  && defined(HK_PLATFORM_X64)
 	return _mm_extract_epi64(zz, 0);
 #else
 	return HK_M128(zz).m128i_i64[0];
@@ -786,7 +786,7 @@ template <int I> inline void hkInt64Vector4::countLeadingZeros(hkIntVector& lead
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

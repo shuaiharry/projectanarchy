@@ -812,39 +812,85 @@ bool VPositionCurve::DataExchangeXML(TiXmlElement *pCurveNode, bool bWrite)
 VPositionCurve* VPositionCurve::DoArchiveLookupExchange( VArchive &ar, VPositionCurve *pSource, bool bBrokenCount )
 {
   short iSamples;
-  if (ar.IsLoading())
+  if ( ar.IsLoading() )
   {
+    // Version 0
     ar >> iSamples;
-    if (iSamples<=0)
+    if ( iSamples == 0 )
       return NULL;
+
+    unsigned char uiVersion = 0;
+
+    // Mode added in Version 1
+    if ( iSamples < 0 )
+    {
+      iSamples = -iSamples;
+      ar >> uiVersion;
+
+      VASSERT(uiVersion == 1);
+    }
+
     ANALYSIS_IGNORE_WARNING_ONCE(6211)
     pSource = new VPositionCurve();
-    pSource->m_iLookupCount = iSamples;
-    pSource->m_fLookupCount = ((float)iSamples)-0.001f;
-    pSource->m_pLookupValues = new hkvVec3[iSamples];
-    if (bBrokenCount)
-      ar.Read(pSource->m_pLookupValues,iSamples*sizeof(float),"f",iSamples); // OLD version
-    else
-      ar.Read(pSource->m_pLookupValues,iSamples*sizeof(float)*3,"fff",iSamples);
-  } else
+
+    // In Version 0 we wrote the sample array, from Version 1 and up the array is simply recreated on load
+    if ( uiVersion == 0 )
+    {
+      pSource->m_iLookupCount = iSamples;
+      pSource->m_fLookupCount = ((float)iSamples)-0.001f;
+      pSource->m_pLookupValues = new hkvVec3[iSamples];
+
+      if (bBrokenCount)
+        ar.Read(pSource->m_pLookupValues,iSamples*sizeof(float),"f",iSamples); // OLD version
+      else
+        ar.Read(pSource->m_pLookupValues,iSamples*sizeof(float)*3,"fff",iSamples);
+    }
+
+    if ( uiVersion >= 1 )
+    {
+      // Added in Version 1
+      ar >> pSource->m_X;
+      ar >> pSource->m_Y;
+      ar >> pSource->m_Z;
+
+      pSource->UpdateCurve(false);
+      pSource->CreateLookup(iSamples);
+    }
+  }
+  else
   {
     if (pSource!=NULL && pSource->m_iLookupCount>0)
     {
       iSamples = (short)pSource->m_iLookupCount;
-      ar << iSamples;
-      ar.Write(pSource->m_pLookupValues,iSamples*sizeof(float)*3,"fff",iSamples);
+
+      VASSERT(iSamples > 0);
+
+      // The great elders did not think that this code might ever change and therefore did not include a version number for the file format.
+      // The number of samples cannot be negative. Thus the sign-bit of the samples number now indicates whether this is the old version zero, or at least version 1
+      // In case of version 1, a version number is written, to ensure that future updates can be more easily done
+
+      ar << (short) -iSamples; // a negative sample number indicates that this is version 1 and thus a version byte will follow
+      const unsigned char uiVersion = 1;
+
+      // Added in Version 1
+      ar << uiVersion;
+
+      // Version 1 stuff
+      ar << pSource->m_X;
+      ar << pSource->m_Y;
+      ar << pSource->m_Z;
     }
     else
     {
       iSamples = 0;
       ar << iSamples;
-    } 
+    }
   }
   return pSource;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

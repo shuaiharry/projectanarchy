@@ -43,9 +43,15 @@ struct hkcdRay
 	/// Set from direction. Does not modify the origin
 	HK_FORCE_INLINE	void setDirection(hkVector4Parameter direction, hkSimdRealParameter fraction = hkSimdReal::getConstant(HK_QUADREAL_1));
 
-	hkVector4	m_origin;		///< Origin of the ray.
-	hkVector4	m_direction;	///< Direction of the ray. Effectively the (endPoint - startPoint) vector (and length as |direction|).
-	hkVector4	m_invDirection;	///< Precomputed direction reciprocal with +/-Inf == 0.
+	/// Origin of the ray.
+	hkVector4	m_origin;
+
+	/// Direction of the ray. Effectively the (endPoint - startPoint) vector (and length as |direction|).
+	hkVector4	m_direction;
+
+	/// Precomputed direction reciprocal with +/-Inf == 0.
+	/// In addition, the mask of the following comparison is stored in the W component via setInt24W: m_direction >= [0,0,0].
+	hkVector4	m_invDirection;	
 };
 
 
@@ -119,7 +125,7 @@ struct hkcdRayCastResult
 #endif // HKCD_TYPES_RAY
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

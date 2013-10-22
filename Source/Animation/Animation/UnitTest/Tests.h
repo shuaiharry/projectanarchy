@@ -20,12 +20,13 @@ HK_TEST_DECLARE(hkaDirectionalMovementParameterizedReferenceFrame_simpleMotionEx
 HK_TEST_DECLARE(hkaDirectionalMovementParameterizedReferenceFrame_jitteryMotionExtraction)
 HK_TEST_DECLARE(hkaDirectionalMovementParameterizedReferenceFrame_motionDoesNotStartInOrigin)
 HK_TEST_DECLARE(hkaDirectionalMovementParameterizedReferenceFrame_rotatedMotion)
+HK_TEST_DECLARE(hkaBarycentricCoordinatesTests)
 HK_TEST_DECLARE(hkaPose_test)
 HK_TEST_DECLARE(quatizedQuaternionTest_main)
 HK_TEST_DECLARE(hkIndividualTrackSampling_test)
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

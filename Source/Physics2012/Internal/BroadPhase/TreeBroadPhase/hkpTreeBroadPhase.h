@@ -151,7 +151,7 @@ class hkpTreeBroadPhase : public hkpBroadPhase
 		//
 		
 		/// Return the broadphase type.
-		virtual BroadPhaseType			getType() const { return BROADPHASE_TREE; }
+		virtual BroadPhaseType			getType() const;
 		
 		/// Return the actual broadphase implementing a capability.
 		virtual const hkpBroadPhase*	getCapabilityDelegate(Capabilities cap) const;
@@ -273,7 +273,7 @@ class hkpTreeBroadPhase : public hkpBroadPhase
 #endif // HK_COLLIDE_TREE_BROADPHASE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

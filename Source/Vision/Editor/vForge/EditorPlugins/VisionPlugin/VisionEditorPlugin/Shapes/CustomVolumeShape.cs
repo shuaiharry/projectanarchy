@@ -25,12 +25,11 @@ using CSharpFramework.Actions;
 using CSharpFramework.View;
 using CSharpFramework.PropertyEditors;
 using CSharpFramework.Scene;
+using CSharpFramework.DynamicProperties;
 
 using VisionManaged;
 using VisionEditorPlugin.Dialogs;
 using System.Collections.Generic;
-
-
 
 namespace VisionEditorPlugin.Shapes
 {
@@ -284,12 +283,7 @@ namespace VisionEditorPlugin.Shapes
       if (EditorManager.ActiveView.CurrentContext is AddVolumeVertexContext)
         EditorManager.ActiveView.SetDefaultContext();
 
-      IEngineShapeInstance keepAlive = _engineInstance;
-      _engineInstance = null;
-
       base.RemoveEngineInstance(bRemoveChildren);
-
-      _engineInstance = keepAlive;
     }
 
     public override void SetEngineInstanceBaseProperties()
@@ -409,6 +403,37 @@ namespace VisionEditorPlugin.Shapes
     #endregion
 
     #region Properties
+
+    // Only allow positive scaling
+    // (Min value of 1e-18 works well with Havok Physics)
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleX
+    {
+      get { return base.ScaleX; }
+      set { base.ScaleX = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleY
+    {
+      get { return base.ScaleY; }
+      set { base.ScaleY = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float ScaleZ
+    {
+      get { return base.ScaleZ; }
+      set { base.ScaleZ = value; }
+    }
+
+    [RangeCheckAttribute(1e-18f, float.PositiveInfinity)]
+    public override float UniformScaling
+    {
+      get { return base.UniformScaling; }
+      set { base.UniformScaling = value; }
+    }
+
     [SortedCategory(CAT_VOLUME, CATORDER_VOLUME), PropertyOrder(1)]
     [Description("The height of the volume shape")]
     public float Height
@@ -1142,7 +1167,7 @@ namespace VisionEditorPlugin.Shapes
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

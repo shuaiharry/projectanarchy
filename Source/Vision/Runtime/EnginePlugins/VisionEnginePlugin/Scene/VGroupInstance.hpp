@@ -6,6 +6,8 @@
  *
  */
 
+#ifndef VISION_SCENE_VGROUP_INSTANCE_H
+#define VISION_SCENE_VGROUP_INSTANCE_H
 #ifndef _VISION_DOC
 
 class VGroupInstance
@@ -167,10 +169,11 @@ inline void VGroupInstanceFile::Close(bool bCloseStream)
   m_eFlags = VGroupInstance::INSTANCE_UNDEFINED;
 }
 
+#endif
 #endif // _VISION_DOC
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

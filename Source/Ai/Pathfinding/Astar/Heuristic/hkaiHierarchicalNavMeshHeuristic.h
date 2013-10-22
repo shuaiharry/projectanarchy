@@ -10,7 +10,7 @@
 
 #include <Ai/Pathfinding/Astar/hkaiAstar.h>
 #include <Ai/Pathfinding/Astar/hkaiAstarParameters.h>
-#include <Ai/Pathfinding/Astar/Search/DirectedGraphSearch/hkaiDirectedGraphSearch.h>
+#include <Ai/Pathfinding/Astar/Search/DirectedGraphSearch/hkaiDirectedGraphEuclideanSearch.h>
 
 #include <Ai/Pathfinding/Graph/hkaiDirectedGraphExplicitCost.h>
 #include <Ai/Pathfinding/Graph/hkaiNavMeshSectionGraph.h>
@@ -19,6 +19,8 @@
 // If this is defined, some extra distance information will be used in the heuristic
 // This overestimates the cost slightly, but can greatly reduce the number of iterations taken
 #define HKAI_USE_EXTRA_DISTANCE_INFORMATION
+
+struct hkaiSearchMemoryInfo;
 
 // The abstract graph (CoarseGraph) is constructed on the faces of the nav mesh.
 // But the original graph (OriginalGraph) is on the edges. Be careful!
@@ -57,7 +59,7 @@ struct hkaiHierarchicalNavMeshHeuristic
 
 		enum { MAX_GOALS = 16 };
 
-		inline hkaiHierarchicalNavMeshHeuristic(char* openSetStorage, int openSetStorageCount, char* searchStorage, int searchStorageCount);
+		inline hkaiHierarchicalNavMeshHeuristic(const hkaiSearchMemoryInfo& memInfo);
 
 		~hkaiHierarchicalNavMeshHeuristic() {}
 
@@ -80,7 +82,7 @@ struct hkaiHierarchicalNavMeshHeuristic
 
 
 		inline void getEdgePosition(EdgeKey edgeId, hkVector4& posOut) const;
-		void getClusterPosition(ClusterKey idx, hkVector4& posOut) const;
+		void getClusterPosition(ClusterKey key, hkVector4& posOut) const;
 
 	protected:
 		/// Returns the Euclidean distance to the closest goal
@@ -99,7 +101,7 @@ struct hkaiHierarchicalNavMeshHeuristic
 		HK_PAD_ON_SPU(const hkaiStreamingCollection::InstanceInfo*) m_streamingInfo;
 		
 		HK_PAD_ON_SPU(int) m_numGoals;
-		HK_PAD_ON_SPU(bool) m_someGoalCluster;
+		HK_PAD_ON_SPU(bool) m_hasValidGoalCluster;
 		HK_PAD_ON_SPU(ClusterKey) m_originalStartCluster;
 		
 		ClusterKey		m_endClusterKeys[MAX_GOALS];
@@ -108,7 +110,7 @@ struct hkaiHierarchicalNavMeshHeuristic
 		hkVector4		m_startPosition;
 		HK_PAD_ON_SPU(FaceKey) m_startFaceKey;
 		
-		mutable hkaiDirectedGraphSearch m_coarseSearch;
+		mutable hkaiDirectedGraphEuclideanSearch m_coarseSearch;
 			
 		hkaiGeneralAccessor m_accessor;
 
@@ -124,7 +126,7 @@ struct hkaiHierarchicalNavMeshHeuristic
 #endif // HKAI_ASTAR_HIERARCHICAL_HEURISTIC_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

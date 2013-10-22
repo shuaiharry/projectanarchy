@@ -277,12 +277,6 @@ class hkaiNavMesh : public hkReferencedObject
 		HK_FORCE_INLINE const FaceData* getFaceDataPtr( hkaiNavMesh::FaceIndex fIdx) const;
 		HK_FORCE_INLINE       FaceData* getFaceDataPtr( hkaiNavMesh::FaceIndex fIdx);
 
-		// Utility method to copy user data.
-		template<typename DATA>
-		static HK_FORCE_INLINE void copyUserData(DATA* dst, const DATA* src, int striding);
-
-		template<typename DATA>
-		static HK_FORCE_INLINE void copyUserData( hkArrayBase<DATA>& dataArray, int dstIndex, int srcIndex, int striding );
 
 			/// Get the local-space vertices for the given edge index (same as getEdgePoints but keeps the same interface as hkaiNavMeshInstance)
 		inline void getEdgeLocalPoints( hkaiNavMesh::EdgeIndex eIdx, hkVector4& edgeA, hkVector4& edgeB ) const;
@@ -414,7 +408,7 @@ class hkaiNavMesh : public hkReferencedObject
 #endif //HKAI_NAVMESH_GEOMETRY_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

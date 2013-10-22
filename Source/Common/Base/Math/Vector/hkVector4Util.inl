@@ -612,7 +612,14 @@ HK_FORCE_INLINE void HK_CALL hkVector4UtilImpl<FT>::calculatePerpendicularNormal
 	biVectorOut(ok1) =  vectorIn(ok2);
 	biVectorOut(ok2) = -vectorIn(ok1);
 	biVectorOut.template normalize<3,HK_ACC_23_BIT, HK_SQRT_IGNORE>();
-	bi2VectorOut.setCross( biVectorOut, vectorIn );
+	if(INVERSE2)
+	{
+		bi2VectorOut.setCross( biVectorOut, vectorIn );
+	}
+	else
+	{
+		bi2VectorOut.setCross( vectorIn, biVectorOut );
+	}
 #endif
 }
 
@@ -1402,7 +1409,7 @@ HK_FORCE_INLINE void HK_CALL hkVector4UtilImpl<FT>::dot4xyz1_1vs4( typename hkRe
 	typename hkRealTypes<FT>::Vector c3; c3.setMul(a3, vectorIn);
 
 	transpose(c0, c1, c2, c3);
-	typename hkRealTypes<FT>::Vector w; w.setAll(vectorIn.getW());
+	typename hkRealTypes<FT>::Scalar w = vectorIn.getW();
 	typename hkRealTypes<FT>::Vector s; s.setAdd(c2, w);
 	dotsOut.setAdd(c0, c1);
 	dotsOut.add(s);
@@ -2082,7 +2089,7 @@ template <typename FT>
 {
 	typedef typename hkRealTypes<FT>::Scalar Sc;
 
-	Sc diam; diam.setMul(radius, Sc::template getConstant<HK_QUADREAL_2>());
+	Sc diam; diam.setAdd(radius, radius);
 	Sc diamr; diamr.template setReciprocal<HK_ACC_FULL, HK_DIV_IGNORE>(diam);
 
 	return toRange(v, radius, diam, diamr, k);
@@ -2095,39 +2102,25 @@ template <typename FT>
 	typedef typename hkRealTypes<FT>::Comparison Cmp;
 
 	// Compute the number of 2Pi multiples needed.
-	Sc kf; kf.setAdd(v, radius); kf.mul(diameterReciprocal); 
-	k.setFloor(kf);
-	Sc cv; cv.setSubMul(v, k, diameter);
-
-	// Be paranoid about edge cases (TODO J.N: check numerical analysis).
-	Sc mradius; mradius.setMul(radius, Sc::template getConstant<HK_QUADREAL_MINUS1>());
-	Sc cvc; cvc.setClamped(cv, mradius, radius);
-	if (!cvc.isEqual(cv))
+	k.setZero();
+	Sc cv = v;
+	Sc mradius = -radius;
+	Sc cvc;
+	do
 	{
-		Cmp gt = cv.greater(radius);
-		Cmp lt = cv.less(mradius);
-
-		Sc gkfi; gkfi.setAdd(k, Sc::template getConstant<HK_QUADREAL_1>());
-		Sc gcv; gcv.setSub(cv, diameter);
-		Sc lkfi; lkfi.setSub(k, Sc::template getConstant<HK_QUADREAL_1>());
-		Sc lcv; lcv.setAdd(cv, diameter);
-	
-		cv.setSelect(gt, gcv, cv);
-		k.setSelect(gt, gkfi, k);
-		cv.setSelect(lt, lcv, cv);
-		k.setSelect(lt, lkfi, k);
-
-#ifdef HK_DEBUG
-		Sc clamped; clamped.setClamped(cv, mradius, radius);
-		HK_ASSERT(0x15a82a34, clamped.isEqual(cv));
-#endif
-	}
+		Sc kf; kf.setAdd(cv, radius); kf.mul(diameterReciprocal); 
+		kf.setFloor(kf);
+		
+		cv.subMul(kf, diameter);
+		k.add(kf);
+		cvc.setClamped(cv, mradius, radius);
+	} while ( !cvc.isEqual(cv) );
 
 	return cv;
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -24,9 +24,9 @@ class hkpHingeLimitsData : public hkpConstraintData
 {
 	public:
 
-		enum 
+		enum
 		{
-			SOLVER_RESULT_LIMITS		= 0,	// angular limits defined around m_freeAxisA 
+			SOLVER_RESULT_LIMITS		= 0,	// angular limits defined around m_freeAxisA
 			SOLVER_RESULT_ANG_AXIS_1	= 1,	// angular constraint defined by m_constrainedAxis1A
 			SOLVER_RESULT_ANG_AXIS_2	= 2,	// angular constraint defined by m_constrainedAxis2A
 			SOLVER_RESULT_MAX			= 3
@@ -63,30 +63,34 @@ class hkpHingeLimitsData : public hkpConstraintData
 			int getSizeOfAllAtoms() const { return hkGetByteOffsetInt(this, &m_2dAng+1); }
 
 			hkpSetLocalRotationsConstraintAtom	m_rotations;
-			hkpAngLimitConstraintAtom			m_angLimit; 
+			hkpAngLimitConstraintAtom			m_angLimit;
 			hkp2dAngConstraintAtom				m_2dAng;
 		};
 
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_CONSTRAINT);
 		HK_DECLARE_REFLECTION();
 
 		/// Constructor.
 		hkpHingeLimitsData();
 
+#ifndef HK_PLATFORM_SPU
+
 		/// Serialization constructor.
 		hkpHingeLimitsData(hkFinishLoadedObjectFlag f) : hkpConstraintData(f), m_atoms(f) {}
 
+#endif
+
 		/// Set the data for a Limited Hinge constraint with information given in body space.
-		void setInBodySpace(const hkVector4& axisA, const hkVector4& axisB, 
+		void setInBodySpace(const hkVector4& axisA, const hkVector4& axisB,
 								const hkVector4& axisAPerp, const hkVector4& axisBPerp);
 
 		/// Set the data for a Limited Hinge constraint with information given in world space.
 		void setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, const hkVector4& axis);
 
 		static inline Runtime* HK_CALL getRuntime( hkpConstraintRuntime* runtime ) { return reinterpret_cast<Runtime*>(runtime); }
-	
+
 		//
 		// Methods to set and get angle limits
 		//
@@ -108,7 +112,7 @@ class hkpHingeLimitsData : public hkpConstraintData
 		/// this value from 0 to 1 for a newly created constraint,
 		/// you can nicely blend in the limits.
 		inline void setAngularLimitsTauFactor( hkReal mag );
-			
+
 		/// get the m_angularLimitsTauFactor;
 		inline hkReal getAngularLimitsTauFactor() const;
 
@@ -123,7 +127,7 @@ class hkpHingeLimitsData : public hkpConstraintData
 		virtual void getConstraintInfo( ConstraintInfo& infoOut ) const;
 
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
-		
+
 	public:
 
 		HK_ALIGN_REAL( Atoms m_atoms );
@@ -135,7 +139,7 @@ class hkpHingeLimitsData : public hkpConstraintData
 #endif // HKP_HINGE_LIMITS_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

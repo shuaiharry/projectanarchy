@@ -42,6 +42,20 @@ public:
   IVisApp_cl *m_pApp;
 };
 
+/// \brief
+///   Encapsulates information about a load scene request.
+/// \sa VisionApp_cl::RequestLoadScene
+struct VLoadSceneRequest
+{
+  void Clear();
+
+  VString sSceneFileName;
+  int     iAdditionalLoadingFlags;
+  bool    bAllowProfileFallback;
+  bool    bPending;
+};
+
+
 
 /// \brief
 ///   A reference implementation of the IVisApp_cl interface that is used by the samples in Vision.
@@ -293,6 +307,42 @@ public:
   ///   forwards all progress changes to OnLoadSceneStatus for backwards compatibility.
   VISION_APIFUNC virtual VProgressStatus& GetLoadingProgress();
 
+  /// \brief
+  ///   Stores a request for loading the given scene.
+  ///
+  /// Any subclass of VisionApp_cl is responsible for processing and clearing any pending load scene request.
+  /// 
+  /// \return
+  ///   False, if there is still a pending load scene request.
+  ///
+  /// \param pszSceneName
+  ///   The name of the scene file (.vscene will be added).
+  ///
+  /// \param iAdditionalLoadingFlags
+  ///   Optionally specify additional VSceneLoader flags.
+  ///
+  /// \param bAllowProfileFallback
+  ///   If true LoadScene will try to guess the asset profile to use. By default it will first use the platform specific profile, but it might fall back to 'pcdx9'
+  ///   if there is no platform specific profile, but a pcdx9 profile, and the current platform is compatible with that (regarding texture formats).
+  virtual VISION_APIFUNC bool RequestLoadScene(const char* pszSceneName, int iAdditionalLoadingFlags = 0, bool bAllowProfileFallback = true) HKV_OVERRIDE;
+
+  /// \brief
+  ///   Retrieve a currently pending load scene request.
+  ///
+  /// \return
+  ///   Information about the currently pending load scene request.
+  VISION_APIFUNC const VLoadSceneRequest& GetPendingLoadSceneRequest() const;
+
+  /// \brief
+  ///   Return if there is currently a load scene request pending.
+  inline bool IsLoadSceneRequestPending() const 
+  { 
+    return m_loadSceneRequest.bPending; 
+  }
+
+  /// \brief
+  ///   Clear any currently pending load scene request.
+  VISION_APIFUNC void ClearLoadSceneRequest();
 
   ///
   /// @}
@@ -503,11 +553,14 @@ protected:
   //////////////////////////////////////////////////////////////////
   
   int   m_iInitializeCount;
-  int   m_iInitFlags;                          ///< Flags that were used to initialize the application.
+  int   m_iInitFlags;                           ///< Flags that were used to initialize the application.
   
-  bool  m_bInputInitialized, m_bUpdateScreen;  ///< Whether input is initialized.
+  bool m_bInputInitialized;                     ///< Whether input is initialized.
+  bool m_bUpdateScreen;                         ///< Whether UpdateScreen should be called.
+  bool m_bInsideRun;                            ///< Whether we are already inside the Run method.
 
   VAppProgressStatus m_LoadingProgress;
+  VLoadSceneRequest m_loadSceneRequest;
 
   ///
   /// @}
@@ -533,7 +586,7 @@ public:
   ///   The number of simulation ticks per second
   ///
   /// \param iMaxTickCount
-  ///   An upper limit for the returned counts in GetUpdateTickCount. A value of 0 can be passed for no upper limnit
+  ///   An upper limit for the returned counts in GetUpdateTickCount. A value of 0 can be passed for no upper limit
   ///
   /// \param bDeleteObjectUponUnref
   ///   If false, this reference counted instance will not be destroyed when de-referenced.
@@ -544,21 +597,45 @@ public:
   ///   Destructor
   VISION_APIFUNC virtual ~VFixStepSceneUpdateController();
 
-  /// \brief
-  ///   Overridden function to reset the internal timer
-  VISION_APIFUNC VOVERRIDE void Reset();
+  VISION_APIFUNC virtual void Reset() HKV_OVERRIDE;
 
-  /// \brief
-  ///   Returns the number of simulation ticks that have to be executed since the last call of this function.
-  VISION_APIFUNC VOVERRIDE int GetUpdateTickCount();
+  VISION_APIFUNC virtual int GetUpdateTickCount() HKV_OVERRIDE;
 
   /// \brief
   ///   Modify the number of ticks executed per second. Same as values passed to constructor
   VISION_APIFUNC void SetSteps(int iTicksPerSec, int iMaxTickCount=0);
 
+  /// \brief
+  ///  Returns the number of simulation ticks per second.
+  inline int GetTicksPerSecond() const 
+  { 
+    return m_iTicksPerSecond; 
+  }
+
+  /// \brief
+  ///   Returns the maximum number of simulation ticks per frame.
+  inline int GetMaxTickCount() const
+  { 
+    return m_iMaxTickCount; 
+  }
+
+  ///
+  /// @{
+  /// @name Serialization
+  ///
+
+  V_DECLARE_SERIAL_DLLEXP(VFixStepSceneUpdateController, VISION_APIDATA)
+
+  VISION_APIFUNC virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
+
+private:
   int m_iMaxTickCount;
   int m_iTicksPerSecond;
-
+  
   uint64 m_iLastUpdateTickCount;
 };
 
@@ -566,7 +643,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -160,8 +160,60 @@ VExportShapesArchive* VSceneExporter::StartVSceneExport(IVFileOutStream *pOut, b
     pToD = NULL; 
   (*m_pArchive) << pToD;
 
+  // #18:
+  hkvVec4 vDefaultGlobalAmbientColor = Vision::Renderer.GetDefaultGlobalAmbientColor();
+  (*m_pArchive) << vDefaultGlobalAmbientColor;
+
   // #15: Serialize global LOD Hysteresis settings
   VLODHysteresisManager::SerializeX(*m_pArchive);
+
+  // #19: coordinate settings
+  (*m_pArchive) << Vision::World.GetCoordinateSystem()->GetProjection();
+
+  // #17: time stepping
+  // Note we always export variable timestepping for now (2013.2)
+  // This will be re-enabled as soon as fixed time stepping works correctly (2013.3).
+  if ((m_eExportFlags & VExport_TimeStepping) != 0)
+  {
+    // Update Scene Controller
+    /*IVisUpdateSceneController_cl* pUpdateSceneController = Vision::GetApplication()->GetSceneUpdateController();
+    (*m_pArchive) << pUpdateSceneController;*/
+    (*m_pArchive) << (IVisUpdateSceneController_cl*)(NULL);
+
+    // Timer
+    IVTimerPtr spTimer = Vision::GetTimer();
+
+    // Set default timer in order to check if the retrieved timer
+    // is Vision's default timer.
+    Vision::SetTimer(NULL); 
+
+    //if (spTimer == Vision::GetTimer())
+    {
+      // Do not serialize default timer.
+      (*m_pArchive) << (IVTimer*)(NULL);
+    }
+    /*else
+    {
+      (*m_pArchive) << spTimer;
+    }*/
+
+    // Re-set timer.
+    Vision::SetTimer(spTimer);
+
+    // Store physics time stepping
+    /*IVisPhysicsModule_cl* pPhysicsModule = Vision::GetApplication()->GetPhysicsModule();
+    if (pPhysicsModule != NULL)
+    {
+      (*m_pArchive) << pPhysicsModule->GetPhysicsTickCount();
+      (*m_pArchive) << pPhysicsModule->GetMaxTicksPerFrame();
+    }
+    else*/
+    {
+      // no physics time stepping specified
+      (*m_pArchive) << int(-1);
+      (*m_pArchive) << int(-1);
+    }
+  }
 
   return m_pArchive;
 }
@@ -282,14 +334,15 @@ void VSceneExporter::WriteVSceneFile()
 
   // v3d chunk, currently contains some scene-wide settings
   file.StartChunk('_V3D');
-
+  {
   file.WriteInt(6); // version for this chunk
-  hkvVec3d refPos;
-  Vision::World.GetCoordinateSystem()->GetSceneReferencePosition(refPos);
 
     file.WriteFloat(Vision::World.GetGlobalUnitScaling());
 
+    hkvVec3d refPos;
+    Vision::World.GetCoordinateSystem()->GetSceneReferencePosition(refPos);
     file.Write(refPos.data,sizeof(double)*3,"qqq"); // version 6
+
     VColorRef iDefaultLightColor = Vision::Renderer.GetDefaultLightingColor();
     int iLightmapEquation = Vision::Renderer.GetLightingMode();
     if (!Vision::RenderLoopHelper.HasLightmaps())
@@ -305,17 +358,12 @@ void VSceneExporter::WriteVSceneFile()
     VLightGrid_cl* pGrid = Vision::RenderLoopHelper.GetLightGrid();
     if (pGrid != NULL && pGrid->GetFilename())
     {
-      /*const char* szFilename = pGrid->GetFilename();
-      char szExtName[FS_MAX_PATH];
-      if (m_pPlatformProfile->m_bSimpleLightGrid)
-        VFileHelper::AddExtension(szExtName, szFilename, "vslg");
-      else
-        VFileHelper::AddExtension(szExtName, szFilename, "vlg");*/
-
       file.WriteString(pGrid->GetFilename());
     }
     else
+    {
       file.WriteString(NULL);
+    }
 
     //save shader provider
     IVisShaderProvider_cl* pShaderProvider = Vision::GetApplication()->GetShaderProvider();
@@ -323,6 +371,7 @@ void VSceneExporter::WriteVSceneFile()
       file.WriteString(pShaderProvider->GetTypeId()->m_lpszClassName);
     else
       file.WriteString(NULL);
+  }
   file.EndChunk();
 
   // serialize fog config
@@ -346,6 +395,7 @@ void VSceneExporter::WriteVSceneFile()
     file.WriteFloat(fog.fHeightFogEnd);
     file.Writebool(fog.bHeightFogAddScattering);
     file.Writebool(fog.bMaskSky);
+    file.WriteFloat(fog.fVirtualSkyDepth);
 
     file.EndChunk();
   }
@@ -491,7 +541,7 @@ void VSceneExporter::WriteVPrefabFile()
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

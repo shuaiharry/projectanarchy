@@ -70,7 +70,7 @@ class hkbPoweredRagdollControlsModifier : public hkbModifier
 		struct hkbPoweredRagdollControlData m_controlData; //+hk.Description("The control parameters that influence the Powered Ragdoll Modifier.")
 
 					/// The bones to be driven by the rigid body ragdoll controller.  If this is empty, all bones will be driven.
-		hkRefPtr<hkbBoneIndexArray> m_bones;	//+hkb.RoleAttribute("ROLE_DEFAULT","FLAG_RAGDOLL")
+		hkRefPtr<hkbBoneIndexArray> m_bones;	//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_RAGDOLL|FLAG_NOT_VARIABLE")
 												//+hk.Description("The bones to be driven by the rigid body ragdoll controller.  If this is empty, all bones will be driven.")	
 
 			/// How to process the world-from-model.
@@ -94,7 +94,7 @@ class hkbPoweredRagdollControlsModifier : public hkbModifier
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

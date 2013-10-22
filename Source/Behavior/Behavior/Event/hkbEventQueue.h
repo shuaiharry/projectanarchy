@@ -11,6 +11,8 @@
 
 #include <Behavior/Behavior/Event/hkbEvent.h>
 #include <Common/Base/Container/Queue/hkQueue.h>
+#include <Common/Base/DebugUtil/DeterminismUtil/hkCheckDeterminismUtil.h>
+#include <Behavior/Behavior/hkbBase.h>
 #include <Behavior/Behavior/Linker/hkbSymbolIdMap.h>
 
 /// A queue for storing hkbEvents.  
@@ -76,7 +78,7 @@ class hkbEventQueue
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

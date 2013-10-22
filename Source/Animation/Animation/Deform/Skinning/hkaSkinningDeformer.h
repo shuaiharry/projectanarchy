@@ -11,7 +11,106 @@
 
 #include <Animation/Animation/Deform/hkaVertexDeformerInput.h>
 
-class hkxVertexBuffer;
+#include <Common/SceneData/Mesh/hkxVertexBuffer.h>
+
+struct hkaSkinBinding
+{
+	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_ANIM_RUNTIME, hkaSkinBinding );
+
+	// Input buffer
+	const hkFloat32* m_iPosBase;
+	const hkFloat32* m_iNormBase;
+	const hkFloat32* m_iBinormBase;
+	const hkFloat32* m_iTangentBase;
+	const hkUint8* m_iWeightBase;
+	const hkUint8* m_iIndexBase;
+	hkUint8 m_iPosStride;  // in hkFloat32
+	hkUint8 m_iNormStride; // in hkFloat32
+	hkUint8 m_iBinormStride; // in hkFloat32
+	hkUint8 m_iTangentStride;// in hkFloat32
+	hkUint8 m_iWeightStride; // in bytes
+	hkUint8 m_iIndexStride;  // in bytes
+	hkUint8 m_bonesPerVertex;
+
+	// Output Buffer
+	hkFloat32* m_oPosBase;
+	hkFloat32* m_oNormBase;
+	hkFloat32* m_oBinormBase;
+	hkFloat32* m_oTangentBase;
+	hkUint8 m_oPosStride; // in hkFloat32
+	hkUint8 m_oNormStride; // in hkFloat32
+	hkUint8 m_oBinormStride; // in hkFloat32
+	hkUint8 m_oTangentStride; // in hkFloat32
+
+	hkUint32 m_numVerts;
+	bool m_outputBufferIsAligned;
+
+	void setBoneIndicesDataPtr(const hkxVertexBuffer& vb)
+	{
+		const hkxVertexDescription& vertDecl = vb.getVertexDesc(); 
+		const hkxVertexDescription::ElementDecl* boneDecl = vertDecl.getElementDecl(hkxVertexDescription::HKX_DU_BLENDINDICES, 0);
+
+		m_iIndexBase = (hkUint8*)( vb.getVertexDataPtr(*boneDecl) );
+		m_iIndexStride =  hkUint8(boneDecl->m_byteStride);
+	}
+	hkUint16 getVertexBoneIndex(hkUint32 vertexIdx, hkUint32 influenceIdx)
+	{
+		const hkUint8* vertexBoneIndices = (const hkUint8*)(m_iIndexBase + vertexIdx*m_iIndexStride);
+		hkUint8 boneIndex = vertexBoneIndices[influenceIdx];
+
+		return hkUint16(boneIndex);
+	}
+};
+
+struct hkaSkinLargeBinding
+{
+	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_ANIM_RUNTIME, hkaSkinLargeBinding );
+
+	// Input buffer
+	const hkFloat32* m_iPosBase;
+	const hkFloat32* m_iNormBase;
+	const hkFloat32* m_iBinormBase;
+	const hkFloat32* m_iTangentBase;
+	const hkUint8* m_iWeightBase;
+	const hkUint16* m_iIndexBase;
+	hkUint8 m_iPosStride;  // in hkFloat32
+	hkUint8 m_iNormStride; // in hkFloat32
+	hkUint8 m_iBinormStride; // in hkFloat32
+	hkUint8 m_iTangentStride;// in hkFloat32
+	hkUint8 m_iWeightStride; // in bytes
+	hkUint8 m_iIndexStride;  // in bytes
+	hkUint8 m_bonesPerVertex;
+
+	// Output Buffer
+	hkFloat32* m_oPosBase;
+	hkFloat32* m_oNormBase;
+	hkFloat32* m_oBinormBase;
+	hkFloat32* m_oTangentBase;
+	hkUint8 m_oPosStride; // in hkFloat32
+	hkUint8 m_oNormStride; // in hkFloat32
+	hkUint8 m_oBinormStride; // in hkFloat32
+	hkUint8 m_oTangentStride; // in hkFloat32
+
+	hkUint32 m_numVerts;
+	bool m_outputBufferIsAligned;
+
+	void setBoneIndicesDataPtr(const hkxVertexBuffer& vb)
+	{
+		const hkxVertexDescription& vertDecl = vb.getVertexDesc(); 
+		const hkxVertexDescription::ElementDecl* boneDecl = vertDecl.getElementDecl(hkxVertexDescription::HKX_DU_BLENDINDICES, 0);
+
+		m_iIndexBase = (hkUint16*)( vb.getVertexDataPtr(*boneDecl) );
+		m_iIndexStride =  hkUint8(boneDecl->m_byteStride/sizeof(hkUint16));
+	}
+	hkUint16 getVertexBoneIndex(hkUint32 vertexIdx, hkUint32 influenceIdx)
+	{
+		const hkUint16* vertexBoneIndices = (const hkUint16*)(m_iIndexBase + vertexIdx*m_iIndexStride);
+		hkUint16 boneIndex = vertexBoneIndices[influenceIdx];
+
+		return boneIndex;
+	}
+};
+
 
 /// The abstract base class for weighted vertex deformation.
 /// Applies to both indexed and non indexed skinning.
@@ -37,7 +136,7 @@ class hkaSkinningDeformer
 #endif // HK_SKINNING_DEFORMER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

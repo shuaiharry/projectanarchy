@@ -181,6 +181,9 @@
 #		elif WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
 #			define HK_PLATFORM_IS_CONSOLE 1
 #		endif
+#	elif defined(_DURANGO)
+#		define HK_PLATFORM_DURANGO
+#		define HK_PLATFORM_IS_CONSOLE 1
 #	endif
 #	ifdef ___UNDEF_FAMILY 
 		#undef WINAPI_FAMILY_APP         
@@ -197,6 +200,16 @@
 #	if defined(HK_ARCH_ARM_V7) && !defined(HK_DISABLE_NEON)
 #		define HK_COMPILER_HAS_INTRINSICS_NEON 1
 #	endif
+
+#elif defined(HK_PLATFORM_TIZEN) || defined(__tizen__) || defined(TIZEN)
+#	ifndef HK_PLATFORM_TIZEN
+#		define HK_PLATFORM_TIZEN
+//		#	if defined(HK_ARCH_ARM_V7) && !defined(HK_DISABLE_NEON)
+//		#		define HK_COMPILER_HAS_INTRINSICS_NEON 1
+//		#	endif
+#	endif
+#	define HK_PLATFORM_IS_CONSOLE 1
+
 #elif (defined(__unix__) || defined(__linux__))
 #	define HK_PLATFORM_LINUX
 #	define HK_PLATFORM_IS_CONSOLE 0
@@ -223,6 +236,8 @@
 #	define HK_PLATFORM_PS3
 #	define HK_PLATFORM_PS3_PPU
 #	define HK_PLATFORM_IS_CONSOLE 1
+// Uncomment this to build a PRX (Internal builds only)
+//#	define HK_PS3_PRX_BUILD
 #elif defined(__SPU__) && defined(__CELLOS_LV2__)
 #	define HK_PLATFORM_PS3
 #	define HK_PLATFORM_PS3_SPU
@@ -427,7 +442,11 @@ typedef hkFloat32 hkReal;
 
 #define HK_NULL 0
 
-#if defined (HK_COMPILER_MSVC)
+#if __cplusplus >= 201103
+#	define HK_OVERRIDE override
+#	define HK_FINAL final
+#	define HK_FINAL_OVERRIDE final override
+#elif defined (HK_COMPILER_MSVC)
 #	if (_MSC_VER >= 1700)
 #		define HK_OVERRIDE override
 #		define HK_FINAL	final
@@ -522,7 +541,7 @@ typedef hkFloat32 hkReal;
 #	define HK_CLASSALIGN8(DECL) HK_ALIGN8(DECL)
 #	define HK_CLASSALIGN16(DECL) HK_ALIGN16(DECL)
 
-#	if defined(HK_ARCH_ARM) || defined(HK_COMPILER_GHS) || defined(HK_PLATFORM_IOS_SIM)
+#	if defined(HK_ARCH_ARM) || defined(HK_COMPILER_GHS) || defined(HK_PLATFORM_IOS_SIM) || defined(HK_PLATFORM_TIZEN)
 #		define HK_ALIGN_RELAX_CHECKS 1
 #	endif
 
@@ -540,13 +559,9 @@ typedef hkFloat32 hkReal;
 #	endif
 
 #   if defined(HK_PLATFORM_PS3_PPU)
-#     if ( HK_CELL_SDK_VERSION < 0x080000 )
-			typedef unsigned long hkUint64;
-			typedef long hkInt64;
-#     else
-			typedef unsigned long long hkUint64;
-			typedef long long hkInt64;
-#     endif
+		typedef unsigned long long hkUint64;
+		typedef long long hkInt64;
+
 #   elif defined(HK_PLATFORM_PS3_SPU)
 		typedef unsigned long long hkUint64;
 		typedef long long hkInt64;
@@ -599,7 +614,7 @@ typedef hkFloat32 hkReal;
 #	define HK_DEPRECATED /* nothing */
 #	define HK_DEPRECATED2(MSG) /* nothing */
 // Section attribute. Placing each function in a different section allows the linker to dead-strip them individually
-#if !defined(HK_PLATFORM_IOS) && !defined(HK_PLATFORM_MAC386) && !defined(HK_PLATFORM_PSVITA) && !defined(HK_PLATFORM_WIIU)
+#if !defined(HK_PLATFORM_IOS) && !defined(HK_PLATFORM_MAC386) && !defined(HK_PLATFORM_PSVITA) && !defined(HK_PLATFORM_WIIU) && !defined (HK_PS3_PRX_BUILD)
 #	define HK_INIT_FUNCTION2(FN, SECTION_SUFFIX)	__attribute__ ((section (".text_init." #SECTION_SUFFIX))) FN
 #	define HK_INIT_FUNCTION(FN)						HK_INIT_FUNCTION2(FN, FN)
 #endif
@@ -779,7 +794,7 @@ typedef hkFloat32 hkReal;
 #	define HK_ON_PLATFORM_HAS_SPU(code)
 #endif
 
-#if defined(HK_PLATFORM_PS3_PPU) || defined(HK_PLATFORM_WIN32) || defined(HK_PLATFORM_XBOX360) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_LINUX) || defined(HK_PLATFORM_PSVITA) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_WIIU) || defined(HK_PLATFORM_PS4)
+#if defined(HK_PLATFORM_PS3_PPU) || defined(HK_PLATFORM_WIN32) || defined(HK_PLATFORM_XBOX360) || defined(HK_PLATFORM_MAC386) || defined(HK_PLATFORM_MACPPC) || defined(HK_PLATFORM_LINUX) || defined(HK_PLATFORM_PSVITA) || defined(HK_PLATFORM_IOS) || defined(HK_PLATFORM_ANDROID) || defined(HK_PLATFORM_WIIU) || defined(HK_PLATFORM_PS4) || defined(HK_PLATFORM_TIZEN)
 #	define HK_PLATFORM_MULTI_THREAD
 #endif
 
@@ -854,7 +869,7 @@ typedef hkFloat32 hkReal;
 #endif // HKBASE_HKBASEDEFS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

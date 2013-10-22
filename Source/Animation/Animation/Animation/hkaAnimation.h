@@ -74,7 +74,8 @@ class hkaAnimation : public hkReferencedObject
 			/// Sample a individual floating tracks.
 		virtual void sampleIndividualFloatTracks( hkReal time, const hkInt16* tracks, hkUint32 numTracks, hkReal* out ) const = 0;
 
-
+			/// Return the memory footprint of this animation.
+		virtual int getSizeInBytes() const = 0;
 
 			/// Returns the number of original samples / frames of animation.
 		virtual int getNumOriginalFrames() const = 0;
@@ -251,7 +252,7 @@ class hkaAnimation : public hkReferencedObject
 #endif // HKANIMATION_ANIMATION_HKSKELETALANIMATION_XML_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

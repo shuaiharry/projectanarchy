@@ -6,34 +6,28 @@
  *
  */
 
-/// \file vHavokRigidBody.hpp
+/// \file vHavokUserData.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKUSERDATA_HPP_INCLUDED
 #define VHAVOKUSERDATA_HPP_INCLUDED
 
-
 ///
 /// \brief
-///   Enum that defines the type of object that is encoded into a user data pointer.
+///   Enum defining the type of data that is encoded into a user data pointer.
 ///
 enum vHavokUserDataType_e
 {
   V_USERDATA_UNDEFINED    = 0,  ///< Collider type is undefined
-  V_USERDATA_OBJECT       = 1,  ///< Havok rigid body object (can be dynamic or static) or Havok character controller
+  V_USERDATA_OBJECT       = 1,  ///< Havok Physics rigid body object (can be dynamic or static) or Havok Physics character controller
   V_USERDATA_STATIC       = 2,  ///< Static mesh
   V_USERDATA_TERRAIN      = 3,  ///< Terrain mesh
 
   V_USERDATA_TYPEMASK     = 3,  ///< Bitmask used to extract the type from the pointer
 };
 
-
 ///
 /// \brief
-///   Internal class to hold two Havok user data void pointers.
+///   Internal class to hold two Havok Physics user data void pointers.
 ///
 /// \internal
 ///
@@ -48,12 +42,12 @@ struct vHavokUserDataPointerPair_t
 
   inline void* GetTypAndPointer(int iIndex, vHavokUserDataType_e &eType) const
   {
-    return ExtractTypeAndPointer(m_pUserData[iIndex],eType);
+    return ExtractTypeAndPointer(m_pUserData[iIndex], eType);
   }
 
   static inline void* CombineTypeAndPointer(void *pPtr, vHavokUserDataType_e eType)
   {
-    VASSERT_MSG((((hkUlong)pPtr)&V_USERDATA_TYPEMASK) == 0, "pointer must be 4-byte aligned");
+    VASSERT_MSG((((hkUlong)pPtr) & V_USERDATA_TYPEMASK) == 0, "pointer must be 4-byte aligned");
     return (void *)(((hkUlong)pPtr) | eType); ///< the lowest 2 bits are used to store the type
   }
 
@@ -68,7 +62,7 @@ struct vHavokUserDataPointerPair_t
 #endif // VHAVOKUSERDATA_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

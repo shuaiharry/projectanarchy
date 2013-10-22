@@ -36,7 +36,7 @@ using namespace System::Runtime::CompilerServices;
 // You can specify all the value or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly:AssemblyVersionAttribute("2013.1.1.1")];
+[assembly:AssemblyVersionAttribute("2013.2.0.1")];
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 
@@ -65,7 +65,7 @@ using namespace System::Runtime::CompilerServices;
 [assembly:AssemblyKeyNameAttribute("")];
 
 /*
- * Havok SDK - Base file, BUILD(#20130725)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

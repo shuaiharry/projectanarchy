@@ -14,11 +14,17 @@
 // Include required headers
 #include <Vision/Runtime/Engine/System/Vision.hpp>
 #include <Vision/Runtime/Engine/Application/VisionApp.hpp>
-#include <Vision/Runtime/Common/iOS/VisAppSettings.h>
+#if !defined(_VISION_TIZEN)
+  #include <Vision/Runtime/Common/iOS/VisAppSettings.h>
+#else
+  #include <Vision/Runtime/Common/Tizen/VisTizenGLESApp.hpp>
+#endif
 #include <Vision/Runtime/Engine/Application/VisProfilingMenu.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Input/VMouseCamera.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Scene/VSceneLoader.hpp>
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/Rendering/Profiling/VGraphObject.hpp>
+
+#include <Vision/Runtime/Engine/Renderer/RenderLoop/VisApiDebugShadingRenderLoop.hpp>
 
 #include <Vision/Runtime/EnginePlugins/VisionEnginePlugin/GUI/VMenuIncludes.hpp>
 class VBufferResolver;
@@ -29,58 +35,61 @@ class VBufferResolver;
 /// \brief
 ///   Flag values for configuring the behavior of a VisSampleApp.
 /// \note
-///   Not all flags are applicable to all platforms.
-enum VSampleFlags
+///   Not all flags are applicable to all platforms. 
+namespace VSampleFlags
 {
-  VSAMPLE_FORCEFULLSCREEN           = V_BIT(0),  ///< Start in full-screen mode. Unless VSAMPLE_ASKFULLSCREEN is specified, no display mode prompt is shown. (Windows desktop only)
-  VSAMPLE_ASKFULLSCREEN             = V_BIT(1),  ///< Ask about the display mode. The answer to this prompt will override VSAMPLE_FORCEFULLSCREEN. (Windows desktop only)
-  VSAMPLE_MULTISAMPLE2X             = V_BIT(2),  ///< Use multisampling: 2 samples.
-  VSAMPLE_MULTISAMPLE4X             = V_BIT(3),  ///< Use multisampling: 4 samples.
-  VSAMPLE_WAITRETRACE               = V_BIT(4),  ///< Wait for vertical sync before swapping buffers.
-  VSAMPLE_USEDESKTOPRESOLUTION      = V_BIT(5),  ///< In full-screen mode, use the current screen resolution instead of the resolution passed to VisSampleApp::InitSample().
-  VSAMPLE_SPLASHSCREEN              = V_BIT(6),  ///< Show a loading screen with a progress bar, that cross-fades into the loaded scene once loading is complete.
-  VSAMPLE_HAVOKLOGO                 = V_BIT(7),  ///< Show the Havok logo as an overlay in the lower right corner of the screen or window
-  VSAMPLE_ALIGNLOGOALTERNATIVE      = V_BIT(8),  ///< If VSAMPLE_HAVOKLOGO is specified as well, shows the Havok logo in the lower left corner instead.
-  VSAMPLE_MULTISAMPLE8X             = V_BIT(10), ///< Use multisampling: 4 samples.
-  VSAMPLE_CUSTOMDATADIRECTORIES     = V_BIT(11), ///< Don't add default data dirs for Vision samples (see VisSampleApp::SetupSampleData()).
-  VSAMPLE_DISABLEDEFAULTKEYS        = V_BIT(12), ///< Don't process default sample hotkeys for showing debug information and changing rendering modes.
-  VSAMPLE_ENABLE_IHV_PROFILING      = V_BIT(13), ///< Enable hardware vendor-specific profiling (Windows only; this enables nVidia NVPerfHUD).
-  VSAMPLE_XBOX360_BUFFER_2_FRAMES   = V_BIT(14), ///< Allow commands of two frames to queue up in the command buffer (Xbox360 only).
-  VSAMPLE_NO_DEPTHBUFFER            = V_BIT(15), ///< Don't create a depth/stencil buffer.
-  VSAMPLE_DX11_0_ON_DX11            = V_BIT(16), ///< Attempt to create the DirectX 11.0 feature level (DirectX 11 only).
-  VSAMPLE_DX10_1_ON_DX11            = V_BIT(17), ///< Attempt to create the DirectX 10.1 feature level (DirectX 11 only).
-  VSAMPLE_DX10_0_ON_DX11            = V_BIT(18), ///< Attempt to create the DirectX 10.0 feature level (DirectX 11 only).
-  VSAMPLE_DX9_3_ON_DX11             = V_BIT(19), ///< Attempt to create the DirectX 9.3 feature level (DirectX 11 only).
-  VSAMPLE_DX9_2_ON_DX11             = V_BIT(20), ///< Attempt to create the DirectX 9.2 feature level (DirectX 11 only).
-  VSAMPLE_DX9_1_ON_DX11             = V_BIT(21), ///< Attempt to create the DirectX 9.1 feature level (DirectX 11 only).
-  VSAMPLE_FORCEMOBILEMODE           = V_BIT(22), ///< Use the mobile shader provider when loading and setting up a scene.
-  VSAMPLE_FLIPMODE30FPS             = V_BIT(23), ///< Perform 30 Hz frame sync (Playstation 3 only).
-  VSAMPLE_FLIPMODE60FPS             = V_BIT(24), ///< Perform 60 Hz frame sync (Playstation 3 only).
-  VSAMPLE_CHECKFULLSCREENMODE       = V_BIT(25), ///< Check whether the resolution passed to VisSampleApp::InitSample() is actually supported; use closest supported alternative if it isn't (Windows desktop only).
-  VSAMPLE_WIIU_DRCDEMO              = V_BIT(26), ///< WiiU only: Show a demo animation on the DRC.
-  VSAMPLE_WIIU_DRCCOPY              = V_BIT(27), ///< WiiU only: Show the rendered scene on the DRC also.
-  VSAMPLE_HEADLESS                  = V_BIT(28), ///< Run in headless mode (see VVideo::SetHeadlessModeEnabled() for more details; Windows only).
-  VSAMPLE_SHOWEXITPROMPT            = V_BIT(29), ///< Prompt before exiting the application (Android only).
-  VSAMPLE_NO_FALLBACK_ASSETPROFILE  = V_BIT(30), ///< Don't allow selection of a different asset profile as a fallback in case the specified profile doesn't exist. See LoadScene() for more details.
-  VSAMPLE_DONT_LOAD_MANIFESTFILE    = V_BIT(31), ///< Don't evaluate the project's manifest file for additional data directories to add.
+  const uint64 VSAMPLE_FORCEFULLSCREEN           = V_BIT_64(0);  ///< Start in full-screen mode. Unless VSAMPLE_ASKFULLSCREEN is specified, no display mode prompt is shown. (Windows desktop only)
+  const uint64 VSAMPLE_ASKFULLSCREEN             = V_BIT_64(1);  ///< Ask about the display mode. The answer to this prompt will override VSAMPLE_FORCEFULLSCREEN. (Windows desktop only)
+  const uint64 VSAMPLE_MULTISAMPLE2X             = V_BIT_64(2);  ///< Use multisampling: 2 samples.
+  const uint64 VSAMPLE_MULTISAMPLE4X             = V_BIT_64(3);  ///< Use multisampling: 4 samples.
+  const uint64 VSAMPLE_WAITRETRACE               = V_BIT_64(4);  ///< Wait for vertical sync before swapping buffers.
+  const uint64 VSAMPLE_USEDESKTOPRESOLUTION      = V_BIT_64(5);  ///< In full-screen mode, use the current screen resolution instead of the resolution passed to VisSampleApp::InitSample().
+  const uint64 VSAMPLE_SPLASHSCREEN              = V_BIT_64(6);  ///< Show a loading screen with a progress bar, that cross-fades into the loaded scene once loading is complete.
+  const uint64 VSAMPLE_HAVOKLOGO                 = V_BIT_64(7);  ///< Show the Havok logo as an overlay in the lower right corner of the screen or window
+  const uint64 VSAMPLE_ALIGNLOGOALTERNATIVE      = V_BIT_64(8);  ///< If VSAMPLE_HAVOKLOGO is specified as well, shows the Havok logo in the lower left corner instead.
+  const uint64 VSAMPLE_MULTISAMPLE8X             = V_BIT_64(10); ///< Use multisampling: 4 samples.
+  const uint64 VSAMPLE_CUSTOMDATADIRECTORIES     = V_BIT_64(11); ///< Don't add default data dirs for Vision samples (see VisSampleApp::SetupSampleData()).
+  const uint64 VSAMPLE_DISABLEDEFAULTKEYS        = V_BIT_64(12); ///< Don't process default sample hotkeys for showing debug information and changing rendering modes.
+  const uint64 VSAMPLE_ENABLE_IHV_PROFILING      = V_BIT_64(13); ///< Enable hardware vendor-specific profiling (Windows only; this enables nVidia NVPerfHUD).
+  const uint64 VSAMPLE_XBOX360_BUFFER_2_FRAMES   = V_BIT_64(14); ///< Allow commands of two frames to queue up in the command buffer (Xbox360 only).
+  const uint64 VSAMPLE_NO_DEPTHBUFFER            = V_BIT_64(15); ///< Don't create a depth/stencil buffer.
+  const uint64 VSAMPLE_DX11_0_ON_DX11            = V_BIT_64(16); ///< Attempt to create the DirectX 11.0 feature level (DirectX 11 only).
+  const uint64 VSAMPLE_DX10_1_ON_DX11            = V_BIT_64(17); ///< Attempt to create the DirectX 10.1 feature level (DirectX 11 only).
+  const uint64 VSAMPLE_DX10_0_ON_DX11            = V_BIT_64(18); ///< Attempt to create the DirectX 10.0 feature level (DirectX 11 only).
+  const uint64 VSAMPLE_DX9_3_ON_DX11             = V_BIT_64(19); ///< Attempt to create the DirectX 9.3 feature level (DirectX 11 only).
+  const uint64 VSAMPLE_DX9_2_ON_DX11             = V_BIT_64(20); ///< Attempt to create the DirectX 9.2 feature level (DirectX 11 only).
+  const uint64 VSAMPLE_DX9_1_ON_DX11             = V_BIT_64(21); ///< Attempt to create the DirectX 9.1 feature level (DirectX 11 only).
+  const uint64 VSAMPLE_FORCEMOBILEMODE           = V_BIT_64(22); ///< Use the mobile shader provider when loading and setting up a scene.
+  const uint64 VSAMPLE_FLIPMODE30FPS             = V_BIT_64(23); ///< Perform 30 Hz frame sync (Playstation 3 only).
+  const uint64 VSAMPLE_FLIPMODE60FPS             = V_BIT_64(24); ///< Perform 60 Hz frame sync (Playstation 3 only).
+  const uint64 VSAMPLE_CHECKFULLSCREENMODE       = V_BIT_64(25); ///< Check whether the resolution passed to VisSampleApp::InitSample() is actually supported; use closest supported alternative if it isn't (Windows desktop only).
+  const uint64 VSAMPLE_WIIU_DRCDEMO              = V_BIT_64(26); ///< WiiU only: Show a demo animation on the DRC.
+  const uint64 VSAMPLE_WIIU_DRCCOPY              = V_BIT_64(27); ///< WiiU only: Show the rendered scene on the DRC also.
+  const uint64 VSAMPLE_HEADLESS                  = V_BIT_64(28); ///< Run in headless mode (see VVideo::SetHeadlessModeEnabled() for more details; Windows only).
+  const uint64 VSAMPLE_SHOWEXITPROMPT            = V_BIT_64(29); ///< Prompt before exiting the application (Android only).
+  const uint64 VSAMPLE_NO_FALLBACK_ASSETPROFILE  = V_BIT_64(30); ///< Don't allow selection of a different asset profile as a fallback in case the specified profile doesn't exist. See LoadScene() for more details.
+  const uint64 VSAMPLE_DONT_LOAD_MANIFESTFILE    = V_BIT_64(31); ///< Don't evaluate the project's manifest file for additional data directories to add.
+  const uint64 VSAMPLE_ENABLE_DEBUG_SHADING      = V_BIT_64(32); ///< Enables debug shading modes.
 
 #if defined(_VISION_WIIU) // on WIIU we currently need WAITRETRACE
-  VSAMPLE_INIT_DEFAULTS = VSAMPLE_ASKFULLSCREEN|VSAMPLE_SPLASHSCREEN|VSAMPLE_USEDESKTOPRESOLUTION|VSAMPLE_HAVOKLOGO|VSAMPLE_WIIU_DRCDEMO|VSAMPLE_WAITRETRACE,
-#elif defined(HK_ANARCHY) && !defined( _VISION_MOBILE )
-  VSAMPLE_INIT_DEFAULTS = VSAMPLE_ASKFULLSCREEN|VSAMPLE_SPLASHSCREEN|VSAMPLE_USEDESKTOPRESOLUTION|VSAMPLE_SHOWEXITPROMPT,
-#else
-  VSAMPLE_INIT_DEFAULTS = VSAMPLE_ASKFULLSCREEN|VSAMPLE_SPLASHSCREEN|VSAMPLE_USEDESKTOPRESOLUTION|VSAMPLE_HAVOKLOGO|VSAMPLE_SHOWEXITPROMPT,
+  const uint64 VSAMPLE_INIT_DEFAULTS = VSAMPLE_ASKFULLSCREEN|VSAMPLE_SPLASHSCREEN|VSAMPLE_USEDESKTOPRESOLUTION|VSAMPLE_HAVOKLOGO|VSAMPLE_WIIU_DRCDEMO|VSAMPLE_WAITRETRACE|VSAMPLE_ENABLE_DEBUG_SHADING;
+#elif defined(HK_ANARCHY) && !defined( _VISION_MOBILE ) // Force VSync on PC, no VSAMPLE_HAVOKLOGO
+  const uint64 VSAMPLE_INIT_DEFAULTS = VSAMPLE_ASKFULLSCREEN|VSAMPLE_SPLASHSCREEN|VSAMPLE_USEDESKTOPRESOLUTION|VSAMPLE_SHOWEXITPROMPT|VSAMPLE_WAITRETRACE|VSAMPLE_ENABLE_DEBUG_SHADING;
+#elif defined(WIN32) && !defined(_VISION_WINRT) // Force VSync on PC
+  const uint64 VSAMPLE_INIT_DEFAULTS = VSAMPLE_ASKFULLSCREEN|VSAMPLE_SPLASHSCREEN|VSAMPLE_USEDESKTOPRESOLUTION|VSAMPLE_HAVOKLOGO|VSAMPLE_SHOWEXITPROMPT|VSAMPLE_WAITRETRACE|VSAMPLE_ENABLE_DEBUG_SHADING;
+#else // All other platforms:
+  const uint64 VSAMPLE_INIT_DEFAULTS = VSAMPLE_ASKFULLSCREEN|VSAMPLE_SPLASHSCREEN|VSAMPLE_USEDESKTOPRESOLUTION|VSAMPLE_HAVOKLOGO|VSAMPLE_SHOWEXITPROMPT|VSAMPLE_ENABLE_DEBUG_SHADING;
 #endif
 
-  VSAMPLE_DX11_FEATURE_LEVEL_MASK   = VSAMPLE_DX11_0_ON_DX11 | VSAMPLE_DX10_1_ON_DX11 | VSAMPLE_DX10_0_ON_DX11 | VSAMPLE_DX9_3_ON_DX11 | VSAMPLE_DX9_2_ON_DX11 | VSAMPLE_DX9_1_ON_DX11,
-  VSAMPLE_DX11_FEATURE_LEVEL_COUNT  = 6,
+  const uint64 VSAMPLE_DX11_FEATURE_LEVEL_MASK   = VSAMPLE_DX11_0_ON_DX11 | VSAMPLE_DX10_1_ON_DX11 | VSAMPLE_DX10_0_ON_DX11 | VSAMPLE_DX9_3_ON_DX11 | VSAMPLE_DX9_2_ON_DX11 | VSAMPLE_DX9_1_ON_DX11;
+  const unsigned int VSAMPLE_DX11_FEATURE_LEVEL_COUNT  = 6;
 };
 
 //defines platform specific macros to make the sample source more readable
 //  - VISION_MAIN: the main function signature
 //  - VISION_BASE_DATA: the root path to the Base Data directory
 //  - VISION_COMMON_DATA: the root path to the Sample Data directory
-//  - VISION_ROOT_DATA: the root path (on PC the current directory, on console the root path)
+//  - VISION_ROOT_DATA: the path that contains the Data folder (e.g the repository root)
 //  - VISION_MANDATORY_SAMPLE_FLAGS: Sample flags that are mandatory (e.g. fullscreen for consoles)
 //  - VISION_DEFAULT_WORKERTHREADCOUNT: Default worker thread count for the platform
 //  - VISION_FIXED_WORKERTHREAD_CPU_ASSIGNMENT: If true, the worker threads will be assigned to specific processors
@@ -112,7 +121,7 @@ enum VSampleFlags
                                             LPSTR     lpCmdLine, \
                                             int       nCmdShow )
 
-  #define VISION_ROOT_DATA ".\\"
+  #define VISION_ROOT_DATA "..\\..\\..\\..\\"
   #define VISION_BASE_DATA "..\\..\\..\\..\\Data\\Vision\\Base"
   #define VISION_COMMON_DATA "..\\..\\..\\..\\Data\\Vision\\Samples\\Engine"
   #define VISION_MANDATORY_SAMPLE_FLAGS 0
@@ -128,7 +137,7 @@ enum VSampleFlags
   #define VISION_ROOT_DATA "D:\\"
   #define VISION_BASE_DATA "D:\\Data\\Vision\\Base"
   #define VISION_COMMON_DATA "D:\\Data\\Vision\\Samples\\Engine"
-  #define VISION_MANDATORY_SAMPLE_FLAGS VSAMPLE_FORCEFULLSCREEN
+  #define VISION_MANDATORY_SAMPLE_FLAGS VSampleFlags::VSAMPLE_FORCEFULLSCREEN
   #define VISION_DEFAULT_WORKERTHREADCOUNT 4
   #define VISION_FIXED_WORKERTHREAD_CPU_ASSIGNMENT true
   #define VISION_OUTPUT_DIR "D:\\"
@@ -147,10 +156,12 @@ enum VSampleFlags
     #define VISION_COMMON_DATA "/app_home/Data/Vision/Samples/Engine"
   #endif
 
-  #define VISION_MANDATORY_SAMPLE_FLAGS VSAMPLE_FORCEFULLSCREEN
+  #define VISION_MANDATORY_SAMPLE_FLAGS VSampleFlags::VSAMPLE_FORCEFULLSCREEN
   #define VISION_DEFAULT_WORKERTHREADCOUNT 1
   #define VISION_FIXED_WORKERTHREAD_CPU_ASSIGNMENT false
   #define VISION_OUTPUT_DIR "/app_home/Bin"
+
+  int VisSampleSpursUtilGetSecondaryPpuThreadPriority(int *prio);
 
 #elif defined(_VISION_IOS)
   #define VISION_MAIN extern "C" int VisionMainFunction(const char* pDocumentsDirectory)
@@ -158,7 +169,7 @@ enum VSampleFlags
   #define VISION_BASE_DATA VisSampleApp::GetBaseDataDirectory()
   #define VISION_COMMON_DATA VisSampleApp::GetCommonDataDirectory()
   #define VISION_OUTPUT_DIR VisSampleApp::GetDocumentsDirectory()
-  #define VISION_MANDATORY_SAMPLE_FLAGS VSAMPLE_FORCEFULLSCREEN
+  #define VISION_MANDATORY_SAMPLE_FLAGS VSampleFlags::VSAMPLE_FORCEFULLSCREEN
   #define VISION_DEFAULT_WORKERTHREADCOUNT 0
   #define VISION_FIXED_WORKERTHREAD_CPU_ASSIGNMENT false
 
@@ -196,19 +207,19 @@ enum VSampleFlags
   #define VISION_COMMON_DATA "app0:Data/Vision/Samples/Engine"
   #define VISION_OUTPUT_DIR "app0:Bin"
 
-  #define VISION_MANDATORY_SAMPLE_FLAGS VSAMPLE_FORCEFULLSCREEN
+  #define VISION_MANDATORY_SAMPLE_FLAGS VSampleFlags::VSAMPLE_FORCEFULLSCREEN
   #define VISION_DEFAULT_WORKERTHREADCOUNT 2
   #define VISION_FIXED_WORKERTHREAD_CPU_ASSIGNMENT true
 
 #elif defined(_VISION_ANDROID)
 
   #define VISION_MAIN extern "C" void android_main(struct android_app* state)
-  #define VISION_ROOT_DATA ""  
+  #define VISION_ROOT_DATA VisSampleApp::GetDataRootDirectory()  
   #define VISION_BASE_DATA VisSampleApp::GetBaseDataDirectory()
   #define VISION_COMMON_DATA VisSampleApp::GetCommonDataDirectory()
   #define VISION_OUTPUT_DIR VisSampleApp::GetCacheDirectory()
 
-  #define VISION_MANDATORY_SAMPLE_FLAGS VSAMPLE_FORCEFULLSCREEN
+  #define VISION_MANDATORY_SAMPLE_FLAGS VSampleFlags::VSAMPLE_FORCEFULLSCREEN
   #define VISION_DEFAULT_WORKERTHREADCOUNT 0
   #define VISION_FIXED_WORKERTHREAD_CPU_ASSIGNMENT false
 
@@ -221,9 +232,23 @@ enum VSampleFlags
   #define VISION_COMMON_DATA "/vol/content/VisionRoot/Data/Vision/Samples/Engine"
   #define VISION_OUTPUT_DIR "/vol/save"
   
-  #define VISION_MANDATORY_SAMPLE_FLAGS VSAMPLE_FORCEFULLSCREEN
+  #define VISION_MANDATORY_SAMPLE_FLAGS VSampleFlags::VSAMPLE_FORCEFULLSCREEN
   #define VISION_DEFAULT_WORKERTHREADCOUNT 2
   #define VISION_FIXED_WORKERTHREAD_CPU_ASSIGNMENT true
+
+#elif defined(_VISION_TIZEN)
+
+  #define VISION_MAIN extern "C" _EXPORT_ int OspMain(int argc, char* argv[])
+  #define VISION_ROOT_DATA VisSampleApp::GetDataRootDirectory()
+  #define VISION_BASE_DATA VisSampleApp::GetBaseDataDirectory()
+  #define VISION_COMMON_DATA VisSampleApp::GetCommonDataDirectory()
+  #define VISION_OUTPUT_DIR VisSampleApp::GetCacheDirectory()
+
+  #define VISION_MANDATORY_SAMPLE_FLAGS VSampleFlags::VSAMPLE_FORCEFULLSCREEN
+  // TODO: really 0?
+  #define VISION_DEFAULT_WORKERTHREADCOUNT 0
+  #define VISION_FIXED_WORKERTHREAD_CPU_ASSIGNMENT false
+
 #else
   #error "Missing platform!"
 #endif
@@ -244,7 +269,7 @@ VISION_CALLBACK bool VisionRunFunction();
 #define VISION_DEINIT VISION_CALLBACK bool VisionDeInitFunction()
 #define VISION_RUN    VISION_CALLBACK bool VisionRunFunction()
 
-#if (defined(_VISION_WINRT) || defined(_VISION_IOS) || defined(_VISION_ANDROID)) && !defined(NO_VISION_SAMPLEAPP_CALLBACKS) && !defined(VISION_SAMPLEAPP_CALLBACKS)
+#if (defined(_VISION_WINRT) || defined(_VISION_IOS) || defined(_VISION_ANDROID) || defined(_VISION_TIZEN)) && !defined(NO_VISION_SAMPLEAPP_CALLBACKS) && !defined(VISION_SAMPLEAPP_CALLBACKS)
   #define VISION_SAMPLEAPP_CALLBACKS
 #endif
 
@@ -261,7 +286,6 @@ VISION_CALLBACK bool VisionRunFunction();
 
 #if defined(_VISION_ANDROID)
 #define VISION_MAIN_DEFAULT VISION_MAIN { \
-  printf("android_main\n"); \
   app_dummy(); \
   AndroidApplication = state; \
   char apkDir[FS_MAX_PATH]; \
@@ -275,6 +299,14 @@ VISION_CALLBACK bool VisionRunFunction();
   DeinitAndroidNativeEnvironment(); }
 #elif defined( _VISION_IOS )
 #define VISION_MAIN_DEFAULT
+#elif defined(_VISION_TIZEN)
+#define VISION_MAIN_DEFAULT VISION_MAIN { \
+  Tizen::Base::Collection::ArrayList* pArgs = new Tizen::Base::Collection::ArrayList(); \
+  pArgs->Construct(); \
+  for (int i = 0; i < argc; i++) pArgs->Add(*(new Tizen::Base::String(argv[i]))); \
+  VisSampleApp::SetTizenDirectories(); \
+  Tizen::App::UiApp::Execute(VisTizenGLESApp::CreateInstance, pArgs); \
+  return 0; }
 #else
 #define VISION_MAIN_DEFAULT VISION_MAIN { \
   if (!VisionInitFunction()) { VisionDeInitFunction(); return -1; } \
@@ -298,7 +330,9 @@ enum VISION_INPUT_CONTROL
   EXIT_COMBO,
 
   SHOW_HELP,
+  SHOW_HELP_PAD,
   SHOW_FRAME_RATE,
+  SHOW_FRAME_RATE_PAD,
 
 #if defined(_VISION_PSP2)
   PSP2_OPTION,            // multi-key combos
@@ -313,8 +347,12 @@ enum VISION_INPUT_CONTROL
   SHOW_NEXT_PROFILING_CHART,
   RESET_MAX_PROFILING_VALUES,
   SHOW_TIME_STEPS,
+
+  SHOW_NEXT_DEBUG_SHADING_MODE,
+  SHOW_NEXT_DEBUG_SHADING_MODE_PAD,
+  SHOW_NEXT_DEBUG_SHADING_MODE_COMBO,
   
-#if defined(_VISION_MOBILE)
+#if defined(_VISION_MOBILE) || defined( _VISION_APOLLO )    // TODO: Have Apollo define _VISION_MOBILE.
   SHOW_PROFILING_MENU1,
   SHOW_PROFILING_MENU2,
 #endif
@@ -334,26 +372,8 @@ class IVisApiBackgroundResourceRestorer;
 ///   samples.
 /// 
 /// It extends the VisionApp_cl class by adding hotkeys for debugging (e.g. F3 for wireframe mode
-/// etc.)
+/// etc.). Please see Tutorial 01 for an explanation of the simplest possible sample.
 /// 
-/// \example
-///   \code
-///   See Tutorial 01 for an explanation of the simplest possible sample:
-///   {
-///     VisSampleAppPtr spApp = new VisSampleApp();
-///     if (!spApp->InitSample("SampleDataDir"))
-///       return -1;
-///     {
-///       VSceneLoader loader;
-///       if (!loader.LoadScene("ViewerMap.vscene"))
-///         Vision::Error.FatalError(loader.GetLastError());
-///     }
-///     spApp->EnableMouseCamera(false);
-///     while (spApp->Run()) {}
-///     spApp->DeInitSample();
-///     return 0;
-///   }
-///   \endcode
 class VisSampleApp : public VisionApp_cl, public IVisCallbackHandler_cl
 {
 public:
@@ -405,7 +425,7 @@ public:
   /// 
   /// \param iSampleFlags
   ///   Initialization flags for the sample. See the VSampleFlags enum for available flags.
-  ///   The default (\c VSAMPLE_INIT_DEFAULTS) provides reasonable defaults. On Windows desktop,
+  ///   The default (\c VSampleFlags::VSAMPLE_INIT_DEFAULTS) provides reasonable defaults. On Windows desktop,
   ///   it always asks about switching to full-screen mode.
   /// 
   /// \param iX
@@ -424,7 +444,7 @@ public:
   /// 
   /// \sa VisionApp_cl::InitEngine
   /// \sa VisSampleApp::SetupSampleData
-  bool InitSample( const char *pszSampleDataDir = NULL, const char *pszSampleScene = NULL, int iSampleFlags = VSAMPLE_INIT_DEFAULTS, int iX=VVIDEO_DEFAULTWIDTH, int iY=VVIDEO_DEFAULTHEIGHT , int iInitFlags = VAPP_INIT_DEFAULTS, int iNumThreads = 0);
+  bool InitSample( const char *pszSampleDataDir = NULL, const char *pszSampleScene = NULL, uint64 iSampleFlags = VSampleFlags::VSAMPLE_INIT_DEFAULTS, int iX=VVIDEO_DEFAULTWIDTH, int iY=VVIDEO_DEFAULTHEIGHT , int iInitFlags = VAPP_INIT_DEFAULTS, int iNumThreads = 0);
 
 #if defined(WIN32) && !defined(_VISION_WINRT)
   bool InitSampleForBrowser( HWND hWnd, WNDPROC wndProc, VVIDEO_Multisample msaa = VVIDEO_MULTISAMPLE_OFF);
@@ -445,10 +465,21 @@ public:
   inline static const char* GetSDCardDirectory() { return m_szSDCardDirectory; }
   inline static const char* GetCacheDirectory() { return m_szCacheDirectory; }
   inline static const char* GetApkDirectory() { return m_szAPKDirectory; }
+  inline static const char* GetDataRootDirectory() { return m_szDataRootDirectory; }
 
   static void SetAndroidDirectories(const char* szAPKDirectory, const char* szSDCardDirectory, const char* szCacheDirectory);
 
   static bool ExtractFileFromAPKToCache(const char* pszFileName);
+#endif
+
+#if defined(_VISION_TIZEN)
+  inline static const char* GetBaseDataDirectory() { return m_szBaseDataDirectory; }
+  inline static const char* GetCommonDataDirectory() { return m_szCommonDataDirectory; }
+  inline static const char* GetSDCardDirectory() { return m_szSDCardDirectory; }
+  inline static const char* GetCacheDirectory() { return m_szCacheDirectory; }
+  inline static const char* GetDataRootDirectory() { return m_szDataRootDirectory; }
+
+  static void SetTizenDirectories(const char* pszAlternativeCacheDir = NULL);
 #endif
 
 #if defined(_VISION_WINRT)
@@ -531,6 +562,7 @@ public:
     ///   Constructor. Initializes the structure with the default values.
     LoadingScreenSettings()
       : sBackgroundImagePath()
+      , iBackgroundTextureFlags(0)
       , backgroundColor( 0, 0, 0 )
       , eAspectRatioAlignment( ALIGN_NONE )
       , iProgressBarLeft(-1), iProgressBarRight(-1)
@@ -540,6 +572,7 @@ public:
     {}
 
     VString sBackgroundImagePath;                 ///< path to the background image to be displayed on the loading screen
+    int iBackgroundTextureFlags;                  ///< texture flags used for the background image.
     VColorRef backgroundColor;                    ///< color to be displayed 
     AspectRatioAlignment eAspectRatioAlignment;   ///< alignment specification for the background texture
     int iProgressBarLeft, iProgressBarRight;      ///< horizontal placement of the progress bar
@@ -551,7 +584,7 @@ public:
   /// \brief
   ///   Enables or disables display of a progress bar during world loading
   /// 
-  /// Call this function before VSceneLoader::LoadScene to setup the display of a loading screen
+  /// Call this function before VisSampleApp::LoadScene to setup the display of a loading screen
   /// and progress bar.
   /// 
   /// \param bStatus
@@ -580,7 +613,7 @@ public:
   ///   of the background texture.
   /// 
   /// \note
-  ///   Call this function before calling VSceneLoader::LoadScene
+  ///   Call this function before calling VisSampleApp::LoadScene
   ///
   /// \note
   ///   Using this function will set the loading screen's alignment parameter to 
@@ -589,13 +622,14 @@ public:
   /// \sa VisionApp_cl::OnLoadSceneStatus  
   ///
   /// \sa VisSampleApp::LoadingScreenSettings
+  ///
+  /// \sa VisSampleApp::LoadScene
   /// 
   /// \example
   ///   \code
   ///   VisSampleApp *pApplication = new VisSampleApp ( );  
   ///   pApplication->SetupLoadingScreen ( true , "Textures\\splash.dds" ); 
-  ///   VSceneLoader loader;
-  ///   loader.LoadScene("ViewerMap.vscene");
+  ///   pApplication->LoadScene("ViewerMap.vscene");
   ///   \endcode
   void SetupLoadingScreen(bool bStatus, const char *szTextureFile=NULL, float fFadeOutTime=2.f,
     int iProgressBarLeft=-1, int iProgressBarTop=-1, int iProgressBarRight=-1, int iProgressBarBottom=-1);
@@ -603,7 +637,7 @@ public:
   /// \brief
   ///   Enables or disables display of a progress bar during world loading
   /// 
-  /// Call this function before VSceneLoader::LoadScene to setup the display of a loading screen
+  /// Call this function before VisSampleApp::LoadScene to setup the display of a loading screen
   /// and progress bar.
   /// 
   /// \param bStatus
@@ -613,11 +647,13 @@ public:
   ///   Additional loading screen settings.
   /// 
   /// \note
-  ///   Call this function before calling VSceneLoader::LoadScene
+  ///   Call this function before calling VisSampleApp::LoadScene
   /// 
   /// \sa VisionApp_cl::OnLoadSceneStatus  
   ///
   /// \sa VisSampleApp::LoadingScreenSettings
+  ///
+  /// \sa VisSampleApp::LoadScene
   /// 
   /// \example
   ///   \code
@@ -625,9 +661,8 @@ public:
   ///   VisSampleApp::LoadingScreenSettings settings;
   ///   settings.sBackgroundImagePath = "Textures\\splash.dds";
   ///   settings.eAspectRatioAlignment = LoadingScreenSettings::ALIGN_VERTICAL;
-  ///   pApplication->SetupLoadingScreen ( true , settings ); 
-  ///   VSceneLoader loader;
-  ///   loader.LoadScene("ViewerMap.vscene");
+  ///   pApplication->SetupLoadingScreen ( true , settings );
+  ///   pApplication->LoadScene("ViewerMap.vscene");
   ///   \endcode
   void SetupLoadingScreen(bool bStatus, const LoadingScreenSettings& settings );
 
@@ -642,6 +677,15 @@ public:
   ///
 
 #if defined( SUPPORTS_FILESERVE_CLIENT ) || defined( _VISION_DOC )
+  /// \brief all possible fall back strategies for vFileServe in case there is no connection to the server
+  enum VFileServeFallback_e
+  {
+    VFSF_FALLBACK_CACHE, ///< fallback to the data cached on the device
+    VFSF_FALLBACK_PACKAGE, ///< fallback to the data stored inside the application package
+    VFSF_FALLBACK_CACHE_AND_PACKAGE /**< first try to fallback to the data cached on the device, 
+                                    if the file is not in the cache fallback to the application package */
+  };
+
   /// \brief
   ///   Static helper method for setting up a VFileServeClient as global file manager.
   ///
@@ -650,17 +694,21 @@ public:
   /// no file server connection could be established: In this case, Vision can either use a fallback
   /// to the cache directory (which will naturally only work if the data has been copied to the cache
   /// in a previous session with file serving enabled and connected), or it can load the data from
-  /// the installed AppData (which is an APK file on Android and a the application data folder on iOS).
+  /// the installed AppData (which is an APK file on Android and a the application data folder on iOS),
+  /// or both at the same time.
+  /// Call this function before setting up a VisSampleApp instance.
   ///
-  /// \param bUseAppDataFallback
-  ///   Defines what should happen if no connection to a file server could be made. If set to false,
-  ///   the cache directory will be used. If set to true, Vision will attempt to load from the AppData
-  ///   instead.
+  /// \param eFallbackType
+  ///   Defines what should happen if no connection to a file server could be made. Fallbacks to the local
+  ///   cache directory, the application package, or both can be configured.
+  ///
+  /// \param pszAlternativeCacheDir
+  ///   If this parameter is not NULL the given path is used for the file serve cache
   ///
   /// \return 
   ///   True if the connection to a file serve host was successful. False if no connection could be made.
-  ///   If false is returned, the subsequent behavior depends on the value passed into bUseApkFallback.
-  static bool SetupFileServeClient(bool bUseAppDataFallback = false);
+  ///   If false is returned, the subsequent behavior depends on the value passed into eFallbackType.
+  static bool SetupFileServeClient(VFileServeFallback_e eFallbackType = VFSF_FALLBACK_CACHE, const char* pszAlternativeCacheDir = NULL);
 #endif
 
   ///
@@ -776,7 +824,7 @@ public:
 
 
   /// \brief
-  ///   Loads the given scene and return true of the scene was loaded successfully.
+  ///   Loads the given scene and return true if the scene was loaded successfully.
   /// 
   /// Adds ".vscene" to the scene name.
   /// 
@@ -842,8 +890,7 @@ public:
   /// \example
   ///   \code
   ///   A very basic world viewer:
-  ///     VSceneLoader loader;
-  ///     loader.LoadScene("ViewerMap.vscene");
+  ///     pApplication->LoadScene("ViewerMap.vscene");
   ///     pApplication->EnableMouseCamera("CameraPosition", 500.0f);
   ///     while ( pApplication->Run () ) { }
   ///   \endcode
@@ -1063,11 +1110,25 @@ public:
   ///   Returns true if the vFileServe file manager is installed.
   static bool IsFileServerInstalled() { return s_bIsFileserverInstalled; }
 
-#if defined(_VISION_MOBILE)
+#if defined(_VISION_MOBILE) || defined( _VISION_APOLLO )    // TODO: Have Apollo define _VISION_MOBILE.
   /// \brief
   ///   Show exit dialog
   void ShowExitDialog();
 #endif
+
+#if defined(SUPPORTS_DEBUG_SHADING) && defined(HK_DEBUG)
+  /// \brief
+  ///   Advances debug shading mode
+  void NextDebugShadingMode();
+#endif
+
+  /// \brief
+  ///   Enables debug rendering of touch areas
+  void EnableTouchAreaRendering(bool bEnabled);
+
+  /// \brief
+  ///   Returns if debug rendering of touch areas is enabled
+  bool IsTouchAreaRenderingEnabled() const { return m_bTouchAreaDebug; }
 
 protected:
   /// \brief
@@ -1100,12 +1161,12 @@ protected:
   ///   The saturation of the screen shot. (0 = gray scale, 1 = no change)
   void StoreScreenShotAsLoadBackgroundEnd(const char* szFileName, float fBrightness, float fSaturation);
 
-#if defined(_VISION_ANDROID)
+#if defined(_VISION_ANDROID) || defined( _VISION_TIZEN )
   /// \brief 
   ///   Optional handling of the Android Back Button event. 
   ///
   /// Return true if you want to override the default behavior, false otherwise.
-  virtual bool OnAndroidBackButtonPressed(){ return false; }
+  virtual bool OnMobileBackButtonPressed(){ return false; }
 #endif
 
   void GetLoadingScreenExtents(float& fLeft, float& fTop, float& fRight, float& fBottom) const;
@@ -1123,7 +1184,8 @@ protected:
   DynArray_cl<char *> m_pszHelpText;
   int m_iNumHelpLines;
 
-  float m_fFPSPos, m_fCurrentFPS, m_fCurrentFrameTime;
+  uint64  m_uiFPSPos;
+  float m_fCurrentFPS, m_fCurrentFrameTime;
 
   // protected functions
   void ProcessKeys();
@@ -1136,8 +1198,7 @@ protected:
   
   void AdjustFOV(float fDir);
 
-
-#if defined(_VISION_MOBILE)
+#if defined(EMULATE_DEVICE) || defined(_VISION_MOBILE) || defined( _VISION_APOLLO ) || defined( _VISION_METRO )   // TODO: Have Apollo define _VISION_MOBILE.
 
   VGUIMainContextPtr m_spGUIContext;
   VDialogPtr m_spProfilingDlg;
@@ -1145,6 +1206,10 @@ protected:
   void ShowProfilingMenu();
   void EnsureGUIContextCreated();
 
+#endif
+
+#if defined(SUPPORTS_DEBUG_SHADING) && defined(HK_DEBUG)
+  void InitDebugShadingModes();
 #endif
 
 #if defined(_VISION_WIIU)
@@ -1177,6 +1242,15 @@ protected:
   static char m_szCacheDirectory[FS_MAX_PATH];
 
   static char m_szAPKDirectory[FS_MAX_PATH];
+  static char m_szDataRootDirectory[FS_MAX_PATH];
+
+#elif defined(_VISION_TIZEN)
+  static char m_szBaseDataDirectory[FS_MAX_PATH];
+  static char m_szCommonDataDirectory[FS_MAX_PATH];
+  static char m_szDataRootDirectory[FS_MAX_PATH];
+
+  static char m_szSDCardDirectory[FS_MAX_PATH];
+  static char m_szCacheDirectory[FS_MAX_PATH];
 
 #elif defined(_VISION_WINRT)
 
@@ -1207,18 +1281,18 @@ protected:
 
   int m_iFrameCtr;
 
-  int m_iSampleFlags;
+  uint64 m_iSampleFlags;
   VisScreenMaskPtr m_spLogoOverlay;
   float m_fCurrentFadeOutTime, m_fFadeInTime;
-  int m_iXDist;
   bool m_bLogoFadeInDone;
   
   bool m_bSampleInitialized;
-  
+
   bool m_bTripleHead;
+  int m_iXDist;       ///< Determines where to display the fps.
 
   #ifdef _VR_DX11
-    D3D_FEATURE_LEVEL m_FeatureLevels[ VSAMPLE_DX11_FEATURE_LEVEL_COUNT ];
+    D3D_FEATURE_LEVEL m_FeatureLevels[ VSampleFlags::VSAMPLE_DX11_FEATURE_LEVEL_COUNT ];
   #endif
 
   VisScreenMaskPtr m_spProgressBar;
@@ -1228,6 +1302,18 @@ protected:
   int m_iUnfilteredTimeStepCurveIndex;
   int m_iTimeStepCurveIndex;
 
+  IVRendererNodePtr m_spBackupRendererNode;
+
+  #if defined(SUPPORTS_DEBUG_SHADING) && defined(HK_DEBUG)
+    VSmartPtr<VShaderEffectLib> m_spDebugShadingShaderLib;
+    VRefCountedCollection<VCompiledEffect> m_debugShadingEffects;
+    VSmartPtr<VisDebugShadingRenderLoop_cl> m_spDebugShadingRenderLoop;
+    int m_iCurrentDebugShadingMode;
+  #endif
+
+  bool m_bTouchAreaDebug;
+
+public:
   static bool s_bIsFileserverInstalled;
 
   ///
@@ -1243,7 +1329,7 @@ typedef VSmartPtr<VisSampleApp> VisSampleAppPtr;
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

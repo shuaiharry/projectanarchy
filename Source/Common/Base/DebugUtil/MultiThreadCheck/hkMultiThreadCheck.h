@@ -158,7 +158,7 @@ class hkMultiThreadCheck
 			
 			/// Traces the call stack when markForWrite() is called. In the event of a conflicting lock, the stack trace can be displayed
 			/// to aid in debugging.
-		static hkStackTracer* s_stackTracer;
+		static hkStackTracer s_stackTracer;
 
 			/// Tree in which to store stack traces. Each unique call stack from which markForWrite() was called will be inserted.
 		static hkStackTracer::CallTree* s_stackTree;
@@ -213,7 +213,7 @@ class hkMultiThreadCheck
 #endif // HK_DYNAMICS2_MULTI_THREADING_TYPES_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

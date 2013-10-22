@@ -23,7 +23,7 @@ HK_CLASS(hkaiSilhouetteRecorderSilhouettesSteppedEvent)
 HK_CLASS(hkaiSilhouetteRecorderVolumeLoadedEvent)
 HK_CLASS(hkaiSilhouetteRecorderVolumeUnloadedEvent)
 HK_CLASS(hkaiSilhouetteRecorderWorldConnectedEvent)
-HK_STRUCT(hkaiNavMeshDebugUtilsClusterGraphSettings)
+HK_STRUCT(hkaiGraphDebugUtilsDebugInfo)
 HK_STRUCT(hkaiNavMeshDebugUtilsDebugInfo)
 HK_STRUCT(hkaiNavMeshDebugUtilsFaceNormalSettings)
 HK_STRUCT(hkaiNavMeshDebugUtilsNonplanarFacesSettings)
@@ -33,7 +33,7 @@ HK_STRUCT(hkaiNavVolumeDebugUtilsGeomteryBuildSettings)
 HK_STRUCT(hkaiNavVolumeDebugUtilsGeomteryDisplaySettings)
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

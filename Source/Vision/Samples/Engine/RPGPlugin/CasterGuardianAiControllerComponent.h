@@ -17,86 +17,51 @@ public:
   // Constructor needs to be public for FORCE_LINKDYNCLASS on mobile
   RPG_CasterGuardianAiControllerComponent();
 
-protected:
-  //@{
-  // State Machine Management
-  void SelectState() HKV_OVERRIDE;
-  //@}
-
-  //@{
-  // Individual State Updates
-  void UpdateWandering(float const deltaTime) HKV_OVERRIDE;
-  void UpdateMovingToPosition(float const deltaTime) HKV_OVERRIDE;
-  void UpdateRangedAttacking(float const deltaTime) HKV_OVERRIDE;
-  void UpdateAoeAttacking(float const deltaTime) HKV_OVERRIDE;
-  void UpdateFleeing(float const deltaTime) HKV_OVERRIDE;
-  void UpdateHealing(float const deltaTime) HKV_OVERRIDE;
-  //@}
-
-  //@{
-  // Conditions
-  bool HasHealingTarget() const;
-  bool WantsToHeal(const RPG_Character* healingTarget) const;
-  bool IsReadyToHeal() const;
-  bool IsTargetTooClose() const;
-  bool IsTargetTooFar() const;
-  bool IsReadyToFlee() const;
-  bool IsReadyToAoeAttack() const;
-  bool ShouldAoeAttack() const;
-  //@}
-
-  //@{
-  // Commands
-  bool AcquireHealingTarget();
-  void ClearHealingTarget();
-  //@}
-
-  //@{
-  // Attacking state
-  float m_lastAttackTime;     ///< When did this character last attack?
-  float m_attackInterval;     ///< Randomly assigned delay between attacks
-  float m_attackIntervalMin;
-  float m_attackIntervalMax;
-  float m_attackMaxRange;
-  //@}
-
-  //@{
-  // AoE Attacking state
-  float m_aoeMinInterval;
-  float m_lastAoeTime;
-  //@}
-
-  //@{
-  // Wander state
-  hkvVec3 m_wanderOrigin;
-  float m_wanderAngle;
-  float m_wanderIdleTime;
-  //@}
-
-  //@{
-  // Healing state
-  RPG_Character* m_healingTarget;
-  float m_healMinInterval;
-  float m_lastHealTime;
-  //@}
-
-  //@{
-  // Fleeing state
-  float m_holdOffRange;
-  float m_fleeMaxDuration;
-  float m_fleeMinInterval;
-  float m_lastFleeTime;
-  //@}
-
 private:
+  // IVObjectComponent
+  void SetOwner(VisTypedEngineObject_cl *newOwner) HKV_OVERRIDE;
+
   V_DECLARE_SERIAL_DLLEXP(RPG_CasterGuardianAiControllerComponent, RPG_PLUGIN_IMPEXP);
   V_DECLARE_VARTABLE(RPG_CasterGuardianAiControllerComponent, RPG_PLUGIN_IMPEXP);
 };
 
+namespace RPG_CasterGuardianAiControllerState
+{
+  // Idling
+  class Idling : public RPG_ControllerStateBase
+  {
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "Caster::Idling"; }
+  };
+
+  // Moving
+  class Moving : public RPG_ControllerState::Moving
+  {
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "Caster::Moving"; }
+  };
+
+  // Healing
+  class Healing : public RPG_ControllerStateBase
+  {
+    void OnEnterState(RPG_ControllerComponent *controller) HKV_OVERRIDE;
+
+    void OnExitState(RPG_ControllerComponent *controller) HKV_OVERRIDE;
+
+    void OnProcessAnimationEvent(RPG_ControllerComponent *controller, hkbEvent const& animationEvent) HKV_OVERRIDE;
+
+    void OnTick(RPG_ControllerComponent *controller, float deltaTime) HKV_OVERRIDE;
+
+    char const *GetName() const HKV_OVERRIDE { return "Caster::Healing"; }
+  };
+}
+
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

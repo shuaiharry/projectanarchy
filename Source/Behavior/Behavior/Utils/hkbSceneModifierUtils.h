@@ -102,7 +102,7 @@ class hkbCharacterControllerSceneModifier : public hkbSceneModifier
 		hkbPhysicsInterface* m_physicsInterface;
 
 			/// When using the hkbCharacterRigidBodyDriver the physics must be stepped.  Otherwise, it's optional.
-			/// If this is true physics is stepped in either case.
+			/// If this is false physics is always stepped.  This defaults to false.
 		bool m_stepPhysicsOnlyIfNecessary;
 };
 
@@ -160,7 +160,7 @@ class hkbSceneModifierUtils
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

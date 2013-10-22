@@ -79,7 +79,7 @@ class hkbPinBonesGenerator : public hkbGenerator
 		hkRefPtr<hkbGenerator> m_pinnedGenerator; //+hk.Description("The animation from this generator is pinned.")
 
 			// bone indices
-		hkRefPtr<hkbBoneIndexArray> m_boneIndices;	//+hkb.RoleAttribute("ROLE_DEFAULT","FLAG_NOT_VARIABLE")
+		hkRefPtr<hkbBoneIndexArray> m_boneIndices;	//+hkb.RoleAttribute("ROLE_BONE_INDEX","FLAG_NOT_VARIABLE")
 													//+hk.Description("The bones that will be pinned.")
 
 			// Fraction to pin the bones. Set this to 1 to completely pin the bones.
@@ -96,7 +96,7 @@ class hkbPinBonesGenerator : public hkbGenerator
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

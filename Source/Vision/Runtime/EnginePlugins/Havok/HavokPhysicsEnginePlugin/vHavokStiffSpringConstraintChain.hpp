@@ -12,10 +12,6 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConstraintChain.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokConversionUtils.hpp>
 
-// ----------------------------------------------------------------------------
-// vHavokStiffSpringConstraintChainDesc
-// ----------------------------------------------------------------------------
-
 /// \brief
 ///   Descriptor for vHavok Stiff Spring constraint chains.
 class vHavokStiffSpringConstraintChainDesc : public vHavokConstraintChainDesc
@@ -24,10 +20,10 @@ public:
   VHAVOK_IMPEXP vHavokStiffSpringConstraintChainDesc();
 
 public:
-  VHAVOK_IMPEXP virtual void Reset();
+  VHAVOK_IMPEXP virtual void Reset() HKV_OVERRIDE;
 
-  V_DECLARE_SERIAL_DLLEXP( vHavokStiffSpringConstraintChainDesc, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
+  V_DECLARE_SERIAL_DLLEXP(vHavokStiffSpringConstraintChainDesc, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
 
 public:
   float m_fLinkPivotOffset; ///< How far the pivot points are offset from each link end (in fractions of the link length)
@@ -36,44 +32,52 @@ private:
   static const unsigned int s_iSerialVersion; ///< The current serialization version for objects of this class.
 };
 
-
-// ----------------------------------------------------------------------------
-// vHavokStiffSpringConstraintChain
-// ----------------------------------------------------------------------------
-
 /// \brief
 ///   Implementation of vHavok Ball-and-Socket constraint chains.
 class vHavokStiffSpringConstraintChain : public vHavokConstraintChain
 {
+public:
+  ///
   /// @name Serialization and Type Management
-  //@{
-public:
-  V_DECLARE_SERIAL_DLLEXP( vHavokStiffSpringConstraintChain, VHAVOK_IMPEXP )
-  VHAVOK_IMPEXP VOVERRIDE void Serialize( VArchive &ar );
-  //@}
+  /// @{
+  ///
 
-  /// @name vHavokConstraintChain Overrides
-  //@{
+  V_DECLARE_SERIAL_DLLEXP(vHavokStiffSpringConstraintChain, VHAVOK_IMPEXP)
+  VHAVOK_IMPEXP virtual void Serialize(VArchive &ar) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
+
 protected:
+  ///
+  /// @name vHavokConstraintChain Overrides
+  /// @{
+  ///
+
   VHAVOK_IMPEXP virtual void AppendConstraintInfo(const hkvVec3& vPivotA, 
-    const hkvVec3& vPivotB, bool bIsAnchor = false);
-  VHAVOK_IMPEXP virtual hkvVec3 CalcLinkPivot(unsigned int iIndex);
-  VHAVOK_IMPEXP virtual hkpConstraintChainData* CreateConstraintChainData();
-  VHAVOK_IMPEXP virtual vHavokConstraintChainDesc *CreateConstraintChainDesc();
-  VHAVOK_IMPEXP virtual unsigned int GetConstraintInfoCount();
-  VHAVOK_IMPEXP virtual hkVector4 GetImpulseApplied() const;
-  VHAVOK_IMPEXP virtual float GetLastLinkAllowedGap() const;
-  VHAVOK_IMPEXP virtual unsigned int GetMaxNumLinks() const;
-  VHAVOK_IMPEXP virtual bool GetParametersFromDesc(vHavokConstraintChainDesc const& desc);
+    const hkvVec3& vPivotB, bool bIsAnchor = false) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual hkvVec3 CalcLinkPivot(unsigned int iIndex) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual hkpConstraintChainData* CreateConstraintChainData() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual vHavokConstraintChainDesc *CreateConstraintChainDesc() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual unsigned int GetConstraintInfoCount() HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual hkVector4 GetImpulseApplied() const HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual float GetLastLinkAllowedGap() const HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual unsigned int GetMaxNumLinks() const HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual bool GetParametersFromDesc(vHavokConstraintChainDesc const& desc) HKV_OVERRIDE;
   VHAVOK_IMPEXP virtual void InitConstraintChainDataFromDesc(hkpConstraintChainData& data, 
-    vHavokConstraintChainDesc const& desc);
-  VHAVOK_IMPEXP virtual void RemoveConstraintInfo(unsigned int iIndex);
-  VHAVOK_IMPEXP virtual void UpdateChainPhysicsProperties();
+    vHavokConstraintChainDesc const& desc) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void RemoveConstraintInfo(unsigned int iIndex) HKV_OVERRIDE;
+  VHAVOK_IMPEXP virtual void UpdateChainPhysicsProperties() HKV_OVERRIDE;
   VHAVOK_IMPEXP virtual void UpdateConstraintInfo(unsigned int iIndex, 
-    const hkvVec3& vPivotA, const hkvVec3& vPivotB);
+    const hkvVec3& vPivotA, const hkvVec3& vPivotB) HKV_OVERRIDE;
+
 public:
-  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintChainDesc& desc);
-  //@}
+  VHAVOK_IMPEXP virtual void SaveToDesc(vHavokConstraintChainDesc& desc) HKV_OVERRIDE;
+
+  ///
+  /// @}
+  ///
 
 private:
   float m_fLinkPivotOffset; ///< How far the pivot points are offset from each link end (in fractions of the link length)
@@ -84,7 +88,7 @@ private:
 #endif //V_HAVOK_STIFF_SPRING_CONSTRAINT_CHAIN_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

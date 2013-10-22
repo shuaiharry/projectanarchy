@@ -86,6 +86,10 @@ public:
 		/// at this point would not be necessary.
 	virtual bool isNearGoal() const = 0;
 
+		/// Gets all potential goals (in world space). The current goal is not tracked, and any of the points
+		/// are valid goals if repath() is called.
+	virtual void getGoalPoints( hkArray<hkVector4>::Temp& goalsOut ) const = 0;
+
 		/// Request a new path. This should be equivalent to calling
 		/// requestPathWithMultipleGoals with the previous goals.
 	virtual void repath(int priority = 0) = 0;
@@ -120,7 +124,7 @@ protected:
 #endif // HK_AI_CHARACTER_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -30,6 +30,10 @@ namespace Editor
       resourceMasterPanel.ShowAutoThumbnailButton();
 
       EditorManager.SceneClosing += new CancelEventHandler(EditorManager_SceneClosing);
+
+#if !HK_DEBUG
+      this.TabText += " (More information available in Dev or Debug builds)";
+#endif
     }
 
     /// <summary>
@@ -85,7 +89,7 @@ namespace Editor
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

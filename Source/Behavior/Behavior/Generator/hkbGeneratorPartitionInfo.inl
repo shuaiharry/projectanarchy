@@ -13,13 +13,13 @@ HK_FORCE_INLINE bool hkbGeneratorPartitionInfo::hasPartitions() const
 
 HK_FORCE_INLINE bool hkbGeneratorPartitionInfo::hasPartitionIndex(const hkInt16 partitionIndex) const
 {
-	const hkBitField partitionMaskBitfield(const_cast<hkUint32*>(m_partitionMask), MAX_NUM_PARTITIONS);
+	const hkBitField partitionMaskBitfield(const_cast<hkUint32*>(m_partitionMask), 0, MAX_NUM_PARTITIONS);
 	return (!hasPartitions()) || (partitionMaskBitfield.get(partitionIndex) & 0x1);
 }
 
 HK_FORCE_INLINE bool hkbGeneratorPartitionInfo::hasBoneIndex(const hkInt16 boneIndex) const
 {
-	const hkBitField boneMaskBitfield(const_cast<hkUint32*>(m_boneMask), MAX_NUM_BONES);
+	const hkBitField boneMaskBitfield(const_cast<hkUint32*>(m_boneMask), 0, MAX_NUM_BONES);
 	return (!hasPartitions()) || (boneMaskBitfield.get(boneIndex) & 0x1);
 }
 
@@ -78,7 +78,7 @@ HK_FORCE_INLINE bool hkbGeneratorPartitionInfo::hasSameNumBones(const hkbGenerat
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -5,6 +5,8 @@
  * Product and Trade Secret source code contains trade secrets of Havok. Havok Software (C) Copyright 1999-2013 Telekinesys Research Limited t/a Havok. All Rights Reserved. Use of this software is subject to the terms of an end user license agreement.
  *
  */
+//HK_REFLECTION_PARSER_EXCLUDE_FILE
+
 #ifndef HKBASE_HKDEBUGUTIL_CHECK_DETERMINISM_UTIL_H
 #define HKBASE_HKDEBUGUTIL_CHECK_DETERMINISM_UTIL_H
 
@@ -91,15 +93,19 @@ struct hkCheckDeterminismUtil
 		struct Fuid
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BASE_CLASS, hkCheckDeterminismUtil::Fuid );
-
+				
 			static Fuid& getZeroFuid();
 			static Fuid& getCanceledFuid();
 
 			bool operator==(const Fuid& f);
 			bool operator!=(const Fuid& f);
+			void setPackedJobId(const struct hkJob& job);
+			hkUint16 getPackedJobId() const { return m_jobPackedId; }
 
 			hkUint32 m_0;
-			hkUint8 m_1;
+		private:
+			hkUint16 m_jobPackedId; // use getJobFuid() to initialize for this value
+		public:
 			hkUint16 m_2;
 			hkUint32 m_3, m_4;
 		};
@@ -118,11 +124,11 @@ struct hkCheckDeterminismUtil
 
 			/// Sets this utility to write mode. Call at startup of your test.
 			/// Make sure to call finish() at the end.
-		void startWriteMode(const char* filename = "hkDeterminismCheckfile.bin");
+		void startWriteMode(bool stampFilename = false, const char* filename = "hkDeterminismCheckfile.bin");
 
 			/// Sets this utility to check mode. Call at startup of your test.
 			/// Make sure to call finish() at the end.
-		void startCheckMode(const char* filename = "hkDeterminismCheckfile.bin");
+		void startCheckMode(const char* filename = HK_NULL);
 
 			/// Call this function at the end of your write/check run. This closes the open files
 		void finish();
@@ -333,8 +339,13 @@ struct hkCheckDeterminismUtil
 
 	public:
 		void flushWrite();
-		static void setCurrentJobFuid(Fuid jobFuid);
+		void setCurrentJobFuid(Fuid jobFuid);
+		static void setCurrentCheckIndex(hkUint32 checkIndex);
+		static void bumpCurrentCheckIndex();
+		static hkUint32 getCurrentCheckIndex();
 		static Fuid getCurrentJobFuid();
+
+		bool isNearBreakpoint(hkUint64 offset);
 
 	protected:
 		static void HK_CALL initThreadImpl();
@@ -351,10 +362,10 @@ struct hkCheckDeterminismUtil
 		void  combineRegisteredJobsImpl();
 		void  extractRegisteredJobsImpl();
 		void  clearRegisteredJobsImpl();
+		void  delayJob(const Fuid& id, bool start) const;
 
 
 		void checkImpl( int id, const void* object, int size, int* excluded = HK_NULL);
-
 		void checkCrcImpl( int id, const void* object, int size);
 
 		enum Mode
@@ -364,13 +375,15 @@ struct hkCheckDeterminismUtil
 			MODE_COMPARE
 		};
 		Mode m_mode;
+		hkUint64 m_frame;
 
 		hkBool m_inSingleThreadedCode;
 
 		hkMemoryTrack* m_memoryTrack;	///< This will be created when this utility works in memory ( no file name given in the startXXX() functions)
 
-		hkIstream* m_sharedInputStream;
-		hkOstream* m_sharedOutputStream;
+		hkStringPtr	m_filename;
+		hkIstream*	m_sharedInputStream;
+		hkOstream*	m_sharedOutputStream;
 
 		hkIstream* m_primaryWorkerThreadInputStream;
 		hkOstream* m_primaryWorkerThreadOutputStream;
@@ -388,17 +401,26 @@ struct hkCheckDeterminismUtil
 		struct JobInfo
 		{
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_BASE_CLASS, hkCheckDeterminismUtil::JobInfo );
-			Fuid	  m_jobFuid;
+			Fuid		m_jobFuid;
 
-				// This is the data. In multi threaded mode, the thread-local m_input/outputStreams connect to the corresponding hkArray.
-				// This array is resizable, therefore it has to point to the data array.
+			// This is the data. In multi threaded mode, the thread-local m_input/outputStreams connect to the corresponding hkArray.
+			// This array is resizable, therefore it has to point to the data array.
 			hkMemoryTrack* m_data; // for write
 
-			hkBool		  m_isOpen;
+			hkBool			m_isOpen;
 		};
 
 		hkArray<JobInfo> m_registeredJobs;
+		
+		hkBool m_delayJobs;
+		hkUint32 m_delayCounter;
+		hkArray<unsigned char> m_delayJobSeed;
+		
 
+		bool m_enableThreadTracker;
+		int m_maxTheadId;
+		hkArray<Fuid> m_threadTracker;
+		
 #if defined(HK_DETERMINISM_CHECK_SIZES)
 		hkPointerMap<int,int> m_sizePerId;
 #endif
@@ -418,7 +440,7 @@ struct hkCheckDeterminismUtil
 #endif // HKBASE_HKDEBUGUTIL_CHECK_DETERMINISM_UTIL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

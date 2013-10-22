@@ -30,6 +30,8 @@ HK_FORCE_INLINE void hkbEventQueue::enqueueWithInternalId( hkbEvent event, const
 	HK_ASSERT2( 0xc57aab55, event.isValid(), "null events should not go on the queue" );
 	
 
+	hkCheckDeterminismUtil::checkMt(0xb0000060, HKB_DETERMINISTIC_EVENT_INTERNAL_ID_BASE + event.m_id);
+
 	// in certain cases when doing precomputation there won't be a map available
 	if ( eventIdMap != HK_NULL )
 	{
@@ -39,6 +41,8 @@ HK_FORCE_INLINE void hkbEventQueue::enqueueWithInternalId( hkbEvent event, const
 
 		event.setId( externalEventId );
 	}
+
+	hkCheckDeterminismUtil::checkMt(0xb0000061, HKB_DETERMINISTIC_EVENT_EXTERNAL_ID_BASE + event.m_id);
 
 	m_queue.enqueue( event );
 }
@@ -53,6 +57,8 @@ HK_FORCE_INLINE void hkbEventQueue::enqueueWithExternalId( hkbEvent event )
 {
 	HK_ASSERT2( 0xc57aab55, event.isValid(), "null events should not go on the queue" );
 
+	hkCheckDeterminismUtil::checkMt(0xb0000062, HKB_DETERMINISTIC_EVENT_EXTERNAL_ID_BASE + event.m_id);
+
 	m_queue.enqueue( event );
 }
 
@@ -60,16 +66,22 @@ HK_FORCE_INLINE const hkbEvent hkbEventQueue::dequeue()
 {
 	hkbEvent e;
 	m_queue.dequeue( e );
+	
+	hkCheckDeterminismUtil::checkMt(0xb0000063, HKB_DETERMINISTIC_EVENT_EXTERNAL_ID_BASE + e.m_id);
+	hkCheckDeterminismUtil::checkMt(0xb0000067, HKB_DETERMINISTIC_EVENT_COUNT_BASE + m_queue.getSize());
+
 	return e;
 }
 
 HK_FORCE_INLINE void hkbEventQueue::clear()
 {
 	m_queue.clear();
+
+	hkCheckDeterminismUtil::checkMt(0xb0000068, HKB_DETERMINISTIC_EVENT_COUNT_BASE);
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

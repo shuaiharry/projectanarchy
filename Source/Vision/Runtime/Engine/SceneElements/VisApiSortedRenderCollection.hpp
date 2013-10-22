@@ -556,6 +556,9 @@ class VisEntityCollection_cl : public VisRenderCollection_cl
   /// rather than on individual one-entity collections. This will be significantly faster.
   VISION_APIFUNC void PrepareForRendering() const;
 
+  /// \brief
+  ///   Waits until the animation tasks of all entities in this collection are finished.
+  VISION_APIFUNC void EnsureTasksFinished() const;
 
   /// \brief
   ///   Sorts the entity collection according to the specified criteria.
@@ -1587,7 +1590,7 @@ class VisStaticGeometryInstanceCollection_cl : public VisRenderCollection_cl
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

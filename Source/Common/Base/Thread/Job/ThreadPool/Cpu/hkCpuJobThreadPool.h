@@ -40,19 +40,21 @@ class hkCpuJobThreadPool : public hkJobThreadPool
 		virtual void processAllJobs( hkJobQueue* queue, hkJobType firstJobType_unused = HK_JOB_TYPE_MAX );
 
 
-		////////////////////////////
-		/// hkThreadPool interface
+		//
+		// hkThreadPool interface
+		//
+
 		virtual void waitForCompletion();
 
-		virtual bool isProcessing();
+		virtual bool isProcessing() const;
 
-		virtual void appendTimerData(  hkArrayBase<hkTimerData>& timerDataOut, hkMemoryAllocator& alloc );
+		virtual void appendTimerData( hkArrayBase<hkTimerData>& timerDataOut, hkMemoryAllocator& alloc );
 
 		virtual void clearTimerData();
 
-		virtual int getNumThreads();
+		virtual int getNumThreads() const;
 
-		virtual void setNumThreads(int numThreads);				
+		virtual void setNumThreads( int numThreads );
 
 		virtual void gcThreadMemoryOnNextCompletion();
 
@@ -69,7 +71,7 @@ class hkCpuJobThreadPool : public hkJobThreadPool
 #endif // HK_BASE_CPU_THREAD_POOL_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

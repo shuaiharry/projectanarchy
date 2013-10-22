@@ -8,10 +8,6 @@
 
 /// \file vHavokContactListener.hpp
 
-// ***********************************************************************************************
-// vHavok binding for Vision that uses Havok for physics
-// Copyright (C) Trinigy GmbH. All rights reserved.
-// ***********************************************************************************************
 #ifndef VHAVOKCONTACTLISTENER_HPP_INCLUDED
 #define VHAVOKCONTACTLISTENER_HPP_INCLUDED
 
@@ -25,7 +21,6 @@ class vHavokRagdoll;
 class vHavokStaticMesh;
 class vHavokTerrain;
 
-
 /// 
 /// \brief
 ///    Structure that holds information about one collider object.
@@ -36,23 +31,25 @@ class vHavokTerrain;
 ///
 struct vHavokColliderInfo_t
 {
+  /// \brief
+  ///   Constructor.
   vHavokColliderInfo_t()
-  {
-    m_pRigidBody = NULL;
-    m_pCharacter = NULL;
-    m_pStaticMesh = NULL;
-#ifdef SUPPORTS_TERRAIN
-    m_pTerrainSector = NULL; 
+    : m_eType(V_USERDATA_UNDEFINED)
+    , m_pRigidBody(NULL)
+    , m_pCharacter(NULL)
+    , m_pRagdoll(NULL)
+    , m_pStaticMesh(NULL)
+#if defined(SUPPORTS_TERRAIN)
+    , m_pTerrainSector(NULL)
 #endif
-	m_pRagdoll = NULL;
-    m_eType = V_USERDATA_UNDEFINED;
-  }
+  {}
 
-  void SetInfo(void *pUserData);
+  void SetInfo(void* pUserData);
 
   /// \brief
-  ///   Internal helper to copy the content of the physics collider to physics engine independent representation
-  void FillScriptInfo(VScriptColliderInfo & collider);
+  ///   Internal helper function transferring the content of the physics 
+  ///   collider to a physics engine independent representation
+  void FillScriptInfo(VScriptColliderInfo& collider);
 
   vHavokUserDataType_e m_eType;            ///< Type of collider object
   vHavokRigidBody *m_pRigidBody;           ///< Physics object (can be NULL)
@@ -62,16 +59,14 @@ struct vHavokColliderInfo_t
 #ifdef SUPPORTS_TERRAIN
   vHavokTerrain *m_pTerrainSector;         ///< Terrain sector (can be NULL)
 #endif
-
 };
-
 
 ///
 /// \brief
 ///   Structure that holds information about a collision.
 ///
-/// When a collision is detected a message is sent to both colliders containing information about the
-/// collision in this structure, for instance information about the impact point.
+/// When a collision is detected, a message is sent to both colliders containing collision information
+/// using this structure.
 ///
 struct vHavokCollisionInfo_t
 {
@@ -85,43 +80,47 @@ struct vHavokCollisionInfo_t
     m_pSenderTarget[0] = m_pSenderTarget[1] = NULL;
   }
 
-  // element access indices for m_Collider and m_pMaterials correspond to each other
-  vHavokColliderInfo_t m_Collider[2];   ///< Pair of colliders this notification is about.
-  VColMeshMaterial m_Materials[2];      ///< Pair of physics materials, which are involved into collision.
+  // element access indices for m_Collider and corresponding m_pMaterials
+  vHavokColliderInfo_t m_Collider[2];   ///< Pair of colliders involved in the collision.
+  VColMeshMaterial m_Materials[2];      ///< Pair of physics materials corresponding to the colliders.
                                         ///< The materials are triangle based, if available, otherwise shape based.
-                                        ///< If no materials were explicitly assigned to the corresponding colliders, a default material will be returned.
+                                        ///< If no materials were explicitly assigned to the corresponding colliders,
+                                        ///< a default material will be returned.
 
-  hkvVec3 m_vPoint;                ///< Impact Point
-  hkvVec3 m_vNormal;               ///< Impact Normal 
-  hkReal m_fVelocity;                    ///< Relative velocity at the point of contact projected onto the collision normal
+  hkvVec3 m_vPoint;                     ///< Impact Point
+  hkvVec3 m_vNormal;                    ///< Impact Normal 
+  hkReal m_fVelocity;                   ///< Relative velocity at the point of contact projected onto the collision normal
+  
   VisTypedEngineObject_cl *m_pSenderTarget[2];
 };
-
 
 /// \brief 
 ///   Holds the hit's result for a sweep query
 struct vHavokSweepResult
 {
   vHavokSweepResult()
-  {
-    m_fDistance = 0.0f;
-  }
+    : m_fDistance(0.0f)
+  {}
 
-  hkReal           m_fDistance;    ///< Distance to the hit point
-  hkvVec3          m_vTouchPos;    ///< World-space impact point
-  hkvVec3          m_vNormal;      ///< World-space impact normal
-  vHavokColliderInfo_t  m_collInfo;     ///< Collider info
+  hkReal                m_fDistance; ///< Distance to the hit point
+  hkvVec3               m_vTouchPos; ///< World-space impact point
+  hkvVec3               m_vNormal;   ///< World-space impact normal
+  vHavokColliderInfo_t  m_collInfo;  ///< Collider info
 };
-
 
 ///
 /// \brief
-///    Class that implements the hkpContactListener Interface which is responsible for Havok collision callbacks.
+///   Class that implements the hkpContactListener Interface which is responsible for 
+///   Havok Physics collision callbacks.
 ///
-/// The Havok contact listener is added to the Havok world to provide collision information. It responds to
-/// collision callbacks, collects the collision information and sends messages to the collider objects. 
+/// The Havok Physics contact listener is added to the Havok Physics world to provide collision information. 
+/// It responds to collision callbacks, collects the collision information and sends messages to the 
+/// collider objects. 
 /// 
-class vHavokContactListener : public VRefCounter, public hkpContactListener, public hkpEntityListener
+class vHavokContactListener 
+  : public VRefCounter
+  , public hkpContactListener
+  , public hkpEntityListener
 {
 public:
 
@@ -130,97 +129,87 @@ public:
   /// @{
   ///
 
-
   /// 
   /// \brief
   /// Constructor of the Havok Contact Listener.
   /// 
   /// \param pPhysicsWorld
-  ///   Pointer to the Havok physics world the Contact listener is added to.
+  ///   Pointer to the Havok physics world the Contact listener belongs to.
   /// 
   vHavokContactListener(hkpWorld* pPhysicsWorld);  
-
 
   /// 
   /// \brief
   /// Destructor of the Havok Contact Listener.
   ///
-  ~vHavokContactListener();
-
+  virtual ~vHavokContactListener();
 
   ///
   /// @}
   ///
 
-
   ///
-  /// @name hkpContactListener Virtual Overrides
+  /// @name hkpContactListener Overrides
   /// @{
   ///
-
 
   /// 
   /// \brief
   ///   Called for each new contact point between two bodies. 
   /// 
-  /// This method is triggered when the contact point is generated by the Havok system. 
+  /// This method is triggered when the contact point is generated by Havok Physics. 
   /// This is the place where basic collision information is added.
   /// 
   /// \param event
-  ///   Struct that contains detailed information about the collision.
+  ///   Struct that contains information about the collision.
   /// 
   /// \see
   ///   vHavokContactListener::collisionAddedCallback
   ///   vHavokContactListener::collisionRemovedCallback
   ///
-  VOVERRIDE void contactPointCallback (const hkpContactPointEvent &event);
-
+  virtual void contactPointCallback(const hkpContactPointEvent& event) HKV_OVERRIDE;
 
   /// 
   /// \brief
   ///   Called for a new collision between two bodies.
   /// 
-  /// This method is triggered when the contact point is generated by the Havok system. 
+  /// This method is triggered when the contact point is generated by Havok Physics. 
   /// This is the place where basic collision information is added.
   /// 
   /// \param event
-  ///   Struct that contains detailed information about the collision.
+  ///   Struct that contains information about the collision.
   /// 
   /// \see
   ///   vHavokContactListener::contactPointCallback
   ///   vHavokContactListener::collisionRemovedCallback
   ///
-  VOVERRIDE void collisionAddedCallback (const hkpCollisionEvent &event);
-
+  virtual void collisionAddedCallback(const hkpCollisionEvent& event) HKV_OVERRIDE;
 
   /// 
   /// \brief
-  ///   Called when two bodies are no longer colliding.
+  ///   Called when two bodies are not colliding anymore.
   /// 
-  /// This method is triggered when the contact point is generated by the Havok system. 
+  /// This method is triggered when the contact point is generated by Havok Physics. 
   /// This is the place where basic collision information is added.
   /// 
   /// \param event
-  ///   Struct that contains detailed information about the collision.
+  ///   Struct that contains information about the collision.
   /// 
   /// \see
   ///   vHavokContactListener::contactPointCallback
   ///   vHavokContactListener::collisionAddedCallback
   ///
-  VOVERRIDE void collisionRemovedCallback (const hkpCollisionEvent &event);
-
+  virtual void collisionRemovedCallback(const hkpCollisionEvent& event) HKV_OVERRIDE;
 
   ///
   /// @}
   ///
-
-
 };
 
 #endif // VHAVOKCONTACTLISTENER_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

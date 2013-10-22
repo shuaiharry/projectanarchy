@@ -9,6 +9,9 @@
 #define HKAI_HIERARCHY_UTILS_H
 
 #include <Ai/Pathfinding/hkaiBaseTypes.h>
+#include <Ai/Pathfinding/Astar/Heuristic/hkaiGraphDistanceHeuristic.h>
+#include <Ai/Pathfinding/NavMesh/hkaiNavMeshPathSearchParameters.h>
+#include <Ai/Pathfinding/Graph/hkaiAgentTraversalInfo.h>
 
 class hkaiDirectedGraphExplicitCost;
 class hkaiDirectedGraphInstance;
@@ -29,12 +32,14 @@ public:
 	HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI, hkaiHierarchyUtils);
 	HK_DECLARE_REFLECTION();
 
+		/// Cluster generation settings.
 	struct ClusterSettings
 	{
+		//+version(1)
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_AI, ClusterSettings);
 		HK_DECLARE_REFLECTION();
 		ClusterSettings();
-		ClusterSettings( hkFinishLoadedObjectFlag f ) {}
+		ClusterSettings( hkFinishLoadedObjectFlag f );
 
 			/// The desired number of faces per cluster.
 			/// This is approximate and will vary with the actual nav mesh.
@@ -46,11 +51,16 @@ public:
 			/// regions won't early out (and could flood fill).
 		hkBool m_ensureClusterPerRegion; //+default(true)
 
-			/// Cost modifier to be used during clustering. This affects the final costs for the graph edges.
-		const hkaiAstarCostModifier*	m_costModifier;	//+default(HK_NULL)
+			/// Search parameters used when determining the final costs for graph edges.
+			/// You can specifiy e.g. an hkaiAstarCostModifier to make the costs as close to possible to the cost of an
+			/// actual nav mesh search.
+			/// It is recommended that you set the global up vector with hkaiNavMeshPathSearchParameters::setUp() - if
+			/// this is not done, the up vector for the search will be computed as the average of the face normals.
+		hkaiNavMeshPathSearchParameters m_searchParameters;
 
-			/// Edge filter to be used during clustering. This affects the final costs for the graph edges.
-		const hkaiAstarEdgeFilter*		m_edgeFilter;	//+default(HK_NULL)
+			/// Agent information used when determining the final costs for graph edges.
+			/// Setting the minimum agent size here will give more accurate costs in the graph.
+		hkaiAgentTraversalInfo m_agentInfo;
 	};
 
 		/// Creates a cluster of the input nav mesh using the specified ClusterSettings.
@@ -61,23 +71,6 @@ public:
 		/// This interface is deprecrated and may be removed soon.
 	static void HK_CALL clusterNavMesh( hkaiNavMesh& mesh, hkaiDirectedGraphExplicitCost& graphOut, int desiredNumGroups, bool ensureClusterPerRegion = true, const hkaiAstarCostModifier* costModifier = HK_NULL, const hkaiAstarEdgeFilter* edgeFilter = HK_NULL);
 	
-
-		/// Adds an edge to the corresponding directed graph instances, or increments its reference count
-	static void HK_CALL addDirectedGraphEdgeForUserEdge( hkaiPackedKey startFaceKey, hkaiPackedKey userEdgeKey, hkaiStreamingCollection* collection );
-	static void HK_CALL removeDirectedGraphEdgeForUserEdge( hkaiPackedKey startFaceKey, hkaiPackedKey userEdgeKey, hkaiStreamingCollection* collection );
-	
-		/// Removes all graph user edges connected to the section.
-	static void HK_CALL removeDirectedUserEdgesToSection( hkaiStreamingCollection* collection, hkaiRuntimeIndex sectionIndex);
-
-	static void HK_CALL compactOwnedEdges( hkaiDirectedGraphInstance& graph );
-
-	enum Adjustment
-	{
-		GRAPH_ADD_EDGE = 1,
-		GRAPH_REMOVE_EDGE = -1,
-	};
-
-	static void HK_CALL _adjustDirectedGraphEdge( hkaiPackedKey startFaceKey, hkaiPackedKey userEdgeKey, hkaiStreamingCollection* collection, Adjustment adj );
 
 	//
 	// All other structs and methods are internal to the cluster builder.
@@ -139,10 +132,11 @@ public:
 		typedef hkReal PathCost;
 		typedef int SearchIndex;
 
+		typedef hkaiGraphMultiDistanceHeuristic<hkaiNavMeshFaceGraph>  Heuristic;
 		CostAdaptor(SemiSparse2dArray& costs, int sourceNid);
 
 		PathCost getCost( SearchIndex nid ) const;
-		void setCost( SearchIndex nid, PathCost d );
+		void setCost( Heuristic* h_unused, SearchIndex nid, PathCost d );
 		bool isCostTooHigh( PathCost c) { return false; }
 		hkBool32 estimatedCostLess( SearchIndex a, SearchIndex b ) const;
 
@@ -153,13 +147,13 @@ public:
 		int m_sourceNid;
 	};
 	
-	static void HK_CALL buildAbstractGraphFromClusterInfo( hkaiNavMeshFaceGraph& graph, hkaiDirectedGraphExplicitCost& graphOut, hkArray<int>&, hkArray<int>&, const hkArray<hkVector4>&, const hkaiAstarCostModifier*, const hkaiAstarEdgeFilter* edgeFilter);
+	static void HK_CALL buildAbstractGraphFromClusterInfo( hkaiNavMeshFaceGraph& graph, hkaiDirectedGraphExplicitCost& graphOut, hkArray<int>&, hkArray<int>&, const hkArray<hkVector4>&, const hkaiNavMeshPathSearchParameters& searchParams, const hkaiAgentTraversalInfo& agentInfo );
 };
 
 #endif // HKAI_HIERARCHY_UTILS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

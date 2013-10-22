@@ -649,13 +649,7 @@ public:
   /// 
   /// If no application is set via the application code, this function creates and sets an instance
   /// of the VisionApp_cl class.
-  inline static IVisApp_cl *GetApplication()
-  {
-    if (m_spApp.GetPtr() == NULL)
-      m_spApp = new VisionApp_cl;
-    return m_spApp.GetPtr();
-  }
-
+  VISION_APIFUNC static IVisApp_cl *GetApplication();
 
   /// \brief
   ///   Sets the global scene manager instance
@@ -823,7 +817,7 @@ void VISION_APIFUNC VisionInterReleaseDebugLinkingCheck();
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

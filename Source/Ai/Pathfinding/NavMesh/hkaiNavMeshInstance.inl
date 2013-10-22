@@ -462,7 +462,7 @@ inline void hkaiNavMeshInstance::copyOwnedEdge( int dstIndex, int srcIndex )
 	m_ownedEdges[dstIndex] = m_ownedEdges[srcIndex];
 	m_cuttingInfo[dstIndex] = m_cuttingInfo[srcIndex];
 
-	hkaiNavMesh::copyUserData( m_ownedEdgeData, dstIndex, srcIndex, getEdgeDataStriding() );
+	hkaiUserDataUtils::copyUserData( m_ownedEdgeData, dstIndex, srcIndex, getEdgeDataStriding() );
 
 }
 
@@ -471,13 +471,13 @@ inline void hkaiNavMeshInstance::copyOwnedFace( int dstIndex, int srcIndex )
 	m_ownedFaces[dstIndex] = m_ownedFaces[srcIndex];
 	m_faceFlags[dstIndex + m_numOriginalFaces] = m_faceFlags[srcIndex + m_numOriginalFaces];
 	m_faceClearanceIndices[dstIndex + m_numOriginalFaces] = m_faceClearanceIndices[srcIndex + m_numOriginalFaces];
-	hkaiNavMesh::copyUserData( m_ownedFaceData, dstIndex, srcIndex, getFaceDataStriding() );
+	hkaiUserDataUtils::copyUserData( m_ownedFaceData, dstIndex, srcIndex, getFaceDataStriding() );
 }
 
 inline void hkaiNavMeshInstance::copyInstancedEdge( int dstIndex, int srcIndex )
 {
 	m_instancedEdges[dstIndex] = m_instancedEdges[srcIndex];
-	hkaiNavMesh::copyUserData( m_instancedEdgeData, dstIndex, srcIndex, getEdgeDataStriding() );
+	hkaiUserDataUtils::copyUserData( m_instancedEdgeData, dstIndex, srcIndex, getEdgeDataStriding() );
 }
 
 
@@ -505,7 +505,7 @@ inline void hkaiNavMeshInstance::setNumInstancedEdges( int numInstancedEdges )
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

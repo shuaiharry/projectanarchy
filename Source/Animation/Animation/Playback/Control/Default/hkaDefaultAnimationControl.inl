@@ -69,39 +69,45 @@ inline void hkaDefaultAnimationControl::setEaseOutCurve(hkReal y0, hkReal y1, hk
 
 
 // We assume that ease out and in are symmetric
-inline hkReal hkaDefaultAnimationControl::easeIn(hkReal duration)
+inline hkReal hkaDefaultAnimationControl::easeIn(hkReal durationR)
 {
-	const hkReal denominator = duration; // avoid sn compiler warning
+	const hkSimdReal duration = hkSimdReal::fromFloat(durationR);
+	hkSimdReal easeT; easeT.load<1>(&m_easeT);
 
 	// Test if the control is currently easing out
 	if ( m_easeStatus == EASING_OUT || m_easeStatus == EASED_OUT )
 	{
 		// "Mirror" the amount of time left for easing
-		m_easeT = 1.0f - m_easeT;
+		easeT = hkSimdReal_1 - easeT;
+		easeT.store<1>(&m_easeT);
 	}
 
-	m_easeInvDuration = (duration > HK_REAL_EPSILON) ? (1.0f / denominator) : HK_REAL_MAX;
-	m_easeStatus = ( m_easeT == 1.0f ) ? EASED_IN : EASING_IN;
+	hkSimdReal invD; invD.setSelect(duration.greater(hkSimdReal_Eps), duration.reciprocal(), hkSimdReal_Max);
+	invD.store<1>(&m_easeInvDuration);
+	m_easeStatus = easeT.isEqual(hkSimdReal_1) ? EASED_IN : EASING_IN;
 
-	return duration * (1.0f - m_easeT);
+	return (duration * (hkSimdReal_1 - easeT)).getReal();
 }
 
 // We assume that ease out and in are symmetric
-inline hkReal hkaDefaultAnimationControl::easeOut(hkReal duration)
+inline hkReal hkaDefaultAnimationControl::easeOut(hkReal durationR)
 {
-	const hkReal denominator = duration; // avoid sn compiler warning
+	const hkSimdReal duration = hkSimdReal::fromFloat(durationR);
+	hkSimdReal easeT; easeT.load<1>(&m_easeT);
 
 	// Test if the control is currently easing out
 	if ( m_easeStatus == EASING_IN || m_easeStatus == EASED_IN )
 	{
 		// "Mirror" the amount of time left for easing
-		m_easeT = 1.0f - m_easeT;
+		easeT = hkSimdReal_1 - easeT;
+		easeT.store<1>(&m_easeT);
 	}
 
-	m_easeInvDuration = (duration > HK_REAL_EPSILON) ? (1.0f / denominator) : HK_REAL_MAX;
-	m_easeStatus = ( m_easeT == 1.0f ) ? EASED_OUT : EASING_OUT;
+	hkSimdReal invD; invD.setSelect(duration.greater(hkSimdReal_Eps), duration.reciprocal(), hkSimdReal_Max);
+	invD.store<1>(&m_easeInvDuration);
+	m_easeStatus = easeT.isEqual(hkSimdReal_1) ? EASED_OUT : EASING_OUT;
 
-	return duration * (1.0f - m_easeT);
+	return (duration * (hkSimdReal_1 - easeT)).getReal();
 }
 
 // Select between easeIn/easeOut based on a boolean
@@ -145,10 +151,7 @@ inline void hkaDefaultAnimationControl::setCropEndAmountLocalTime( hkReal cropEn
 	hkReal endTime = m_binding->m_animation->m_duration - m_cropEndAmountLocalTime;
 
 	// make sure the local time is kept in range
-	if ( m_localTime >= endTime )
-	{
-		m_localTime = endTime;
-	}
+	m_localTime = hkMath::min2( m_localTime, endTime );
 }
 
 // Get the amount (in local seconds) to crop the start of the animation.
@@ -164,7 +167,7 @@ inline hkReal hkaDefaultAnimationControl::getCropEndAmountLocalTime()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

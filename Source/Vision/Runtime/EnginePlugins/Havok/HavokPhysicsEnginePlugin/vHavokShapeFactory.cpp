@@ -215,7 +215,15 @@ hkRefNew<hkpShape> vHavokShapeFactory::CreateShapeFromMesh(VBaseMesh* pMesh, con
   ci.m_userDataMode = hkpBvCompressedMeshShape::PER_PRIMITIVE_DATA_NONE; // Materials
   ci.m_weldingType = vHavokConversionUtils::VisToHkWeldingType(eWeldingType);
   hkvBvCompressedMeshShape* pCompressedMeshShape = new hkvBvCompressedMeshShape(ci, pColMesh->GetFileTime());
-  VASSERT_MSG(pCompressedMeshShape->getNumChildShapes() > 0, "hkvBvCompressedMeshShape could not be created for dynamic model!");
+
+  if (pCompressedMeshShape->getNumChildShapes() <= 0)
+  {
+    pCompressedMeshShape->removeReference();
+
+    const char *szMeshFilename = (pMesh->GetFilename() != NULL) ? pMesh->GetFilename() : "UnnamedMesh";
+    Vision::Error.Warning("Physics Shape for [%s] is empty. Volume too small?",  szMeshFilename);
+    return NULL;
+  }
   
   if (bCacheShape)
     *szShapeCacheId = AddShape(szShapeId, pCompressedMeshShape);
@@ -531,7 +539,7 @@ hkpShape* vHavokShapeFactory::CreateMeshShapeFromStaticMeshInstances(const VisSt
   ci.m_collisionFilterInfoMode = bHaveTriCDData ? hkpBvCompressedMeshShape::PER_PRIMITIVE_DATA_8_BIT : hkpBvCompressedMeshShape::PER_PRIMITIVE_DATA_NONE;
   
   hkvBvCompressedMeshShape *pCompressedMeshShape = HK_NULL;
-  if ( materials.getSize() > 0)
+  if ( materials.getSize() > 0 && materials.getSize() < 255)
   {
     ci.m_userDataMode = hkpBvCompressedMeshShape::PER_PRIMITIVE_DATA_8_BIT; 
     pCompressedMeshShape = new hkvBvCompressedMeshShape(ci, materials, iFileTime);
@@ -731,16 +739,22 @@ hkvVec3 vHavokShapeFactory::GetPivotOffset(const VDynamicMesh *pMesh, float fUni
 
 void vHavokShapeFactory::GetIDStringForConvexShape(char *szIDString, const char *szMeshName, const hkvVec3& vScale, bool bShrinkByCvxRadius)
 {
-	if (bShrinkByCvxRadius)
-		sprintf(szIDString, "%s|Cvx_%.2f_%.2f_%.2f_t", szMeshName, vScale.x, vScale.y, vScale.z);
-	else
-		sprintf(szIDString, "%s|Cvx_%.2f_%.2f_%.2f", szMeshName, vScale.x, vScale.y, vScale.z);
+  // Use Havok instead of Vision scale to account for global HavokToVision scale. 
+  const hkvVec3 vHavokScale = vScale * vHavokConversionUtils::GetVision2HavokScale();
+
+  if (bShrinkByCvxRadius)
+    sprintf(szIDString, "%s|C_%.3g_%.3g_%.3g_t", szMeshName, vHavokScale.x, vHavokScale.y, vHavokScale.z);
+  else
+    sprintf(szIDString, "%s|C_%.3g_%.3g_%.3g", szMeshName, vHavokScale.x, vHavokScale.y, vHavokScale.z);
 }
 
 void vHavokShapeFactory::GetIDStringForMeshShape(char *szIDString, const char *szMeshName, const hkvVec3& vScale, VisStaticMeshInstance_cl::VisCollisionBehavior_e eCollisionBehavior,
                                                  VisWeldingType_e eWeldingType) 
 {
-  sprintf(szIDString, "%s|Msh_%.2f_%.2f_%.2f_%i_%i", szMeshName, vScale.x, vScale.y, vScale.z, (int)eCollisionBehavior, (int)eWeldingType);
+  // Use Havok instead of Vision scale to account for global HavokToVision scale.
+  const hkvVec3 vHavokScale = vScale * vHavokConversionUtils::GetVision2HavokScale();
+
+  sprintf(szIDString, "%s|M_%.3g_%.3g_%.3g_%i_%i", szMeshName, vHavokScale.x, vHavokScale.y, vHavokScale.z, (int)eCollisionBehavior, (int)eWeldingType);
 }
 
 void vHavokShapeFactory::BuildGeomFromCollisionMesh(const IVCollisionMesh *pColMesh, int iSubmeshIndex,const hkvMat4 &transform, bool bConvex, hkGeometry& geom)
@@ -903,7 +917,11 @@ void vHavokShapeFactory::GetHktDependencies(VResourceSnapshot &snapshot, VisBase
   VASSERT(pModule != NULL);
   pModule->MarkForRead();
   const hkpRigidBody *pRigidBody = pWrappedRigidBody->GetHkRigidBody();
-  VASSERT(pRigidBody != NULL);
+  if (pRigidBody == NULL)
+  {
+    pModule->UnmarkForRead();
+    return;
+  }
   const hkpShape *pShape = pRigidBody->getCollidable()->getShape();
   pModule->UnmarkForRead();
   
@@ -965,10 +983,10 @@ void vHavokShapeFactory::GetHktDependencies(VResourceSnapshot &snapshot, VTerrai
   char szPath[FS_MAX_PATH];
   bool bSuccess = VFileHelper::GetAbsolutePath(szFilename, szPath, Vision::File.GetManager());
   VASSERT_MSG(bSuccess, "vHavokShapeFactory::GetHktDependencies: Failed to make the path to the sector hmap absolute, the file may not exist!");
-  VFileHelper::GetFilenameNoExt(szFilename, szPath);
+  VFileHelper::GetFilenameNoExt(szPath, szFilename);
 
   // Build the cached shape filename
-  VStaticString<FS_MAX_PATH> szCachedShapeName(szFilename);
+  VStaticString<FS_MAX_PATH> szCachedShapeName(szPath);
   vHavokCachedShape::GetTerrainSectorShapePath(szCachedShapeName, ePhysicsType, bHasHoles);
   IVFileInStream *pIn = Vision::File.Open(szCachedShapeName);
   if (pIn)
@@ -982,7 +1000,7 @@ void vHavokShapeFactory::GetHktDependencies(VResourceSnapshot &snapshot, VTerrai
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

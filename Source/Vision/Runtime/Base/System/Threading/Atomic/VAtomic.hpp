@@ -46,6 +46,8 @@ public:
   #include <Vision/Runtime/Base/System/Threading/Atomic/VAtomicIOS.inl>
 #elif defined(_VISION_ANDROID)
   #include <Vision/Runtime/Base/System/Threading/Atomic/VAtomicAndroid.inl>
+#elif defined(_VISION_TIZEN)
+#include <Vision/Runtime/Base/System/Threading/Atomic/VAtomicTizen.inl>
 #elif defined(_VISION_PSP2)
   #include <Vision/Runtime/Base/System/Threading/Atomic/VAtomicPSP2.inl>
 #elif defined(_VISION_WIIU)
@@ -58,7 +60,7 @@ public:
 #endif  // VATOMIC_HPP_INCLUDED
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

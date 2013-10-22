@@ -135,10 +135,11 @@ inline void hkaiPath::popBack()
 
 inline const hkTransform& HK_CALL hkaiPathUtil::getSectionTransform( const hkaiStreamingCollection* collection, hkaiRuntimeIndex fixedSectionId )
 {
-	if (fixedSectionId == HKAI_INVALID_RUNTIME_INDEX)
+	if (fixedSectionId == HKAI_INVALID_RUNTIME_INDEX || fixedSectionId >= collection->getNumInstanceInfos() )
 	{
 		// Individual path points might have no sectionId, as for invalid start/goal points.
 		// These points are already in world space
+		// Additionally, the section may have been unloaded. Nothing we can do in that case.
 		return hkTransform::getIdentity();
 	}
 
@@ -147,7 +148,7 @@ inline const hkTransform& HK_CALL hkaiPathUtil::getSectionTransform( const hkaiS
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

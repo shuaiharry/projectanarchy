@@ -242,7 +242,7 @@ hkaPose::hkaPose (const hkaSkeleton* skeleton)
 	const int numSlots =  m_skeleton->m_floatSlots.getSize();
 	const int numSlotsRoundedUp = HK_NEXT_MULTIPLE_OF( 4, numSlots );
 	m_floatSlotValues.reserveExactly( numSlotsRoundedUp );
-	m_floatSlotValues.setSize( numSlots, 0.0f );
+	m_floatSlotValues.setSize( numSlots, hkReal(0) );
 
 
 #ifdef HK_DEBUG
@@ -273,7 +273,7 @@ hkaPose::hkaPose(const hkaSkeleton* skeleton, void* preallocatedMemory)
 		m_localInSync (false),
 		m_floatSlotValues (reinterpret_cast<hkReal*> (m_boneFlags.begin() + skeleton->m_bones.getSize()), skeleton->m_floatSlots.getSize(), HK_NEXT_MULTIPLE_OF( 4, skeleton->m_floatSlots.getSize()))
 {
-	HK_ASSERT2 (0x4643f989, (reinterpret_cast<hkUlong> (preallocatedMemory) & 0xf) == 0, "Preallocated memory must be 16-byte aligned");
+	HK_ASSERT2 (0x4643f989, (reinterpret_cast<hkUlong> (preallocatedMemory) & (HK_REAL_ALIGNMENT-1)) == 0, "Preallocated memory must be aligned for SIMD");
 
 #ifdef HK_DEBUG
 	setNonInitializedFlags();
@@ -306,7 +306,7 @@ hkArray<hkReal>& hkaPose::getFloatSlotValues()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

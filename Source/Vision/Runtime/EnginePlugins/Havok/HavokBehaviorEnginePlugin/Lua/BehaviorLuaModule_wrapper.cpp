@@ -2325,6 +2325,17 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
   }
 
 
+  SWIGINTERN int VisTypedEngineObject_cl_AddTimedValue(lua_State *L)
+  {
+    
+    //insert the class name of the component as parameter #2
+    lua_pushstring(L, "VTimedValueComponent");
+    lua_insert(L, 2);
+    
+    return VisTypedEngineObject_cl_AddComponentOfType(L);
+  }
+
+
   SWIGINTERN int VisTypedEngineObject_cl_AddTransitionStateMachine(lua_State *L)
   {
     
@@ -2342,7 +2353,7 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
     SWIG_CONVERT_POINTER(L, 1, VisTypedEngineObject_cl, pSelf)
 
     //param #2: type name of the component
-    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_AddComponentOfType");
+    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_GetComponentOfType");
     const char * szComponentType = lua_tostring(L, 2);       
     
     //param #3: optional name of the component
@@ -2372,7 +2383,7 @@ SWIGINTERN bool VisTypedEngineObject_cl_RemoveComponentOfType__SWIG_0(VisTypedEn
     SWIG_CONVERT_POINTER(L, 1, VisTypedEngineObject_cl, pSelf)
 
     //param #2: type name of the component
-    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_AddComponentOfType");
+    if(!SWIG_lua_isnilstring(L,2)) luaL_error(L, "Expected a string value as parameter 2 for VisTypedEngineObject_GetComponentOfBaseType");
     const char * szBaseTypeName = lua_tostring(L, 2);       
     
     //param #3: optional name of the component
@@ -4451,6 +4462,7 @@ static swig_lua_method swig_VisTypedEngineObject_cl_methods[] = {
     { "AddTriggerTarget",VisTypedEngineObject_cl_AddTriggerTarget},
     { "AddTriggerSource",VisTypedEngineObject_cl_AddTriggerSource},
     { "AddTransitionStateMachine",VisTypedEngineObject_cl_AddTransitionStateMachine},
+    { "AddTimedValue",VisTypedEngineObject_cl_AddTimedValue},
     { "AddComponentOfType",VisTypedEngineObject_cl_AddComponentOfType},
     { "AddAnimation",VisTypedEngineObject_cl_AddAnimation},
     {"GetComponentCount", _wrap_VisTypedEngineObject_cl_GetComponentCount}, 
@@ -10275,22 +10287,23 @@ fail:
 }
 
 
-static int _wrap_vHavokBehaviorComponent_TriggerEvent(lua_State* L) {
+static int _wrap_vHavokBehaviorComponent_GetBoolVar(lua_State* L) {
   int SWIG_arg = 0;
   vHavokBehaviorComponent *arg1 = (vHavokBehaviorComponent *) 0 ;
   char *arg2 = (char *) 0 ;
+  bool result;
   
-  SWIG_check_num_args("TriggerEvent",2,2)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("TriggerEvent",1,"vHavokBehaviorComponent *");
-  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("TriggerEvent",2,"char const *");
+  SWIG_check_num_args("GetBoolVar",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("GetBoolVar",1,"vHavokBehaviorComponent const *");
+  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("GetBoolVar",2,"char const *");
   
   if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_vHavokBehaviorComponent,0))){
-    SWIG_fail_ptr("vHavokBehaviorComponent_TriggerEvent",1,SWIGTYPE_p_vHavokBehaviorComponent);
+    SWIG_fail_ptr("vHavokBehaviorComponent_GetBoolVar",1,SWIGTYPE_p_vHavokBehaviorComponent);
   }
   
   arg2 = (char *)lua_tostring(L, 2);
-  (arg1)->TriggerEvent((char const *)arg2);
-  
+  result = (bool)((vHavokBehaviorComponent const *)arg1)->GetBoolVar((char const *)arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
   return SWIG_arg;
   
   if(0) SWIG_fail;
@@ -10331,6 +10344,85 @@ static int _wrap_vHavokBehaviorComponent_GetBoneTransform(lua_State* L) {
   
   (arg1)->GetBoneTransform((char const *)arg2,*arg3,*arg4);
   
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vHavokBehaviorComponent_TriggerEvent(lua_State* L) {
+  int SWIG_arg = 0;
+  vHavokBehaviorComponent *arg1 = (vHavokBehaviorComponent *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  SWIG_check_num_args("TriggerEvent",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("TriggerEvent",1,"vHavokBehaviorComponent const *");
+  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("TriggerEvent",2,"char const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_vHavokBehaviorComponent,0))){
+    SWIG_fail_ptr("vHavokBehaviorComponent_TriggerEvent",1,SWIGTYPE_p_vHavokBehaviorComponent);
+  }
+  
+  arg2 = (char *)lua_tostring(L, 2);
+  ((vHavokBehaviorComponent const *)arg1)->TriggerEvent((char const *)arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vHavokBehaviorComponent_RegisterEventHandler(lua_State* L) {
+  int SWIG_arg = 0;
+  vHavokBehaviorComponent *arg1 = (vHavokBehaviorComponent *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  SWIG_check_num_args("RegisterEventHandler",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("RegisterEventHandler",1,"vHavokBehaviorComponent *");
+  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("RegisterEventHandler",2,"char const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_vHavokBehaviorComponent,0))){
+    SWIG_fail_ptr("vHavokBehaviorComponent_RegisterEventHandler",1,SWIGTYPE_p_vHavokBehaviorComponent);
+  }
+  
+  arg2 = (char *)lua_tostring(L, 2);
+  (arg1)->RegisterEventHandler((char const *)arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vHavokBehaviorComponent_WasEventTriggered(lua_State* L) {
+  int SWIG_arg = 0;
+  vHavokBehaviorComponent *arg1 = (vHavokBehaviorComponent *) 0 ;
+  char *arg2 = (char *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("WasEventTriggered",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("WasEventTriggered",1,"vHavokBehaviorComponent const *");
+  if(!SWIG_lua_isnilstring(L,2)) SWIG_fail_arg("WasEventTriggered",2,"char const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_vHavokBehaviorComponent,0))){
+    SWIG_fail_ptr("vHavokBehaviorComponent_WasEventTriggered",1,SWIGTYPE_p_vHavokBehaviorComponent);
+  }
+  
+  arg2 = (char *)lua_tostring(L, 2);
+  result = (bool)((vHavokBehaviorComponent const *)arg1)->WasEventTriggered((char const *)arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
   return SWIG_arg;
   
   if(0) SWIG_fail;
@@ -10403,8 +10495,11 @@ static swig_lua_method swig_vHavokBehaviorComponent_methods[] = {
     {"SetFloatVar", _wrap_vHavokBehaviorComponent_SetFloatVar}, 
     {"SetWordVar", _wrap_vHavokBehaviorComponent_SetWordVar}, 
     {"SetBoolVar", _wrap_vHavokBehaviorComponent_SetBoolVar}, 
-    {"TriggerEvent", _wrap_vHavokBehaviorComponent_TriggerEvent}, 
+    {"GetBoolVar", _wrap_vHavokBehaviorComponent_GetBoolVar}, 
     {"GetBoneTransform", _wrap_vHavokBehaviorComponent_GetBoneTransform}, 
+    {"TriggerEvent", _wrap_vHavokBehaviorComponent_TriggerEvent}, 
+    {"RegisterEventHandler", _wrap_vHavokBehaviorComponent_RegisterEventHandler}, 
+    {"WasEventTriggered", _wrap_vHavokBehaviorComponent_WasEventTriggered}, 
     {"TempMeth", _wrap_vHavokBehaviorComponent_TempMeth}, 
     {0,0}
 };

@@ -501,12 +501,12 @@ public:
 	VBASE_IMPEXP void GetColorsAtPositionI(const hkvVec3& vPos, hkvVec3* pDestColors, int iRequired=CUBEMAPFACE_BIT_ALL);
 
   /// \brief
-  ///   Calculates the average color intensity (i.e., componentwise arithmetic mean of the six colors) at the specified world position and stores the
+  ///   Calculates the average color intensity (i.e., componentwise arithmetic mean of the six colors, or just the ambient color for a simple light grid) at the specified world position and stores the
   ///   average color in vDestColor. Samples from the closest sampling point; does not perform interpolation.
   VBASE_IMPEXP void GetAverageColorAtPosition(const hkvVec3& vPos, hkvVec3& vDestColor, int iRequired=CUBEMAPFACE_BIT_ALL);
 
   /// \brief
-  ///   Calculates the average color intensity (i.e., componentwise arithmetic mean of the six colors) at the specified world position and stores the
+  ///   Calculates the average color intensity (i.e., componentwise arithmetic mean of the six colors, or just the ambient color for a simple light grid) at the specified world position and stores the
   ///   average color in vDestColor. Samples at the 8 closest sampling points and performs trilinear interpolation between them.
   VBASE_IMPEXP void GetAverageColorAtPositionI(const hkvVec3& vPos, hkvVec3& vDestColor, int iRequired=CUBEMAPFACE_BIT_ALL);
 
@@ -1067,7 +1067,7 @@ public:
 #endif
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -24,6 +24,7 @@ using CSharpFramework.View;
 using CSharpFramework.Serialization;
 using CSharpFramework.Math;
 using CSharpFramework.Scene;
+using CSharpFramework.DynamicProperties;
 
 namespace FmodEditorPlugin
 {
@@ -544,6 +545,14 @@ namespace FmodEditorPlugin
           EngineFmodReverb.SetReverbDistances(_fReverbMin * UniformScaling, _fReverbMax * UniformScaling);
       }
     }
+
+    // Only allow positive scaling.
+    [RangeCheckAttribute(0.0f, float.PositiveInfinity, RangeCheckAttribute.Flags.MinExclusive)]
+    public override float UniformScaling
+    {
+      get { return base.UniformScaling; }
+      set { base.UniformScaling = value; }
+    }
     
     #endregion
 
@@ -875,11 +884,11 @@ namespace FmodEditorPlugin
 
   }
 
-  #endregion 
+  #endregion
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130717)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok
