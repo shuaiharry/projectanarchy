@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|hkAndroid">
@@ -16,7 +16,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4910E2EB-2888-4829-9FE1-3E7B6FA0ED76}</ProjectGuid>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <ProjectName>ProjectTemplate</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -27,31 +28,29 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|hkAndroid'">
-    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_vs2010_anarchyDebug.props" />
+    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_arm_vs2010_anarchyDebug.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Dev|hkAndroid'">
-    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_vs2010_anarchyDev.props" />
+    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_arm_vs2010_anarchyDev.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|hkAndroid'">
-    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_vs2010_anarchyRelease.props" />
+    <Import Project="$(VISION_SDK)\Build\Vision\PropertySheets\Application_android_arm_vs2010_anarchyRelease.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|hkAndroid'">
-    <OutDir>..\..\Bin\android_vs2010_anarchy\$(Configuration)\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|hkAndroid'">
-    <IntDir>..\..\Obj\android_vs2010_anarchy\$(Configuration)\</IntDir>
+    <OutDir>..\..\Bin\android_arm_vs2010_anarchy\$(Configuration)\</OutDir>
+    <IntDir>..\..\Obj\android_arm_vs2010_anarchy\$(Configuration)\ProjectTemplate\</IntDir>
     <TargetName>ProjectTemplate</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev|hkAndroid'">
     <TargetName>ProjectTemplate</TargetName>
-    <OutDir>..\..\Bin\android_vs2010_anarchy\$(Configuration)\</OutDir>
-    <IntDir>..\..\Obj\android_vs2010_anarchy\$(Configuration)\</IntDir>
+    <OutDir>..\..\Bin\android_arm_vs2010_anarchy\$(Configuration)\</OutDir>
+    <IntDir>..\..\Obj\android_arm_vs2010_anarchy\$(Configuration)\ProjectTemplate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|hkAndroid'">
     <TargetName>ProjectTemplate</TargetName>
-    <OutDir>..\..\Bin\android_vs2010_anarchy\$(Configuration)\</OutDir>
-    <IntDir>..\..\Obj\android_vs2010_anarchy\$(Configuration)\</IntDir>
+    <OutDir>..\..\Bin\android_arm_vs2010_anarchy\$(Configuration)\</OutDir>
+    <IntDir>..\..\Obj\android_arm_vs2010_anarchy\$(Configuration)\ProjectTemplate\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|hkAndroid'">
     <ClCompile>
@@ -68,11 +67,11 @@
       <PrecompiledHeaderOutputFile>$(IntDir)GameApplicationPCH.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <PostBuildEvent>
-      <Command>"$(VISION_SDK)\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe" $(OutDir)$(TargetName)$(TargetExt) --pickleName $(ProjectFileName)_$(Configuration).deploy -j $(JavaOutputDir) -s $(AndroidAPILevel) -e -i --asset ..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\../Assets/ Assets/</Command>
+      <Command>"$(VISION_SDK)\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe" $(OutDir)$(TargetName)$(TargetExt) --deployFileName $(ProjectFileName)_$(Configuration).deploy -j $(JavaOutputDir) -s $(AndroidAPILevel) -l $(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/armeabi-v7a/libfmodexL.so -l $(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/armeabi-v7a/libfmodeventL.so -e -i --resDir ..\../Data/Common/Android --asset ..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\../Assets/ Assets/</Command>
     </PostBuildEvent>
     <Link>
       <AdditionalDependencies>-lGamePlugin;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\Lib\android_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Lib\android_arm_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dev|hkAndroid'">
@@ -82,10 +81,10 @@
       <PrecompiledHeaderOutputFile>$(IntDir)GameApplicationPCH.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <PostBuildEvent>
-      <Command>"$(VISION_SDK)\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe" $(OutDir)$(TargetName)$(TargetExt) --pickleName $(ProjectFileName)_$(Configuration).deploy -j $(JavaOutputDir) -s $(AndroidAPILevel) -e -i --asset ..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\../Assets/ Assets/</Command>
+      <Command>"$(VISION_SDK)\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe" $(OutDir)$(TargetName)$(TargetExt) --deployFileName $(ProjectFileName)_$(Configuration).deploy -j $(JavaOutputDir) -s $(AndroidAPILevel) -l $(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/armeabi-v7a/libfmodex.so -l $(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/armeabi-v7a/libfmodevent.so -e -i --resDir ..\../Data/Common/Android --asset ..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\../Assets/ Assets/</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalLibraryDirectories>..\..\Lib\android_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Lib\android_arm_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>-lGamePlugin;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -96,15 +95,15 @@
       <PrecompiledHeaderOutputFile>$(IntDir)GameApplicationPCH.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <PostBuildEvent>
-      <Command>"$(VISION_SDK)\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe" $(OutDir)$(TargetName)$(TargetExt) --pickleName $(ProjectFileName)_$(Configuration).deploy -j $(JavaOutputDir) -s $(AndroidAPILevel) -e -i --asset ..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\../Assets/ Assets/</Command>
+      <Command>"$(VISION_SDK)\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe" $(OutDir)$(TargetName)$(TargetExt) --deployFileName $(ProjectFileName)_$(Configuration).deploy -j $(JavaOutputDir) -s $(AndroidAPILevel) -l $(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/armeabi-v7a/libfmodex.so -l $(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/armeabi-v7a/libfmodevent.so -e -i --resDir ..\../Data/Common/Android --asset ..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\../Assets/ Assets/</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalLibraryDirectories>..\..\Lib\android_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\Lib\android_arm_vs2010_anarchy\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>-lGamePlugin;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="$(ANDROID_NDK_ROOT)\sources\android\native_app_glue\android_native_app_glue.c" />
+    <ClCompile Include="$(NDKROOT)\sources\android\native_app_glue\android_native_app_glue.c" />
     <ClCompile Include="GameApplicationPCH.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="VisSampleApp.cpp" />

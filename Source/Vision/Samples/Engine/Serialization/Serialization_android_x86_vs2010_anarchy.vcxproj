@@ -77,7 +77,7 @@
     
     
     <PostBuildEvent>
-      <Command>..\..\..\..\..\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe $(OutputFile) --arch x86 --pickleName $(ProjectFileName)_$(Configuration).deploy -j $(IntDir)$(JavaOutputDir) -s $(AndroidAPILevel) -i -e --excludeDir SciFi/SpeedTree --asset ..\..\..\..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Common/ Data/Vision/Samples/Engine/Common/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Maps/SciFi/ Data/Vision/Samples/Engine/Maps/SciFi/</Command>
+      <Command>..\..\..\..\..\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe $(OutputFile) --arch x86 --deployFileName $(ProjectFileName)_$(Configuration).deploy -j $(IntDir)$(JavaOutputDir) -s $(AndroidAPILevel) --resDir ..\..\..\..\..\Data\Common\Anarchy\Android -i -e --excludeDir SciFi/SpeedTree --asset ..\..\..\..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Common/ Data/Vision/Samples/Engine/Common/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Maps/SciFi/ Data/Vision/Samples/Engine/Maps/SciFi/</Command>
     </PostBuildEvent>
     
     <ClCompile>
@@ -90,7 +90,7 @@
       <AdditionalOptions>-ffunction-sections -fno-inline %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_DEBUG;HK_DEBUG;HK_DEBUG_SLOW;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O0</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -116,16 +116,17 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libSerialization_android_x86-vs2010_anarchy_debug.so</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
-      <AdditionalDependencies>-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Debug.a;-lBaseD;-lVisionD;-lVisionEnginePlugin;-lvHavok;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Debug.a;-lBaseD;-lVisionD;-lVisionEnginePlugin;-lvHavok;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
     </Lib>
     <Link>
-      <AdditionalDependencies>-landroid;-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Debug.a;-lBaseD;-lVisionD;-lVisionEnginePlugin;-lvHavok;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-landroid;-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Debug.a;-lBaseD;-lVisionD;-lVisionEnginePlugin;-lvHavok;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
@@ -184,7 +185,7 @@
     
     
     <PostBuildEvent>
-      <Command>..\..\..\..\..\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe $(OutputFile) --arch x86 --pickleName $(ProjectFileName)_$(Configuration).deploy -j $(IntDir)$(JavaOutputDir) -s $(AndroidAPILevel) -i --excludeDir SciFi/SpeedTree --asset ..\..\..\..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Common/ Data/Vision/Samples/Engine/Common/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Maps/SciFi/ Data/Vision/Samples/Engine/Maps/SciFi/</Command>
+      <Command>..\..\..\..\..\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe $(OutputFile) --arch x86 --deployFileName $(ProjectFileName)_$(Configuration).deploy -j $(IntDir)$(JavaOutputDir) -s $(AndroidAPILevel) --resDir ..\..\..\..\..\Data\Common\Anarchy\Android -i --excludeDir SciFi/SpeedTree --asset ..\..\..\..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Common/ Data/Vision/Samples/Engine/Common/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Maps/SciFi/ Data/Vision/Samples/Engine/Maps/SciFi/</Command>
     </PostBuildEvent>
     
     <ClCompile>
@@ -197,7 +198,7 @@
       <AdditionalOptions>-ffunction-sections %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>HK_DEBUG;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O3</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -223,16 +224,17 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libSerialization_android_x86-vs2010_anarchy_dev.so</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
-      <AdditionalDependencies>-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lBase;-lVision;-lVisionEnginePlugin;-lvHavok;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lBase;-lVision;-lVisionEnginePlugin;-lvHavok;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
     </Lib>
     <Link>
-      <AdditionalDependencies>-landroid;-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lBase;-lVision;-lVisionEnginePlugin;-lvHavok;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-landroid;-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lBase;-lVision;-lVisionEnginePlugin;-lvHavok;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
@@ -291,7 +293,7 @@
     
     
     <PostBuildEvent>
-      <Command>..\..\..\..\..\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe $(OutputFile) --arch x86 --pickleName $(ProjectFileName)_$(Configuration).deploy -j $(IntDir)$(JavaOutputDir) -s $(AndroidAPILevel) -i --excludeDir SciFi/SpeedTree --asset ..\..\..\..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Common/ Data/Vision/Samples/Engine/Common/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Maps/SciFi/ Data/Vision/Samples/Engine/Maps/SciFi/</Command>
+      <Command>..\..\..\..\..\Build\StandaloneTools\Deployment\Exe\deployAndroid.exe $(OutputFile) --arch x86 --deployFileName $(ProjectFileName)_$(Configuration).deploy -j $(IntDir)$(JavaOutputDir) -s $(AndroidAPILevel) --resDir ..\..\..\..\..\Data\Common\Anarchy\Android -i --excludeDir SciFi/SpeedTree --asset ..\..\..\..\../Data/Vision/Base/ Data/Vision/Base/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Common/ Data/Vision/Samples/Engine/Common/ --asset ..\..\..\..\../Data/Vision/Samples/Engine/Maps/SciFi/ Data/Vision/Samples/Engine/Maps/SciFi/</Command>
     </PostBuildEvent>
     
     <ClCompile>
@@ -304,7 +306,7 @@
       <AdditionalOptions>-ffunction-sections %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O3</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -330,16 +332,17 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libSerialization_android_x86-vs2010_anarchy_release.so</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
-      <AdditionalDependencies>-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lBase;-lVision;-lVisionEnginePlugin;-lvHavok;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lBase;-lVision;-lVisionEnginePlugin;-lvHavok;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
     </Lib>
     <Link>
-      <AdditionalDependencies>-landroid;-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lBase;-lVision;-lVisionEnginePlugin;-lvHavok;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-landroid;-lEGL;-lGLESv2;-lGLESv1_CM;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lBase;-lVision;-lVisionEnginePlugin;-lvHavok;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
@@ -408,7 +411,7 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\EnginePlugins\EnginePluginsImport.hpp">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="$(ANDROID_NDK_ROOT)\sources\android\native_app_glue\android_native_app_glue.c">
+    <ClCompile Include="$(NDKROOT)\sources\android\native_app_glue\android_native_app_glue.c">
         <CompileAsWinRT>false</CompileAsWinRT>
         <AdditionalOptions> </AdditionalOptions>
         <DeploymentContent>False</DeploymentContent></ClCompile>

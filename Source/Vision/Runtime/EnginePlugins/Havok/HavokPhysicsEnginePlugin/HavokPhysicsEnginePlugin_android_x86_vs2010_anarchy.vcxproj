@@ -87,7 +87,7 @@
       <AdditionalOptions>-ffunction-sections -fno-inline %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_DEBUG;HK_DEBUG;HK_DEBUG_SLOW;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O0</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -113,6 +113,7 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libvHavok.a</OutputFile>
@@ -191,7 +192,7 @@
       <AdditionalOptions>-ffunction-sections %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>HK_DEBUG;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O3</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -217,6 +218,7 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libvHavok.a</OutputFile>
@@ -295,7 +297,7 @@
       <AdditionalOptions>-ffunction-sections %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O3</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -321,6 +323,7 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libvHavok.a</OutputFile>
@@ -416,6 +419,8 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="vHavokBallAndSocketConstraintChain.hpp">
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="vHavokPhysicsImportExport.h">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="vHavokCachedShape.hpp">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="vHavokPrismaticConstraint.cpp">
@@ -448,6 +453,8 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="vHavokStiffSpringConstraint.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="vHavokBlockerVolumeComponent.hpp">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="vHavokConstraintChainRenderer.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="CharacterControlStates\vCharacterStateJumping.h">
@@ -540,6 +547,8 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="vHavokPhysicsModule.hpp">
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClCompile Include="vHavokBlockerVolumeComponent.cpp">
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="vHavokChainConstraintChainRenderer.hpp">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <None Include="vHavokElementManager.inl"><DeploymentContent>False</DeploymentContent></None>

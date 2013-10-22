@@ -16,7 +16,7 @@
     <ClInclude Include="EngineInstances\EngineInstanceLightGridIndicator.hpp">
         <Filter>EngineInstances</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="EngineInstances\EngineInstancePath.cpp">
+    <ClCompile Include="EngineInstances\EngineInstanceCubemapEntity.cpp">
         <Filter>EngineInstances</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="EngineInstances\EngineInstanceBillboardGroup.hpp">
@@ -40,15 +40,18 @@
     <ClInclude Include="EngineInstances\EngineInstanceProjector.hpp">
         <Filter>EngineInstances</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClCompile Include="EngineInstances\EngineInstancePath.cpp">
+        <Filter>EngineInstances</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Tools\ColorGradingTool.hpp">
         <Filter>Tools</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="EngineInstances\EngineInstanceClothObject.hpp">
         <Filter>EngineInstances</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="EngineInstances\EngineInstanceHeightfieldGenerator.hpp">
-        <Filter>EngineInstances</Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClCompile Include="VisionManaged.cpp">
+        <Filter></Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="EngineInstances\EngineInstanceHeightfieldGenerator.cpp">
         <Filter>EngineInstances</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -76,9 +79,9 @@
     <ClInclude Include="EngineInstances\EngineInstanceMirror.hpp">
         <Filter>EngineInstances</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="VisionManaged.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="EngineInstances\EngineInstanceHeightfieldGenerator.hpp">
+        <Filter>EngineInstances</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="EngineInstances\EngineInstanceDecorationGroup.cpp">
         <Filter>EngineInstances</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -112,6 +115,9 @@
     <ClCompile Include="VisionManagedPCH.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="EngineInstances\EngineInstanceCubemapEntity.hpp">
+        <Filter>EngineInstances</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="EngineInstances\EngineInstancePrefab.cpp">
         <Filter>EngineInstances</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>

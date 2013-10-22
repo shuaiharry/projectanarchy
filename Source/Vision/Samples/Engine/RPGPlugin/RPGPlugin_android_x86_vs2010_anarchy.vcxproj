@@ -87,7 +87,7 @@
       <AdditionalOptions>-ffunction-sections -fno-inline %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_DEBUG;HK_DEBUG;HK_DEBUG_SLOW;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O0</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -113,18 +113,19 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libRPGPlugin.a</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
       <AdditionalDependencies>-lfmodexL;-lfmodeventL;-lVisionEnginePlugin;-lvHavok;-lvHavokAi;-lvHavokBehavior;-lvFmodEnginePlugin;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86</AdditionalLibraryDirectories>
     </Lib>
     <Link>
       <AdditionalDependencies>-landroid;-lfmodexL;-lfmodeventL;-lVisionEnginePlugin;-lvHavok;-lvHavokAi;-lvHavokBehavior;-lvFmodEnginePlugin;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
       <OptimizationStrategy>general</OptimizationStrategy>
       <SourceRoot>.</SourceRoot>
@@ -191,7 +192,7 @@
       <AdditionalOptions>-ffunction-sections %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>HK_DEBUG;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O3</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -217,18 +218,19 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libRPGPlugin.a</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
       <AdditionalDependencies>-lfmodex;-lfmodevent;-lVisionEnginePlugin;-lvHavok;-lvHavokAi;-lvHavokBehavior;-lvFmodEnginePlugin;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86</AdditionalLibraryDirectories>
     </Lib>
     <Link>
       <AdditionalDependencies>-landroid;-lfmodex;-lfmodevent;-lVisionEnginePlugin;-lvHavok;-lvHavokAi;-lvHavokBehavior;-lvFmodEnginePlugin;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
       <OptimizationStrategy>general</OptimizationStrategy>
       <SourceRoot>.</SourceRoot>
@@ -295,7 +297,7 @@
       <AdditionalOptions>-ffunction-sections %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O3</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -321,18 +323,19 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libRPGPlugin.a</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
       <AdditionalDependencies>-lfmodex;-lfmodevent;-lVisionEnginePlugin;-lvHavok;-lvHavokAi;-lvHavokBehavior;-lvFmodEnginePlugin;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86</AdditionalLibraryDirectories>
     </Lib>
     <Link>
       <AdditionalDependencies>-landroid;-lfmodex;-lfmodevent;-lVisionEnginePlugin;-lvHavok;-lvHavokAi;-lvHavokBehavior;-lvFmodEnginePlugin;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
       <OptimizationStrategy>general</OptimizationStrategy>
       <SourceRoot>.</SourceRoot>
@@ -390,8 +393,6 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="GameManager.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionDie.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="PlayerUIDialog.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="ManaPickup.h">
@@ -400,34 +401,24 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="InventoryItem.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="InventoryItem.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="HighlightableComponentManager.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="FloatingEntity.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="PlayerControllerComponent.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Pickup.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="Precompiled.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionMeleeAttack.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionBlock.cpp">
+    <ClCompile Include="GUIHud_VisionGUI.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Renderer.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionDodge.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="VisionHavokBehaviorWorldListener.h">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="AiControllerComponent.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="InventoryPickup.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="MeleeGuardian.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionDodge.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="MeleeGuardianAiControllerComponent.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="InteractableComponent.cpp">
@@ -446,24 +437,16 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="VisionHavokBehaviorWorldListener.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="VisionUserMessages.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="CharacterActionData.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="DummyEntity.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionHandler.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="CharacterStats.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Trigger.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionMove.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="Precompiled.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionMeleeAttack.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="RangedGuardianAiControllerComponent.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="LevelInfo.h">
@@ -473,6 +456,8 @@
     <ClInclude Include="VisionEffectHelper.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="PlayerSpawnPoint.cpp">
+        <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClCompile Include="HealthPickup.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <None Include="VisionHavokConversion.inl"><DeploymentContent>False</DeploymentContent></None>
     <ClCompile Include="VisionHavokBehaviorHelper.cpp">
@@ -485,43 +470,25 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Projectile.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="VisionTimer.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="PlayerCharacterSynchronizationGroup.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="BossAiControllerComponent.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionRangedAttack.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="VisionGameDebug.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="ProjectileHealing.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="DestructibleEntity.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="HighlightableComponent.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="RangedGuardian.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="AiCharacter.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionSpawn.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="VisionSerializer.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionChallenge.h">
+    <ClInclude Include="BossAiControllerComponent.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionPowerAttack.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="HealthPickup.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Plugin.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="HealthPickup.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="MeleeGuardianAiControllerComponent.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="Action.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="GUIManager.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -531,20 +498,18 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="CharacterActionData.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClCompile Include="DamageableEntity.cpp">
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="CasterGuardianAiControllerComponent.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionSpawn.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="GUIHud_VisionGUI.cpp">
+    <ClCompile Include="VisionModuleTypes.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="Action.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClCompile Include="DestructibleEntity.cpp">
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="AttackableComponent.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="PlayerCharacter.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="VisionHavokBehaviorWorldListener.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="PlayerCharacterSynchronizationGroup.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="AiControllerComponent.cpp">
@@ -559,13 +524,9 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="MeshTrailEffectComponent.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="RangedGuardian.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="VisionTimer.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="DependencyHelper.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="DamageableEntity.cpp">
+    <ClCompile Include="Character.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="DependencyHelper.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -575,20 +536,12 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Plugin.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionAttackBase.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionPowerAttack.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="CasterGuardian.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="LevelInfo.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="GUIMinimap_VisionGUI.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionAoeAttack.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionHandler.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="InteractableComponent.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="AiCharacter.h">
@@ -603,8 +556,6 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="VisionHavokBehaviorHelper.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionChallenge.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="ControllerComponent.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="BossAiControllerComponent.cpp">
@@ -621,33 +572,27 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="PlayerControllerComponent.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="Character.cpp">
+    <ClCompile Include="InventoryItem.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="PlayerUIDialog.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionAoeAttack.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="Effect.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="SpawnPoint.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="InventoryHandler.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionAttackBase.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Attachment.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="Boss.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionHeal.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="DamageableEntity.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="BaseComponent.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="RangedGuardianAiControllerComponent.h">
+    <ClInclude Include="Boss.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionRangedAttack.h">
+    <ClInclude Include="RangedGuardianAiControllerComponent.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Renderer.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -657,31 +602,27 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="BaseEntity.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionDie.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="SpawnPoint.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Pickup.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="VisionEffectHelper.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="VisionModuleTypes.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="PlayerControllerComponent.h">
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="GUIManager_VisionGUI.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="VisionHavokConversion.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionHeal.h">
+    <ClInclude Include="RangedGuardian.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="Boss.h">
-        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClCompile Include="RangedGuardian.cpp">
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Attachment.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ProjectileHealing.h">
+    <ClInclude Include="Precompiled.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionMove.cpp">
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionBlock.h">
+    <ClInclude Include="ProjectileHealing.h">
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="BaseComponent.cpp">
         <DeploymentContent>False</DeploymentContent></ClCompile>

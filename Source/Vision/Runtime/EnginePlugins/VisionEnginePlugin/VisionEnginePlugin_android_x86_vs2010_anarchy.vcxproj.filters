@@ -13,8 +13,8 @@
     <Filter Include="Particles">
         <UniqueIdentifier>7385B390-385B-4073-5B39-7385B3907385</UniqueIdentifier>
         <DeploymentContent>False</DeploymentContent></Filter>
-    <Filter Include="GUI\Controls">
-        <UniqueIdentifier>6CC768EF-CC76-4F6C-768E-6CC768EF6CC7</UniqueIdentifier>
+    <Filter Include="Entities">
+        <UniqueIdentifier>474B1491-74B1-4147-B149-474B1491474B</UniqueIdentifier>
         <DeploymentContent>False</DeploymentContent></Filter>
     <Filter Include="Scripting\RSDClient">
         <UniqueIdentifier>6640D992-640D-4266-0D99-6640D9926640</UniqueIdentifier>
@@ -85,8 +85,8 @@
     <Filter Include="Terrain\Application">
         <UniqueIdentifier>742E87E6-42E8-4674-E87E-742E87E6742E</UniqueIdentifier>
         <DeploymentContent>False</DeploymentContent></Filter>
-    <Filter Include="Entities">
-        <UniqueIdentifier>474B1491-74B1-4147-B149-474B1491474B</UniqueIdentifier>
+    <Filter Include="GUI\Controls">
+        <UniqueIdentifier>6CC768EF-CC76-4F6C-768E-6CC768EF6CC7</UniqueIdentifier>
         <DeploymentContent>False</DeploymentContent></Filter>
     <Filter Include="Terrain">
         <UniqueIdentifier>3C529794-C529-443C-2979-3C5297943C52</UniqueIdentifier>
@@ -148,6 +148,9 @@
     <ClCompile Include="Animation\Transition\VTransitionBase.cpp">
         <Filter>Animation\Transition</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClCompile Include="Scripting\Components\VTimedValueComponent.cpp">
+        <Filter>Scripting\Components</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Components\VAnimationEventEffectTrigger.hpp">
         <Filter>Components</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -175,6 +178,9 @@
     <Compile Include="Scripting\Lua\VisApiObject3D.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
+    <ClCompile Include="Rendering\Effects\BlobShadow.cpp">
+        <Filter>Rendering\Effects</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <Compile Include="Scripting\Lua\hkvAlignedBBox.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
@@ -183,6 +189,9 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Entities\TriggerDoorEntity.hpp">
         <Filter>Entities</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="Rendering\PathRendering\VDebugPathRenderer.hpp">
+        <Filter>Rendering\PathRendering</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="Components\VFollowPathComponent.cpp">
         <Filter>Components</Filter>
@@ -208,9 +217,9 @@
     <CustomBuild Include="Scripting\Lua\VisionLuaModule.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></CustomBuild>
-    <Compile Include="Scripting\Lua\VisPathNode_cl.i">
-        <Filter>Scripting\Lua</Filter>
-        <DeploymentContent>False</DeploymentContent></Compile>
+    <ClInclude Include="Input\VStringInputMap.hpp">
+        <Filter>Input</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Components\VPlayableCharacterComponent.hpp">
         <Filter>Components</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -382,15 +391,15 @@
     <ClCompile Include="Input\VStringInputMap.cpp">
         <Filter>Input</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="Rendering\Postprocessing\PostProcessRenderLoop.hpp">
-        <Filter>Rendering\Postprocessing</Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="Rendering\Effects\CubeMapHandle.cpp">
         <Filter>Rendering\Effects</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <None Include="Particles\ParticleDescriptor.inl">
         <Filter>Particles</Filter>
         <DeploymentContent>False</DeploymentContent></None>
+    <ClCompile Include="Rendering\PathRendering\IVPathRenderingData\VPathRenderingData.cpp">
+        <Filter>Rendering\PathRendering\IVPathRenderingData</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Input\VMouseCamera.cpp">
         <Filter>Input</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -448,6 +457,9 @@
     <ClCompile Include="Particles\ParticleEmitter.cpp">
         <Filter>Particles</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClCompile Include="Entities\TriggerDoorEntity.cpp">
+        <Filter>Entities</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Animation\Transition\VTransitionBase.hpp">
         <Filter>Animation\Transition</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -457,9 +469,9 @@
     <ClCompile Include="Animation\Transition\VTransitionStateMachine.cpp">
         <Filter>Animation\Transition</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <Compile Include="Scripting\Lua\VisionConsoleManager.i">
-        <Filter>Scripting\Lua</Filter>
-        <DeploymentContent>False</DeploymentContent></Compile>
+    <ClCompile Include="GUI\VDialogResource.cpp">
+        <Filter>GUI</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Terrain\Geometry\TerrainVisibilityCollector.hpp">
         <Filter>Terrain\Geometry</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -502,9 +514,9 @@
     <Compile Include="Scripting\Lua\VisApiDynamicMesh.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
-    <ClCompile Include="Rendering\Postprocessing\VPostProcessScreenMasks.cpp">
-        <Filter>Rendering\Postprocessing</Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="Rendering\PathRendering\VPathRenderingData.hpp">
+        <Filter>Rendering\PathRendering</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="Rendering\Effects\MirrorRenderLoop.cpp">
         <Filter>Rendering\Effects</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -586,6 +598,9 @@
     <ClInclude Include="Particles\ParticleModule.hpp">
         <Filter>Particles</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="Rendering\PathRendering\VCablePathRenderer.hpp">
+        <Filter>Rendering\PathRendering</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Entities\_DanglingEntity.hpp">
         <Filter>Entities</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -595,11 +610,14 @@
     <ClInclude Include="Input\VZoomDetector.hpp">
         <Filter>Input</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="Input\VStringInputMap.hpp">
-        <Filter>Input</Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <Compile Include="Scripting\Lua\VisionConsoleManager.i">
+        <Filter>Scripting\Lua</Filter>
+        <DeploymentContent>False</DeploymentContent></Compile>
     <ClInclude Include="Rendering\RenderingHelpers\TimeOfDay.hpp">
         <Filter>Rendering\RenderingHelpers</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="Rendering\Postprocessing\VPostProcessScreenMasks.hpp">
+        <Filter>Rendering\Postprocessing</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="GUI\IVMenuSystemResource.cpp">
         <Filter>GUI</Filter>
@@ -607,6 +625,9 @@
     <ClInclude Include="Scene\VGroupInstance.hpp">
         <Filter>Scene</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClCompile Include="Rendering\Postprocessing\VPostProcessScreenMasks.cpp">
+        <Filter>Rendering\Postprocessing</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Components\VLightClippingVolumeComponent.cpp">
         <Filter>Components</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -688,8 +709,8 @@
     <ClCompile Include="Particles\ParticleGroupManager.cpp">
         <Filter>Particles</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="Rendering\Postprocessing\VPostProcessScreenMasks.hpp">
-        <Filter>Rendering\Postprocessing</Filter>
+    <ClInclude Include="Scripting\Components\VTimedValueComponent.hpp">
+        <Filter>Scripting\Components</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Rendering\Effects\BillboardGroup.hpp">
         <Filter>Rendering\Effects</Filter>
@@ -706,6 +727,9 @@
     <ClCompile Include="VisionEnginePluginPCH.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <Compile Include="Scripting\Lua\VColor.i">
+        <Filter>Scripting\Lua</Filter>
+        <DeploymentContent>False</DeploymentContent></Compile>
     <ClCompile Include="Entities\TriggerBoxEntity.cpp">
         <Filter>Entities</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -790,6 +814,9 @@
     <ClCompile Include="Rendering\Postprocessing\VPostProcessTranslucencies.cpp">
         <Filter>Rendering\Postprocessing</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClCompile Include="Rendering\Effects\VLightClippingVolumeRenderer.cpp">
+        <Filter>Rendering\Effects</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <Compile Include="Scripting\Lua\VTypedObject.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
@@ -808,7 +835,7 @@
     <ClInclude Include="Terrain\Geometry\TerrainDecorationModel.hpp">
         <Filter>Terrain\Geometry</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <Compile Include="Scripting\Lua\VColor.i">
+    <Compile Include="Scripting\Lua\VisPathNode_cl.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
     <ClInclude Include="GUI\VCursor.hpp">
@@ -829,8 +856,8 @@
     <ClInclude Include="Scripting\Components\VAnimationComponent.hpp">
         <Filter>Scripting\Components</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="Scripting\Components\VAnimationComponent.cpp">
-        <Filter>Scripting\Components</Filter>
+    <ClCompile Include="Rendering\PathRendering\IVPathRenderingData\VDebugPathRenderer.cpp">
+        <Filter>Rendering\PathRendering\IVPathRenderingData</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Rendering\ShadowMapping\VShadowMapGenSpotDir.cpp">
         <Filter>Rendering\ShadowMapping</Filter>
@@ -856,8 +883,8 @@
     <Compile Include="Scripting\Lua\VisApiBaseEntity.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
-    <ClCompile Include="Particles\ParticleDescriptor.cpp">
-        <Filter>Particles</Filter>
+    <ClCompile Include="Rendering\PathRendering\IVPathRenderingData\VCablePathRenderer.cpp">
+        <Filter>Rendering\PathRendering\IVPathRenderingData</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="GUI\VDialogFrame.hpp">
         <Filter>GUI</Filter>
@@ -871,6 +898,9 @@
     <ClInclude Include="Rendering\Sky\Sky.hpp">
         <Filter>Rendering\Sky</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
+    <Compile Include="Scripting\Lua\VisApiTriggerComponent.i">
+        <Filter>Scripting\Lua</Filter>
+        <DeploymentContent>False</DeploymentContent></Compile>
     <ClInclude Include="Terrain\Application\Terrain.hpp">
         <Filter>Terrain\Application</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -880,8 +910,8 @@
     <ClInclude Include="Rendering\Effects\EffectsModule.hpp">
         <Filter>Rendering\Effects</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="GUI\VGUICommandBuffer.hpp">
-        <Filter>GUI</Filter>
+    <ClInclude Include="Terrain\Geometry\TerrainSectorManager.hpp">
+        <Filter>Terrain\Geometry</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Rendering\Postprocessing\PostProcessBase.hpp">
         <Filter>Rendering\Postprocessing</Filter>
@@ -901,11 +931,14 @@
     <ClCompile Include="Terrain\Editing\CommonTerrainFilters.cpp">
         <Filter>Terrain\Editing</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClCompile Include="Particles\ParticleDescriptor.cpp">
+        <Filter>Particles</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <Compile Include="Scripting\Lua\VScriptFileSystem_wrapper.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
-    <ClCompile Include="Rendering\Effects\BlobShadow.cpp">
-        <Filter>Rendering\Effects</Filter>
+    <ClCompile Include="Rendering\PathRendering\IVPathRenderingData\VPathRendererBase.cpp">
+        <Filter>Rendering\PathRendering\IVPathRenderingData</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Particles\ParticleConstraint.hpp">
         <Filter>Particles</Filter>
@@ -979,9 +1012,6 @@
     <ClCompile Include="Rendering\ShadowMapping\VBaseShadowMapComponentSpotDirectional.cpp">
         <Filter>Rendering\ShadowMapping</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="GUI\VDialogResource.cpp">
-        <Filter>GUI</Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Rendering\Effects\VCoronaComponent.hpp">
         <Filter>Rendering\Effects</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -994,8 +1024,8 @@
     <ClInclude Include="GUI\Controls\VSliderControl.hpp">
         <Filter>GUI\Controls</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="Terrain\Geometry\TerrainSectorManager.hpp">
-        <Filter>Terrain\Geometry</Filter>
+    <ClInclude Include="GUI\VGUICommandBuffer.hpp">
+        <Filter>GUI</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="Rendering\ShadowMapping\VMobileShadowMapComponentSpotDirectional.cpp">
         <Filter>Rendering\ShadowMapping</Filter>
@@ -1012,15 +1042,15 @@
     <ClCompile Include="Resources\VResourcePreview.cpp">
         <Filter>Resources</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="Rendering\Effects\VLightClippingVolumeRenderer.cpp">
-        <Filter>Rendering\Effects</Filter>
+    <ClCompile Include="Scripting\Components\VAnimationComponent.cpp">
+        <Filter>Scripting\Components</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <Compile Include="Scripting\Lua\IVRendererNode.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
-    <Compile Include="Scripting\Lua\PathCameraEntity.i">
-        <Filter>Scripting\Lua</Filter>
-        <DeploymentContent>False</DeploymentContent></Compile>
+    <ClInclude Include="Rendering\PathRendering\VPathRendererBase.hpp">
+        <Filter>Rendering\PathRendering</Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="Scripting\VScriptIncludes.hpp">
         <Filter>Scripting</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -1042,13 +1072,13 @@
     <ClCompile Include="Rendering\Profiling\VGraphObject.cpp">
         <Filter>Rendering\Profiling</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="Entities\TriggerDoorEntity.cpp">
-        <Filter>Entities</Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
+    <Compile Include="Scripting\Lua\PathCameraEntity.i">
+        <Filter>Scripting\Lua</Filter>
+        <DeploymentContent>False</DeploymentContent></Compile>
     <ClCompile Include="Components\VTimeOfDayComponent.cpp">
         <Filter>Components</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <Compile Include="Scripting\Lua\VisApiTriggerComponent.i">
+    <Compile Include="Scripting\Lua\VTimedValueComponent.i">
         <Filter>Scripting\Lua</Filter>
         <DeploymentContent>False</DeploymentContent></Compile>
 

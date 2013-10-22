@@ -4,6 +4,9 @@
     <Filter Include="External\Runtime\EnginePlugins">
         <UniqueIdentifier>16D60179-6D60-4916-6017-16D6017916D6</UniqueIdentifier>
         <DeploymentContent>False</DeploymentContent></Filter>
+    <Filter Include="GUI">
+        <UniqueIdentifier>693BCF76-93BC-4669-BCF7-693BCF76693B</UniqueIdentifier>
+        <DeploymentContent>False</DeploymentContent></Filter>
     <Filter Include="External\Runtime\Common">
         <UniqueIdentifier>154ADA41-54AD-4115-ADA4-154ADA41154A</UniqueIdentifier>
         <DeploymentContent>False</DeploymentContent></Filter>
@@ -34,9 +37,6 @@
     <ClCompile Include="vSceneViewerPCH.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="..\..\Runtime\Common\VisSampleAppCallbacks.cpp">
-        <Filter>External\Runtime\Common</Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="vSceneViewer.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -48,6 +48,12 @@
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="resource.h">
         <Filter></Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClCompile Include="GUI\GUISystem.cpp">
+        <Filter>GUI</Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="GUI\GUISystem.hpp">
+        <Filter>GUI</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
 
   </ItemGroup>

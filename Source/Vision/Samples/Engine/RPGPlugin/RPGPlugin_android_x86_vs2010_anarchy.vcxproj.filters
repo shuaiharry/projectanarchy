@@ -17,9 +17,6 @@
     <ClInclude Include="PlayerCharacterSynchronizationGroup.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionAoeAttack.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="HighlightableComponentManager.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -38,12 +35,6 @@
     <ClInclude Include="GUIManager_VisionGUI.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionHeal.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionMove.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="GUIManager.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -65,16 +56,10 @@
     <ClInclude Include="BaseComponent.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionChallenge.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="PlayerUI.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="HealthPickup.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionChallenge.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="ManaPickup.h">
@@ -92,9 +77,6 @@
     <ClInclude Include="Boss.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionSpawn.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="ManaPickup.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -104,28 +86,13 @@
     <ClCompile Include="CasterGuardian.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="VisionUserMessages.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="Action.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="ControllerComponent.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="VisionTimer.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionAoeAttack.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionHandler.h">
+    <ClInclude Include="PlayerCharacter.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="DummyEntity.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionRangedAttack.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="PlayerUIDialog.cpp">
@@ -137,19 +104,16 @@
     <ClCompile Include="AiControllerComponent.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionBlock.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="DamageableEntity.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="InventoryHandler.h">
+    <ClInclude Include="BaseEntity.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="InteractableComponent.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionMeleeAttack.cpp">
+    <ClCompile Include="MeleeGuardianAiControllerComponent.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Renderer.cpp">
@@ -170,9 +134,6 @@
     <ClInclude Include="CharacterStats.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="Attachment.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="FloatingEntity.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -185,25 +146,16 @@
     <ClInclude Include="PlayerUI.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionHandler.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="InteractableComponent.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="PlayerControllerComponent.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionSpawn.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="Boss.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="GameManager.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="VisionTimer.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="GUIHud_VisionGUI.cpp">
@@ -215,18 +167,12 @@
     <ClInclude Include="RangedGuardianAiControllerComponent.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionAttackBase.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="GUIMinimap_VisionGUI.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="CharacterStats.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionMove.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="BaseComponent.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -239,9 +185,9 @@
     <ClInclude Include="HighlightableComponent.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="Explosion.cpp">
+    <ClInclude Include="PlayerControllerComponent.h">
         <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="AiCharacter.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -263,7 +209,7 @@
     <ClCompile Include="MeshTrailEffectComponent.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="Character.cpp">
+    <ClCompile Include="InventoryItem.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="DamageableEntity.h">
@@ -278,21 +224,12 @@
     <ClInclude Include="GameManager.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionHeal.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="VisionModuleTypes.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="InventoryItem.cpp">
+    <ClCompile Include="Character.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionRangedAttack.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionDodge.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="InventoryItem.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -302,18 +239,9 @@
     <ClCompile Include="LevelInfo.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionBlock.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="VisionGameDebug.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionDodge.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="Attachment.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="AttackableComponent.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -326,16 +254,7 @@
     <ClCompile Include="Pickup.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionDie.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="AiCharacter.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="HealthPickup.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="Action.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="RangedGuardian.cpp">
@@ -347,9 +266,9 @@
     <ClInclude Include="Effect.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="MeleeGuardianAiControllerComponent.cpp">
+    <ClInclude Include="Attachment.h">
         <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="DestructibleEntity.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -365,19 +284,16 @@
     <ClCompile Include="HighlightableComponentManager.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="GUIMinimap_VisionGUI.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="GUIManager.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClCompile Include="DestructibleEntity.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionDie.h">
+    <ClCompile Include="HealthPickup.cpp">
         <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="BaseEntity.h">
+        <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="InventoryHandler.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="AiSpawnPoint.h">
@@ -422,9 +338,9 @@
     <ClCompile Include="Effect.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="PlayerControllerComponent.h">
+    <ClCompile Include="Explosion.cpp">
         <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="Trigger.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -437,25 +353,16 @@
     <None Include="VisionHavokConversion.inl">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></None>
-    <ClInclude Include="PlayerCharacter.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="ActionAttackBase.cpp">
+    <ClCompile Include="Attachment.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="ActionPowerAttack.h">
+    <ClCompile Include="GUIMinimap_VisionGUI.cpp">
         <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="ActionMeleeAttack.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="RangedGuardian.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="PlayerSpawnPoint.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="ActionPowerAttack.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="PlayerUIDialog.h">

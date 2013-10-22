@@ -4,6 +4,9 @@
     <Filter Include="Lua">
         <UniqueIdentifier>45DB356F-5DB3-4F45-B356-45DB356F45DB</UniqueIdentifier>
         <DeploymentContent>False</DeploymentContent></Filter>
+    <Filter Include="Null">
+        <UniqueIdentifier>3DA27053-A270-4DA2-053D-27053DA27053</UniqueIdentifier>
+        <DeploymentContent>False</DeploymentContent></Filter>
 
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +78,9 @@
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="FmodEnginePlugin.hpp">
         <Filter></Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="Null\VFModNull.hpp">
+        <Filter>Null</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="VFmodSoundResource.cpp">
         <Filter></Filter>

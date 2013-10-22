@@ -49,27 +49,15 @@
     <ClCompile Include="CharacterLOD.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClCompile Include="LODObject.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="..\..\..\..\..\Source\Vision\Runtime\Common\VisSampleApp.hpp">
         <Filter>External\Source\Vision\Runtime\Common</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="DemoCamera.hpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="LODObject.h">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="CharacterLODPCH.h">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="EntityLODComponent.hpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClCompile Include="EntityLODComponent.cpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClCompile>
 
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug DLL|Win32">
@@ -52,9 +52,9 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Dev DLL|Win32'">ProjectTemplate</TargetName>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\</OutDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">ProjectTemplate</TargetName>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">..\..\Obj\win32_vs2010_anarchy\debug_dll\DX9\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Dev DLL|Win32'">..\..\Obj\win32_vs2010_anarchy\dev_dll\DX9\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">..\..\Obj\win32_vs2010_anarchy\release_dll\DX9\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">..\..\Obj\win32_vs2010_anarchy\debug_dll\DX9\ProjectTemplate\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Dev DLL|Win32'">..\..\Obj\win32_vs2010_anarchy\dev_dll\DX9\ProjectTemplate\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">..\..\Obj\win32_vs2010_anarchy\release_dll\DX9\ProjectTemplate\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
     <ClCompile>
@@ -74,10 +74,6 @@
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <ImportLibrary>..\..\Lib\win32_vs2010_anarchy\debug_dll\$(TargetName)D.lib</ImportLibrary>
     </Link>
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
     <PreBuildEvent>
       <Command>
       </Command>
@@ -101,10 +97,6 @@
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <ImportLibrary>..\..\Lib\win32_vs2010_anarchy\dev_dll\$(TargetName).lib</ImportLibrary>
     </Link>
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
     <PreBuildEvent>
       <Command>
       </Command>
@@ -130,10 +122,6 @@
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <ImportLibrary>..\..\Lib\win32_vs2010_anarchy\release_dll\$(TargetName).lib</ImportLibrary>
     </Link>
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
     <PreBuildEvent>
       <Command>
       </Command>

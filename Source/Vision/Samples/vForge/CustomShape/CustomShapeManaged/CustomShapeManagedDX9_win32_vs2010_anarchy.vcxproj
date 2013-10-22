@@ -17,6 +17,10 @@
       <Configuration>Dev DLL</Configuration>
       <Platform>win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Hybrid DLL|win32">
+      <Configuration>Hybrid DLL</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release DLL|win32">
       <Configuration>Release DLL</Configuration>
       <Platform>win32</Platform>
@@ -43,6 +47,12 @@
     <CLRSupport>true</CLRSupport>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'" Label="Configuration">
+    <CharacterSet>MultiByte</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CLRSupport>true</CLRSupport>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'" Label="Configuration">
     <CharacterSet>MultiByte</CharacterSet>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -50,9 +60,13 @@
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   <PropertyGroup>
 <TargetExt  Condition="'$(Configuration)|$(Platform)'=='Debug DLL|win32'">.dll</TargetExt>
 <TargetExt  Condition="'$(Configuration)|$(Platform)'=='Dev DLL|win32'">.dll</TargetExt>
+<TargetExt  Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">.dll</TargetExt>
 <TargetExt  Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'">.dll</TargetExt>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|win32'">Obj\win32_vs2010_anarchy\debug_dll\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|win32'">..\..\..\..\..\..\Bin\win32_vs2010_anarchy\debug_dll\DX9\</OutDir>
@@ -62,12 +76,17 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Dev DLL|win32'">..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\</OutDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Dev DLL|win32'">CustomShapeManaged</TargetName>
     <OutputFile Condition="'$(Configuration)|$(Platform)'=='Dev DLL|win32'">..\..\..\..\..\..\Bin\win32_vs2010_anarchy\dev_dll\DX9\CustomShapeManaged.dll</OutputFile>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">Obj\win32_vs2010_anarchy\hybrid_dll\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">..\..\..\..\..\..\Bin\win32_vs2010_anarchy\hybrid_dll\DX9\</OutDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">CustomShapeManaged</TargetName>
+    <OutputFile Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">..\..\..\..\..\..\Bin\win32_vs2010_anarchy\hybrid_dll\DX9\CustomShapeManaged.dll</OutputFile>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'">Obj\win32_vs2010_anarchy\release_dll\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'">..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\</OutDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'">CustomShapeManaged</TargetName>
     <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'">..\..\..\..\..\..\Bin\win32_vs2010_anarchy\release_dll\DX9\CustomShapeManaged.dll</OutputFile>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DLL|win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Dev DLL|win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'">false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|win32'">
@@ -112,6 +131,7 @@
       <WarningLevel>Level3</WarningLevel>
       <CompileAsManaged>true</CompileAsManaged>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+	  
     </ClCompile>
     <ResourceCompile>
       <ResourceOutputFileName></ResourceOutputFileName>
@@ -181,6 +201,7 @@
       <WarningLevel>Level3</WarningLevel>
       <CompileAsManaged>true</CompileAsManaged>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+	  
     </ClCompile>
     <ResourceCompile>
       <ResourceOutputFileName></ResourceOutputFileName>
@@ -202,6 +223,76 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary></ImportLibrary>
       <AssemblyDebug>true</AssemblyDebug>
+      <SubSystem>Console</SubSystem>
+      <ManifestFile>$(IntDir)Manifest$(TargetExt).intermediate.manifest</ManifestFile>
+      <OptimizeReferences></OptimizeReferences>
+      <EnableCOMDATFolding></EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">
+    
+    
+    
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\..;$(DXSDK_DIR)/Include;</AdditionalIncludeDirectories>
+      <AdditionalOptions></AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <SDLCheck>false</SDLCheck>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>Default</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings></DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnablePREfast></EnablePREfast>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <OmitFramePointers></OmitFramePointers>
+      <Optimization>disabled</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Vision/Samples/vForge/CustomShape/CustomShapeManaged/CustomShapeManagedPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)CustomShapeManaged.pch</PrecompiledHeaderOutputFile>
+      <PreprocessorDefinitions>HK_DEBUG;_WINDOWS;WIN32;_WIN32;_CONSOLE;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;HK_ANARCHY;PROFILING;_VISION_WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_VR_DX9;_VR_DX9;PROFILING;_VISION_WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_VR_DX9;WIN32;HK_CONFIG_SIMD=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions></UndefinePreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <StringPooling>true</StringPooling>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+      <CompileAsManaged>true</CompileAsManaged>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+	  
+    </ClCompile>
+    <ResourceCompile>
+      <ResourceOutputFileName></ResourceOutputFileName>
+      <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Lib>
+      <IgnoreAllDefaultLibraries></IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>mscoree.lib;msvcrt.lib;msvcmrt.lib;msvcprt.lib;Base.lib;Vision.lib;CustomShapeEnginePlugin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\..\..\Lib\win32_vs2010_anarchy\hybrid_dll</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <UseUnicodeResponseFiles>true</UseUnicodeResponseFiles>
+      <AdditionalOptions> /ignore:4221</AdditionalOptions>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>mscoree.lib;msvcrt.lib;msvcmrt.lib;msvcprt.lib;Base.lib;Vision.lib;CustomShapeEnginePlugin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\..\..\Lib\win32_vs2010_anarchy\hybrid_dll</AdditionalLibraryDirectories>
+      <AdditionalOptions> /ignore:4221</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary></ImportLibrary>
+      <AssemblyDebug>false</AssemblyDebug>
       <SubSystem>Console</SubSystem>
       <ManifestFile>$(IntDir)Manifest$(TargetExt).intermediate.manifest</ManifestFile>
       <OptimizeReferences></OptimizeReferences>
@@ -250,6 +341,7 @@
       <WarningLevel>Level3</WarningLevel>
       <CompileAsManaged>true</CompileAsManaged>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+	  
     </ClCompile>
     <ResourceCompile>
       <ResourceOutputFileName></ResourceOutputFileName>
@@ -285,6 +377,7 @@
     <ClCompile Include="CustomShapeManagedPCH.cpp">
         <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|win32'">Create</PrecompiledHeader>
         <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Dev DLL|win32'">Create</PrecompiledHeader>
+        <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">Create</PrecompiledHeader>
         <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|win32'">Create</PrecompiledHeader>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="CustomShapeManagedPCH.h">
@@ -312,6 +405,10 @@
     <CodeAnalysisInputAssembly>$(OutputFile)</CodeAnalysisInputAssembly>
 </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev DLL|win32'">
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisInputAssembly>$(OutputFile)</CodeAnalysisInputAssembly>
+</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Hybrid DLL|win32'">
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisInputAssembly>$(OutputFile)</CodeAnalysisInputAssembly>
 </PropertyGroup>

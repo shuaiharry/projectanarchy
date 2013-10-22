@@ -87,7 +87,7 @@
       <AdditionalOptions>-ffunction-sections -fno-inline %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_DEBUG;HK_DEBUG;HK_DEBUG_SLOW;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;USE_FILESERVE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/inc;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O0</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -113,18 +113,19 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libMobileOffroadPlugin.a</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
-      <AdditionalDependencies>-lfmodexL;-lfmodeventL;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Debug.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>-lfmodexL;-lfmodeventL;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Debug.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
     </Lib>
     <Link>
-      <AdditionalDependencies>-landroid;-lfmodexL;-lfmodeventL;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Debug.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-landroid;-lfmodexL;-lfmodeventL;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Debug.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\debug;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
       <OptimizationStrategy>general</OptimizationStrategy>
       <SourceRoot>.</SourceRoot>
@@ -191,7 +192,7 @@
       <AdditionalOptions>-ffunction-sections %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>HK_DEBUG;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;USE_FILESERVE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/inc;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O3</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -217,18 +218,19 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libMobileOffroadPlugin.a</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
-      <AdditionalDependencies>-lfmodex;-lfmodevent;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>-lfmodex;-lfmodevent;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
     </Lib>
     <Link>
-      <AdditionalDependencies>-landroid;-lfmodex;-lfmodevent;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-landroid;-lfmodex;-lfmodevent;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\dev;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
       <OptimizationStrategy>general</OptimizationStrategy>
       <SourceRoot>.</SourceRoot>
@@ -295,7 +297,7 @@
       <AdditionalOptions>-ffunction-sections %(AdditionalOptions) %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>;HK_ANARCHY;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_ANDROID_X86;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;LINK_WITH_VISION;VISIONDLL_LIB;USE_HAVOK;USE_FILESERVE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(ANDROID_NDK_ROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/inc;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\..\..;$(NDKROOT)/sources;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProducesObjectFile>true</ProducesObjectFile>
       <OptimizationLevel>O3</OptimizationLevel>
       <CppInliningLevel></CppInliningLevel>
@@ -321,18 +323,19 @@
       <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
       <ForcedIncludeFile></ForcedIncludeFile>
       <ConcurrentCompile>False</ConcurrentCompile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)\libMobileOffroadPlugin.a</OutputFile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <LibrarianCommand>-rmc</LibrarianCommand>
-      <AdditionalDependencies>-lfmodex;-lfmodevent;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>-lfmodex;-lfmodevent;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
     </Lib>
     <Link>
-      <AdditionalDependencies>-landroid;-lfmodex;-lfmodevent;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkInternal;-lhkGeometryUtilities;-lhkVisualize;-lhkSerialize;-lhkCompat;-lhkSceneData;-lhkBase;-lhkcdCollide;-lhkcdInternal;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-landroid;-lfmodex;-lfmodevent;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib\LuaAndroidx86_Release.a;-lVisionEnginePlugin;-lvHavok;-lvFmodEnginePlugin;-lhkBase;-lhkCompat;-lhkSceneData;-lhkSerialize;-lhkVisualize;-lhkInternal;-lhkGeometryUtilities;-lhkcdInternal;-lhkcdCollide;-lhkpUtilities;-lhkpVehicle;-lhkpDynamics;-lhkpCollide;-lhkpInternal;-lhkpConstraintSolver;-lhkpConstraint;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.11/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\Lib\android_x86_vs2010_anarchy\release;$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/android/x86;$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib</AdditionalLibraryDirectories>
       <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
       <OptimizationStrategy>general</OptimizationStrategy>
       <SourceRoot>.</SourceRoot>

@@ -28,6 +28,9 @@
     <ClCompile Include="vHavokVisionShapes.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClCompile Include="vHavokBlockerVolumeComponent.cpp">
+        <Filter></Filter>
+        <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="vHavokRigidBody.hpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -103,7 +106,7 @@
     <ClCompile Include="CharacterControlStates\vCharacterStateJumping.cpp">
         <Filter>CharacterControlStates</Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
-    <ClInclude Include="vHavokCachedShape.hpp">
+    <ClInclude Include="vHavokSync.hpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="vHavokVisualDebugger.hpp">
@@ -130,6 +133,9 @@
     <ClCompile Include="vHavokPointToPathConstraint.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
+    <ClInclude Include="vHavokPhysicsImportExport.h">
+        <Filter></Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="vHavokPrismaticConstraint.hpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -193,9 +199,6 @@
     <ClInclude Include="CharacterControlStates\vCharacterStateOnGround.h">
         <Filter>CharacterControlStates</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
-    <ClInclude Include="vHavokSync.hpp">
-        <Filter></Filter>
-        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClCompile Include="vHavokPrismaticConstraint.cpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
@@ -208,6 +211,9 @@
     <CustomBuild Include="Lua\HavokPhysicsLuaModule.i">
         <Filter>Lua</Filter>
         <DeploymentContent>False</DeploymentContent></CustomBuild>
+    <ClInclude Include="vHavokBlockerVolumeComponent.hpp">
+        <Filter></Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="CharacterControlStates\vCharacterInput.h">
         <Filter>CharacterControlStates</Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
@@ -251,6 +257,9 @@
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClCompile>
     <ClInclude Include="vHavokProfiler.hpp">
+        <Filter></Filter>
+        <DeploymentContent>False</DeploymentContent></ClInclude>
+    <ClInclude Include="vHavokCachedShape.hpp">
         <Filter></Filter>
         <DeploymentContent>False</DeploymentContent></ClInclude>
     <ClInclude Include="vHavokUserData.hpp">
