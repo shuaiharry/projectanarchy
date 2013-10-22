@@ -53,7 +53,7 @@
     <Lib>
       <AdditionalDependencies>msvcrtd.lib;msvcmrtd.lib;msvcprtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\Lib\win32_vs2010_anarchy\debug_dll;$(VISION_SDK)/Lib/win32_vs2010_anarchy\debug_dll;$(DXSDK_DIR)/Lib/x86</AdditionalLibraryDirectories>
-      <AdditionalOptions> /ignore:4221</AdditionalOptions>
+      <AdditionalOptions>/ignore:4221</AdditionalOptions>
       <IgnoreAllDefaultLibraries/>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <UseUnicodeResponseFiles>true</UseUnicodeResponseFiles>
@@ -61,7 +61,7 @@
     <Link>
       <AdditionalDependencies>msvcrtd.lib;msvcmrtd.lib;msvcprtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\Lib\win32_vs2010_anarchy\debug_dll;$(VISION_SDK)/Lib/win32_vs2010_anarchy\debug_dll;$(DXSDK_DIR)/Lib/x86</AdditionalLibraryDirectories>
-      <AdditionalOptions> /ignore:4221</AdditionalOptions>
+      <AdditionalOptions>/ignore:4221</AdditionalOptions>
       <AssemblyDebug>true</AssemblyDebug>
       <EnableCOMDATFolding/>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -72,5 +72,5 @@
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup>
-</PropertyGroup>
+  </PropertyGroup>
 </Project>

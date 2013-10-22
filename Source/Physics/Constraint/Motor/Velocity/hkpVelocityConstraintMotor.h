@@ -18,7 +18,7 @@ extern const hkClass hkpVelocityConstraintMotorClass;
 class hkpVelocityConstraintMotor : public hkpLimitedForceConstraintMotor
 {
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT );
 		HK_DECLARE_REFLECTION();
 
@@ -33,7 +33,7 @@ class hkpVelocityConstraintMotor : public hkpLimitedForceConstraintMotor
 
 		/// Motor clone method.
 		virtual hkpConstraintMotor* clone() const;
-		
+
 	public:
 
 		/// The stiffness between 0 and 1.
@@ -41,7 +41,7 @@ class hkpVelocityConstraintMotor : public hkpLimitedForceConstraintMotor
 
 		/// Velocity target.
 		hkReal m_velocityTarget;
-			
+
 		/// Tells the motor to ignore the stored velocity target.
 		/// When set to true, the motor calculates the requested velocity from the target orientations
 		/// supplied by the constraint owning the motor.
@@ -54,7 +54,7 @@ class hkpVelocityConstraintMotor : public hkpLimitedForceConstraintMotor
 #endif // HKP_VELOCITY_CONSTRAINT_MOTOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

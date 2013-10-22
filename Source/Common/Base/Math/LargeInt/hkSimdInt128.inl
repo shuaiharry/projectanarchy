@@ -226,7 +226,7 @@ inline void hkSimdInt<128>::setMul(const hkSimdInt<128>& origX, hkInt64 iOrigY)
 #endif	//__HAVOK_PARSER__
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

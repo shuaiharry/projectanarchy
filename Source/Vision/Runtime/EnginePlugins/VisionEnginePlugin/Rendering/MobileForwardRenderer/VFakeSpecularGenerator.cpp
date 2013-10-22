@@ -105,7 +105,7 @@ void VFakeSpecularGenerator::OnDoRenderLoop(void *pUserData)
 V_IMPLEMENT_DYNAMIC(VFakeSpecularGenerator, VisTypedEngineObject_cl, &g_VisionEngineModule);
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -1,0 +1,179 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Accelerometer", "..\..\Source\Vision\Samples\Engine\Accelerometer\Accelerometer_tizen_vs2010_anarchy.vcxproj", "{232A3C46-471E-3B55-AC1C-B3A1B2F80C36}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BasicAnimation", "..\..\Source\Vision\Samples\Engine\BasicAnimation\BasicAnimation_tizen_vs2010_anarchy.vcxproj", "{A619205F-8E2C-352E-BAEF-C66A3BF3C125}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CharacterLOD", "..\..\Source\Vision\Samples\Engine\CharacterLOD\CharacterLOD_tizen_vs2010_anarchy.vcxproj", "{FF152960-A4AC-38F0-B335-08B5CC5818FC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CustomEntityTextures", "..\..\Source\Vision\Samples\Engine\CustomEntityTextures\CustomEntityTextures_tizen_vs2010_anarchy.vcxproj", "{9C69B856-238E-3C7C-9A11-71EDA59AC36B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileServe", "..\..\Source\Vision\Samples\Engine\FileServe\FileServe_tizen_vs2010_anarchy.vcxproj", "{0F6A1296-D925-39A1-84FB-C54FF5CC4CD2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUI", "..\..\Source\Vision\Samples\Engine\GUI\GUI_tizen_vs2010_anarchy.vcxproj", "{8E7B353F-C5F1-32A0-A170-523FA0502138}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HavokAi", "..\..\Source\Vision\Samples\Engine\HavokAi\HavokAi_tizen_vs2010_anarchy.vcxproj", "{17B7CE53-C27D-3428-AEA2-7C7D72B85E36}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MobileOffroad", "..\..\Source\Vision\Samples\Engine\MobileOffroad\MobileOffroad_tizen_vs2010_anarchy.vcxproj", "{54D37226-523A-21D3-B646-AB6E3B9C3E71}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8199D84A-8759-34BA-9828-DC808E15DAAC} = {8199D84A-8759-34BA-9828-DC808E15DAAC}
+		{8199D84A-8759-34BA-9828-DC808E15DAAC} = {8199D84A-8759-34BA-9828-DC808E15DAAC}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MobileOffroadPlugin", "..\..\Source\Vision\Samples\Engine\MobileOffroadPlugin\MobileOffroadPlugin_tizen_vs2010_anarchy.vcxproj", "{8199D84A-8759-34BA-9828-DC808E15DAAC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModelMerging", "..\..\Source\Vision\Samples\Engine\ModelMerging\ModelMerging_tizen_vs2010_anarchy.vcxproj", "{512835C5-256B-332B-9FAE-6DA90FA9C0F3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RPGPlugin", "..\..\Source\Vision\Samples\Engine\RPGPlugin\RPGPlugin_tizen_vs2010_anarchy.vcxproj", "{D2C9AE4F-0F90-406E-85BA-F9DA83AA90FF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderToTexture", "..\..\Source\Vision\Samples\Engine\RenderToTexture\RenderToTexture_tizen_vs2010_anarchy.vcxproj", "{F6CF679C-9E2D-37AA-B67E-9C403CC85F21}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Serialization", "..\..\Source\Vision\Samples\Engine\Serialization\Serialization_tizen_vs2010_anarchy.vcxproj", "{AD6F682F-1272-3C90-9636-CEC4395B19DE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleFont", "..\..\Source\Vision\Samples\Engine\SimpleFont\SimpleFont_tizen_vs2010_anarchy.vcxproj", "{9E0D7B8C-E67F-3E20-93C7-EF10AF2025B8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial01", "..\..\Source\Vision\Samples\Engine\Tutorial01\Tutorial01_tizen_vs2010_anarchy.vcxproj", "{37A97266-825D-42F4-A636-FB4D4A9B3D52}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial02", "..\..\Source\Vision\Samples\Engine\Tutorial02\Tutorial02_tizen_vs2010_anarchy.vcxproj", "{726DD9C3-7348-4606-B61C-12BBA3F14B7B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial03", "..\..\Source\Vision\Samples\Engine\Tutorial03\Tutorial03_tizen_vs2010_anarchy.vcxproj", "{F316BA4F-D40D-47A5-8F0E-5916D831B3D0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial04", "..\..\Source\Vision\Samples\Engine\Tutorial04\Tutorial04_tizen_vs2010_anarchy.vcxproj", "{8C1D107A-23D0-4DBD-8E3F-DB2EDEA29588}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial05", "..\..\Source\Vision\Samples\Engine\Tutorial05\Tutorial05_tizen_vs2010_anarchy.vcxproj", "{5C0D3652-2A8F-4348-AC20-2C621E05AD5F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Unicode", "..\..\Source\Vision\Samples\Engine\Unicode\Unicode_tizen_vs2010_anarchy.vcxproj", "{D6AD3CAB-368E-30BC-9A3A-E2AB7C69CE2F}"
+EndProject
+
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|hkTizen = Debug|hkTizen
+		Dev|hkTizen = Dev|hkTizen
+		Release|hkTizen = Release|hkTizen
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{232A3C46-471E-3B55-AC1C-B3A1B2F80C36}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{232A3C46-471E-3B55-AC1C-B3A1B2F80C36}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{232A3C46-471E-3B55-AC1C-B3A1B2F80C36}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{232A3C46-471E-3B55-AC1C-B3A1B2F80C36}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{232A3C46-471E-3B55-AC1C-B3A1B2F80C36}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{232A3C46-471E-3B55-AC1C-B3A1B2F80C36}.Release|hkTizen.Build.0 = Release|hkTizen
+		{A619205F-8E2C-352E-BAEF-C66A3BF3C125}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{A619205F-8E2C-352E-BAEF-C66A3BF3C125}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{A619205F-8E2C-352E-BAEF-C66A3BF3C125}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{A619205F-8E2C-352E-BAEF-C66A3BF3C125}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{A619205F-8E2C-352E-BAEF-C66A3BF3C125}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{A619205F-8E2C-352E-BAEF-C66A3BF3C125}.Release|hkTizen.Build.0 = Release|hkTizen
+		{FF152960-A4AC-38F0-B335-08B5CC5818FC}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{FF152960-A4AC-38F0-B335-08B5CC5818FC}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{FF152960-A4AC-38F0-B335-08B5CC5818FC}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{FF152960-A4AC-38F0-B335-08B5CC5818FC}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{FF152960-A4AC-38F0-B335-08B5CC5818FC}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{FF152960-A4AC-38F0-B335-08B5CC5818FC}.Release|hkTizen.Build.0 = Release|hkTizen
+		{9C69B856-238E-3C7C-9A11-71EDA59AC36B}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{9C69B856-238E-3C7C-9A11-71EDA59AC36B}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{9C69B856-238E-3C7C-9A11-71EDA59AC36B}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{9C69B856-238E-3C7C-9A11-71EDA59AC36B}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{9C69B856-238E-3C7C-9A11-71EDA59AC36B}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{9C69B856-238E-3C7C-9A11-71EDA59AC36B}.Release|hkTizen.Build.0 = Release|hkTizen
+		{0F6A1296-D925-39A1-84FB-C54FF5CC4CD2}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{0F6A1296-D925-39A1-84FB-C54FF5CC4CD2}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{0F6A1296-D925-39A1-84FB-C54FF5CC4CD2}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{0F6A1296-D925-39A1-84FB-C54FF5CC4CD2}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{0F6A1296-D925-39A1-84FB-C54FF5CC4CD2}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{0F6A1296-D925-39A1-84FB-C54FF5CC4CD2}.Release|hkTizen.Build.0 = Release|hkTizen
+		{8E7B353F-C5F1-32A0-A170-523FA0502138}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{8E7B353F-C5F1-32A0-A170-523FA0502138}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{8E7B353F-C5F1-32A0-A170-523FA0502138}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{8E7B353F-C5F1-32A0-A170-523FA0502138}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{8E7B353F-C5F1-32A0-A170-523FA0502138}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{8E7B353F-C5F1-32A0-A170-523FA0502138}.Release|hkTizen.Build.0 = Release|hkTizen
+		{17B7CE53-C27D-3428-AEA2-7C7D72B85E36}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{17B7CE53-C27D-3428-AEA2-7C7D72B85E36}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{17B7CE53-C27D-3428-AEA2-7C7D72B85E36}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{54D37226-523A-21D3-B646-AB6E3B9C3E71}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{54D37226-523A-21D3-B646-AB6E3B9C3E71}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{54D37226-523A-21D3-B646-AB6E3B9C3E71}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{54D37226-523A-21D3-B646-AB6E3B9C3E71}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{54D37226-523A-21D3-B646-AB6E3B9C3E71}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{54D37226-523A-21D3-B646-AB6E3B9C3E71}.Release|hkTizen.Build.0 = Release|hkTizen
+		{8199D84A-8759-34BA-9828-DC808E15DAAC}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{8199D84A-8759-34BA-9828-DC808E15DAAC}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{8199D84A-8759-34BA-9828-DC808E15DAAC}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{8199D84A-8759-34BA-9828-DC808E15DAAC}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{8199D84A-8759-34BA-9828-DC808E15DAAC}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{8199D84A-8759-34BA-9828-DC808E15DAAC}.Release|hkTizen.Build.0 = Release|hkTizen
+		{512835C5-256B-332B-9FAE-6DA90FA9C0F3}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{512835C5-256B-332B-9FAE-6DA90FA9C0F3}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{512835C5-256B-332B-9FAE-6DA90FA9C0F3}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{512835C5-256B-332B-9FAE-6DA90FA9C0F3}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{512835C5-256B-332B-9FAE-6DA90FA9C0F3}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{512835C5-256B-332B-9FAE-6DA90FA9C0F3}.Release|hkTizen.Build.0 = Release|hkTizen
+		{D2C9AE4F-0F90-406E-85BA-F9DA83AA90FF}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{D2C9AE4F-0F90-406E-85BA-F9DA83AA90FF}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{D2C9AE4F-0F90-406E-85BA-F9DA83AA90FF}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{D2C9AE4F-0F90-406E-85BA-F9DA83AA90FF}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{D2C9AE4F-0F90-406E-85BA-F9DA83AA90FF}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{D2C9AE4F-0F90-406E-85BA-F9DA83AA90FF}.Release|hkTizen.Build.0 = Release|hkTizen
+		{F6CF679C-9E2D-37AA-B67E-9C403CC85F21}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{F6CF679C-9E2D-37AA-B67E-9C403CC85F21}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{F6CF679C-9E2D-37AA-B67E-9C403CC85F21}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{F6CF679C-9E2D-37AA-B67E-9C403CC85F21}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{F6CF679C-9E2D-37AA-B67E-9C403CC85F21}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{F6CF679C-9E2D-37AA-B67E-9C403CC85F21}.Release|hkTizen.Build.0 = Release|hkTizen
+		{AD6F682F-1272-3C90-9636-CEC4395B19DE}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{AD6F682F-1272-3C90-9636-CEC4395B19DE}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{AD6F682F-1272-3C90-9636-CEC4395B19DE}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{AD6F682F-1272-3C90-9636-CEC4395B19DE}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{AD6F682F-1272-3C90-9636-CEC4395B19DE}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{AD6F682F-1272-3C90-9636-CEC4395B19DE}.Release|hkTizen.Build.0 = Release|hkTizen
+		{9E0D7B8C-E67F-3E20-93C7-EF10AF2025B8}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{9E0D7B8C-E67F-3E20-93C7-EF10AF2025B8}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{9E0D7B8C-E67F-3E20-93C7-EF10AF2025B8}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{9E0D7B8C-E67F-3E20-93C7-EF10AF2025B8}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{9E0D7B8C-E67F-3E20-93C7-EF10AF2025B8}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{9E0D7B8C-E67F-3E20-93C7-EF10AF2025B8}.Release|hkTizen.Build.0 = Release|hkTizen
+		{37A97266-825D-42F4-A636-FB4D4A9B3D52}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{37A97266-825D-42F4-A636-FB4D4A9B3D52}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{37A97266-825D-42F4-A636-FB4D4A9B3D52}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{37A97266-825D-42F4-A636-FB4D4A9B3D52}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{37A97266-825D-42F4-A636-FB4D4A9B3D52}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{37A97266-825D-42F4-A636-FB4D4A9B3D52}.Release|hkTizen.Build.0 = Release|hkTizen
+		{726DD9C3-7348-4606-B61C-12BBA3F14B7B}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{726DD9C3-7348-4606-B61C-12BBA3F14B7B}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{726DD9C3-7348-4606-B61C-12BBA3F14B7B}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{726DD9C3-7348-4606-B61C-12BBA3F14B7B}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{726DD9C3-7348-4606-B61C-12BBA3F14B7B}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{726DD9C3-7348-4606-B61C-12BBA3F14B7B}.Release|hkTizen.Build.0 = Release|hkTizen
+		{F316BA4F-D40D-47A5-8F0E-5916D831B3D0}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{F316BA4F-D40D-47A5-8F0E-5916D831B3D0}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{F316BA4F-D40D-47A5-8F0E-5916D831B3D0}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{F316BA4F-D40D-47A5-8F0E-5916D831B3D0}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{F316BA4F-D40D-47A5-8F0E-5916D831B3D0}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{F316BA4F-D40D-47A5-8F0E-5916D831B3D0}.Release|hkTizen.Build.0 = Release|hkTizen
+		{8C1D107A-23D0-4DBD-8E3F-DB2EDEA29588}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{8C1D107A-23D0-4DBD-8E3F-DB2EDEA29588}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{8C1D107A-23D0-4DBD-8E3F-DB2EDEA29588}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{8C1D107A-23D0-4DBD-8E3F-DB2EDEA29588}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{8C1D107A-23D0-4DBD-8E3F-DB2EDEA29588}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{8C1D107A-23D0-4DBD-8E3F-DB2EDEA29588}.Release|hkTizen.Build.0 = Release|hkTizen
+		{5C0D3652-2A8F-4348-AC20-2C621E05AD5F}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{5C0D3652-2A8F-4348-AC20-2C621E05AD5F}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{5C0D3652-2A8F-4348-AC20-2C621E05AD5F}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{5C0D3652-2A8F-4348-AC20-2C621E05AD5F}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{5C0D3652-2A8F-4348-AC20-2C621E05AD5F}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{5C0D3652-2A8F-4348-AC20-2C621E05AD5F}.Release|hkTizen.Build.0 = Release|hkTizen
+		{D6AD3CAB-368E-30BC-9A3A-E2AB7C69CE2F}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{D6AD3CAB-368E-30BC-9A3A-E2AB7C69CE2F}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{D6AD3CAB-368E-30BC-9A3A-E2AB7C69CE2F}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{D6AD3CAB-368E-30BC-9A3A-E2AB7C69CE2F}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{D6AD3CAB-368E-30BC-9A3A-E2AB7C69CE2F}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{D6AD3CAB-368E-30BC-9A3A-E2AB7C69CE2F}.Release|hkTizen.Build.0 = Release|hkTizen
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		
+	EndGlobalSection
+EndGlobal

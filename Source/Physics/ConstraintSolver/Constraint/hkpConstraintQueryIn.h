@@ -36,7 +36,7 @@ class hkpConstraintQueryStepInfo
 		hkPadSpu<hkReal>		m_frameInvDeltaTime;
 		hkPadSpu<hkReal>		m_invNumSteps;
 		hkPadSpu<hkReal>		m_invNumStepsTimesMicroSteps;	// = 1.0f/(numSubsteps*numMicroSteps)
-	
+
 		hkPadSpu<hkReal>		m_maxConstraintViolationSqrd;
 
 			// a factor all rhs should be multiplied
@@ -115,11 +115,11 @@ class hkpConstraintQueryIn : public hkpConstraintQueryStepInfo
 			return *this;
 		}
 #endif
-	
+
 	public:
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT_SOLVER, hkpConstraintQueryIn );
-	
+
 		typedef void (HK_CALL *FnBeginConstraints)( const hkpConstraintQueryIn &in, hkpConstraintQueryOut &out, hkpSolverResults* sr, int solverResultStriding );
 
 #if !defined (HK_PLATFORM_SPU)
@@ -127,7 +127,7 @@ class hkpConstraintQueryIn : public hkpConstraintQueryStepInfo
 #else
 		hkpConstraintQueryIn() {}
 #endif
-		
+
 			/// The velocity accumulator of bodyA. Typically this is a hkpVelocityAccumulator
 		HK_ALIGN16( hkPadSpu<const hkpVelocityAccumulator*>	m_bodyA );
 
@@ -155,7 +155,7 @@ class hkpConstraintQueryIn : public hkpConstraintQueryStepInfo
 
 			/// listeners
 		hkPadSpu<hkpViolatedConstraintArray*> m_violatedConstraints;
-		
+
 			/// Data to be written to the header schema
 		hkPadSpu<hkUint32> m_accumulatorAIndex;
 		hkPadSpu<hkUint32> m_accumulatorBIndex;
@@ -179,7 +179,7 @@ class hkpConstraintQueryIn : public hkpConstraintQueryStepInfo
 #endif // HKP_CONSTRAINT_QUERY_IN_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

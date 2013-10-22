@@ -1,0 +1,280 @@
+<?xml version="1.0" ?>
+
+<!DOCTYPE changelog SYSTEM "../../../../../../Build/Vision/changelog.dtd">
+
+<?xml-stylesheet type="text/xsl" href="../../../../../../Build/Vision/changelog.xsl" ?>
+
+
+<changelog name="HavokPhysicsPlugin">
+  <!--  Only add NEW features to this section.  Add branch FIXES to the appropriate versions BELOW this one -->
+  <version major="2013" minor="2" fix="0" desc="Anarchy Beta">
+    <changed>The ragdoll component no longer moves the entity to the root bone's location. Instead, the original relation between root bone and entity at the moment of activation is preserved during the time the component is active.</changed>
+  </version>
+  <version major="2013" minor="2" fix="0">
+    <fixed>Terrain Sector HKT file path was the absolute path in the resource snapshot.</fixed>
+    <changed>Asynchronous stepping is now disabled by default. It can be enabled by calling vHavokPhysicsModule::SetUseAsynchronousPhysics().</changed>
+    <added>Havok Physics Blocker Volume component. Can be attached to Custom Volume objects in order to create invisible walls. </added>
+    <changed>Motion deltas can no longer be used to apply forces to rigid bodies. Directly use vHavokRigidBody::ApplyForce() instead. </changed>
+    <fixed>Cached physics shape HKT files are now identified by the final Havok scale instead of the Vision scale, in order to account for different HavokToVision scales. Thus previous cached files are not anymore valid. [HS#10563]</fixed>
+    <added>vHavokVisualDebugger: Exposed support for setting the server listening port. [HS#10275]</added>
+    <fixed>Custom Vision physics shapes (hkv) can now be used outside the vHavokPhysicsEnginePlugin.</fixed>
+    <fixed>An issue preventing the proper cleanup of vHavokConstraints during scene unloading has been fixed.</fixed>
+    <fixed>Stack overflow assertion failures that could occur when adding many overlapping physics objects have been fixed.</fixed>
+  </version>
+  <version major="2013" minor="1" fix="0" desc="Anarchy Beta">
+    <changed>vHavokRigidBody/vHavokRagdoll: The ApplyForce method now takes a mandatory time interval parameter. The documentation has been clarified to distinguish the use cases for ApplyForce and ApplyLinearImpulse.</changed>
+  </version>
+  <version major="2013" minor="1" fix="0">
+    <added>Added option to turn off fixed time stepping for Havok Physics Module. This might be useful for mobile applications, which should only step once per frame. </added>
+    <added>Solver iterations and hardness can be configured in the Havok physics panel of vForge.</added>
+    <added>ReloadResources updates outdated physics shapes in vForge when .vcolmesh is present.</added>
+    <added>TightFit variable to rigid body so that auto created shapes (so not from hkt) can shrink their surface such that surface + convex radius == graphics surface.</added>
+    <added>vPhysicsShapeCacher command line tool for generating cached shape HKT files outside of vForge.</added>
+    <changed>Deleted all old unsupported cached shape HKT files and replace them by new HKT files.</changed>
+    <added>vHavokPhysicsModule::PerformSweepBatched: Multithreaded linear casts. [HS#3231]</added>
+    <changed>Refactored shape caching system. Old cached shape HKT files are not supported anymore. (For more information check Havok Physics Integration - Shape Caching chapter in the Artist documentation). </changed> 
+    <changed>Cached shape HKT files are now added to the resource snapshot dependencies.</changed>
+    <added>vHavokRagdoll component. [HB#1559]</added>
+    <fixed>SetBroadphaseSize: Use a workaround for hkpWorld::removePhysicsSystem because of a known issue with constraint chains.[#619-8329412]</fixed>
+    <fixed>vHavokConstraintChain: Creation from a VisPath_cl will now store the path key instead of a pointer to avoid a dangling reference. The signature of CalcPivotPointsFromPath has changed. [#619-8329386] </fixed>
+  </version>
+  <version major="2012" minor="2" fix="1">
+    <added>Added welding support for static meshes, concave dynamic rigid bodies and terrain. [#619-8328576]</added>
+	<fixed>m_bResultsExpected is reset (if true) in vHavokPhysicsModule::FetchPhysicsResults; consequently OnFetchPhysicsResults callback will only be fired (and the Visual Debugger will only be stepped) if the physics simulation has been stepped (it is possible for FetchPhysicsResults to be called several times between simulation steps; OnUpdatePhysicsFinished callback is still triggered at this frequency). [HS#8673]</fixed>
+  </version>
+  <version major="2012" minor="2" fix="0">
+    <fixed>vHavokRigidBody: sphere shape type collision meshes are now positioned correctly if pivot auto-align is active.</fixed>
+    <changed>Removed pivot offset from vHavokCharacterController and capsule parameters are now always relative to the entity pivot instead of the mesh collision AABB. See migration guide for further details.</changed>
+    <fixed>Debug geometry now survives switching vForge into and out of run mode. [HS#7672]</fixed>
+    <added>Added support for raycasts against terrain with holes. [#619-8328043]</added>
+    <added>Extended vHavokGenericConstraint. [#619-8327127]</added>
+  </version>
+  <version major="2012" minor="1" fix="3">
+    <fixed>Physics broadphase size warning message. [#619-8328068][#619-8328192]</fixed>
+    <fixed>vHavokCharacterController: stepping is now stable regarding to the frame-rate. [#619-8327998]</fixed>
+    <changed>vHavokRigidBody, vHavokShapeFactory: Migrated several members and functions to hkRefPtrs to automate reference counting.</changed>
+	<fixed>vHavokRigidBody: Rigid body shapes with type FromFile are now cached (unless the rigid body properties from the .hkt-file are needed). [#619-8328651] </fixed>
+    <fixed>Physics broadphase size warning message. [#619-8328068][#619-8328192]</fixed>
+    <fixed>vHavokCharacterController: stepping is now stable regarding to the frame-rate. [#619-8327998]</fixed>
+    <added>Native serialization of Static Mesh Caching parameter. [#619-8327948]</added>
+    <fixed>vHavokRigidBody: When AlwaysInitAsDynamic property was set on rigid body the quality type was not initalized correctly. [#619-8327320]</fixed>
+    <changed>Declared chain path renderer as deprecated and hided its component classes in vForge (use path renderer of Vision Engine Plugin instead).</changed>
+    <fixed>Terrain shape: Broken or missing physics edges between sectors (visible in Visual debugger)</fixed>
+  </version>
+  <version major="2012" minor="1" fix="2">
+    <fixed>Havok Physics Panel properties are now exported correctly. [#619-8326758]</fixed>
+    <fixed>vHavokRigidBody component in vForge: Shape_type mesh can now be also used in combination with any motiontype. [P#619-8316810]</fixed>
+    <fixed>vHavokPhysicsModule: The step function of rigidbodies was sometimes called with a delta time of 0. This led to problems when a character controller was standing on a moving keyframed rigid body. [P#619-8316810]</fixed>
+    <fixed>vHavokRigidBody: Re-initialization of rigid bodies loaded from file: Old shape is now removed. [HS#7040]</fixed>
+  </version>
+  <version major="2012" minor="1" fix="1">
+    <changed>vHavokCharacterController: Stepped every frame instead of accumulating a time step.</changed>
+    <fixed>vHavokRigidBody: When transforming keyframed rigid bodies the Havok physics representation was not correct. [#6824]</fixed>
+  </version>
+  <version major="2012" minor="1" fix="0">
+    <fixed>Collision behavior of static meshes is now correctly taken into account.</fixed>
+    <added>Enqueued Raycasts can handle now VisPhysicsRaycastClosestResult_cl and VisPhysicsRaycastAllResults_cl.</added>
+    <added>Console Action for toggling the Havok Visual Debugger.</added>
+    <added>Exposed PerformSweep/ DropToFloor functionality to scripting.</added>
+    <added>Added DropToFloor functionality.</added>
+    <changed>Restructured and extended Havok Physics panel functionality.</changed>
+    <added>The activation state of Rigid Body Components is now serialized and exposed to vForge.</added>
+    <added>vHavokTriggerVolume component.</added>
+    <changed>Havok Rigid Bodies will now only be updated in Vision when they are active (very critical performance improvement)</changed>
+  </version>
+  
+   <version major="8" minor="2" fix="10">
+     <fixed>vHavokStaticMesh: Collision layer information is now correctly loaded from vcolmesh file. [#6602]</fixed>
+  </version>
+  <version major="8" minor="2" fix="9">
+    <added>Exposed missing functions from vHavokEnginePlugin interface. [HS#6118][#6395]</added>
+  </version>
+  <version major="8" minor="2" fix="8">
+    <changed>Updated Havok Libraries to version 2011.3.1</changed>
+  </version>
+  <version major="8" minor="2" fix="7">
+    <added>vHavokCharacterController: Added ability to configure stair climbing behavior.</added>
+    <added>vHavokCharacterController: Added fly mode to controller. If set to true the z value of the motiondelta will be also considered. Gravity will not have an impact on the controller then anymore. Please also note that the UseMotionDeltaZ property was removed, since it had no effect. [#5658]</added>
+  </version>
+  <version major="8" minor="2" fix="6">
+    <changed>Updated Havok Libraries to version 2011.3</changed>
+    <fixed>Terrain: Fixed artifacts for Havok physics generation of terrain. This happened because samples of different sectors were overlapping by 2 samples instead of 1. [#5611]</fixed>
+  </version>
+  <version major="8" minor="2" fix="5">
+    <added>vHavokRigidBody component can now also be attached to mirrors. </added>
+    <added>Added 'Jump_Height' property to vHavokCharacterController component. [#5398]</added>
+  </version>
+  <version major="8" minor="2" fix="4">
+    <fixed>Non uniform scaling on static meshes breaks rotation</fixed>
+    <changed>The stepHeight parameter from the vHavokCharacterController::MoveController method has been removed since it doesn't have any effect. If you get a compile error due to that then please remove the stepHeight parameter from your MoveController() call.</changed>
+    <fixed>Keyframed: Motiondelta is now taken into account when a rigid body is set to keyframed mode.</fixed>
+    <fixed>The Havok_NoDeactivate property on the rigid body did not work properly, since it only configured the solver but not the rigid body accordingly. [#5058]</fixed>
+    <changed>The default for the Havok to Vision scale is now 100 (so Vision in cm, Havok in metres), instead of 50. You can still change this in code via the vHavokConversionUtils::SetHavok2VisionScale() static method, before loading files. </changed>
+    <changed>Added vHavokPhysicsModule_GetWorldCreateSettings that allow you to change the Broadphase extents</changed>
+    <changed>By default the hkpWorld is created as late as possible (only when really needed, so Broadphase can be auto computed etc). It should not affect any user code, but something to look pout for if there are any issues.</changed>
+  </version>
+  <version major="8" minor="2" fix="3">  
+    <fixed>Anchors of a Havok constraint that are inside a prefab are now updated correctly when transforming the prefab only. [#4996]</fixed>
+  </version>
+  <version major="8" minor="2" fix="2">  
+    <changed>Changed HavokPhysics restitution behavior for static meshes collision from max value to min value</changed>
+    <fixed>Hinge constraint is now positioned and rotated correctly when being instantiated from a prefab. [#4763]</fixed>
+  </version>
+  <version major="8" minor="2" fix="0">  
+    <changed>Extended Prismatic Constraint to be able to convert it into a Cylindrical Constraint.</changed>
+    <added>Pulley-/ PointToPlane-/ PointToPath- Constraint and corresponding automated tests.</added>
+    <added>CustomArchiveTransformation application to constraints.</added>
+    <changed>Collision messages are now queued and sent from the main thread</changed>
+  </version>
+  <version major="8" minor="2" fix="0">  
+    <added>Automated Tests for Enqueued Raycasts.</added>
+    <added>Automated Tests for Material-System.</added>
+    <added>Automated Tests for Raycasting/ CollisionFiltering and for Prismatic/ Generic Constraints.</added>
+    <added>Automated Tests for Sweep Testing.</added>
+    <changed>Upgraded Havok SDK to 2011.2 for PC/ Xbox360/ PS3/ PSP2/ iOS.</changed>
+    <added>Support for XBox360 and Wii.</added>
+    <added>Support for all PC configurations (x86/ x64/ Visual Studio 2008/ Visual Studio 2010)</added>
+    <changed>Upgraded Havok SDK to 2011.1 for PC/ Xbox360/ PS3/ Wii/ PSP2.</changed>
+    <fixed>OnBreak notification for constraints.</fixed>
+    <added>Motion/ Rotation Delta application for rigid bodies.</added>
+    <added>PrismaticConstraint and GenericConstraint.</added>
+    <added>Custom Memory Allocator.</added>
+    <added>Sweep Testing.</added>
+    <added>Physics material support.</added>
+    <changed>Changed vHavok constraints and constraint chains to make use of the new mechanism for serializing object references.</changed>
+    <added>Support for terrain vegetation collision (i.e. speedtree capsules)</added>
+    <added>Support for terrain holes</added>
+    <added>Character controller has a Gravity_Scale property</added>
+  </version>
+  <version major="8" minor="1" fix="18">
+    <added>vHavokCableConstraintChainRenderer: You can now activate dynamic shadows for the component vHavokCableConstraintChainRenderer. [#4561]</added>
+  </version>
+  <version major="8" minor="1" fix="17">
+    <fixed>hkpKeyFrameUtility::applyHardKeyFrame use frame time delta instead of fixed time step. [#4194] </fixed>
+    <changed>ErrorReport: Output errors and assert messages also directly to Visual Studio, because breaks happen before update of ResourceViewer[#4281]</changed>
+  </version>
+  <version major="8" minor="1" fix="15">
+    <added>New method vHavokRigidBody::SetAlwaysInitAsDynamic() to bypass Havok's motion type optimization regarding dynamic/keyframed motion type switching. [#3950]</added>
+    <changed>HavokEditorPlugin: Made Havok shapes classes public. [#3881]</changed>
+    <fixed>vHavokRigidBody: member variables Havok_Mass, Havok_MotionType, Havok_Restitution, Havok_CollisionLayer, Havok_CollisionGroup, Havok_SubSystemId, Havok_SubSystemDontCollideWith are now also set when using the appropriate setter functions [#3841]</fixed>
+    <added>Havok for PS3 now uses SPUs.[#3720]</added>
+    <fixed>Fixed problem of hinge constraint (vHavokHingeConstraint) now restoring pivot/axis correctly on deserialization if the related rigid bodies had been moved. [#3948]</fixed>
+  </version>
+  <version major="8" minor="1" fix="13">
+    <changed>Removed vHavokCharacterController::SetProxyPosition. (Duplicate functionality of ::SetPosition)</changed>
+    <fixed>Havok Character Controller: The debug rendering could not be disabled.</fixed>
+    <fixed>Line Follower Component: The line follower component did not work properly in combination with Havok and the "reset" camera path action.</fixed>
+    <fixed>Fixed Havok breakpoint/crash when constraint chain links become too short.</fixed>
+  </version>
+  <version major="8" minor="1" fix="10">
+    <added>Ragdoll constraint binding (with optional motors)</added>
+    <added>Support for ObjectKey in vHavok constraints</added>
+    <fixed>Issue with quaternion interpolation artifacts in constraint chain-based animation of entities</fixed>
+    <changed>Introduced a property to optionally use the Z component of motion delta in the character controller.</changed>
+    <changed>Renamed vHavokConstraintChain::GetChainForce to GetChainForceVec, and GetChainForceNorm to GetChainForce</changed>
+  </version>
+  <version major="8" minor="1" fix="8">
+    <changed>vHavokChainAnimation now adjusts the bone positions using the actual length of the chain (as defined by the pivot points) instead of using the chain links only.</changed>
+    <fixed>Fixed crash during deinitialization due to concurrent callback execution</fixed>
+    <fixed>Fixed crash on vHavok reinitialization in combination with multithreading</fixed>
+    <added>Support for angular friction in constraint chains</added>
+    <changed>CFM of constraint chains is not computed by default anymore, but set to a fixed value (which can be specified). Computation can be enabled by a parameter.</changed>
+    <added>Compatibility to double-precision builds of Havok Physics</added>
+    <added>Option to use a fixed number of physics steps in each Vision frame</added>
+    <added>Parameter for specifying motion quality of Havok rigid bodies</added>
+    <changed>Removed linker dependency to Havok Animation (currently unused)</changed>
+    <changed>Character controller now also takes z direction of motion delta into account</changed>
+    <changed>Changed motion type and quality of chain link bodies from DYNAMIC/MOVING to SPHERE_INERTIA/DEBRIS for performance reasons</changed>
+  </version>
+  <version major="8" minor="1" fix="5">
+    <fixed>Corrected some multithreading issues and enabled Havok multithreading again.</fixed>
+    <fixed>Performance counters for main thread was not visible in multithreading configuration</fixed>
+    <changed>Havok update from version 2010.1 to version 2010.2</changed>
+  </version>
+  <version major="8" minor="1" fix="4">
+    <added>Constraint chains: support for specifying whether and how the inertia tensor shall be computed</added>
+    <added>Rigid bodies: support for specifying whether and how the inertia tensor shall be computed</added>
+    <added>Constraint chains: support for retrieving the constraint forces.</added>
+    <changed>vHavokHingeConstraint uses degrees for its limits (instead of radians)</changed>
+    <changed>Moved the constraint chain roll removal algorithm to the constraint chain class</changed>
+    <added>New component to animate the bones of an entity with a constraint chain</added>
+    <fixed>Hinge constraint now also works with scaled anchor bodies</fixed>
+    <fixed>Constraint chain physics properties are now updated when the chain changes</fixed>
+    <fixed>vHavokDisplayHandler does not leak geometry objects any more.</fixed>
+  </version>
+  <version major="8" minor="1" fix="2">
+    <added>Constraint chain length can now be changed dynamically at runtime.</added>
+    <fixed>Conditions in which the constraint chain would get too many links are now handled cleanly.</fixed>
+    <added>Added scope guards for marking the Havok world for reading or writing.</added>
+    <added>vHavokRigidBody can now request not to be deactivated.</added>
+  </version>
+  <version major="8" minor="1" fix="0">
+    <added>vHavokPhysicsModule::SetPhysicsTickCount has a new parameter iMaxTicksPerFrame to avoid negative feedback</added>
+  </version>
+  <version major="8" minor="0" fix="20">
+    <changed>SaveToSpec for constraint chains is now public</changed>
+    <added>Setter for constraint chain link transform</added>
+    <fixed>Character controller now appears at correct position after binary deserialization. [#1916]</fixed>
+    <added>New constraint chain renderer: render as chain of distinct entities.</added>
+    <added>New constraint type: vHavokStiffSpringConstraint.</added>
+  </version>
+  <version major="8" minor="0" fix="19">
+    <fixed>vHavokRigidBody now uses the Vision file manager to resolve relative paths to Havok geometry files.</fixed>
+    <fixed>Constraint chains are now freed correctly when the scene is unloaded or a new scene is loaded.</fixed>
+    <fixed>Cable constraint chain renderer displayed warnings unconditionally</fixed>
+    <fixed>Improved removal of roll component for links of Havok constraint chains.</fixed>
+  </version>
+  <version major="8" minor="0" fix="18">
+    <added>New constraint chain type (not yet connected to editor infrastructure): vHavokStiffSpringConstraintChain</added>
+    <added>New constraint chain rendering component for rendering Havok constraint chains as cables.</added>
+    <fixed>Introduced VISION_HAVOK_SYNC_PER_THREAD_STATICS macro, Use this macro when you initialize your application so that you can call native Havok function in the application. [#1050]</fixed>
+  </version>
+  <version major="8" minor="0" fix="17">
+    <changed>Improved the generation of Shape Types. Now it gets fitted better to models.</changed>
+    <fixed>Implemented handling of static mesh removal.</fixed>
+    <fixed>Fixed an issue that could lead to errors when serializing multiple constraint chains in one scene</fixed>
+    <changed>Added DLL export specifications to accessor functions in vHavokConstraintChain</changed>
+    <changed>Exposed additional fields in vHavokConstraintChain</changed>
+    <changed>Exposed additional fields in vHavokCharacterController</changed>
+    <added>Static meshes now store a pointer to their HkRigidBody (set via SetPhysicsObject method).</added>
+  </version>
+  
+  <version major="8" minor="0" fix="16">
+    <fixed>Keyframed and fixed motion types were swapped in the rigid body component initialisation. [#928]</fixed>
+    <added>Simple constraint chain renderer component.</added>
+    <added>The rigid body component now serializes the linear and angular velocity. [#792]</added>
+    <added>New rigid body properties: collision layer, collision group and sub system ID. [#792]</added>
+    <added>BallAndSocket constraint chains.</added>
+    <added>ConstraintChain base implementation.</added>
+    <added>BallAndSocket constraint.</added>
+    <added>Constraint base implementation.</added>
+  </version>
+  
+  <version major="8" minor="0" fix="14">
+    <added>New OnBeforeWorldCreated callback in vHavokPhysicsModule class. You can use this callback to modify the hkpWorldCinfo structure before the Havok world is being initialized. [#662]</added>
+    <fixed>Pivot offset was applied two times on rigid bodies center of mass when loading a scene. [#600]</fixed>
+    <fixed>Deserialized rigid bodies were not created at the correct time. [#600]</fixed>
+    <fixed>Havok Debug Render Shape is now updated properly inside vForge. (Havok Rigid Body and Havok Character Controller)</fixed>
+    <fixed>Introduced VISION_HAVOK_SYNC_STATICS() macro, Use this macro when you initialize your application so that you can call native Havok function in the application. [#360]</fixed>
+  </version>
+  
+  <version major="8" minor="0" fix="9">
+    <changed>Updated Havok Binding from 660 to 710: Adapted Binding</changed>
+    <changed>Updated Havok Binding from 660 to 710: Removed hkShapeScalingUtility</changed>
+    <changed>Updated Havok Binding from 660 to 710: Replaced CollisionListener with ContactListener</changed>
+  </version>
+  
+  <version major="7" minor="6" fix="19">
+    <added>Havok Rigid Body - Wrapper Functions (Set and Get Linear Velocity, Set and Get Angular Velocity, Apply Force, Apply Linear Impulse)</added>
+    <added>Havok Rigid Body - Motion Type (Dynamic, Fixed, Keyframed)</added>
+    <added>Havok Rigid Body - Automatic alignment of pivot offset (corrects the shape position when pivot offset is not central)</added>
+    <added>Havok Character Controller - Automatic alignment of pivot offset (corrects the controller position when pivot offset is not at the bottom)</added>
+  </version>
+  
+  <version major="7" minor="6" fix="18">
+    <changed>Havok Character Controller - OnRunPhysics calls the Step function to update the Motion Delta.</changed>
+    <added>Initial version</added>
+  </version>
+  
+</changelog>	
+	

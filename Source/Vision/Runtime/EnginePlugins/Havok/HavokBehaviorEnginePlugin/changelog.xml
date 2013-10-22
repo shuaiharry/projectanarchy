@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+
+<!DOCTYPE changelog SYSTEM "../../../../../../Build/Vision/changelog.dtd">
+
+<?xml-stylesheet type="text/xsl" href="../../../../../../Build/Vision/changelog.xsl" ?>
+
+<changelog name="HavokBehaviorPlugin">
+
+  <version major="2013" minor="2" fix="0">
+    <fixed>Instantiating ragdolls from Behavior projects has been fixed.</fixed>
+	<fixed>'m_useBehaviorWorldFromModel' is now serialized in vHavokBehaviorComponent.</fixed>
+  </version>
+
+  <version major="2013" minor="1" fix="0" desc="Anarchy Beta">
+    <changed>vHavokBehaviorComponent: All exposed customization parameters were given new, more intuitive names, and intuitive custom UI widgets where applicable.</changed>
+  </version>
+  
+</changelog>

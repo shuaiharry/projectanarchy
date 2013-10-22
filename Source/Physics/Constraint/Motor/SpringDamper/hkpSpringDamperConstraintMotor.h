@@ -22,7 +22,7 @@ extern const hkClass hkpSpringDamperConstraintMotorClass;
 class hkpSpringDamperConstraintMotor : public hkpLimitedForceConstraintMotor
 {
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT );
 		HK_DECLARE_REFLECTION();
 
@@ -51,7 +51,7 @@ class hkpSpringDamperConstraintMotor : public hkpLimitedForceConstraintMotor
 #endif // HKP_SPRING_DAMPER_CONSTRAINT_MOTOR_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -378,7 +378,7 @@ class hkp3AxisSweep : public hkpBroadPhase
 #endif // HK_COLLIDE_3_AXIS_SWEEP_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -11,7 +11,10 @@
 /ThirdParty/*
 /Tools/VisualDebugger
 AndroidTemp/
+/AssetMgmt_data/transformed
 
+Uninstall.app/
+git_*
 ProjectAnarchyEULA.pdf
 ProjectAnarchyGit.zip
 EnvBackup.txt

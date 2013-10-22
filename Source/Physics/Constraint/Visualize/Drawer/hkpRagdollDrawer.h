@@ -21,7 +21,7 @@ class hkpRagdollDrawer : public hkpConstraintDrawer
 	public:
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HKP_MEMORY_CLASS_VDB, hkpRagdollDrawer );
-	
+
 		void drawConstraint(const hkpRagdollConstraintData* constraintData,
 			const hkTransform& localToWorldA, const hkTransform& localToWorldB,
 			hkDebugDisplayHandler* displayHandler, int id, int tag);
@@ -38,7 +38,7 @@ class hkpRagdollDrawer : public hkpConstraintDrawer
 #endif	// HKP_RAGDOLLDRAWER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

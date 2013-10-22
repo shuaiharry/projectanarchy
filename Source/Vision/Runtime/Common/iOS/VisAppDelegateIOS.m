@@ -14,6 +14,8 @@
 
 #include <unistd.h>
 
+extern char g_szDeviceName[256];
+
 @implementation VisAppDelegate
 
 @synthesize window;
@@ -32,6 +34,8 @@
   g_VisionAppSettings.szAppDirectory = [appPath fileSystemRepresentation];
   g_VisionAppSettings.szDocumentsDirectory = [documentsDirectory fileSystemRepresentation];
   g_VisionAppSettings.szCachesDirectory = [cachesDirectory fileSystemRepresentation];
+  
+  strncpy(g_szDeviceName, [[[UIDevice currentDevice] name] UTF8String], sizeof(g_szDeviceName));
   
   if (!VisionInitFunction())
     return NO;
@@ -97,7 +101,7 @@
 @end
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131021)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

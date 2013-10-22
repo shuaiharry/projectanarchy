@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+
+<!DOCTYPE changelog SYSTEM "../../../../Build/Vision/changelog.dtd">
+
+<?xml-stylesheet type="text/xsl" href="../../../../Build/Vision/changelog.xsl" ?>
+
+<changelog name="vSceneViewer">
+
+  <!--  Only add NEW features to this section.  Add branch FIXES to the appropriate versions BELOW this one -->
+  <version major="2013" minor="2" fix="0" desc="Anarchy">
+    <added>FileServe now auto-detects mobile devices (including iOS) running vSceneViewer over the network and can connect to them without having to manually push a vFileServeHost.txt file to the device.</added>
+  </version>
+  <version major="2013" minor="2" fix="0">
+    <added>It is now possible to view the last scene exported by vForge inside the vSceneViewer</added>
+  </version>
+  <version major="2013" minor="1" fix="0" desc="Anarchy Beta">
+    <added>Extended -af Anisotropic filtering command line parameter to take the filtering level as a second parameter. [#619-8331017]</added>
+    <fixed>-af Anisotropic filtering command line parameter was not working. [#619-8331017]</fixed>
+    <added>Added command-line parameter -varkeys, which can be used to add custom variant keys for testing purposes.</added>
+  </version>
+  <version major="2012" minor="2" fix="0">
+    <added>Ported to iOS devices.</added>
+  </version>
+  <version major="2012" minor="1" fix="2">
+    <added>Ported to Android devices.</added>
+  </version>
+  <version major="2012" minor="1" fix="0">
+    <changed>Replaced old Sound Plugin with new Fmod Plugin.</changed>
+  </version>
+  <version major="8" minor="2" fix="6">
+    <fixed>vSceneViewer crash fixed when Locked Screen while starting scene viewer. [HS:#4960]</fixed>
+  </version>
+  <version major="8" minor="2" fix="4">
+    <fixed>-nocam command line parameter was not working</fixed>
+  </version>
+  <version major="8" minor="1" fix="12">
+    <fixed>Fixed conversion to multi-byte characters of the scene that was being opened [#3001].</fixed>
+  </version>
+  <version major="8" minor="1" fix="4">
+    <added>New command line parameter "adapter x" with x specifying the adapter index</added>
+  </version>
+  <version major="8" minor="1" fix="4">
+    <changed>vSceneViewer now can open the file without type argument.</changed>
+    <fixed>Path including asian language wasn't handled properly [#1989]</fixed>
+    <added>Added "WASD" control to the vScene Viewer and the controls "Q" and "E" to move the camera down and up [#2053]</added>
+  </version>
+  <version major="8" minor="1" fix="2">
+    <added>Dedicated changelog for the vScene Viewer</added>
+  </version>
+  
+</changelog>	
+	

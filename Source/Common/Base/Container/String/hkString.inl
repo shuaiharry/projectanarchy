@@ -308,7 +308,7 @@ HK_FORCE_INLINE int HK_CALL hkString::memCmpUint32(const hkUint32* buf1, const h
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

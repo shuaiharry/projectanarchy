@@ -17,7 +17,7 @@ class hkpSolverResults
 	public:
 
 		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT_SOLVER, hkpSolverResults );
-		
+
 		/// Get the impulse applied by the solver on the last time step. This structure may be returned prior to the application of the
 		/// constraint solver. For the case of a contact constraint it is initialized to a very crude guess at the expected initial impulse.
 		HK_FORCE_INLINE hkReal getImpulseApplied() const;
@@ -29,7 +29,7 @@ class hkpSolverResults
 		HK_FORCE_INLINE void init();
 
 	public:
-		
+
 		// internal use only
 		hkReal m_impulseApplied;
 
@@ -43,7 +43,7 @@ class hkpSolverResults
 #endif // HKP_SOLVER_RESULTS_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

@@ -17,7 +17,7 @@ extern const hkClass hkpLinearParametricCurveClass;
 class hkpLinearParametricCurve : public hkpParametricCurve
 {
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_BASE);
 		HK_DECLARE_REFLECTION();
 
@@ -106,7 +106,7 @@ class hkpLinearParametricCurve : public hkpParametricCurve
 #endif  // HKP_LINEAR_PARAMETRIC_CURVE_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

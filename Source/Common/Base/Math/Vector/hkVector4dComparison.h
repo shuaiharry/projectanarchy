@@ -159,7 +159,7 @@ extern const hkUint8 hkVector4Comparison_maskToLastIndex[16];  ///< selection ma
 #endif //HK_MATH_VECTOR4d_COMPARISON_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

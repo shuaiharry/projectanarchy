@@ -292,7 +292,7 @@ hkBlockList<T, BLOCK_SIZE>::BatchConsumer::~BatchConsumer()
 }
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

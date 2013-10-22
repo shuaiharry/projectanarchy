@@ -1,0 +1,85 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FmodEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\ThirdParty\FmodEnginePlugin\FmodEnginePlugin_tizen_vs2010_anarchy.vcxproj", "{92824671-6D52-330F-B2BD-E072AB91898D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HavokBehaviorEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\Havok\HavokBehaviorEnginePlugin\HavokBehaviorEnginePlugin_tizen_vs2010_anarchy.vcxproj", "{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HavokPhysicsEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\Havok\HavokPhysicsEnginePlugin\HavokPhysicsEnginePlugin_tizen_vs2010_anarchy.vcxproj", "{53B25EFB-8962-48B3-8FBA-847237788084}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RPG", "..\..\Source\Vision\Samples\Engine\RPG\RPG_tizen_vs2010_anarchy.vcxproj", "{16D37446-845F-38D9-B332-DB8D3B3A1E87}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84} = {F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}
+		{53B25EFB-8962-48B3-8FBA-847237788084} = {53B25EFB-8962-48B3-8FBA-847237788084}
+		{92824671-6D52-330F-B2BD-E072AB91898D} = {92824671-6D52-330F-B2BD-E072AB91898D}
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5} = {AE97707F-3BD0-4E29-80DA-96930FC434B5}
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84} = {F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}
+		{53B25EFB-8962-48B3-8FBA-847237788084} = {53B25EFB-8962-48B3-8FBA-847237788084}
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5} = {AE97707F-3BD0-4E29-80DA-96930FC434B5}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VisionEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\VisionEnginePlugin\VisionEnginePlugin_tizen_vs2010_anarchy.vcxproj", "{AE97707F-3BD0-4E29-80DA-96930FC434B5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vSceneViewer", "..\..\Source\Vision\Tools\vSceneViewer\vSceneViewer_tizen_vs2010_anarchy.vcxproj", "{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84} = {F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}
+		{53B25EFB-8962-48B3-8FBA-847237788084} = {53B25EFB-8962-48B3-8FBA-847237788084}
+		{92824671-6D52-330F-B2BD-E072AB91898D} = {92824671-6D52-330F-B2BD-E072AB91898D}
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5} = {AE97707F-3BD0-4E29-80DA-96930FC434B5}
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84} = {F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}
+		{53B25EFB-8962-48B3-8FBA-847237788084} = {53B25EFB-8962-48B3-8FBA-847237788084}
+		{92824671-6D52-330F-B2BD-E072AB91898D} = {92824671-6D52-330F-B2BD-E072AB91898D}
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5} = {AE97707F-3BD0-4E29-80DA-96930FC434B5}
+	EndProjectSection
+EndProject
+
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|hkTizen = Debug|hkTizen
+		Dev|hkTizen = Dev|hkTizen
+		Release|hkTizen = Release|hkTizen
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Release|hkTizen.Build.0 = Release|hkTizen
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Release|hkTizen.Build.0 = Release|hkTizen
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Release|hkTizen.Build.0 = Release|hkTizen
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Release|hkTizen.Build.0 = Release|hkTizen
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Release|hkTizen.Build.0 = Release|hkTizen
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Debug|hkTizen.ActiveCfg = Debug|hkTizen
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Debug|hkTizen.Build.0 = Debug|hkTizen
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Dev|hkTizen.ActiveCfg = Dev|hkTizen
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Dev|hkTizen.Build.0 = Dev|hkTizen
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Release|hkTizen.ActiveCfg = Release|hkTizen
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Release|hkTizen.Build.0 = Release|hkTizen
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		
+	EndGlobalSection
+EndGlobal

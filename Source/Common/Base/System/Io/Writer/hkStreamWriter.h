@@ -19,7 +19,6 @@ class hkStreamWriter : public hkReferencedObject
 	public:
 		HK_DECLARE_CLASS_ALLOCATOR(HK_MEMORY_CLASS_STREAM);
 
-
 		hkStreamWriter() {}
 			/// Return false if end of file has been reached or some other error.
 			/// Otherwise return true.
@@ -50,7 +49,7 @@ class hkStreamWriter : public hkReferencedObject
 #endif //HKBASE_STREAM_WRITER_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

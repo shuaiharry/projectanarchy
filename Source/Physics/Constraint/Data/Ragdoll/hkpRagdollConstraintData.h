@@ -325,7 +325,7 @@ class hkpRagdollConstraintData : public hkpConstraintData
 
 		/// Sets the inertia stabilization factor, return HK_FAILURE if the factor is not defined for the given constraint.
 		virtual hkResult setInertiaStabilizationFactor(const hkReal inertiaStabilizationFactorIn);
-		
+
 		virtual void getRuntimeInfo( hkBool wantRuntime, hkpConstraintData::RuntimeInfo& infoOut ) const;
 
 	public:
@@ -339,7 +339,7 @@ class hkpRagdollConstraintData : public hkpConstraintData
 #endif // HKP_RAGDOLL_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

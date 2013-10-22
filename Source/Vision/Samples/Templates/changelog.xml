@@ -6,6 +6,14 @@
 
 <changelog name="ProjectTemplates">
 
+  <version major="2013" minor="2" fix="0">
+    <added>The project template links against Behavior, AI, Physics and Fmod, if the products are available.</added>
+    <added>Added build step for gameplugin on Windows that copys the resulting plugin file to the Vision bin folder. So you don't have to copy it manually.</added>
+    <added>New post build step for windows projects that copy the needed dll files to the target folder. Removed the dll copy commands from run_once.bat.</added>
+    <fixed>Run_once.bat could not handle spaces in the paths correctly.</fixed>
+    <added>Run_once.bat copies default icons from %VISION_SDK%\Data\Common\Android to the project template folder Data\Common\Android. The post-build step deployAndroid.exe is now called with --resDir and references the copied icons [HS#10484]</added>
+  </version>
+
   <version major="2013" minor="1" fix="0">
     <added>Added template project for Android. [HS#9909]</added>
     <changed>Merged templates into only one template project.</changed>

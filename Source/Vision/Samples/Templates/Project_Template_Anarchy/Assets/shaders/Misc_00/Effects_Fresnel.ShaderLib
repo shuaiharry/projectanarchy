@@ -471,7 +471,7 @@ float4 gFogColor : register(c1);
 	#endif
 
 	#ifdef DEFERRED_RENDERING
-	float4 fAlphaTestThreshold : register(c34);
+	float4 AlphaThreshold : register(c34);
 	float  GlobalAmbientMultiplier : register(c35);
 	#undef USE_LIGHT_WS // for security only
 	#endif
@@ -1452,7 +1452,7 @@ float4 gFogColor : register(c1);
 	#endif
 
 	#ifdef DEFERRED_RENDERING
-	float4 fAlphaTestThreshold : register(c34);
+	float4 AlphaThreshold : register(c34);
 	float  GlobalAmbientMultiplier : register(c35);
 	#undef USE_LIGHT_WS // for security only
 	#endif
@@ -2441,7 +2441,7 @@ float4 gFogColor : register(c1);
 	#endif
 
 	#ifdef DEFERRED_RENDERING
-	float4 fAlphaTestThreshold : register(c34);
+	float4 AlphaThreshold : register(c34);
 	float  GlobalAmbientMultiplier : register(c35);
 	#undef USE_LIGHT_WS // for security only
 	#endif
@@ -3502,7 +3502,7 @@ float4 gFogColor : register(c1);
 	#endif
 
 	#ifdef DEFERRED_RENDERING
-	float4 fAlphaTestThreshold : register(c34);
+	float4 AlphaThreshold : register(c34);
 	float  GlobalAmbientMultiplier : register(c35);
 	#undef USE_LIGHT_WS // for security only
 	#endif

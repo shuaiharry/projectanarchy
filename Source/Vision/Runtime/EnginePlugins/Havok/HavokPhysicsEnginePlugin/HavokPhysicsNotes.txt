@@ -1,0 +1,34 @@
+
+
+vHavokCollisionListener:
+
+- An additional "m_uniqueIdCounter" for couting all collisions and supplying the collision infos
+  with an unique collision ID => See CollisionEventsDemo (Havok Samples)
+
+- Do we need to scale the relative veloctiy of the contact point of a havok collison to Vision
+  scale? => See vHavokCollisionInfo_t
+  
+- Toi contacts, which are just created if two objects hit with high velocity and the interaction 
+  of both objects is flagged as continuous => Right now only normal contacts are supported
+  
+  
+  
+vHavokShapeFactory:
+
+- Documentation for CreateShapeFromStaticMeshInstances
+
+- Do we need separate tables for cached conves shapes and static meshes?
+
+
+
+
+18.12.09 - Notes:
+
+1) InitRbFromFile(..., vHavokRigidBody::InitTemplate* initTempl); => Pointer instead Reference?
+
+2) InitRbFromFile: File needs to be specified relative to Binary. No default setup.
+
+3) InitRbFromFile: Don't pass CreateHkRigidBody, etc. Creates RB directly.
+
+4) vHavokPhysicsModule: IVisPhysicsObject_cl *CreatePhysicsObject(...); return NULL?
+=> Create Component + warning

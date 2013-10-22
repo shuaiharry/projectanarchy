@@ -1,7 +1,7 @@
 Project Anarchy: Source Code
 ============================
 
-![alt text](http://www.projectanarchy.com/sites/default/files/Project%20Anarchy%20Logo.png "Project Anachy")
+![alt text](http://www.projectanarchy.com/sites/default/files/Project%20Anarchy%20Logo.png "Project Anarchy")
 
 Overview
 --------

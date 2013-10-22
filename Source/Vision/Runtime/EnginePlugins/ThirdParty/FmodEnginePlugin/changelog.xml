@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+
+<!DOCTYPE changelog SYSTEM "../../../../../../Build/Vision/changelog.dtd">
+
+<?xml-stylesheet type="text/xsl" href="../../../../../../Build/Vision/changelog.xsl" ?>
+
+
+<changelog name="FmodPlugin">
+  <!--  Only add NEW features to this section. Add branch FIXES to the appropriate versions BELOW this one -->
+  <version major="2013" minor="2" fix="0">
+    <fixed>Paused sounds/ events are not anymore automatically disposed. [HS#11482]</fixed>
+    <changed>Updated Fmod to 4.44.16 [HS#8829]</changed>
+  </version>
+  
+  <version major="2013" minor="1" fix="0">  
+    <fixed>Sounds and events are now correctly exported with regard to their visibilty property in vForge. [HS#8138]</fixed>
+    <changed>Updated Fmod to 4.44.11</changed>
+    <added>Debug output level and FmodToVision scale (for doppler shift) can now be set in VFmodConfig.</added>
+    <fixed>Sound, Event, Reverb and Collision shapes are now correctly transformed (moved, rotated, scaled) with their parent shapes in vForge. [HS#8886]</fixed>
+    <changed>Event shape is now also rendered in vForge when no valid event resource is selected.</changed>
+  </version> 
+  
+  <version major="2012" minor="1" fix="3">
+    <added>Function VFmodManager::LoadEventProject. [#619-8327743]</added>
+  </version> 
+  <version major="2012" minor="1" fix="2">
+    <changed>Updated Fmod to 4.42.00</changed>
+    <added>VFmodEvent::Stop now features a new parameter "bImmediate". Set this to false if you want to make use of Fmod's "Fadeout time" property. [#619-8326696]</added>
+    <added>Error Handling: The error check caused a stack corruption as the error string was not formatted correctly. [#619-8326681]</added>
+  </version> 
+ <version major="2012" minor="1" fix="0">
+    <changed>Sound shape is now rendered in editor also when no valid sound file is selected. [HS#7671]</changed>
+    <fixed>Reverb shape now correctly reflects the visible state by enabling/disabling the effect. [HS#7636]</fixed>
+    <added>Initial version: Created new Fmod Engine Plugin</added>
+  </version>
+  
+</changelog>	
+	

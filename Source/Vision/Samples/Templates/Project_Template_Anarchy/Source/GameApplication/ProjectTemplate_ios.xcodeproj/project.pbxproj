@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0768420000000000022738 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5487400000000000022737 /* Foundation.framework */; };
+		1D9998EC17D8BBE4002E2E50 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9998EB17D8BBE4002E2E50 /* AudioToolbox.framework */; };
 		1DE116281738092D00E51293 /* GameApplicationPCH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1DE116241738092D00E51293 /* GameApplicationPCH.cpp */; };
 		1DE1163417380E0600E51293 /* VisSampleApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1DE1163117380E0600E51293 /* VisSampleApp.cpp */; };
 		1DE1163517380E0600E51293 /* VisSampleAppCallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1DE1163217380E0600E51293 /* VisSampleAppCallbacks.cpp */; };
@@ -53,6 +54,7 @@
 		0759340000000000022679 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		0942950000000000022753 /* Data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Data; sourceTree = "<group>"; };
 		1189170000000000022747 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
+		1D9998EB17D8BBE4002E2E50 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		1DE116241738092D00E51293 /* GameApplicationPCH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameApplicationPCH.cpp; sourceTree = "<group>"; };
 		1DE116251738092D00E51293 /* GameApplicationPCH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameApplicationPCH.h; sourceTree = "<group>"; };
 		1DE1163117380E0600E51293 /* VisSampleApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VisSampleApp.cpp; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D9998EC17D8BBE4002E2E50 /* AudioToolbox.framework in Frameworks */,
 				2D6DA8611766290D006ED258 /* SystemConfiguration.framework in Frameworks */,
 				2D6DA85F176628E1006ED258 /* CoreData.framework in Frameworks */,
 				7090370000000000022740 /* QuartzCore.framework in Frameworks */,
@@ -142,6 +145,7 @@
 		6850770000000000022680 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				1D9998EB17D8BBE4002E2E50 /* AudioToolbox.framework */,
 				2D6DA8601766290D006ED258 /* SystemConfiguration.framework */,
 				2D6DA85E176628E1006ED258 /* CoreData.framework */,
 				1DE1168F1739530700E51293 /* iOS */,
@@ -330,6 +334,7 @@
 				ARCHS = armv7;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
+				DEBUG_INFORMATION_FORMAT=dwarf;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SYMBOL_SEPARATION = NO;
@@ -346,6 +351,7 @@
 					VBASE_LIB,
 					LINK_WITH_VISION,
 					VISIONDLL_LIB,
+					USE_HAVOK,
 				);
 				GCC_STRICT_ALIASING = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -356,11 +362,13 @@
 				HEADER_SEARCH_PATHS = (
 					"$(VISION_SDK)/Source",
 					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/",
+					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc",
 				);
 				INFOPLIST_FILE = "../../Data/Common/iOS/Samples-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				LIBRARY_SEARCH_PATHS = (
 					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib/iphoneos/Debug",
+					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/ios",
 					"$(VISION_SDK)/Lib/ios_xcode_anarchy/$(CONFIGURATION)",
 				);
 				MACH_O_TYPE = mh_execute;
@@ -377,6 +385,7 @@
 					"-D_VR_GLES2",
 					"-DVBASE_LIB",
 					"-DLINK_WITH_VISION",
+					"-DUSE_HAVOK",
 					"-DVISIONDLL_LIB",
 					"-D_DEBUG",
 					"-DHK_DEBUG",
@@ -388,6 +397,44 @@
 					"-lBaseD",
 					"-lVisionD",
 					"-lVisionEnginePlugin",
+					"-lfmodexL_iphoneos",
+					"-lfmodeventL_iphoneos",
+					"-lfmodeventnetL_iphoneos",
+					"-lvHavokAi",
+					"-lvHavokBehavior",
+					"-lvHavok",
+					"-lhkBase",
+					"-lhkCompat",
+					"-lhkSceneData",
+					"-lhkSerialize",
+					"-lhkVisualize",
+					"-lhkVisualize",
+					"-lhkInternal",
+					"-lhkGeometryUtilities",
+					"-lhkcdInternal",
+					"-lhkcdCollide",
+					"-lhkpUtilities",
+					"-lhkpVehicle",
+					"-lhkpDynamics",
+					"-lhkpCollide",
+					"-lhkpInternal",
+					"-lhkpConstraintSolver",
+					"-lhkpConstraint",
+					"-lhkaPhysics2012Bridge",
+					"-lhkaInternal",
+					"-lhkaAnimation",
+					"-lhkbBehavior",
+					"-lhkbInternal",
+					"-lhkbUtilities",
+					"-lhkbPhysics2012Bridge",
+					"-lhkbAiBridge",
+					"-lhkbScript",
+					"-lhkaiPathfinding",
+					"-lhkaiInternal",
+					"-lhkaiVisualize",
+					"-lhkaiSpatialAnalysis",
+					"-lhkaiPhysics2012Bridge",
+					"-lvFmodEnginePlugin",
 				);
 				PRODUCT_NAME = "ProjectTemplate_ios-xcode_debug_v7";
 				SDKROOT = iphoneos;
@@ -423,6 +470,7 @@
 				ARCHS = armv7;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				COMPRESS_PNG_FILES = NO;
+				DEBUG_INFORMATION_FORMAT=dwarf;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SYMBOL_SEPARATION = NO;
@@ -439,6 +487,7 @@
 					VBASE_LIB,
 					LINK_WITH_VISION,
 					VISIONDLL_LIB,
+					USE_HAVOK,
 				);
 				GCC_STRICT_ALIASING = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -449,10 +498,12 @@
 				HEADER_SEARCH_PATHS = (
 					"$(VISION_SDK)/Source",
 					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/",
+					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc",
 				);
 				INFOPLIST_FILE = "../../Data/Common/iOS/Samples-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				LIBRARY_SEARCH_PATHS = (
+					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/ios",
 					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib/iphoneos/Release",
 					"$(VISION_SDK)/Lib/ios_xcode_anarchy/$(CONFIGURATION)",
 				);
@@ -468,6 +519,7 @@
 					"-D_VISION_IOS",
 					"-D_VISION_POSIX",
 					"-D_VR_GLES2",
+					"-DUSE_HAVOK",
 					"-DVBASE_LIB",
 					"-DLINK_WITH_VISION",
 					"-DVISIONDLL_LIB",
@@ -479,6 +531,44 @@
 					"-lBase",
 					"-lVision",
 					"-lVisionEnginePlugin",
+					"-lfmodex_iphoneos",
+					"-lfmodevent_iphoneos",
+					"-lfmodeventnet_iphoneos",
+					"-lvHavokAi",
+					"-lvHavokBehavior",
+					"-lvHavok",
+					"-lhkBase",
+					"-lhkCompat",
+					"-lhkSceneData",
+					"-lhkSerialize",
+					"-lhkVisualize",
+					"-lhkVisualize",
+					"-lhkInternal",
+					"-lhkGeometryUtilities",
+					"-lhkcdInternal",
+					"-lhkcdCollide",
+					"-lhkpUtilities",
+					"-lhkpVehicle",
+					"-lhkpDynamics",
+					"-lhkpCollide",
+					"-lhkpInternal",
+					"-lhkpConstraintSolver",
+					"-lhkpConstraint",
+					"-lhkaPhysics2012Bridge",
+					"-lhkaInternal",
+					"-lhkaAnimation",
+					"-lhkbBehavior",
+					"-lhkbInternal",
+					"-lhkbUtilities",
+					"-lhkbPhysics2012Bridge",
+					"-lhkbAiBridge",
+					"-lhkbScript",
+					"-lhkaiPathfinding",
+					"-lhkaiInternal",
+					"-lhkaiVisualize",
+					"-lhkaiSpatialAnalysis",
+					"-lhkaiPhysics2012Bridge",
+					"-lvFmodEnginePlugin",
 				);
 				PRODUCT_NAME = "ProjectTemplate_ios-xcode_distrib_v7";
 				SDKROOT = iphoneos;
@@ -531,6 +621,7 @@
 				ARCHS = armv7;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
+				DEBUG_INFORMATION_FORMAT=dwarf;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SYMBOL_SEPARATION = NO;
@@ -547,6 +638,7 @@
 					VBASE_LIB,
 					LINK_WITH_VISION,
 					VISIONDLL_LIB,
+					USE_HAVOK,
 				);
 				GCC_STRICT_ALIASING = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -557,10 +649,12 @@
 				HEADER_SEARCH_PATHS = (
 					"$(VISION_SDK)/Source",
 					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/",
+					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc",
 				);
 				INFOPLIST_FILE = "../../Data/Common/iOS/Samples-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				LIBRARY_SEARCH_PATHS = (
+					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/ios",
 					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib/iphoneos/Release",
 					"$(VISION_SDK)/Lib/ios_xcode_anarchy/$(CONFIGURATION)",
 				);
@@ -575,6 +669,7 @@
 					"-DPROFILING",
 					"-D_VISION_IOS",
 					"-D_VISION_POSIX",
+					"-DUSE_HAVOK",
 					"-D_VR_GLES2",
 					"-DVBASE_LIB",
 					"-DLINK_WITH_VISION",
@@ -587,6 +682,44 @@
 					"-lBase",
 					"-lVision",
 					"-lVisionEnginePlugin",
+					"-lfmodex_iphoneos",
+					"-lfmodevent_iphoneos",
+					"-lfmodeventnet_iphoneos",
+					"-lvHavokAi",
+					"-lvHavokBehavior",
+					"-lvHavok",
+					"-lhkBase",
+					"-lhkCompat",
+					"-lhkSceneData",
+					"-lhkSerialize",
+					"-lhkVisualize",
+					"-lhkVisualize",
+					"-lhkInternal",
+					"-lhkGeometryUtilities",
+					"-lhkcdInternal",
+					"-lhkcdCollide",
+					"-lhkpUtilities",
+					"-lhkpVehicle",
+					"-lhkpDynamics",
+					"-lhkpCollide",
+					"-lhkpInternal",
+					"-lhkpConstraintSolver",
+					"-lhkpConstraint",
+					"-lhkaPhysics2012Bridge",
+					"-lhkaInternal",
+					"-lhkaAnimation",
+					"-lhkbBehavior",
+					"-lhkbInternal",
+					"-lhkbUtilities",
+					"-lhkbPhysics2012Bridge",
+					"-lhkbAiBridge",
+					"-lhkbScript",
+					"-lhkaiPathfinding",
+					"-lhkaiInternal",
+					"-lhkaiVisualize",
+					"-lhkaiSpatialAnalysis",
+					"-lhkaiPhysics2012Bridge",
+					"-lvFmodEnginePlugin",
 				);
 				PRODUCT_NAME = "ProjectTemplate_ios-xcode_release_v7";
 				SDKROOT = iphoneos;
@@ -673,6 +806,7 @@
 				ARCHS = armv7;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
+				DEBUG_INFORMATION_FORMAT=dwarf;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SYMBOL_SEPARATION = NO;
@@ -689,6 +823,7 @@
 					VBASE_LIB,
 					LINK_WITH_VISION,
 					VISIONDLL_LIB,
+					USE_HAVOK,
 				);
 				GCC_STRICT_ALIASING = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -699,10 +834,12 @@
 				HEADER_SEARCH_PATHS = (
 					"$(VISION_SDK)/Source",
 					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/",
+					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/inc",
 				);
 				INFOPLIST_FILE = "../../Data/Common/iOS/Samples-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				LIBRARY_SEARCH_PATHS = (
+					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/fmod/4.44.16/lib/ios",
 					"$(HAVOK_THIRDPARTY_DIR)/redistsdks/Lua/5.1.4/lib/iphoneos/Release",
 					"$(VISION_SDK)/Lib/ios_xcode_anarchy/$(CONFIGURATION)",
 				);
@@ -719,6 +856,7 @@
 					"-D_VISION_POSIX",
 					"-D_VR_GLES2",
 					"-DVBASE_LIB",
+					"-DUSE_HAVOK",
 					"-DLINK_WITH_VISION",
 					"-DVISIONDLL_LIB",
 					"-DHK_DEBUG",
@@ -728,6 +866,44 @@
 					"-lBase",
 					"-lVision",
 					"-lVisionEnginePlugin",
+					"-lfmodex_iphoneos",
+					"-lfmodevent_iphoneos",
+					"-lfmodeventnet_iphoneos",
+					"-lvHavokAi",
+					"-lvHavokBehavior",
+					"-lvHavok",
+					"-lhkBase",
+					"-lhkCompat",
+					"-lhkSceneData",
+					"-lhkSerialize",
+					"-lhkVisualize",
+					"-lhkVisualize",
+					"-lhkInternal",
+					"-lhkGeometryUtilities",
+					"-lhkcdInternal",
+					"-lhkcdCollide",
+					"-lhkpUtilities",
+					"-lhkpVehicle",
+					"-lhkpDynamics",
+					"-lhkpCollide",
+					"-lhkpInternal",
+					"-lhkpConstraintSolver",
+					"-lhkpConstraint",
+					"-lhkaPhysics2012Bridge",
+					"-lhkaInternal",
+					"-lhkaAnimation",
+					"-lhkbBehavior",
+					"-lhkbInternal",
+					"-lhkbUtilities",
+					"-lhkbPhysics2012Bridge",
+					"-lhkbAiBridge",
+					"-lhkbScript",
+					"-lhkaiPathfinding",
+					"-lhkaiInternal",
+					"-lhkaiVisualize",
+					"-lhkaiSpatialAnalysis",
+					"-lhkaiPhysics2012Bridge",
+					"-lvFmodEnginePlugin",
 				);
 				PRODUCT_NAME = "ProjectTemplate_ios-xcode_dev_v7";
 				SDKROOT = iphoneos;

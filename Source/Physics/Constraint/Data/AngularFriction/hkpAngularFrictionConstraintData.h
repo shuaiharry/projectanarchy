@@ -16,7 +16,7 @@
 class hkpAngularFrictionConstraintData : public hkpConstraintData
 {
 	public:
-		
+
 		enum
 		{
 			SOLVER_RESULT_FRICTION_0	= 0,	// the angular friction value
@@ -45,7 +45,7 @@ class hkpAngularFrictionConstraintData : public hkpConstraintData
 		{
 			// +version(1)
 			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR( HK_MEMORY_CLASS_COLLIDE, hkpAngularFrictionConstraintData::Atoms );
-			
+
 			enum Axis
 			{
 				AXIS_TWIST = 0,
@@ -66,9 +66,9 @@ class hkpAngularFrictionConstraintData : public hkpConstraintData
 			hkpSetLocalTransformsConstraintAtom	m_transforms;
 			hkpAngFrictionConstraintAtom		m_angFriction;
 		};
-		
+
 	public:
-	
+
 		HK_DECLARE_CLASS_ALLOCATOR( HK_MEMORY_CLASS_CONSTRAINT );
 
 		/// Constructor.
@@ -76,7 +76,7 @@ class hkpAngularFrictionConstraintData : public hkpConstraintData
 
 		/// Destructor. Will dereference any motors held.
 		~hkpAngularFrictionConstraintData();
-		
+
 		/// Set up the constraint based on information in world space.
 		/// \param bodyA			The attached body transform
 		/// \param bodyB			The reference body transform
@@ -105,7 +105,7 @@ class hkpAngularFrictionConstraintData : public hkpConstraintData
 		/// Gets the constraint frame.
 		/// \param constraintFrameB Column 0 = twist axis, Column 1 = plane, Column 2 = twist cross plane.
 		void getConstraintFrameB( hkMatrix3& constraintFrameB ) const;
-		
+
 		/// Sets the friction value. Set this before adding to the system.
 		/// Note that this value is an absolute torque value and is therefore dependent on the masses of constrained
 		/// bodies and not limited between 0.0f and 1.0f. If trying to stiffen up ragdoll constraints, try setting this
@@ -145,7 +145,7 @@ class hkpAngularFrictionConstraintData : public hkpConstraintData
 #endif	// HKP_ANGULAR_FRICTION_CONSTRAINT_DATA_H
 
 /*
- * Havok SDK - Base file, BUILD(#20130723)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok

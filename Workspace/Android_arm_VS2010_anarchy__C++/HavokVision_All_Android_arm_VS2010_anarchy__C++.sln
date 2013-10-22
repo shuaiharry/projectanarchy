@@ -1,0 +1,92 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FmodEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\ThirdParty\FmodEnginePlugin\FmodEnginePlugin_android_arm_vs2010_anarchy.vcxproj", "{92824671-6D52-330F-B2BD-E072AB91898D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HavokBehaviorEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\Havok\HavokBehaviorEnginePlugin\HavokBehaviorEnginePlugin_android_arm_vs2010_anarchy.vcxproj", "{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HavokPhysicsEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\Havok\HavokPhysicsEnginePlugin\HavokPhysicsEnginePlugin_android_arm_vs2010_anarchy.vcxproj", "{53B25EFB-8962-48B3-8FBA-847237788084}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RPG", "..\..\Source\Vision\Samples\Engine\RPG\RPG_android_arm_vs2010_anarchy.vcxproj", "{16D37446-845F-38D9-B332-DB8D3B3A1E87}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84} = {F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}
+		{53B25EFB-8962-48B3-8FBA-847237788084} = {53B25EFB-8962-48B3-8FBA-847237788084}
+		{92824671-6D52-330F-B2BD-E072AB91898D} = {92824671-6D52-330F-B2BD-E072AB91898D}
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5} = {AE97707F-3BD0-4E29-80DA-96930FC434B5}
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84} = {F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}
+		{53B25EFB-8962-48B3-8FBA-847237788084} = {53B25EFB-8962-48B3-8FBA-847237788084}
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5} = {AE97707F-3BD0-4E29-80DA-96930FC434B5}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScaleformEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\ThirdParty\ScaleformEnginePlugin\ScaleformEnginePlugin_android_arm_vs2010_anarchy.vcxproj", "{BC1E09F1-5777-3067-BD80-4F2829EAE11C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VisionEnginePlugin", "..\..\Source\Vision\Runtime\EnginePlugins\VisionEnginePlugin\VisionEnginePlugin_android_arm_vs2010_anarchy.vcxproj", "{AE97707F-3BD0-4E29-80DA-96930FC434B5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vSceneViewer", "..\..\Source\Vision\Tools\vSceneViewer\vSceneViewer_android_arm_vs2010_anarchy.vcxproj", "{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84} = {F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}
+		{53B25EFB-8962-48B3-8FBA-847237788084} = {53B25EFB-8962-48B3-8FBA-847237788084}
+		{92824671-6D52-330F-B2BD-E072AB91898D} = {92824671-6D52-330F-B2BD-E072AB91898D}
+		{BC1E09F1-5777-3067-BD80-4F2829EAE11C} = {BC1E09F1-5777-3067-BD80-4F2829EAE11C}
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5} = {AE97707F-3BD0-4E29-80DA-96930FC434B5}
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84} = {F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}
+		{53B25EFB-8962-48B3-8FBA-847237788084} = {53B25EFB-8962-48B3-8FBA-847237788084}
+		{92824671-6D52-330F-B2BD-E072AB91898D} = {92824671-6D52-330F-B2BD-E072AB91898D}
+		{BC1E09F1-5777-3067-BD80-4F2829EAE11C} = {BC1E09F1-5777-3067-BD80-4F2829EAE11C}
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5} = {AE97707F-3BD0-4E29-80DA-96930FC434B5}
+	EndProjectSection
+EndProject
+
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|hkAndroid = Debug|hkAndroid
+		Dev|hkAndroid = Dev|hkAndroid
+		Release|hkAndroid = Release|hkAndroid
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Debug|hkAndroid.ActiveCfg = Debug|hkAndroid
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Debug|hkAndroid.Build.0 = Debug|hkAndroid
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Dev|hkAndroid.ActiveCfg = Dev|hkAndroid
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Dev|hkAndroid.Build.0 = Dev|hkAndroid
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Release|hkAndroid.ActiveCfg = Release|hkAndroid
+		{92824671-6D52-330F-B2BD-E072AB91898D}.Release|hkAndroid.Build.0 = Release|hkAndroid
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Debug|hkAndroid.ActiveCfg = Debug|hkAndroid
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Debug|hkAndroid.Build.0 = Debug|hkAndroid
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Dev|hkAndroid.ActiveCfg = Dev|hkAndroid
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Dev|hkAndroid.Build.0 = Dev|hkAndroid
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Release|hkAndroid.ActiveCfg = Release|hkAndroid
+		{F77853D9-8FE7-4E04-BC2B-B2FCD69CED84}.Release|hkAndroid.Build.0 = Release|hkAndroid
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Debug|hkAndroid.ActiveCfg = Debug|hkAndroid
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Debug|hkAndroid.Build.0 = Debug|hkAndroid
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Dev|hkAndroid.ActiveCfg = Dev|hkAndroid
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Dev|hkAndroid.Build.0 = Dev|hkAndroid
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Release|hkAndroid.ActiveCfg = Release|hkAndroid
+		{53B25EFB-8962-48B3-8FBA-847237788084}.Release|hkAndroid.Build.0 = Release|hkAndroid
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Debug|hkAndroid.ActiveCfg = Debug|hkAndroid
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Debug|hkAndroid.Build.0 = Debug|hkAndroid
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Dev|hkAndroid.ActiveCfg = Dev|hkAndroid
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Dev|hkAndroid.Build.0 = Dev|hkAndroid
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Release|hkAndroid.ActiveCfg = Release|hkAndroid
+		{16D37446-845F-38D9-B332-DB8D3B3A1E87}.Release|hkAndroid.Build.0 = Release|hkAndroid
+		{BC1E09F1-5777-3067-BD80-4F2829EAE11C}.Debug|hkAndroid.ActiveCfg = Debug|hkAndroid
+		{BC1E09F1-5777-3067-BD80-4F2829EAE11C}.Dev|hkAndroid.ActiveCfg = Dev|hkAndroid
+		{BC1E09F1-5777-3067-BD80-4F2829EAE11C}.Release|hkAndroid.ActiveCfg = Release|hkAndroid
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Debug|hkAndroid.ActiveCfg = Debug|hkAndroid
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Debug|hkAndroid.Build.0 = Debug|hkAndroid
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Dev|hkAndroid.ActiveCfg = Dev|hkAndroid
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Dev|hkAndroid.Build.0 = Dev|hkAndroid
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Release|hkAndroid.ActiveCfg = Release|hkAndroid
+		{AE97707F-3BD0-4E29-80DA-96930FC434B5}.Release|hkAndroid.Build.0 = Release|hkAndroid
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Debug|hkAndroid.ActiveCfg = Debug|hkAndroid
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Debug|hkAndroid.Build.0 = Debug|hkAndroid
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Dev|hkAndroid.ActiveCfg = Dev|hkAndroid
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Dev|hkAndroid.Build.0 = Dev|hkAndroid
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Release|hkAndroid.ActiveCfg = Release|hkAndroid
+		{9B127FBC-1456-3F91-554A-6A8CE2D3B44B}.Release|hkAndroid.Build.0 = Release|hkAndroid
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		
+	EndGlobalSection
+EndGlobal

@@ -39,11 +39,11 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2013.1.1.1")]
-[assembly: AssemblyFileVersion("2013.1.1.1")]
+[assembly: AssemblyVersion("2013.2.0.1")]
+[assembly: AssemblyFileVersion("2013.2.0.1")]
 
 /*
- * Havok SDK - Base file, BUILD(#20130725)
+ * Havok SDK - Base file, BUILD(#20131019)
  * 
  * Confidential Information of Havok.  (C) Copyright 1999-2013
  * Telekinesys Research Limited t/a Havok. All Rights Reserved. The Havok
