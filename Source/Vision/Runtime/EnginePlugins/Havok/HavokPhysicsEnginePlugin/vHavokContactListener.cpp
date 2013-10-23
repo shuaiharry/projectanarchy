@@ -16,6 +16,7 @@
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokTerrain.hpp>
 #include <Vision/Runtime/EnginePlugins/Havok/HavokPhysicsEnginePlugin/vHavokRagdoll.hpp>
 #include <Physics2012/Internal/Collide/BvCompressedMesh/hkpBvCompressedMeshShape.h>
+#include <Physics2012/Utilities/CharacterControl/CharacterRigidBody/hkpCharacterRigidBody.h>
 
 void vHavokColliderInfo_t::SetInfo(void *pUserData)
 {
@@ -111,6 +112,13 @@ void vHavokContactListener::contactPointCallback (const hkpContactPointEvent &ev
   vHavokCollisionInfo_t stackInfo;
   vHavokCollisionInfo_t* pInfo = &stackInfo;
   bool bApplyProperties = false;
+
+  // Skip fake vertical contact points that may have been added in the character rigid body listener.
+  if ( event.m_contactPoint->getPosition().getInt24W() == hkpCharacterRigidBody::m_magicNumber ||
+	   event.m_contactPoint->getPosition().getInt24W() == hkpCharacterRigidBody::m_notMagicNumber )
+  {
+	  return;
+  }
 
   for (int i=0;i<2;i++)
   {
