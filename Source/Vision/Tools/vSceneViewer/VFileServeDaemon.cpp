@@ -233,6 +233,7 @@ bool VFileServeDaemon::RunSetup()
   {
     // Need this for the background connection
     VBaseInit();
+    VTargetThread::Init();
 
     // Try to load the last host from the settings file
     if(IVFileInStream *pStream = VBase_GetFileStreamManager()->Open(m_szSettingsFile))
