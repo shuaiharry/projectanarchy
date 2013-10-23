@@ -1,5 +1,5 @@
-Project Anarchy: Source Code
-============================
+Project Anarchy: SDK
+====================
 
 ![alt text](http://www.projectanarchy.com/sites/default/files/Project%20Anarchy%20Logo.png "Project Anarchy")
 
