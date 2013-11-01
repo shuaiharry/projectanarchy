@@ -3,18 +3,21 @@ Project Anarchy: SDK
 
 ![alt text](http://www.projectanarchy.com/sites/default/files/Project%20Anarchy%20Logo.png "Project Anarchy")
 
-Overview
+소개
 --------
 
-**Project Anarchy** is a complete end to end game engine and state-of-the-art toolset for mobile. Project Anarchy also comprises a vibrant game development community centred right at the Project Anarchy [homepage][1]. Project Anarchy includes an entirely free license to ship your game on iOS, Android and Tizen platforms.
+**Project Anarchy** 는 iOS/Android/Tizen 에 무료 배포 가능한 라이브러리형 통합 게임 엔진입니다.[homepage][1]. 
 
-We are providing a great deal of C++ and C# source access with the SDK, so to help the community build off of this easier, we have provided all the source with our SDK on GitHub so that people can more easily develop new plugins, fix bugs or even add new features!
+이 SDK 는 주요한 대부분의 코드를 함께 제공하있어, 여러분들이 게임을 개발하고 엔진을 공부하는 데에 큰 도움이 될 것입니다.
+직접 버그를 수정하거나 기능도 추가해보세요!
 
-Setup
+설치 관련 주의 사항
 -----
 
-**You need to first install the full Project Anarchy SDK** to get all the assets for the samples and base data. You can get that from the [downloads page][2] on the Project Anarchy website. For a complete step-by-step guide to using this GitHub source access, please take a look at our page at [http://projectanarchy.com/git][3].
+**Project Anarchy SDK를 먼저 설치해야 합니다.** [downloads page][2] Project Anarchy website에서 다운 받아 설치해주세요.
+설치 부터 Github 소스코드 동기화까지 하는 전체 과정을 아래 링크를 참조해주세요.
+[http://projectanarchy.com/ko/git][3].
 
-[1]: http://www.projectanarchy.com
-[2]: http://www.projectanarchy.com/download
-[3]: http://projectanarchy.com/git
+[1]: http://www.projectanarchy.com/ko
+[2]: http://www.projectanarchy.com/ko/download
+[3]: http://projectanarchy.com/ko/git
