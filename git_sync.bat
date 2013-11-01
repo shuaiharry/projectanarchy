@@ -1,8 +1,7 @@
 @echo off
 
 ::
-:: WARNING: This will overwrite existing changes to your source files
-::          the first time you run this script!
+:: WARNING: 이 스크립트는 소스코드 파일을 Git 으로 부터 카피해서 덮어쓰게 됩니다. 실행 전에 소스 파일 수정 본을 꼭 백업해주세요.
 ::
 
 set GIT_BIN=C:\Projects\ProjectAnarchy\Tools\PortableGit-1.8.0-preview20121022\bin2

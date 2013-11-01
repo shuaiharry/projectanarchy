@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+
+<!DOCTYPE changelog SYSTEM "changelog.dtd">
+
+<?xml-stylesheet type="text/xsl" href="changelog.xsl" ?>
+
+<changelog name="Lua">
+  <!--  Only add NEW features to this section.  Add branch FIXES to the appropriate versions BELOW this one -->
+  <version major="8" minor="2" fix="0">
+    <added>Added luac</added>
+  </version>
+  <version major="8" minor="1" fix="5">
+    <changed>Updated to Lua 5.1.4-8</changed>
+  </version>
+</changelog>	
+	

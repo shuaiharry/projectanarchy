@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaAndroidx86", "Lua_android_x86_vs2010.vcxproj", "{03D610D2-8C32-4A62-BAB3-DA28561AC7B7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Android = Debug|Android
+		Dev|Android = Dev|Android
+		Release|Android = Release|Android
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{03D610D2-8C32-4A62-BAB3-DA28561AC7B7}.Debug|Android.ActiveCfg = Debug|Android
+		{03D610D2-8C32-4A62-BAB3-DA28561AC7B7}.Debug|Android.Build.0 = Debug|Android
+		{03D610D2-8C32-4A62-BAB3-DA28561AC7B7}.Dev|Android.ActiveCfg = Dev|Android
+		{03D610D2-8C32-4A62-BAB3-DA28561AC7B7}.Dev|Android.Build.0 = Dev|Android
+		{03D610D2-8C32-4A62-BAB3-DA28561AC7B7}.Release|Android.ActiveCfg = Release|Android
+		{03D610D2-8C32-4A62-BAB3-DA28561AC7B7}.Release|Android.Build.0 = Release|Android
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

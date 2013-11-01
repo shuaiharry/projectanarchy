@@ -1,0 +1,98 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "-External - Lua110", "Lua110.vcxproj", "{470579D4-35C4-4A3A-9743-CD38FA826E78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Apollo Debug|ARM = Apollo Debug|ARM
+		Apollo Debug|Win32 = Apollo Debug|Win32
+		Apollo Debug|x64 = Apollo Debug|x64
+		Apollo Release|ARM = Apollo Release|ARM
+		Apollo Release|Win32 = Apollo Release|Win32
+		Apollo Release|x64 = Apollo Release|x64
+		Debug|ARM = Debug|ARM
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Metro Debug|ARM = Metro Debug|ARM
+		Metro Debug|Win32 = Metro Debug|Win32
+		Metro Debug|x64 = Metro Debug|x64
+		Metro Release|ARM = Metro Release|ARM
+		Metro Release|Win32 = Metro Release|Win32
+		Metro Release|x64 = Metro Release|x64
+		Release|ARM = Release|ARM
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+		StaticLib Debug|ARM = StaticLib Debug|ARM
+		StaticLib Debug|Win32 = StaticLib Debug|Win32
+		StaticLib Debug|x64 = StaticLib Debug|x64
+		StaticLib Release|ARM = StaticLib Release|ARM
+		StaticLib Release|Win32 = StaticLib Release|Win32
+		StaticLib Release|x64 = StaticLib Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Debug|ARM.ActiveCfg = Apollo Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Debug|ARM.Build.0 = Apollo Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Debug|ARM.Deploy.0 = Apollo Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Debug|Win32.ActiveCfg = Apollo Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Debug|Win32.Build.0 = Apollo Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Debug|Win32.Deploy.0 = Apollo Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Debug|x64.ActiveCfg = Apollo Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Release|ARM.ActiveCfg = Apollo Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Release|ARM.Build.0 = Apollo Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Release|ARM.Deploy.0 = Apollo Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Release|Win32.ActiveCfg = Apollo Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Release|Win32.Build.0 = Apollo Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Release|Win32.Deploy.0 = Apollo Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Apollo Release|x64.ActiveCfg = Apollo Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|ARM.ActiveCfg = Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|ARM.Build.0 = Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|ARM.Deploy.0 = Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Win32.ActiveCfg = Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Win32.Build.0 = Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|x64.ActiveCfg = Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|x64.Build.0 = Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|ARM.ActiveCfg = Metro Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|ARM.Build.0 = Metro Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|ARM.Deploy.0 = Metro Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|Win32.ActiveCfg = Metro Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|Win32.Build.0 = Metro Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|Win32.Deploy.0 = Metro Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|x64.ActiveCfg = Metro Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|x64.Build.0 = Metro Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Debug|x64.Deploy.0 = Metro Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|ARM.ActiveCfg = Metro Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|ARM.Build.0 = Metro Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|ARM.Deploy.0 = Metro Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|Win32.ActiveCfg = Metro Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|Win32.Build.0 = Metro Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|Win32.Deploy.0 = Metro Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|x64.ActiveCfg = Metro Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|x64.Build.0 = Metro Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Metro Release|x64.Deploy.0 = Metro Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|ARM.ActiveCfg = Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|ARM.Build.0 = Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|ARM.Deploy.0 = Release|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Win32.ActiveCfg = Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Win32.Build.0 = Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|x64.ActiveCfg = Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|x64.Build.0 = Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|ARM.ActiveCfg = StaticLib Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|ARM.Build.0 = StaticLib Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|ARM.Deploy.0 = StaticLib Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Win32.ActiveCfg = StaticLib Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Win32.Build.0 = StaticLib Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|x64.ActiveCfg = StaticLib Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|x64.Build.0 = StaticLib Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|ARM.ActiveCfg = Apollo Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|ARM.Build.0 = Apollo Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|ARM.Deploy.0 = Apollo Debug|ARM
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Win32.ActiveCfg = StaticLib Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Win32.Build.0 = StaticLib Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|x64.ActiveCfg = StaticLib Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|x64.Build.0 = StaticLib Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

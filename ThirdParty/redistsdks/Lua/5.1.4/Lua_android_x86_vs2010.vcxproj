@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    
+    
+    
+  -->
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Android">
+      <Configuration>Debug</Configuration>
+      <Platform>Android</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Android">
+      <Configuration>Release</Configuration>
+      <Platform>Android</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{03D610D2-8C32-4A62-BAB3-DA28561AC7B7}</ProjectGuid>
+    <TargetFrameworkVersion>
+    </TargetFrameworkVersion>
+    <Keyword>StaticLibrary</Keyword>
+    <RootNamespace>
+    </RootNamespace>
+    <ProjectName>LuaAndroidx86</ProjectName>
+  </PropertyGroup>
+  <!-- <Import Project="..\..\..\..\Development\HEAD\Build\MSBuild\Microsoft.Cpp.Default.props" /> -->
+  <Import Project="..\..\..\..\Release\2012_2\Custom\2012_2_x86And\Build\MSBuild\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Android'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>x86-4.6</PlatformToolset>
+    <AndroidAPILevel>android-14</AndroidAPILevel>
+    <AndroidArch>x86</AndroidArch>
+    <AndroidStlType>gnustl_static</AndroidStlType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Android'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>x86-4.6</PlatformToolset>
+    <AndroidAPILevel>android-14</AndroidAPILevel>
+    <AndroidArch>x86</AndroidArch>
+    <AndroidStlType>gnustl_static</AndroidStlType>
+  </PropertyGroup>
+  <!-- <Import Project="..\..\..\..\Development\HEAD\Build\MSBuild\Microsoft.Cpp.props" /> -->
+  <Import Project="..\..\..\..\Release\2012_2\Custom\2012_2_x86And\Build\MSBuild\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Android'">.a</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Android'">.a</TargetExt>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Android'">obj</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Android'">lib</OutDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Android'">LuaAndroidx86_Debug</TargetName>
+    <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Android'">Lib\LuaAndroidx86_Debug.a</OutputFile>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Android'">obj</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Android'">lib</OutDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Android'">LuaAndroidx86_Release</TargetName>
+    <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Android'">Lib\LuaAndroidx86_Release.a</OutputFile>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Android'">
+    </LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Android'">
+    </LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Android'">
+    <ClCompile>
+      <CompileAs>Default</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <AdditionalOptions>-ffunction-sections -fno-inline %(AdditionalOptions) -malign-double %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>VLUA_USE_SWIG_BINDING;HK_DEBUG;_DEBUG;HK_DISABLE_NEON;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..;..\..\..;..\..\..;$(ANDROID_NDK_ROOT)/sources;..\..\..;..\..\..;..\..\..;..\..\..;$(HAVOK_THIRDPARTY_DIR)/redistsdks/JPEGLib/6b/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/PNGLib/1.2.47/src;ThirdParty\zLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProducesObjectFile>true</ProducesObjectFile>
+      <OptimizationLevel>O0</OptimizationLevel>
+      <CppInliningLevel>
+      </CppInliningLevel>
+      <SourceRoot>.</SourceRoot>
+      <DebuggingLevel>MULTI</DebuggingLevel>
+      <Support__noinlineKeyword>
+      </Support__noinlineKeyword>
+      <ANSIAliasingRules>Off</ANSIAliasingRules>
+      <CppLanguageDialect>GNU</CppLanguageDialect>
+      <CppExceptionHandling>
+      </CppExceptionHandling>
+      <CLanguageDialect>ISO_C99</CLanguageDialect>
+      <ImplicitSourceFileInclusion>Off</ImplicitSourceFileInclusion>
+      <SupportImplicitTypenames>
+      </SupportImplicitTypenames>
+      <RunTimeTypeInformationSupport>
+      </RunTimeTypeInformationSupport>
+      <ObjectFileName>$(IntDir)%(FileName).o</ObjectFileName>
+      <QuitAfterWarnings>Off</QuitAfterWarnings>
+      <Warnings>AllWarnings</Warnings>
+      <LineWrapMessages>Off</LineWrapMessages>
+      <SetMessageToSilent>
+      </SetMessageToSilent>
+      <WarnDboNotFoundMax>
+      </WarnDboNotFoundMax>
+      <InternalSwitch>332</InternalSwitch>
+      <SDAOptimization>none</SDAOptimization>
+      <LinkOnceTemplate>On</LinkOnceTemplate>
+      <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
+      <ForcedIncludeFile>
+      </ForcedIncludeFile>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <LibrarianCommand>-rmc</LibrarianCommand>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>-landroid;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>..\..\..\..\Lib\android_x86_vs2010\debug</AdditionalLibraryDirectories>
+      <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
+      <OptimizationStrategy>general</OptimizationStrategy>
+      <SourceRoot>.</SourceRoot>
+      <DebuggingLevel>MULTI</DebuggingLevel>
+      <MarksUnreferencedSymbols>Yes</MarksUnreferencedSymbols>
+      <CppLanguageDialect>GNU</CppLanguageDialect>
+      <CppExceptionHandling>Off</CppExceptionHandling>
+      <CPU>espresso</CPU>
+      <WarnDboNotFoundMax>
+      </WarnDboNotFoundMax>
+      <EntryPoint>_start</EntryPoint>
+      <StartupFiles>
+      </StartupFiles>
+      <DoNotUsedStartupFiles>Yes</DoNotUsedStartupFiles>
+      <LinkOnceTemplate>Off</LinkOnceTemplate>
+      <SDAOptimization>none</SDAOptimization>
+      <AutomaticSDA>No</AutomaticSDA>
+      <DisableSDAOptimization>No</DisableSDAOptimization>
+      <FixCortexA8>false</FixCortexA8>
+      <ObjFileList>@android_x86_vs2010_debug.obj_filelist</ObjFileList>
+    </Link>
+    <PreLink>
+      <ImportLibraryFile>$(OutDir)$(TargetName).a</ImportLibraryFile>
+    </PreLink>
+    <PreLink>
+      <LogFile>
+      </LogFile>
+    </PreLink>
+    <PreLink>
+      <OutputFile>$(IntDir)$(TargetName)_rpl_export.o</OutputFile>
+      <AntiDEFFile>
+      </AntiDEFFile>
+      <DEFFile>
+      </DEFFile>
+      <DeprecatedImpliedNoObjects>Yes</DeprecatedImpliedNoObjects>
+      <ExportAll>No</ExportAll>
+      <PrintVerboseInfo>No</PrintVerboseInfo>
+      <ModuleName>$(TargetName)</ModuleName>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </PreLink>
+    <PostLink>
+      <ImportLibraryFile>
+      </ImportLibraryFile>
+      <InputFile>$(OutDir)$(TargetName).elf</InputFile>
+      <CheckNoSDA>No</CheckNoSDA>
+      <DoNotCompress>No</DoNotCompress>
+      <EmitWarning>No</EmitWarning>
+      <ForceRPX>Yes</ForceRPX>
+      <HeapSize>
+      </HeapSize>
+      <NoLib>Yes</NoLib>
+      <PrintVerboseInfo>No</PrintVerboseInfo>
+      <SetDynamicOnlyFlag>No</SetDynamicOnlyFlag>
+      <SetLoaderTag>
+      </SetLoaderTag>
+      <StackSize>
+      </StackSize>
+      <StripSymbolStrings>No</StripSymbolStrings>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </PostLink>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Android'">
+    <ClCompile>
+      <CompileAs>Default</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <AdditionalOptions>-ffunction-sections %(AdditionalOptions) -malign-double %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>VLUA_USE_SWIG_BINDING;HK_RELEASE;HK_DISABLE_NEON;PROFILING;_VISION_POSIX;_VISION_ANDROID;_VISION_NO_WARNING_IMAGE_FORMAT;VBASE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..;..\..\..;..\..\..;$(ANDROID_NDK_ROOT)/sources;..\..\..;..\..\..;..\..\..;..\..\..;$(HAVOK_THIRDPARTY_DIR)/redistsdks/JPEGLib/6b/;$(HAVOK_THIRDPARTY_DIR)/redistsdks/PNGLib/1.2.47/src;ThirdParty\zLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ProducesObjectFile>true</ProducesObjectFile>
+      <OptimizationLevel>O3</OptimizationLevel>
+      <CppInliningLevel>
+      </CppInliningLevel>
+      <SourceRoot>.</SourceRoot>
+      <DebuggingLevel>MULTI</DebuggingLevel>
+      <Support__noinlineKeyword>
+      </Support__noinlineKeyword>
+      <ANSIAliasingRules>Off</ANSIAliasingRules>
+      <CppLanguageDialect>GNU</CppLanguageDialect>
+      <CppExceptionHandling>
+      </CppExceptionHandling>
+      <CLanguageDialect>ISO_C99</CLanguageDialect>
+      <ImplicitSourceFileInclusion>Off</ImplicitSourceFileInclusion>
+      <SupportImplicitTypenames>
+      </SupportImplicitTypenames>
+      <RunTimeTypeInformationSupport>
+      </RunTimeTypeInformationSupport>
+      <ObjectFileName>$(IntDir)%(FileName).o</ObjectFileName>
+      <QuitAfterWarnings>Off</QuitAfterWarnings>
+      <Warnings>AllWarnings</Warnings>
+      <LineWrapMessages>Off</LineWrapMessages>
+      <SetMessageToSilent>
+      </SetMessageToSilent>
+      <WarnDboNotFoundMax>
+      </WarnDboNotFoundMax>
+      <InternalSwitch>332</InternalSwitch>
+      <SDAOptimization>none</SDAOptimization>
+      <LinkOnceTemplate>On</LinkOnceTemplate>
+      <AllocationGlobalVariable>UniqueDefinitions</AllocationGlobalVariable>
+      <ForcedIncludeFile>
+      </ForcedIncludeFile>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <LibrarianCommand>-rmc</LibrarianCommand>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>-landroid;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>..\..\..\..\Lib\android_x86_vs2010\release</AdditionalLibraryDirectories>
+      <AdditionalLinkerOptions>-nosegments_always_executable</AdditionalLinkerOptions>
+      <OptimizationStrategy>general</OptimizationStrategy>
+      <SourceRoot>.</SourceRoot>
+      <DebuggingLevel>MULTI</DebuggingLevel>
+      <MarksUnreferencedSymbols>Yes</MarksUnreferencedSymbols>
+      <CppLanguageDialect>GNU</CppLanguageDialect>
+      <CppExceptionHandling>Off</CppExceptionHandling>
+      <CPU>espresso</CPU>
+      <WarnDboNotFoundMax>
+      </WarnDboNotFoundMax>
+      <EntryPoint>_start</EntryPoint>
+      <StartupFiles>
+      </StartupFiles>
+      <DoNotUsedStartupFiles>Yes</DoNotUsedStartupFiles>
+      <LinkOnceTemplate>Off</LinkOnceTemplate>
+      <SDAOptimization>none</SDAOptimization>
+      <AutomaticSDA>No</AutomaticSDA>
+      <DisableSDAOptimization>No</DisableSDAOptimization>
+      <FixCortexA8>false</FixCortexA8>
+      <ObjFileList>@android_x86_vs2010_release.obj_filelist</ObjFileList>
+    </Link>
+    <PreLink>
+      <ImportLibraryFile>$(OutDir)$(TargetName).a</ImportLibraryFile>
+    </PreLink>
+    <PreLink>
+      <LogFile>
+      </LogFile>
+    </PreLink>
+    <PreLink>
+      <OutputFile>$(IntDir)$(TargetName)_rpl_export.o</OutputFile>
+      <AntiDEFFile>
+      </AntiDEFFile>
+      <DEFFile>
+      </DEFFile>
+      <DeprecatedImpliedNoObjects>Yes</DeprecatedImpliedNoObjects>
+      <ExportAll>No</ExportAll>
+      <PrintVerboseInfo>No</PrintVerboseInfo>
+      <ModuleName>$(TargetName)</ModuleName>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </PreLink>
+    <PostLink>
+      <ImportLibraryFile>
+      </ImportLibraryFile>
+      <InputFile>$(OutDir)$(TargetName).elf</InputFile>
+      <CheckNoSDA>No</CheckNoSDA>
+      <DoNotCompress>No</DoNotCompress>
+      <EmitWarning>No</EmitWarning>
+      <ForceRPX>Yes</ForceRPX>
+      <HeapSize>
+      </HeapSize>
+      <NoLib>Yes</NoLib>
+      <PrintVerboseInfo>No</PrintVerboseInfo>
+      <SetDynamicOnlyFlag>No</SetDynamicOnlyFlag>
+      <SetLoaderTag>
+      </SetLoaderTag>
+      <StackSize>
+      </StackSize>
+      <StripSymbolStrings>No</StripSymbolStrings>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </PostLink>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ClCompile Include="src\lapi.c" />
+    <ClCompile Include="src\lauxlib.c" />
+    <ClCompile Include="src\lbaselib.c" />
+    <ClCompile Include="src\lcode.c" />
+    <ClCompile Include="src\ldblib.c" />
+    <ClCompile Include="src\ldebug.c" />
+    <ClCompile Include="src\ldo.c" />
+    <ClCompile Include="src\ldump.c" />
+    <ClCompile Include="src\lfunc.c" />
+    <ClCompile Include="src\lgc.c" />
+    <ClCompile Include="src\linit.c" />
+    <ClCompile Include="src\liolib.c" />
+    <ClCompile Include="src\llex.c" />
+    <ClCompile Include="src\lmathlib.c" />
+    <ClCompile Include="src\lmem.c" />
+    <ClCompile Include="src\loadlib.c" />
+    <ClCompile Include="src\lobject.c" />
+    <ClCompile Include="src\lopcodes.c" />
+    <ClCompile Include="src\loslib.c" />
+    <ClCompile Include="src\lparser.c" />
+    <ClCompile Include="src\lstate.c" />
+    <ClCompile Include="src\lstring.c" />
+    <ClCompile Include="src\lstrlib.c" />
+    <ClCompile Include="src\ltable.c" />
+    <ClCompile Include="src\ltablib.c" />
+    <ClCompile Include="src\ltm.c" />
+    <ClCompile Include="src\lundump.c" />
+    <ClCompile Include="src\lvm.c" />
+    <ClCompile Include="src\lzio.c" />
+    <ClCompile Include="src\print.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\lapi.h" />
+    <ClInclude Include="src\lauxlib.h" />
+    <ClInclude Include="src\lcode.h" />
+    <ClInclude Include="src\ldebug.h" />
+    <ClInclude Include="src\ldo.h" />
+    <ClInclude Include="src\lfunc.h" />
+    <ClInclude Include="src\lgc.h" />
+    <ClInclude Include="src\llex.h" />
+    <ClInclude Include="src\llimits.h" />
+    <ClInclude Include="src\lmem.h" />
+    <ClInclude Include="src\lobject.h" />
+    <ClInclude Include="src\lopcodes.h" />
+    <ClInclude Include="src\lparser.h" />
+    <ClInclude Include="src\lstate.h" />
+    <ClInclude Include="src\lstring.h" />
+    <ClInclude Include="src\ltable.h" />
+    <ClInclude Include="src\ltm.h" />
+    <ClInclude Include="src\lua.h" />
+    <ClInclude Include="src\luaconf.h" />
+    <ClInclude Include="src\lualib.h" />
+    <ClInclude Include="src\lundump.h" />
+    <ClInclude Include="src\lvm.h" />
+    <ClInclude Include="src\lzio.h" />
+  </ItemGroup>
+  <!-- <Import Project="..\..\..\..\Development\HEAD\Build\MSBuild\Microsoft.Cpp.targets" /> -->
+  <Import Project="..\..\..\..\Release\2012_2\Custom\2012_2_x86And\Build\MSBuild\Microsoft.Cpp.targets" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Android'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Android'">
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "-External - Lua100", "Lua100.vcxproj", "{470579D4-35C4-4A3A-9743-CD38FA826E78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Cafe = Debug|Cafe
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Debug|Xbox 360 = Debug|Xbox 360
+		Release|Cafe = Release|Cafe
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+		Release|Xbox 360 = Release|Xbox 360
+		StaticLib Debug|Cafe = StaticLib Debug|Cafe
+		StaticLib Debug|Win32 = StaticLib Debug|Win32
+		StaticLib Debug|x64 = StaticLib Debug|x64
+		StaticLib Debug|Xbox 360 = StaticLib Debug|Xbox 360
+		StaticLib Release|Cafe = StaticLib Release|Cafe
+		StaticLib Release|Win32 = StaticLib Release|Win32
+		StaticLib Release|x64 = StaticLib Release|x64
+		StaticLib Release|Xbox 360 = StaticLib Release|Xbox 360
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Cafe.ActiveCfg = Debug|Cafe
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Cafe.Build.0 = Debug|Cafe
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Win32.ActiveCfg = Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Win32.Build.0 = Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|x64.ActiveCfg = Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|x64.Build.0 = Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Xbox 360.ActiveCfg = StaticLib Debug|Xbox 360
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Xbox 360.Build.0 = StaticLib Debug|Xbox 360
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Cafe.ActiveCfg = Release|Cafe
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Cafe.Build.0 = Release|Cafe
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Win32.ActiveCfg = Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Win32.Build.0 = Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|x64.ActiveCfg = Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|x64.Build.0 = Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Xbox 360.ActiveCfg = StaticLib Release|Xbox 360
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Xbox 360.Build.0 = StaticLib Release|Xbox 360
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Cafe.ActiveCfg = Debug|Cafe
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Win32.ActiveCfg = StaticLib Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Win32.Build.0 = StaticLib Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|x64.ActiveCfg = StaticLib Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|x64.Build.0 = StaticLib Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Xbox 360.ActiveCfg = StaticLib Debug|Xbox 360
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Xbox 360.Build.0 = StaticLib Debug|Xbox 360
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Cafe.ActiveCfg = Release|Cafe
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Win32.ActiveCfg = StaticLib Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Win32.Build.0 = StaticLib Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|x64.ActiveCfg = StaticLib Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|x64.Build.0 = StaticLib Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Xbox 360.ActiveCfg = StaticLib Release|Xbox 360
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Xbox 360.Build.0 = StaticLib Release|Xbox 360
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

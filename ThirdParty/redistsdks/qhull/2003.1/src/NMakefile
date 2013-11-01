@@ -1,0 +1,43 @@
+
+CC     = cl
+CCOPTS1 = /Ox /Ob2 /Oi /Ot /Oy /GL /GF /FD /EHsc /MD /Gy /GR- /nologo
+
+# for loader, ld
+LD = lib
+
+# OBJS in execution frequency order.  CFILES after qhull.c are alphabetical
+OBJS = user.obj global.obj stat.obj io.obj geom2.obj poly2.obj \
+       merge.obj qhull.obj geom.obj poly.obj qset.obj mem.obj
+
+CFILES= unix.c qhull.c geom.c geom2.c global.c io.c mem.c merge.c poly.c \
+        poly2.c qset.c stat.c user.c qconvex.c qdelaun.c qhalf.c qvoronoi.c
+HFILES= user.h qhull.h qhull_a.h geom.h io.h mem.h merge.h poly.h qset.h stat.h
+
+default: qhull.lib
+
+qconvex.o:   qhull.h user.h mem.h
+qdelaun.o:   qhull.h user.h mem.h
+qhalf.o:   qhull.h user.h mem.h
+qvoronoi.o:   qhull.h user.h mem.h
+qhull.o:  $(HFILES)
+geom.o:   $(HFILES)
+geom2.o:  $(HFILES)
+global.o: $(HFILES)
+io.o:     $(HFILES)
+mem.o:    mem.h 
+merge.o:  $(HFILES)
+poly.o:   $(HFILES)
+poly2.o:  $(HFILES)
+qset.o:   qset.h mem.h 
+stat.o:   $(HFILES)
+user.o:   $(HFILES)
+
+.c.o:
+	$(CC) /c $(CCOPTS1) $<
+
+qhull.lib: $(OBJS)
+	$(LD) /out:qhull.lib $(OBJS)
+
+qhullx64.lib: $(OBJS)
+	$(LD) /MACHINE:X64 /out:qhullx64.lib $(OBJS)
+

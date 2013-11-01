@@ -1,0 +1,84 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "-External - Lua90", "Lua90.vcproj", "{470579D4-35C4-4A3A-9743-CD38FA826E78}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Luac", "Luac.vcproj", "{94582E90-B455-4500-900B-D997F694F439}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug PS3|Win32 = Debug PS3|Win32
+		Debug PS3|x64 = Debug PS3|x64
+		Debug PSP2|Win32 = Debug PSP2|Win32
+		Debug PSP2|x64 = Debug PSP2|x64
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release PS3|Win32 = Release PS3|Win32
+		Release PS3|x64 = Release PS3|x64
+		Release PSP2|Win32 = Release PSP2|Win32
+		Release PSP2|x64 = Release PSP2|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+		StaticLib Debug|Win32 = StaticLib Debug|Win32
+		StaticLib Debug|x64 = StaticLib Debug|x64
+		StaticLib Release|Win32 = StaticLib Release|Win32
+		StaticLib Release|x64 = StaticLib Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug PS3|Win32.ActiveCfg = Debug PS3|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug PS3|Win32.Build.0 = Debug PS3|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug PS3|x64.ActiveCfg = Debug PS3|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug PSP2|Win32.ActiveCfg = Debug PSP2|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug PSP2|Win32.Build.0 = Debug PSP2|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug PSP2|x64.ActiveCfg = Debug PSP2|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Win32.ActiveCfg = Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|Win32.Build.0 = Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|x64.ActiveCfg = Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Debug|x64.Build.0 = Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release PS3|Win32.ActiveCfg = Release PS3|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release PS3|Win32.Build.0 = Release PS3|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release PS3|x64.ActiveCfg = Release PS3|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release PSP2|Win32.ActiveCfg = Release PSP2|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release PSP2|Win32.Build.0 = Release PSP2|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release PSP2|x64.ActiveCfg = Release PSP2|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Win32.ActiveCfg = Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|Win32.Build.0 = Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|x64.ActiveCfg = Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.Release|x64.Build.0 = Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Win32.ActiveCfg = StaticLib Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|Win32.Build.0 = StaticLib Debug|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|x64.ActiveCfg = StaticLib Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Debug|x64.Build.0 = StaticLib Debug|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Win32.ActiveCfg = StaticLib Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|Win32.Build.0 = StaticLib Release|Win32
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|x64.ActiveCfg = StaticLib Release|x64
+		{470579D4-35C4-4A3A-9743-CD38FA826E78}.StaticLib Release|x64.Build.0 = StaticLib Release|x64
+		{94582E90-B455-4500-900B-D997F694F439}.Debug PS3|Win32.ActiveCfg = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Debug PS3|Win32.Build.0 = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Debug PS3|x64.ActiveCfg = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Debug PSP2|Win32.ActiveCfg = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Debug PSP2|Win32.Build.0 = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Debug PSP2|x64.ActiveCfg = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Debug|Win32.ActiveCfg = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Debug|Win32.Build.0 = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Debug|x64.ActiveCfg = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release PS3|Win32.ActiveCfg = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release PS3|Win32.Build.0 = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release PS3|x64.ActiveCfg = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release PSP2|Win32.ActiveCfg = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release PSP2|Win32.Build.0 = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release PSP2|x64.ActiveCfg = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release|Win32.ActiveCfg = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release|Win32.Build.0 = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.Release|x64.ActiveCfg = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.StaticLib Debug|Win32.ActiveCfg = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.StaticLib Debug|Win32.Build.0 = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.StaticLib Debug|x64.ActiveCfg = Debug|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.StaticLib Release|Win32.ActiveCfg = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.StaticLib Release|Win32.Build.0 = Release|Win32
+		{94582E90-B455-4500-900B-D997F694F439}.StaticLib Release|x64.ActiveCfg = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

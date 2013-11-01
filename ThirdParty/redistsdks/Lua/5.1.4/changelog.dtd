@@ -1,0 +1,19 @@
+
+<!ELEMENT changelog ( version+, oldchangelog? ) >
+<!ATTLIST changelog name    CDATA     #REQUIRED >
+
+<!ELEMENT version ( added | changed | fixed )*  >
+<!ATTLIST version   major   NMTOKEN   #REQUIRED >
+<!ATTLIST version   minor   NMTOKEN   #REQUIRED >
+<!ATTLIST version   fix     NMTOKEN   #IMPLIED  >
+<!ATTLIST version   build   NMTOKEN   #IMPLIED  >
+<!ATTLIST version   desc    CDATA     #IMPLIED  >
+
+<!ELEMENT added ( #PCDATA ) >
+
+<!ELEMENT changed ( #PCDATA ) >
+
+<!ELEMENT fixed ( #PCDATA ) >
+
+<!ELEMENT oldchangelog ( #PCDATA ) >
+
