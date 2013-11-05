@@ -1,0 +1,22 @@
+ImageRuntimeVersion: v4.0.30319
+Assembly HavokBehaviorManaged, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=SHA1, flags=PublicKey
+Assembly mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly CSharpFramework, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly ManagedFramework, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly VisionManaged, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly Microsoft.VisualC, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Class HavokBehaviorManaged.ManagedModule: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    InitManagedModule(): PrivateScope, Public, Static, HideBySig
+    DeInitManagedModule(): PrivateScope, Public, Static, HideBySig

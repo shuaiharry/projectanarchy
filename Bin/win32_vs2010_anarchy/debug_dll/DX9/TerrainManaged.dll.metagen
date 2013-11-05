@@ -1,0 +1,355 @@
+ImageRuntimeVersion: v4.0.30319
+Assembly TerrainManaged, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=SHA1, flags=PublicKey
+Assembly mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly CSharpFramework, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly ManagedBase, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly ManagedFramework, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Assembly System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly TerrainBase, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly VisionEditorPlugin.EditorPlugin, Version=2013.2.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly Microsoft.VisualC, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Class TerrainManaged.TerrainMeshExportSettings: AutoLayout, AnsiClass, Class, Public, Serializable, BeforeFieldInit
+    Void .ctor(TerrainManaged.TerrainMeshExportSettings): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    Boolean _bAutomaticExport : Public
+    Boolean _bSimplifyMesh : Public
+    Boolean _bUseLegacySolver : Public
+    Boolean _bBakedLightmaps : Public
+    Int32 _iTextureResolution : Public
+    Single _fMaxErrorDistance : Public
+    Single _fLoadedDistance : Public
+    Single _fCacheInMargin : Public
+    Single _fCacheOutMargin : Public
+Class TerrainManaged.EngineInstanceTerrain: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :CSharpFramework.IEngineShapeInstance
+    Void .ctor(TerrainBase.Terrain.ITerrainCallback): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    TerrainBase.Terrain.ITerrainCallback m_pSectorCallback : Public
+    Boolean m_bVisible : Public
+    Boolean m_bIsReference : Public
+    UInt32 m_iVisibilityBitmask : Public
+    VEditableTerrain* m_pTerrain : Public
+    IVTerrainDecorationModel* m_pCurrentDecoModel : Public
+    VTextureWeightmapChannelResource* m_pCurrentDetailTexture : Public
+    Int32 m_iDirtyDecorationSectorCount : Public
+    Boolean m_bExportAsEditable : Public
+    TerrainManaged.NativeTerrainListener* m_pListener : Public
+  Properties:
+    Boolean SupportsComponents 'get ' : 
+  Methods:
+    UpdateDecorationModelProperties(DecorationModelResource, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    DeleteDecorationModel(DecorationModelResource): PrivateScope, Public, HideBySig
+    ReloadDecorationModel(DecorationModelResource): PrivateScope, Public, HideBySig
+    UpdateDecoration(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SynchronizeDecorationModels(ArrayList): PrivateScope, Public, HideBySig
+    CopySelection(TerrainSelection): PrivateScope, Public, HideBySig
+    PasteSelection(TerrainSelection, ITerrainClipboardObject): PrivateScope, Public, HideBySig
+    CreateSectorMapPreview(Int32, Int32, BitmapData): PrivateScope, Public, HideBySig
+    OnSectorUnloaded(Int32, Int32): PrivateScope, Public, HideBySig
+    OnSectorReloaded(Int32, Int32): PrivateScope, Public, HideBySig
+    EnsureSectorRangeLoaded(Int32, Int32, Int32, Int32, Int32, Boolean(HasFieldMarshal), Boolean(HasFieldMarshal), ProgressStatus): PrivateScope, Public, HideBySig
+    ReloadSectorRange(Int32, Int32, Int32, Int32, Boolean(HasFieldMarshal), ProgressStatus): PrivateScope, Public, HideBySig
+    AllSectorsLoaded(Int32, Int32, Int32, Int32): PrivateScope, Public, HideBySig
+    SetMinimapTexture(String): PrivateScope, Public, HideBySig
+    ExportHeightmapAsDDS(String, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    ExportDetailTextureAsDDS(String, DetailTextureResource): PrivateScope, Public, HideBySig
+    ExportDensityMapAsDDS(String, DecorationModelResource): PrivateScope, Public, HideBySig
+    ExportTerrainMeshs(TerrainMeshExportSettings, ProgressStatus, Single, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    GetSectorMeshFileName(Int32, Int32): PrivateScope, Public, HideBySig
+    GetSectorMeshCount(Int32&, Int32&): PrivateScope, Public, HideBySig
+    GetSectorOrigin(Int32, Int32): PrivateScope, Public, HideBySig
+    GetSectorLightmapName(Int32, Int32): PrivateScope, Public, HideBySig
+    SetTerrainMeshExportFlag(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetSortDetailTextures(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    GetSectorOwnsLock(Int32, Int32): PrivateScope, Public, HideBySig
+    GetSectorNetworkLock(Int32, Int32): PrivateScope, Public, HideBySig
+    UpdateRCSFiles(Int32): PrivateScope, Public, HideBySig
+    UpdateRCSFiles(Int32, Int32, Int32): PrivateScope, Public, HideBySig
+    UpdateRCSFiles(Int32, Int32, Int32, Int32, Int32): PrivateScope, Public, HideBySig
+    OnDecorationDirtyRegionChanged(): PrivateScope, Public, HideBySig
+    PurgeAll(): PrivateScope, Public, Static, HideBySig
+    SetComponentUpdateThroughUI(Boolean(HasFieldMarshal)): PrivateScope, Public, Static, HideBySig
+    DisposeObject(): PrivateScope, Public, Virtual, HideBySig
+    GetNativeObject(): PrivateScope, Public, Virtual, HideBySig
+    SetVisible(Boolean(HasFieldMarshal)): PrivateScope, Public, Virtual, HideBySig
+    SetPosition(Single, Single, Single): PrivateScope, Public, Virtual, HideBySig
+    SetOrientation(Single, Single, Single): PrivateScope, Public, Virtual, HideBySig
+    SetScaling(Single, Single, Single): PrivateScope, Public, Virtual, HideBySig
+    SetUniqueID(UInt64): PrivateScope, Public, Virtual, HideBySig
+    TraceShape(Shape3D, Vector3F, Vector3F, ShapeTraceResult&): PrivateScope, Public, Virtual, HideBySig
+    GetLocalBoundingBox(BoundingBox&): PrivateScope, Public, Virtual, HideBySig
+    OnExport(SceneExportInfo): PrivateScope, Public, Virtual, HideBySig
+    GetDependencies(ResourceSnapshotInfo): PrivateScope, Public, Virtual, HideBySig
+    OnBeforeExport(SceneExportInfo): PrivateScope, Public, Virtual, HideBySig
+    OnAfterExport(SceneExportInfo): PrivateScope, Public, Virtual, HideBySig
+    SaveToFile(): PrivateScope, Public, HideBySig
+    get_SupportsComponents(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    CanAttachComponent(ShapeComponent, String&): PrivateScope, Public, Virtual, HideBySig
+    OnAttachComponent(ShapeComponent): PrivateScope, Public, Virtual, HideBySig
+    OnRemoveComponent(ShapeComponent): PrivateScope, Public, Virtual, HideBySig
+    OnPostEngineInstanceCreation(): PrivateScope, Public, Virtual, HideBySig
+    SetConfig(TerrainConfig, ArrayList, ArrayList): PrivateScope, Public, HideBySig
+    SetModifiableConfig(TerrainConfig): PrivateScope, Public, HideBySig
+    GetConfig(TerrainConfig): PrivateScope, Public, HideBySig
+    CreateFromCurrentV3D(TerrainConfig): PrivateScope, Public, HideBySig
+    SetVisibleBitmask(UInt32): PrivateScope, Public, HideBySig
+    SetSectorVisibleBitmask(Int32, Int32, UInt32): PrivateScope, Public, HideBySig
+    GetSectorVisibleBitmask(Int32, Int32): PrivateScope, Public, HideBySig
+    SetSectorCollisionBitmask(Int32, Int32, UInt16): PrivateScope, Public, HideBySig
+    GetSectorCollisionBitmask(Int32, Int32): PrivateScope, Public, HideBySig
+    SetSectorPhysicsType(Int32, Int32, SectorPhysicsType_e): PrivateScope, Public, HideBySig
+    GetSectorPhysicsType(Int32, Int32): PrivateScope, Public, HideBySig
+    SetZoneUniqueID(Int32, Int32, UInt64): PrivateScope, Public, HideBySig
+    SetVisibleInVisZones(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetFastUpdate(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    UpdateVisibleStatus(): PrivateScope, Public, HideBySig
+    GetSectorBoundingBox(Int32, Int32, BoundingBox&): PrivateScope, Public, HideBySig
+    SetSectorBoundingBox(Int32, Int32, BoundingBox): PrivateScope, Public, HideBySig
+    AssignGeometryToVisibiltyZone(Int32, Int32, VisibilityZoneShape): PrivateScope, Public, HideBySig
+    GetNativeVisibiltyZone(Int32, Int32): PrivateScope, Public, HideBySig
+    SplitPerSectorTextures(String, String, String, Boolean(HasFieldMarshal), DetailTextureResource, ProgressStatus): PrivateScope, Public, HideBySig
+    SplitPerSectorTexture(String, String*, Int32*, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SaveAndUnload(ProgressStatus, Single): PrivateScope, Public, HideBySig
+    OnTerrainFolderChanged(String, ProgressStatus, Single): PrivateScope, Public, HideBySig
+    SetShaderEffect(ShaderEffectConfig): PrivateScope, Public, HideBySig
+    SetLODScaling(TerrainLODMetric_e, Single, Single): PrivateScope, Public, HideBySig
+    GetLODMetric(): PrivateScope, Public, HideBySig
+    SetForceFullLOD(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetLightmapPageSize(Int32, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetCastStaticShadows(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetLightInfluenceBitmask(UInt16): PrivateScope, Public, HideBySig
+    SetFullbrightLightmaps(): PrivateScope, Public, HideBySig
+    UsesSceneSpecificLightmaps(): PrivateScope, Public, HideBySig
+    SetUseSceneSpecificLightmaps(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    TraceTerrain(Vector3F, Vector3F, Vector3F&): PrivateScope, Public, HideBySig
+    TerrainHeightAtPosition(Vector3F): PrivateScope, Public, HideBySig
+    TerrainHeightAtSamplePos(Int32, Int32): PrivateScope, Public, HideBySig
+    UpdatePhysicsMeshes(): PrivateScope, Public, HideBySig
+    SetReferenceStatus(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    WantsViewUpdate(): PrivateScope, Public, HideBySig
+    SetExportAsEditable(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SelectTerrainBrush(TerrainBrush): PrivateScope, Public, HideBySig
+    Update3DCursor(Cursor3DProperties, Single, Single): PrivateScope, Public, HideBySig
+    GetCurrentCursorCenter(): PrivateScope, Public, HideBySig
+    BlitHeightBrush(TerrainBrush, HeightmapCursorProperties, HeightmapEditMode_e): PrivateScope, Public, HideBySig
+    SetCurrentVegetationModel(DecorationModelResource): PrivateScope, Public, HideBySig
+    GetDecorationModelDensityResolution(DecorationModelResource): PrivateScope, Public, HideBySig
+    BlitVegetationBrush(TerrainBrush, Cursor3DProperties, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetCurrentDetailTexture(DetailTextureResource): PrivateScope, Public, HideBySig
+    BlinkDetailTexture(DetailTextureResource, Single): PrivateScope, Public, HideBySig
+    SetHighlightMaterialID(Int32): PrivateScope, Public, HideBySig
+    BlitDetailTexture(TerrainBrush, Cursor3DProperties, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetPreviewVegetationModelWeightmap(DecorationModelResource): PrivateScope, Public, HideBySig
+    SetUseBakedTextures(Boolean(HasFieldMarshal), ShaderEffectConfig): PrivateScope, Public, HideBySig
+    SetPreviewDirectionalLight(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetDirectionalLightProperties(Vector3F, Color, Color): PrivateScope, Public, HideBySig
+    SetDisplayHoleOverlay(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SetDisplayMiniMap(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    GetDecorationObjectCount(): PrivateScope, Public, HideBySig
+    ReplaceDecorationModel(DecorationModelResource, IVTerrainDecorationModel*, IVTerrainDecorationModel*): PrivateScope, Public, HideBySig
+    SetNativeTextureProperties(DetailTextureResource): PrivateScope, Public, HideBySig
+    UpdateDetailTextureProperties(DetailTextureResource, Boolean(HasFieldMarshal), ProgressStatus, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    DeleteDetailTexture(DetailTextureResource, ProgressStatus): PrivateScope, Public, HideBySig
+    UpdateDetailTextureOrder(ArrayList, Boolean(HasFieldMarshal), ProgressStatus): PrivateScope, Public, HideBySig
+    ApplyHeightmapFilter(IHeightmapFilter, ProgressStatus): PrivateScope, Public, HideBySig
+    ApplyDecorationFilter(IDecorationFilter, ProgressStatus): PrivateScope, Public, HideBySig
+    GetDetailTextureDensity(DetailTextureResource, Int32, Int32, Int32, Int32): PrivateScope, Public, HideBySig
+    GetAverageNormalZ(Int32, Int32, Int32, Int32): PrivateScope, Public, HideBySig
+    QueryTextureSwizzleMask(String): PrivateScope, Public, Static, HideBySig
+    ImportWeightmap(String, DetailTextureResource, DetailTextureResource, DetailTextureResource, DetailTextureResource, ProgressStatus): PrivateScope, Public, HideBySig
+    DetailTexturesFromSlope(String, DetailTextureResource, DetailTextureResource, DetailTextureResource, DetailTextureResource, Single, ProgressStatus): PrivateScope, Public, HideBySig
+    SetNativeModelProperties(DecorationModelResource, IVTerrainDecorationModel*): PrivateScope, Public, HideBySig
+Class TerrainManaged.TerrainConversionHelpers: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  Methods:
+    ConfigToNative(TerrainConfig, VTerrainConfig*): PrivateScope, Public, Static, HideBySig
+    ConfigFromNative(VTerrainConfig*, TerrainConfig): PrivateScope, Public, Static, HideBySig
+    V3DHasTerrain(): PrivateScope, Public, Static, HideBySig
+    CreateBrush(String): PrivateScope, Public, Static, HideBySig
+    FreeBrush(TerrainBrush): PrivateScope, Public, Static, HideBySig
+    CheckBrushModified(TerrainBrush): PrivateScope, Public, Static, HideBySig
+    DetailTexturePropertiesToNative(DetailTextureProperties_t*, DetailTextureResource): PrivateScope, Public, Static, HideBySig
+Class TerrainManaged.TerrainChangedAction: AutoLayout, AnsiClass, Class, Public, Serializable, BeforeFieldInit
+  :TerrainBase.Actions.TerrainChangedBaseAction
+    Void .ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(TerrainManaged.EngineInstanceTerrain, System.String): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Interfaces:
+    System.IDisposable
+  Fields:
+    VEditableTerrain* m_pTerrain : Public
+    VUndoableSectorActionCollection* m_pSectorActions : Public
+  Properties:
+    Int32 SectorY2 'get ' : 
+    Int32 SectorX2 'get ' : 
+    Int32 SectorY1 'get ' : 
+    Int32 SectorX1 'get ' : 
+    Boolean Valid 'get ' : 
+  Methods:
+    Do(): PrivateScope, Public, Virtual, HideBySig
+    Undo(): PrivateScope, Public, Virtual, HideBySig
+    OnDispose(): PrivateScope, Public, Virtual, HideBySig
+    GetObjectData(SerializationInfo, StreamingContext): PrivateScope, Public, Virtual, HideBySig
+    DeserializeCustomDataBlock(): PrivateScope, Public, HideBySig
+    get_Valid(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_SectorX1(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_SectorY1(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_SectorX2(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_SectorY2(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    Dispose(): PrivateScope, Public, Final, Virtual, HideBySig
+Class TerrainManaged.TerrainClipboardObject: AutoLayout, AnsiClass, Class, Public, Serializable, BeforeFieldInit
+  :TerrainBase.Editing.ITerrainClipboardObject
+    Void .ctor(System.Object, System.String): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Interfaces:
+    System.IDisposable
+  Fields:
+    VTerrainLockObject* m_pHeightValues : Public
+    Int32 m_iDetailTextureCount : Public
+    VTerrainLockObject* m_pDetailTextures : Public
+    VString* m_psDetailTextureNames : Public
+    Int32 m_iDecorationChannelCount : Public
+    VTerrainLockObject* m_pDecorationChannels : Public
+    VString* m_psDecorationChannelNames : Public
+  Methods:
+    OnRemovedFromClipboard(): PrivateScope, Public, Virtual, HideBySig, VtableLayoutMask
+    TryPaste(Object): PrivateScope, Public, Virtual, HideBySig
+    Dispose(): PrivateScope, Public, Final, Virtual, HideBySig
+Class TerrainManaged.TerrainClipboardAction: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :TerrainBase.Actions.TerrainChangedBaseAction
+    Void .ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(TerrainManaged.EngineInstanceTerrain, System.String): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    Int32 sx1 : Public
+    Int32 sy1 : Public
+    Int32 sx2 : Public
+    Int32 sy2 : Public
+    VEditableTerrain* m_pTerrain : Public
+    VTerrainLockObject* m_pOldHeightValues : Public
+    VTerrainLockObject* m_pNewHeightValues : Public
+    Int32 m_iDetailTextureCount : Public
+    VTerrainLockObject* m_pOldDetailTextures : Public
+    VTerrainLockObject* m_pNewDetailTextures : Public
+    Int32 m_iDecorationChannelCount : Public
+    VTerrainLockObject* m_pOldDecorationChannels : Public
+    VTerrainLockObject* m_pNewDecorationChannels : Public
+  Properties:
+    Int32 SectorY2 'get ' : 
+    Int32 SectorX2 'get ' : 
+    Int32 SectorY1 'get ' : 
+    Int32 SectorX1 'get ' : 
+  Methods:
+    OnDispose(): PrivateScope, Public, Virtual, HideBySig
+    Do(): PrivateScope, Public, Virtual, HideBySig
+    Undo(): PrivateScope, Public, Virtual, HideBySig
+    GetObjectData(SerializationInfo, StreamingContext): PrivateScope, Public, Virtual, HideBySig
+    get_SectorX1(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_SectorY1(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_SectorX2(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_SectorY2(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    CopyTerrainData(VTerrainLockObject* IsImplicitlyDereferenced, VTerrainLockObject* IsImplicitlyDereferenced): PrivateScope, Public, HideBySig
+    CopyDetailTextures(VTerrainLockObject*): PrivateScope, Public, HideBySig
+    CopyDecoration(VTerrainLockObject*): PrivateScope, Public, HideBySig
+Struct TerrainManaged.HeightmapEditMode_e: AutoLayout, AnsiClass, Class, Public, Sealed, BeforeFieldInit
+  :System.Enum
+  Fields:
+    Int32 value__ : Public, SpecialName, RTSpecialName
+    TerrainManaged.HeightmapEditMode_e RemoveHoles = 6 : Public, Static, Literal, HasDefault
+    TerrainManaged.HeightmapEditMode_e AddHoles = 5 : Public, Static, Literal, HasDefault
+    TerrainManaged.HeightmapEditMode_e Flatten = 3 : Public, Static, Literal, HasDefault
+    TerrainManaged.HeightmapEditMode_e Subtract = 2 : Public, Static, Literal, HasDefault
+    TerrainManaged.HeightmapEditMode_e Elevate = 1 : Public, Static, Literal, HasDefault
+    TerrainManaged.HeightmapEditMode_e Smooth = 4 : Public, Static, Literal, HasDefault
+    TerrainManaged.HeightmapEditMode_e None = 0 : Public, Static, Literal, HasDefault
+Struct TerrainManaged.TerrainLODMetric_e: AutoLayout, AnsiClass, Class, Public, Sealed, BeforeFieldInit
+  :System.Enum
+  Fields:
+    Int32 value__ : Public, SpecialName, RTSpecialName
+    TerrainManaged.TerrainLODMetric_e DistanceOnly_NoHeight = 17 : Public, Static, Literal, HasDefault
+    TerrainManaged.TerrainLODMetric_e DistanceAndNoise_NoHeight = 16 : Public, Static, Literal, HasDefault
+    TerrainManaged.TerrainLODMetric_e DistanceOnly = 1 : Public, Static, Literal, HasDefault
+    TerrainManaged.TerrainLODMetric_e DistanceAndNoise = 0 : Public, Static, Literal, HasDefault
+Struct TerrainManaged.SectorEditorFlags_e: AutoLayout, AnsiClass, Class, Public, Sealed, BeforeFieldInit
+  :System.Enum
+  Fields:
+    Int32 value__ : Public, SpecialName, RTSpecialName
+    TerrainManaged.SectorEditorFlags_e OwnsLock = 65536 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorEditorFlags_e AnythingDirty = 15 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorEditorFlags_e NetworkLock = 131072 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorEditorFlags_e UseTempDir = 256 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorEditorFlags_e WeightmapsDirty = 8 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorEditorFlags_e SecorFileDirty = 4 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorEditorFlags_e HeightmapDirty = 2 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorEditorFlags_e MeshDirty = 1 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorEditorFlags_e None = 0 : Public, Static, Literal, HasDefault
+Struct TerrainManaged.SectorPhysicsType_e: AutoLayout, AnsiClass, Class, Public, Sealed, BeforeFieldInit
+  :System.Enum
+  Fields:
+    Int32 value__ : Public, SpecialName, RTSpecialName
+    TerrainManaged.SectorPhysicsType_e PreciseOfflineWelding = 2 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorPhysicsType_e Precise = 1 : Public, Static, Literal, HasDefault
+    TerrainManaged.SectorPhysicsType_e Approximate = 0 : Public, Static, Literal, HasDefault
+Struct VTerrainDecorationBillboardMesh: AutoLayout, AnsiClass, Class, Public, SequentialLayout, Sealed, BeforeFieldInit
+  :System.ValueType
+Class TerrainManaged.ManagedModule: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    InitManagedModule(): PrivateScope, Public, Static, HideBySig
+    DeInitManagedModule(): PrivateScope, Public, Static, HideBySig
+Class TerrainManaged.IHeightmapImporterFromFile: AutoLayout, AnsiClass, Class, Public, Abstract, BeforeFieldInit
+  :TerrainBase.Editing.IHeightmapImporter
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    Boolean Valid 'get ' : 
+    System.String LastError 'get ' : 
+    Int32 SizeY 'get ' : 
+    Int32 SizeX 'get ' : 
+  Methods:
+    OnStart(IValueProvider, Int32, Int32, Int32, Int32): PrivateScope, Public, Virtual, HideBySig
+    OnFinish(): PrivateScope, Public, Virtual, HideBySig
+    GetHeightAtInternal(Int32, Int32): PrivateScope, Public, Virtual, HideBySig
+    get_SizeX(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_SizeY(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_LastError(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+    get_Valid(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+Class TerrainManaged.IHeightmapImporterFromTextureFile: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :TerrainManaged.IHeightmapImporterFromFile
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    System.String Name 'get ' : 
+  Methods:
+    LoadFromFile(String): PrivateScope, Public, HideBySig
+    get_Name(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+Class TerrainManaged.IHeightmapImporterFromRawFile: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :TerrainManaged.IHeightmapImporterFromFile
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    System.String Name 'get ' : 
+  Methods:
+    LoadFromFile(String): PrivateScope, Public, HideBySig
+    get_Name(): PrivateScope, Public, Virtual, HideBySig, SpecialName
+Class TerrainManaged.IHeightmapImporterFromDDSFile: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :TerrainManaged.IHeightmapImporterFromFile
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    System.String Name 'get ' : 
+  Methods:
+    LoadFromFile(String): PrivateScope, Public, HideBySig
+    get_Name(): PrivateScope, Public, Virtual, HideBySig, SpecialName
